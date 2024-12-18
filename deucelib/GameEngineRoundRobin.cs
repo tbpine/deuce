@@ -22,12 +22,12 @@ class GameEngineRoundRobin : GameEngineBase, IGameEngine
             //hasn't played this round
             List<Player> rpool = new(players);
 
-            for (int j = 0; j < players.Count /2; j++)
+            for (int j = 0; j < (players.Count /2); j++)
             {
                 Player lhs = rpool[0];
                 //Find a match for player 
                 var selList= Player.ExcList(lhs, rpool);
-                int rIdx = r.Next() % selList.Count;
+                int rIdx = rpool.Count > 2 ? r.Next() % selList.Count : 1;
                 Player rhs = selList[rIdx];
 
                 //make game
