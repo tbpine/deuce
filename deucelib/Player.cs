@@ -26,7 +26,7 @@ public class Player
                 if (!tmp.Contains(p)) tmp.Add(p);
         }
 
-        return pool.FindAll(x => !tmp.Contains(x));
+        return pool.FindAll(x => !tmp.Contains(x) && x.Id != player.Id);
         
 
     }

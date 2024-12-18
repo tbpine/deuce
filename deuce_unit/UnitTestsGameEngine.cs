@@ -3,10 +3,10 @@ using deuce.lib;
 namespace deuce_unit;
 
 [TestClass]
-public class UnitTest1
+public class UnitTestsGameEngine
 {
     [TestMethod]
-    public void TestMethod1()
+    public void Run_Round_Robin_Game_Engine_N_Players_Returns_Dic()
     {
         //Assign
         Tournament tournament= new Tournament();

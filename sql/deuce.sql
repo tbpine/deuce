@@ -5,7 +5,7 @@
 *******************************************************/
 -- drop table `tournament`;
 -- drop table `venue`;
-
+-- drop table `player`;
 CREATE TABLE IF NOT EXISTS `tournament_type` (
     `id` INT,
     `label` CHAR(20)

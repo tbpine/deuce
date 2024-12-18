@@ -1,4 +1,5 @@
 using System.Data.SqlTypes;
+using System.Diagnostics;
 using deuce.lib;
 
 class GameEngineRoundRobin : GameEngineBase, IGameEngine
@@ -22,22 +23,28 @@ class GameEngineRoundRobin : GameEngineBase, IGameEngine
             //hasn't played this round
             List<Player> rpool = new(players);
 
+            Debug.WriteLine($"Round #{i+1}");
+            
+
+
             for (int j = 0; j < (players.Count /2); j++)
             {
                 Player lhs = rpool[0];
                 //Find a match for player 
                 var selList= Player.ExcList(lhs, rpool);
-                int rIdx = rpool.Count > 2 ? r.Next() % selList.Count : 1;
+                int rIdx = selList.Count > 1 ? r.Next() % selList.Count : 0;
                 Player rhs = selList[rIdx];
-
+                Debug.WriteLine($"{lhs.First} vs {rhs.First}");
+                
                 //make game
 
                 Game g = new("", j, lhs,  rhs);
                 lhs.AddGame(g);
                 rhs.AddGame(g);
                 //Shrink pool
-
+                
                 rpool.RemoveAll(e => e.Id == lhs.Id || e.Id == rhs.Id);
+                Debug.WriteLine($"Pool size = {rpool.Count}");
             }
             
 
