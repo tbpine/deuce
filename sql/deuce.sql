@@ -37,7 +37,7 @@ CREATE TABLE IF NOT EXISTS `player` (
     `id` INT PRIMARY KEY AUTO_INCREMENT,
     `first_name` VARCHAR(100),
     `last_name` VARCHAR(100),
-    `utr` DECIMAL,
+    `utr` DECIMAL(6,2),
     `updated_datetime` TIMESTAMP,
     `created_datetime` TIMESTAMP
 );
@@ -98,5 +98,25 @@ CREATE TABLE IF NOT EXISTS `club` (
     `updated_datetime` TIMESTAMP,
     `created_datetime` TIMESTAMP
 );
+
+
+DROP VIEW IF EXISTS `tournament_details`;
+
+CREATE VIEW `tournament_details` AS
+    SELECT 
+        t.id 'tournament_id',
+        t.label,
+        p.id 'player_id',
+        p.first_name,
+        p.last_name,
+        p.utr,
+        e.`active`
+    FROM
+        `entry` e
+            JOIN
+        `tournament` t ON t.id = e.tournament
+            JOIN
+        `player` p ON p.id = e.player
+    ORDER BY p.first_name , p.last_name;
 
 

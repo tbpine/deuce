@@ -170,7 +170,7 @@ BEGIN
 
 	SELECT `id`,`first_name`,`last_name`,`utr`,`updated_datetime`,`created_datetime`
 	FROM `player`
-	ORDER BY `first_name`, `last_name`;
+	ORDER BY `id`;
 
 
  END//
@@ -290,20 +290,6 @@ ON DUPLICATE KEY UPDATE `label` = p_label;
 SELECT LAST_INSERT_ID() 'id';
 
 END//
-
-
-DROP PROCEDURE IF EXISTS `sp_get_tournament_details`//
-
-CREATE PROCEDURE `sp_get_tournament_details`(
-IN p_tournament_id INT
-)
-BEGIN
-
-	SELECT * from `tournament_details`
-	where tournament_id = p_tournament_id;
-
-
- END//
 
 DELIMITER ;
 
