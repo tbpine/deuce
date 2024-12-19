@@ -4,7 +4,7 @@ public class GameEngineBase
 {
     protected Tournament _tournament;
     protected event EventHandler<GameCreatedEventArgs>? GameCreated;
-    protected List<Player>? _players;
+    protected List<Player> _players = new();
     protected Dictionary<int, List<Game>> _results = new();
 
     public GameEngineBase(Tournament tournament)
