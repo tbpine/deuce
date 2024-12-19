@@ -38,4 +38,9 @@ public class Player
 
     public IEnumerable<Game> Games { get => _games; }
 
+    public override string ToString()
+    {
+        return _first + " " + _last ;
+    }
+
 }

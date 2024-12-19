@@ -6,10 +6,9 @@ public class FactoryGameEngine
     {
         switch (t.Type?.Id??0)
         {
-            case 1: { return new GameEngineRRLinear(t); }
-            case 2: { return new GameEngineRRrand(t); }
+            case 1: { return new GameEngineRR(t); }
         }
 
-        return null;
+        return new GameEngineRR(t);
     }
 }
