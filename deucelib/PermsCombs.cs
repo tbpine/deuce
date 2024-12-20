@@ -1,5 +1,8 @@
 namespace deuce.lib;
 
+/// <summary>
+/// Combination and permutation methods.
+/// </summary>
 class PermsCombs
 {
     /// <summary>

@@ -4,16 +4,16 @@ using System.Diagnostics;
 namespace deuce.lib;
 
 /// <summary>
-/// 
+/// Round robin format
 /// </summary>
-class GameEngineRR : GameEngineBase, IGameEngine
+class MatchFactoryRR : MatchFactoryBase, IMatchFactory
 {
-    public GameEngineRR(Tournament t) : base(t)
+    public MatchFactoryRR(Tournament t) : base(t)
     {
         this.GameCreated += GameEngine_GameCreated!;
     }
 
-    public Dictionary<int, List<Game>> Generate(List<Player> players)
+    public Dictionary<int, List<Match>> Produce(List<Player> players)
     {
         _players = players;
         //Add a bye for odd numbers
@@ -52,10 +52,10 @@ class GameEngineRR : GameEngineBase, IGameEngine
     }
 
 
-    private void GameEngine_GameCreated(object sender, GameCreatedEventArgs args)
+    private void GameEngine_GameCreated(object sender, MatchCreatedEventArgs args)
     {
-        List<Game> round = _results.ContainsKey(args.Round) ? _results[args.Round] :
-        new List<Game>();
+        List<Match> round = _results.ContainsKey(args.Round) ? _results[args.Round] :
+        new List<Match>();
 
         if (!_results.ContainsKey(args.Round)) _results.Add(args.Round, round);
 
@@ -64,7 +64,7 @@ class GameEngineRR : GameEngineBase, IGameEngine
         Player? rhsPlayer = _players?.Find(e => e.Index == args.Rhs);
 
         //Make the games
-        Game game = new Game("", args.Round, new Player[] { lhsPlayer!, rhsPlayer! });
+        Match game = new Match("", args.Round, new Player[] { lhsPlayer!, rhsPlayer! });
         round.Add(game);
 
 

@@ -1,7 +1,7 @@
 namespace deuce.lib;
 public class Player
 {
-    private List<Game> _games = new();
+    private List<Match> _games = new();
     private int _id;
     private string? _first;
     private double _ranking;
@@ -34,9 +34,9 @@ public class Player
 
 
     }
-    public void AddGame(Game game) => _games.Add(game);
+    public void AddGame(Match game) => _games.Add(game);
 
-    public IEnumerable<Game> Games { get => _games; }
+    public IEnumerable<Match> Games { get => _games; }
 
     public override string ToString()
     {
