@@ -1,4 +1,4 @@
-using deuce.lib;
+namespace deuce;
 
 /// <summary>
 /// Defines an entity that can generate matches.

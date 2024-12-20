@@ -1,4 +1,4 @@
-namespace deuce.lib;
+namespace deuce;
 
 /// <summary>
 /// Minutes, Hours, Day, Week, Month etc.

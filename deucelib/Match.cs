@@ -1,6 +1,6 @@
 using System.Reflection.Metadata.Ecma335;
 
-namespace deuce.lib;
+namespace deuce;
 
 /// <summary>
 /// A competitive activity between players.

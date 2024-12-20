@@ -1,4 +1,4 @@
-using deuce.lib;
+namespace deuce;
 
 /// <summary>
 /// The create factory pattern for classes

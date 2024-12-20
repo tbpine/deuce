@@ -1,4 +1,4 @@
-namespace deuce.lib;
+namespace deuce;
 
 public class Tournament
 {

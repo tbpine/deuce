@@ -1,4 +1,4 @@
-namespace deuce.lib;
+namespace deuce;
 
 /// <summary>
 /// Supply game details to the event handler.

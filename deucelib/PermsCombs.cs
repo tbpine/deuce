@@ -1,4 +1,4 @@
-namespace deuce.lib;
+namespace deuce;
 
 /// <summary>
 /// Combination and permutation methods.

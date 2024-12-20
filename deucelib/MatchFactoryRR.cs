@@ -1,7 +1,7 @@
 using System.Data;
 using System.Diagnostics;
 
-namespace deuce.lib;
+namespace deuce;
 
 /// <summary>
 /// Round robin format

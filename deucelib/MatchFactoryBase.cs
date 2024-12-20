@@ -1,4 +1,4 @@
-using deuce.lib;
+namespace deuce;
 
 /// <summary>
 /// Common attributes amongst classes that produce matches.
