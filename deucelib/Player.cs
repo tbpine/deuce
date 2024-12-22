@@ -8,7 +8,7 @@ public class Player
     //------------------------------------
     //| Internals                        |
     //------------------------------------
-    private List<Match> _games = new();
+    private List<Match> _history = new();
     private int _id;
     private string? _first;
     private double _ranking;
@@ -20,7 +20,7 @@ public class Player
     public string? Last { get { return _last; } set { _last = value; } }
     public double Ranking { get { return _ranking; } set { _ranking = value; } }
     public int Index { get { return _index; } set { _index = value; } }
-    public IEnumerable<Match> Games { get => _games; }
+    public IEnumerable<Match> History { get => _history; }
     /// <summary>
     /// The empty constructor
     /// </summary>
@@ -29,7 +29,7 @@ public class Player
 
     }
 
-    public void AddGame(Match game) => _games.Add(game);
+    public void AddGame(Match game) => _history.Add(game);
 
     public override string ToString()
     {

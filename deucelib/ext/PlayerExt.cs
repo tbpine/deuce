@@ -1,4 +1,4 @@
-namespace deuce.lib.ext;
+namespace deuce.ext;
 
 /// <summary>
 /// Player class extensions.
@@ -16,7 +16,7 @@ public static class PlayerExt
     {
         //Get everone involved in this player's games.
         List<Player> tmp = new();
-        foreach (var g in player.Games)
+        foreach (var g in player.History)
         {
             foreach (var p in g.Players)
                 if (!tmp.Contains(p)) tmp.Add(p);

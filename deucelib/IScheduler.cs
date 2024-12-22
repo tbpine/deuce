@@ -3,7 +3,7 @@ namespace deuce;
 /// <summary>
 /// Defines an entity that can generate matches.
 /// </summary>
-public interface IMatchFactory
+public interface IScheduler
 {
-    Dictionary<int, List<Match>> Produce(List<Player> players);
+    Schedule Run(List<Team> team);
 }

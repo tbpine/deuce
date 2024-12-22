@@ -1,4 +1,4 @@
-namespace deuce.lib.ext;
+namespace deuce.ext;
 
 
 /// <summary>
