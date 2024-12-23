@@ -16,7 +16,7 @@ public class UnitTestsScheduler
         tournament.Type = new TournamentType(1, "Round Robbin");
         //1 for tennis for now.
         tournament.Sport = 1;
-        tournament.Format = new Format(1, 1);
+        tournament.Format = new Format(1, 1, 1);
         tournament.TeamSize = 1;
 
         IGameMaker gm = new GameMakerTennis();
@@ -59,7 +59,7 @@ public class UnitTestsScheduler
         tournament.Type = new TournamentType(1, "Round Robbin");
         //1 for tennis for now.
         tournament.Sport = 1;
-        Format fmt = new Format(noSingles, noDoubles);
+        Format fmt = new Format(noSingles, noDoubles, 1);
         tournament.Format = fmt;
         tournament.TeamSize = teamSize;
 

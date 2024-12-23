@@ -38,4 +38,6 @@ public class Match
 
     public bool HasPlayer(Player val) => _players.Find(e=>e.Id == val.Id) is not null;
 
+    public Player GetPlayerAt(int idx)=>_players[idx];
+
 }

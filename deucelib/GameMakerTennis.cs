@@ -28,7 +28,7 @@ public class GameMakerTennis : IGameMaker
 
         List<Match> results = new();
 
-        Format fmt = (t.Format as Format)!;
+        Format fmt = t.Format??new Format(1, 0, 1);
         Debug.Write($"|");
 
         for (int i = 0; i < fmt.NoSingles && i  < t.TeamSize; i++)
