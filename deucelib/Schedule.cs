@@ -9,7 +9,7 @@ public class Schedule
     //| Internals                        |
     //------------------------------------
 
-    private Dictionary<int, List<Match>> _schedule = new();
+    private Dictionary<int, List<Round>> _schedule = new();
     private Tournament Tournament { get; init; }
 
 
@@ -18,7 +18,7 @@ public class Schedule
     //------------------------------------
 
     public int NoRounds { get => _schedule.Keys.Count; }
-    public List<Match>? GetMatches(int round) => _schedule[round];
+    public List<Round>? GetRounds(int round) => _schedule[round];
 
     /// <summary>
     /// Construct with dependencies
@@ -32,37 +32,34 @@ public class Schedule
     /// <summary>
     /// Add a macth
     /// </summary>
-    /// <param name="round">Which round </param>
-    /// <param name="home">Player 1</param>
-    /// <param name="away">Player 2</param>
-    public void AddMatch(int round, Player home, Player away)
+    /// <param name="roundNo">Round to add</param>
+    public void AddRound(Round round, int roundNo)
     {
         //A a collection of matches for the round
-        List<Match> matches = _schedule.ContainsKey(round) ? _schedule[round] :
-                new List<Match>();
+        List<Round> rounds = _schedule.ContainsKey(roundNo) ? _schedule[roundNo] :
+                new List<Round>();
 
-        if (!_schedule.ContainsKey(round)) _schedule.Add(round, matches);
+        if (!_schedule.ContainsKey(roundNo)) _schedule.Add(roundNo, rounds);
 
         //Make the games
-        Match game = new Match("", round, new Player[] { home!, away! });
-        matches.Add(game);
+        rounds.Add(round);
 
     }
 
     /// <summary>
     /// Add a range of matches
     /// </summary>
-    /// <param name="round">Round</param>
+    /// <param name="roundNo">Round</param>
     /// <param name="toAdd">List of matches</param>
-    public void AddRange(int round, IEnumerable<Match> toAdd)
+    public void AddRange(int roundNo, IEnumerable<Round> toAdd)
     {
         //A a collection of matches for the round
-        List<Match> matches = _schedule.ContainsKey(round) ? _schedule[round] :
-                new List<Match>();
+        List<Round> rounds = _schedule.ContainsKey(roundNo) ? _schedule[roundNo] :
+                new List<Round>();
 
-        if (!_schedule.ContainsKey(round)) _schedule.Add(round, matches);
+        if (!_schedule.ContainsKey(roundNo)) _schedule.Add(roundNo, rounds);
 
-        matches.AddRange(toAdd);
+        rounds.AddRange(toAdd);
 
     }
 }

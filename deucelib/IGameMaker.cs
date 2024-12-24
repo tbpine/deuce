@@ -6,5 +6,5 @@ namespace deuce;
 /// </summary>
 public interface IGameMaker
 {
-    List<Match> Create(Tournament t, Team home, Team Away, int round);
+    Round Create(Tournament t, Team home, Team Away, int round);
 };

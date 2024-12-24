@@ -38,7 +38,7 @@ public class TemplateTennis
         //Strategy : Use a grid for layout (easier).
         MakeHeader(doc, tournament);
 
-        List<Match> matches = s.GetMatches(round) ?? new();
+        List<Match> matches = s.GetRounds(round) ?? new();
         PdfCanvas canvas = new PdfCanvas(pdfdoc.AddNewPage());
 
         //Add header

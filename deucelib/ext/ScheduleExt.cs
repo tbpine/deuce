@@ -8,7 +8,7 @@ public static class ScheduleExt
     {
         int total = 0;
         for(int i = 0; i < s.NoRounds; i++)
-            total+=s.GetMatches(i)?.Count??0;
+            total+=s.GetRounds(i)?.Count??0;
         return total;
 
     }

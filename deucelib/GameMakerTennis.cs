@@ -14,10 +14,11 @@ public class GameMakerTennis : IGameMaker
     /// <param name="t">Tournament</param>
     /// <param name="home">Home team</param>
     /// <param name="away">Away team</param>
-    /// <param name="round">Round</param>
+    /// <param name="round">Round object</param>
     /// <returns>List of matches</returns>
-    public List<Match> Create(Tournament t, Team home, Team away, int round)
+    public Round Create(Tournament t, Team home, Team away, int roundNo)
     {
+        Round round = new(roundNo, new Team[] { home, away});
         //Set up singles matches
         //TODO: Different ways to set up single
         var q1 = from p in home.Players orderby p.Ranking descending select p;
@@ -26,7 +27,6 @@ public class GameMakerTennis : IGameMaker
         Player[] a1 = q1.ToArray();
         Player[] a2 = q2.ToArray();
 
-        List<Match> results = new();
 
         Format fmt = t.Format??new Format(1, 0, 1);
         Debug.Write($"|");
@@ -36,7 +36,7 @@ public class GameMakerTennis : IGameMaker
             Player pHome = a1[i];
             Player pAway = a2[i];
             Debug.Write($"({pHome},{pAway})");
-            results.Add(new Match("", round, pHome, pAway ));
+            round.AddMatch(new Match("",  roundNo, pHome, pAway ));
 
         }
         Debug.Write($"|");
@@ -49,11 +49,11 @@ public class GameMakerTennis : IGameMaker
             Player pAway1 = a2[j % home.NoPlayers];
             Player pAway2 = a2[ (j+1) % home.NoPlayers];
             Debug.Write($"({pHome1} {pHome2},{pAway1} {pAway2})");
-            results.Add(new Match("", round, pHome1, pHome2, pAway1, pAway2 ));
+            round.AddMatch(new Match("", roundNo, pHome1, pHome2, pAway1, pAway2 ));
 
         }
 
 
-        return results;
+        return round;
     }
 }
