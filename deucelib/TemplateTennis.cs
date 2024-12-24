@@ -1,4 +1,6 @@
+using iText.IO.Font.Constants;
 using iText.Kernel.Colors;
+using iText.Kernel.Font;
 using iText.Kernel.Geom;
 using iText.Kernel.Pdf;
 using iText.Kernel.Pdf.Canvas;
@@ -31,16 +33,19 @@ public class TemplateTennis
     /// <param name="round">The round to print</param>
     public void Generate(Document doc, PdfDocument pdfdoc, Schedule s, Tournament tournament, int round)
     {
-        // Player names on the left (half page)
-        // Could be doubles (4 players in a match specifies a doubles match)
+        // Layout : A grid for each match. Player names in the first column,
+        // scores after.
         //Strategy : Use a grid for layout (easier).
+        MakeHeader(doc, tournament);
 
         List<Match> matches = s.GetMatches(round) ?? new();
         PdfCanvas canvas = new PdfCanvas(pdfdoc.AddNewPage());
 
         //Add header
-        int row = 0;
+        
         List<Table> tables = new();
+
+        PdfFont cellFont = PdfFontFactory.CreateFont(StandardFonts.HELVETICA);
 
         foreach (Match match in matches)
         {
@@ -59,6 +64,8 @@ public class TemplateTennis
             Table tbl = new(colWidths.ToArray());
             //Set the table to 100% of page width ?
             tbl.SetWidth(UnitValue.CreatePercentValue(100));
+
+            // Could be doubles (4 players in a match specifies a doubles match)
             //4 players, indicates doubles
             string homeName = match.Players.Count() > 2 ? $"{match.GetPlayerAt(0)} / {match.GetPlayerAt(1)}"
             : $"{match.GetPlayerAt(0)}";
@@ -67,61 +74,34 @@ public class TemplateTennis
             : $"{match.GetPlayerAt(1)}";
 
             //Add headers
-            tbl.AddHeaderCell(new Cell().Add(new Paragraph("Players")));
+            string header1 = $"Round {round} : {homeName} vs {awayName}";
+            Cell headerCell1 = new Cell().Add(new Paragraph(header1)).SetFont(cellFont).SetFontSize(12).SetBackgroundColor(ColorConstants.LIGHT_GRAY).SetPadding(5);
+            tbl.AddHeaderCell(headerCell1);
 
-            for (int i = 0; i < noScores; i++) tbl.AddHeaderCell(new Cell().Add(new Paragraph($"Set {i + 1}")));
+            for (int i = 0; i < noScores; i++) 
+            {
+                Cell headerScore = new Cell().Add(new Paragraph($"Set {i + 1}")).SetFont(cellFont).SetFontSize(12).SetBackgroundColor(ColorConstants.LIGHT_GRAY).SetPadding(5);
+                tbl.AddHeaderCell(headerScore);
+            }
 
             //The table from iText has no rows. Cells a stack horizontally
             //with breaks at the number of col widths ( the array when the table was constructed).
 
-            tbl.AddCell(new Cell().Add(new Paragraph(homeName)));
+            tbl.AddCell(new Cell().Add(new Paragraph(homeName))).SetFont(cellFont).SetFontSize(12).SetPadding(5);
 
             for (int i = 0; i < noScores; i++) tbl.AddCell(MakeScoreCell(2f));
 
-            tbl.AddCell(new Cell().Add(new Paragraph(awayName)));
+            tbl.AddCell(new Cell().Add(new Paragraph(awayName))).SetFont(cellFont).SetFontSize(12).SetPadding(5);
 
             for (int i = 0; i < noScores; i++) tbl.AddCell(MakeScoreCell(2f));
-            tbl.SetMarginBottom(10f);
+            tbl.SetMarginBottom(15f);
 
             tables.Add(tbl);
             doc.Add(tbl);
-            row++;
+         
         }
 
-        CreateScoreBoxes(canvas, doc, 2f, 2f, matches);
-
-
-    }
-
-    private void CreateScoreBoxes(PdfCanvas canvas, Document doc, float borderSize, float padding, List<Table> tables,
-    Tournament tournament)
-    {
-        PdfDocument pdfdoc = canvas.GetDocument();
-        Rectangle pageSize = pdfdoc.GetDefaultPageSize();
         
-        
-        Paragraph p = new Paragraph("");
-        
-        
-        for (int i = 0; i < tables.Count; i++)
-        {
-            for(int j = 0; j < (tournament?.Format?.NoSets??0); j++)
-            {
-                var cell = tables[i].GetCell(1, j+1);
-                
-
-            }
-            float x = (pageSize.GetWidth() - doc.GetLeftMargin() - doc.GetRightMargin()) / 2f;
-
-            float y = pageSize.GetHeight() - doc.GetTopMargin() - 20f * row;
-
-            Rectangle rect = new Rectangle(x, y, 10, 15);
-
-            canvas.SetStrokeColor(ColorConstants.BLACK);
-            canvas.SetLineWidth(2);
-            canvas.Rectangle(rect); canvas.Stroke();
-
-        }
 
 
     }
@@ -138,8 +118,23 @@ public class TemplateTennis
     private Cell MakeScoreCell(float padding)
     {
         var scell = new Cell();
+        scell.SetNextRenderer(new ScoreBoxCellRenderer(scell));
         scell.SetPadding(padding);
 
         return scell;
+    }
+
+    private void MakeHeader(Document doc, Tournament t)
+    {
+        PdfFont font = PdfFontFactory.CreateFont(StandardFonts.HELVETICA_BOLD);
+        string tname = $"{t.Label}";
+        string dates = $"From : {t.Start.ToString("dd MMM yyyy")} To: {t.Start.ToString("dd MMM yyyy")}";
+        string duration = $"When: {t?.Interval?.Label??""}";
+
+        doc.Add(new Paragraph(tname)).SetFont(font).SetFontSize(18).SetTopMargin(10);
+        doc.Add(new Paragraph(dates)).SetFont(font).SetFontSize(16);
+        doc.Add(new Paragraph(duration)).SetFont(font).SetFontSize(16).SetBottomMargin(25);
+        
+        
     }
 }
