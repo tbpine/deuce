@@ -22,10 +22,11 @@ public class ScoreBoxCellRenderer : CellRenderer
         float boxHeight = 15f;
 
         PdfCanvas canvas = drawContext.GetCanvas();
+        
 
-        float x = rectangle.GetX() + (rectangle.GetWidth() - boxWidth) / 2f;
-        float y = rectangle.GetY() +  (rectangle.GetHeight() - boxHeight) / 2f;
-        Rectangle score = new Rectangle(x, y, boxWidth, boxHeight);
+        float x = (rectangle.GetX() + (rectangle.GetWidth() - boxWidth) / 2f);
+        float y = (rectangle.GetY() +  (rectangle.GetHeight() - boxHeight) / 2f);
+        Rectangle score = new Rectangle(x, y, boxWidth , boxHeight);
 
         canvas.SetStrokeColor(ColorConstants.BLACK);
         canvas.SetLineWidth(2);

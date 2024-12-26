@@ -1,0 +1,72 @@
+[
+  {
+    "coordinates": {
+      "lat": 41.3875,
+      "lng": 2.1686
+    },
+    "markerTemplate": "<div class=\"d-flex align-items-center justify-content-center fs-4 text-primary bg-white rounded-circle shadow\" style=\"width: 48px; height: 48px; margin-left: -12px\"><i class=\"fi-bed-double\"></i></div>",
+    "image": "assets/img/listings/city-guide/v2/04.jpg",
+    "category": "Accommodation",
+    "title": "Serenity Hotel",
+    "rating": "4.7",
+    "reviews": 318,
+    "fromCenter": "1.6",
+    "price": "125"
+  },
+  {
+    "coordinates": {
+      "lat": 41.3890,
+      "lng": 2.1790
+    },
+    "markerTemplate": "<div class=\"d-flex align-items-center justify-content-center fs-4 text-info bg-white rounded-circle shadow\" style=\"width: 48px; height: 48px; margin-left: -12px\"><i class=\"fi-shopping-cart\"></i></div>",
+    "image": "assets/img/listings/city-guide/v1/13.jpg",
+    "category": "Shopping",
+    "title": "Fetishist Shopping Mall",
+    "rating": "4.3",
+    "reviews": 12745,
+    "fromCenter": "2.1",
+    "price": "$"
+  },
+  {
+    "coordinates": {
+      "lat": 41.3850,
+      "lng": 2.1750
+    },
+    "markerTemplate": "<div class=\"d-flex align-items-center justify-content-center fs-4 text-warning bg-white rounded-circle shadow\" style=\"width: 48px; height: 48px; margin-left: -12px\"><i class=\"fi-fork-knife\"></i></div>",
+    "image": "assets/img/listings/city-guide/v1/14.jpg",
+    "category": "Food &amp; Drink",
+    "title": "ClubFood Restaurant",
+    "rating": "4.6",
+    "reviews": 259,
+    "fromCenter": "1.8",
+    "price": "30-50"
+  },
+  {
+    "coordinates": {
+      "lat": 41.3930,
+      "lng": 2.1690
+    },
+    "markerTemplate": "<div class=\"d-flex align-items-center justify-content-center fs-4 text-success bg-white rounded-circle shadow\" style=\"width: 48px; height: 48px; margin-left: -12px\"><i class=\"fi-camera\"></i></div>",
+    "image": "assets/img/listings/city-guide/v1/04.jpg",
+    "category": "Entertainment",
+    "title": "Sky Views Observatory",
+    "rating": "4.3",
+    "reviews": 3462,
+    "fromCenter": "1.7",
+    "price": "5"
+  },
+  {
+    "coordinates": {
+      "lat": 41.3930,
+      "lng": 2.1760
+    },
+    "markerTemplate": "<div class=\"d-flex align-items-center justify-content-center fs-4 text-danger bg-white rounded-circle shadow\" style=\"width: 48px; height: 48px; margin-left: -12px\"><i class=\"fi-case-medicine\"></i></div>",
+    "image": "assets/img/listings/city-guide/v1/15.jpg",
+    "category": "Health",
+    "title": "Fair Meds Pharmacy",
+    "rating": "4.9",
+    "reviews": 571,
+    "fromCenter": "2.5",
+    "price": "$"
+  }
+]

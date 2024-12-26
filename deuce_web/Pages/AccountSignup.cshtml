@@ -1,0 +1,164 @@
+@page
+@model AccountSignUpPageModel
+@{
+    Layout="_LayoutFinder";
+}
+  <!-- Page content -->
+  <main class="content-wrapper w-100 px-3 ps-lg-5 pe-lg-4 mx-auto" style="max-width: 1920px">
+    <div class="d-lg-flex">
+
+      <!-- Login form + Footer -->
+      <div class="d-flex flex-column min-vh-100 w-100 py-4 mx-auto me-lg-5" style="max-width: 416px">
+
+        <!-- Logo -->
+        <header class="navbar px-0 pb-4 mt-n2 mt-sm-0 mb-2 mb-md-3 mb-lg-4">
+          <a class="navbar-brand pt-0" href="index.html">
+            <span class="d-flex flex-shrink-0 text-primary rtl-flip me-2">
+              <!-- <svg xmlns="http://www.w3.org/2000/svg" width="35" height="34"><path d="M34.5 16.894v10.731c0 3.506-2.869 6.375-6.375 6.375H17.5h-.85C7.725 33.575.5 26.138.5 17c0-9.35 7.65-17 17-17s17 7.544 17 16.894z" fill="currentColor"/><g fill-rule="evenodd"><path d="M17.5 13.258c-3.101 0-5.655 2.554-5.655 5.655s2.554 5.655 5.655 5.655 5.655-2.554 5.655-5.655-2.554-5.655-5.655-5.655zm-9.433 5.655c0-5.187 4.246-9.433 9.433-9.433s9.433 4.246 9.433 9.433a9.36 9.36 0 0 1-1.569 5.192l2.397 2.397a1.89 1.89 0 0 1 0 2.671 1.89 1.89 0 0 1-2.671 0l-2.397-2.397a9.36 9.36 0 0 1-5.192 1.569c-5.187 0-9.433-4.246-9.433-9.433z" fill="#000" fill-opacity=".05"/><g fill="#fff"><path d="M17.394 10.153c-3.723 0-6.741 3.018-6.741 6.741s3.018 6.741 6.741 6.741 6.741-3.018 6.741-6.741-3.018-6.741-6.741-6.741zM7.347 16.894A10.05 10.05 0 0 1 17.394 6.847 10.05 10.05 0 0 1 27.44 16.894 10.05 10.05 0 0 1 17.394 26.94 10.05 10.05 0 0 1 7.347 16.894z"/><path d="M23.025 22.525c.645-.645 1.692-.645 2.337 0l3.188 3.188c.645.645.645 1.692 0 2.337s-1.692.645-2.337 0l-3.187-3.187c-.645-.646-.645-1.692 0-2.337z"/></g></g><path d="M23.662 14.663c2.112 0 3.825-1.713 3.825-3.825s-1.713-3.825-3.825-3.825-3.825 1.713-3.825 3.825 1.713 3.825 3.825 3.825z" fill="#fff"/><path fill-rule="evenodd" d="M23.663 8.429a2.41 2.41 0 0 0-2.408 2.408 2.41 2.41 0 0 0 2.408 2.408 2.41 2.41 0 0 0 2.408-2.408 2.41 2.41 0 0 0-2.408-2.408zm-5.242 2.408c0-2.895 2.347-5.242 5.242-5.242s5.242 2.347 5.242 5.242-2.347 5.242-5.242 5.242-5.242-2.347-5.242-5.242z" fill="currentColor"/></svg> -->
+            </span>
+            Deuce.com.au
+          </a>
+        </header>
+
+        <h1 class="h2 mt-auto">Create an account</h1>
+        <div class="nav fs-sm mb-3 mb-lg-4">
+          I already have an account
+          <a class="nav-link text-decoration-underline p-0 ms-2" href="account-signin.html">Sign in</a>
+        </div>
+        <div class="nav fs-sm mb-4 d-lg-none">
+          <span class="me-2">Uncertain about creating an account?</span>
+          <a class="nav-link text-decoration-underline p-0" href="#benefits" data-bs-toggle="offcanvas" aria-controls="benefits">Explore the Benefits</a>
+        </div>
+
+        <!-- Form -->
+        <form class="needs-validation" novalidate="">
+          <div class="position-relative mb-4">
+            <label for="register-email" class="form-label">Email</label>
+            <input type="email" class="form-control form-control-lg" id="register-email" required="">
+            <div class="invalid-tooltip bg-transparent py-0">Enter a valid email address!</div>
+          </div>
+          <div class="mb-4">
+            <label for="register-password" class="form-label">Password</label>
+            <div class="password-toggle">
+              <input type="password" class="form-control form-control-lg" id="register-password" minlength="8" placeholder="Minimum 8 characters" required="">
+              <div class="invalid-tooltip bg-transparent py-0">Password does not meet the required criteria!</div>
+              <label class="password-toggle-button fs-lg" aria-label="Show/hide password">
+                <input type="checkbox" class="btn-check">
+              </label>
+            </div>
+          </div>
+          <div class="d-flex flex-column gap-2 mb-4">
+            <div class="form-check">
+              <input type="checkbox" class="form-check-input" id="save-pass">
+              <label for="save-pass" class="form-check-label">Save the password</label>
+            </div>
+            <div class="form-check">
+              <input type="checkbox" class="form-check-input" id="privacy" required="">
+              <label for="privacy" class="form-check-label">I have read and accept the <a class="text-dark-emphasis" href="#!">Privacy Policy</a></label>
+            </div>
+          </div>
+          <button type="submit" class="btn btn-lg btn-primary w-100">
+            Create an account
+            <i class="fi-chevron-right fs-lg ms-1 me-n1"></i>
+          </button>
+        </form>
+
+        <!-- Divider -->
+        <div class="d-flex align-items-center my-4">
+          <hr class="w-100 m-0">
+          <!-- <span class="text-body-emphasis fw-medium text-nowrap mx-4">or continue with</span> -->
+          <hr class="w-100 m-0">
+        </div>
+
+        <!-- Social login -->
+        <div class="d-flex flex-column flex-sm-row gap-3 pb-4 mb-3 mb-lg-4">
+          <!-- <button type="button" class="btn btn-lg btn-outline-secondary w-100 px-2">
+              <i class="fi-google ms-1 me-1"></i>
+              Google
+            </button>
+            <button type="button" class="btn btn-lg btn-outline-secondary w-100 px-2">
+              <i class="fi-facebook ms-1 me-1"></i>
+              Facebook
+            </button>
+            <button type="button" class="btn btn-lg btn-outline-secondary w-100 px-2">
+              <i class="fi-apple ms-1 me-1"></i>
+              Apple
+            </button> -->
+        </div>
+
+        <!-- Footer -->
+        <footer class="mt-auto">
+          <div class="nav mb-4">
+            <a class="nav-link text-decoration-underline p-0" href="help-topics-v1.html">Need help?</a>
+          </div>
+          <p class="fs-xs mb-0">
+            © All rights reserved. Made by <a class="hover-effect-underline text-dark-emphasis text-decoration-none" href="https://createx.studio/" target="_blank" rel="noreferrer">The duke</a>
+          </p>
+        </footer>
+      </div>
+
+
+      <!-- Benefits section that turns into offcanvas on screens < 992px wide (lg breakpoint) -->
+      <div class="offcanvas-lg offcanvas-end w-100 py-lg-4 ms-auto" id="benefits" style="max-width: 1034px">
+        <div class="offcanvas-header justify-content-end position-relative z-2 p-3">
+          <button type="button" class="btn btn-icon btn-outline-dark text-dark border-dark bg-transparent rounded-circle d-none-dark" data-bs-dismiss="offcanvas" data-bs-target="#benefits" aria-label="Close">
+            <i class="fi-close fs-lg"></i>
+          </button>
+          <button type="button" class="btn btn-icon btn-outline-dark text-light border-light bg-transparent rounded-circle d-none d-inline-flex-dark" data-bs-dismiss="offcanvas" data-bs-target="#benefits" aria-label="Close">
+            <i class="fi-close fs-lg"></i>
+          </button>
+        </div>
+        <span class="position-absolute top-0 start-0 w-100 h-100 bg-info-subtle d-lg-none"></span>
+        <div class="offcanvas-body position-relative z-2 d-lg-flex flex-column align-items-center justify-content-center h-100 pt-2 px-3 p-lg-0">
+          <span class="position-absolute top-0 start-0 w-100 h-100 bg-info-subtle rounded-5 d-none d-lg-block"></span>
+          <div class="position-relative z-2 w-100 text-center px-md-2 p-lg-5">
+            <h2 class="h4 pb-3">Organizer benefits</h2>
+            <div class="mx-auto" style="max-width: 790px">
+              <div class="row row-cols-1 row-cols-sm-2 g-3 g-md-4 g-lg-3 g-xl-4">
+                <div class="col">
+                  <div class="card h-100 bg-transparent border-0">
+                    <span class="position-absolute top-0 start-0 w-100 h-100 bg-white border border-white border-opacity-75 rounded-4 d-none-dark" style="--fn-bg-opacity: .3"></span>
+                    <span class="position-absolute top-0 start-0 w-100 h-100 bg-white border rounded-4 d-none d-block-dark" style="--fn-bg-opacity: .05"></span>
+                    <div class="card-body position-relative z-2">
+                      <div class="d-inline-flex position-relative text-info p-3">
+                        <span class="position-absolute top-0 start-0 w-100 h-100 bg-white rounded-pill d-none-dark"></span>
+                        <span class="position-absolute top-0 start-0 w-100 h-100 bg-body-secondary rounded-pill d-none d-block-dark"></span>
+                        <i class="fi-settings position-relative z-2 fs-4 m-1"></i>
+                      </div>
+                      <h3 class="h6 pt-2 my-2">Schedule tournaments</h3>
+                    </div>
+                  </div>
+                </div>
+                <div class="col">
+                  <div class="card h-100 bg-transparent border-0">
+                    <span class="position-absolute top-0 start-0 w-100 h-100 bg-white border border-white border-opacity-75 rounded-4 d-none-dark" style="--fn-bg-opacity: .3"></span>
+                    <span class="position-absolute top-0 start-0 w-100 h-100 bg-white border rounded-4 d-none d-block-dark" style="--fn-bg-opacity: .05"></span>
+                    <div class="card-body position-relative z-2">
+                      <div class="d-inline-flex position-relative text-info p-3">
+                        <span class="position-absolute top-0 start-0 w-100 h-100 bg-white rounded-pill d-none-dark"></span>
+                        <span class="position-absolute top-0 start-0 w-100 h-100 bg-body-secondary rounded-pill d-none d-block-dark"></span>
+                        <i class="fi-credit-card position-relative z-2 fs-4 m-1"></i>
+                      </div>
+                      <h3 class="h6 pt-2 my-2">Pay for tournament entries</h3>
+                    </div>
+                  </div>
+                </div>
+                <div class="col h-100">
+                  <div class="card-body position-relative z-2">
+                  </div>
+                </div>
+                <div class="col h-100">
+                  <div class="card-body position-relative z-2">
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+
+  <!-- Bootstrap + Theme scripts -->
+  <script src="assets/js/theme.min.js"></script>

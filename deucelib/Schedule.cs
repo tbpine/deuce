@@ -20,6 +20,8 @@ public class Schedule
     public int NoRounds { get => _schedule.Keys.Count; }
     public List<Round>? GetRounds(int round) => _schedule[round];
 
+    public List<Round> GetRoundAtIndex(int index) => _schedule[index];
+
     /// <summary>
     /// Construct with dependencies
     /// </summary>

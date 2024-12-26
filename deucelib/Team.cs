@@ -1,4 +1,5 @@
 using System.Diagnostics.Contracts;
+using System.Text;
 
 namespace deuce;
 
@@ -40,5 +41,18 @@ public class Team
 
     public Player GetAt(int i) => _players[i];
     public int NoPlayers { get=>_players.Count; }
+
+    /// <summary>
+    /// List players in a team.
+    /// </summary>
+    /// <returns>String containing player names seperated commas</returns>
+    public string GetPlayerCSV()
+    {
+        StringBuilder sb = new();
+        foreach (Player player in _players) sb.Append(player.ToString() + ",");
+        sb.Remove(sb.Length-1,1);
+
+        return sb.ToString();
+    }
     
 }

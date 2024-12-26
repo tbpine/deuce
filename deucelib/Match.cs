@@ -20,6 +20,9 @@ public class Match
 
     public int Round { get => _round; set => _round = value; }
 
+    //TODO: Not all sport have this property
+    public bool IsDouble{ get=> _players.Count> 2;}
+
     public IEnumerable<Player> Players { get => _players; }
 
     /// <summary>
