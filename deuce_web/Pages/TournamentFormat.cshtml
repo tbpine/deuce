@@ -1,0 +1,151 @@
+@page
+@model TournamentFormatPageModel
+@{
+    Layout="_LayoutFinder";
+}
+
+        <!-- Page content -->
+    <main class="content-wrapper">
+      <div class="container pt-3 pt-sm-4 pt-md-5 pb-5">
+        <div class="row pt-lg-2 pt-xl-3 pb-1 pb-sm-2 pb-md-3 pb-lg-4 pb-xl-5">
+
+          <!-- Sidebar navigation -->
+          <aside class="col-lg-3 col-xl-4 mb-3" style="margin-top: -100px">
+            <div class="sticky-top overflow-y-auto" style="padding-top: 100px">
+              <ul class="nav flex-lg-column flex-nowrap gap-4 gap-lg-0 text-nowrap pb-2 pb-lg-0 active">
+                <li class="nat-item">
+                  <a class="nav-link d-inline-flex position-relative px-0 px-lg-3 active" href="~/TournamentDetail">
+                    <i class="fi-check-circle fs-lg me-2"></i>
+                    <span class="hover-effect-underline stretched-link">Tournament Detail</span>
+                  </a>
+                </li>
+               <li class="nat-item">
+                  <a class="nav-link d-inline-flex px-0 px-lg-3 disabled" aria-current="page">
+                    <i class="fi-arrow-right-circle d-none d-lg-inline-flex fs-lg me-2"></i>
+                    <i class="fi-arrow-down-circle d-lg-none fs-lg me-2"></i>
+                    Format
+                  </a>
+                </li>
+               <li class="nat-item">
+                  <a class="nav-link d-inline-flex px-0 px-lg-3 disabled">
+                    <i class="fi-circle fs-lg me-2"></i>
+                    Schedule
+                  </a>
+                </li>
+                <li class="nat-item">
+                  <a class="nav-link d-inline-flex px-0 px-lg-3 disabled">
+                    <i class="fi-circle fs-lg me-2"></i>
+                    Venue
+                  </a>
+                </li>
+                <li class="nat-item">
+                  <a class="nav-link d-inline-flex px-0 px-lg-3 disabled">
+                    <i class="fi-circle fs-lg me-2"></i>
+                    Price
+                  </a>
+                </li>
+                <li class="nat-item">
+                  <a class="nav-link d-inline-flex px-0 px-lg-3 disabled">
+                    <i class="fi-circle fs-lg me-2"></i>
+                    Players
+                  </a>
+                </li>
+              </ul>
+            </div>
+          </aside>
+
+      <div class="col-lg-9 col-xl-8">
+    <!-- Property location inputs -->
+            <h1 class="h2 pb-1 pb-lg-2">Format</h1>
+            <div class="row row-cols-2 row-cols-sm-2 g-3 g-sm-4 pb-3 pb-sm-4 mb-xl-2">
+              <div class="col">
+                <label class="form-label" for="no_players">Number of entries</label>
+                <input class="form-control" id="no_players" placeholder="2" value="2"/>
+              </div>
+              <div class="col">
+                <label class="form-label" for="games_per_set">Games format</label>
+                <select class="form-select form-select-lg" id="games_per_set">
+                  <option value="" selected>Specify Games format</option>
+                  <option value="1" >Standard( first to 6)</option>
+                  <option value="2">Fast 4</option>
+                  <option value="3">Fixed</option>
+                </select>
+              </div>
+
+            </div>
+
+            <div class="row row-cols-1 row-cols-sm-2 g-3 g-sm-4 pb-3 pb-sm-4 mb-xl-2">
+              <div class="col">
+                <label class="form-label" for="team_size">Team Size *</label>
+                 <select class="form-select form-select-lg"  id="team_size" required>
+                  <option value="" selected>Select team size</option>
+                  <option value="1" >1</option>
+                  <option value="2">2</option>
+                  <option value="3">3</option>
+                  <option value="4">4</option>
+                  <option value="5">5</option>
+                </select>
+              </div>
+              <div class="col">
+                <label class="form-label">Sets *</label>
+                <select class="form-select form-select-lg"  required>
+                  <option value="" selected>Sets played</option>
+                  <option value="1" >1</option>
+                  <option value="2">2</option>
+                  <option value="3">3</option>
+                  <option value="4">4</option>
+                  <option value="5">5</option>
+                </select>
+              </div>
+            </div>
+            <div class="row row-cols-1 row-cols-sm-2 g-3 g-sm-4 pb-3 pb-sm-4 mb-xl-2">
+              <div class="col">
+                <label class="form-label" for="no_singles">No Singles *</label>
+                <select class="form-select form-select-lg" id="no_singles" required>
+                  <option value="" selected>Singles played</option>
+                  <option value="1" >1</option>
+                  <option value="2">2</option>
+                  <option value="3">3</option>
+                  <option value="4">4</option>
+                  <option value="5">5</option>
+                </select>
+              </div>
+              <div class="col">
+                <label for="no_doubles" class="form-label">No Doubles *</label>
+                <select class="form-select form-select-lg" id="no_doubles" required>
+                  <option value="" selected>Doubles played</option>
+                  <option value="1">1</option>
+                  <option value="2">2</option>
+                  <option value="3">3</option>
+                  <option value="4">4</option>
+                  <option value="5">5</option>
+                </select>
+              </div>
+            </div>
+
+        </div>
+      </div>
+      
+      
+    </main>
+
+
+    <!-- Prev / Next navigation (Footer) -->
+    <footer class="sticky-bottom bg-body pb-3 mt-2">
+      <div class="progress rounded-0" role="progressbar" aria-label="Dark example" aria-valuenow="28.57" aria-valuemin="0" aria-valuemax="100" style="height: 4px">
+        <div class="progress-bar bg-dark d-none-dark" style="width: 28.57%"></div>
+        <div class="progress-bar bg-light d-none d-block-dark" style="width: 28.57%"></div>
+      </div>
+      <div class="container d-flex gap-3 pt-3">
+        <a class="btn btn-outline-dark animate-slide-start" href="~/TournamentDetail">
+          <i class="fi-arrow-left animate-target fs-base ms-n1 me-2"></i>
+          Back
+        </a>
+        <a class="btn btn-dark animate-slide-end ms-auto" href="~/TournamentSchedule">
+          Next
+          <i class="fi-arrow-right animate-target fs-base ms-2 me-n1"></i>
+        </a>
+      </div>
+    </footer>
+    <!-- Bootstrap + Theme scripts -->
+    <script src="assets/js/theme.min.js"></script>
