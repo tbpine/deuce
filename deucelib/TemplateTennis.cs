@@ -7,6 +7,7 @@ using iText.Kernel.Pdf.Canvas;
 using iText.Layout;
 using iText.Layout.Element;
 using iText.Layout.Properties;
+using deuce.ext;
 
 namespace deuce;
 

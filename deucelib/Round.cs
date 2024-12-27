@@ -9,8 +9,8 @@ public class Round
     private List<Team> _teams = new();
     private List<Match> _matches = new();
 
-    private readonly int _number;
-    public int NoRounds { get => _number; }
+    private readonly int _index;
+    public int RoundIndex { get => _index; }
     public int NoMatches { get => _matches.Count; }
     public int NoTeams { get => _teams.Count; }
 
@@ -23,7 +23,7 @@ public class Round
     /// </summary>
     public Round(int number, params Team[] teams)
     {
-        _number = number;
+        _index = number;
         _teams.AddRange(teams);
     }
 

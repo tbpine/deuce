@@ -1,3 +1,5 @@
+using System.Net;
+
 namespace deuce.ext;
 
 
@@ -27,5 +29,19 @@ public static class MatchExt {
         return other.Players.Count() == m.Players.Count() && samePlayers &&  other.Round == m.Round;
 
      }
+
+     public static string GetHomeTeam(this Match match)
+     {
+        return match.IsDouble ? match.GetPlayerAt(0).ToString() + "/" + match.GetPlayerAt(1).ToString() :
+            match.GetPlayerAt(0).ToString();
+     }
+
+     public static string GetAwayTeam(this Match match)
+     {
+        return match.IsDouble ? match.GetPlayerAt(2).ToString() + "/" + match.GetPlayerAt(3).ToString() :
+            match.GetPlayerAt(1).ToString();
+     }
+
+      public static string GetTitle(this Match match) => match.IsDouble ? "Doubles" : "Singles";
 
 }
