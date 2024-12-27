@@ -1,11 +1,12 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using deuce;
+using System.Diagnostics;
 
 /// <summary>
 /// 
 /// </summary>
-public class ScoringPageModel :PageModel
+public class ScoringPageModel : PageModel
 {
     private readonly ILogger<ScoringPageModel> _log;
 
@@ -14,9 +15,13 @@ public class ScoringPageModel :PageModel
     private Schedule? _schedule;
     private Tournament? _t;
 
-    public int NoRounds { get=>_schedule?.NoRounds??0;}
-    public int NoSets { get=>_t?.Format?.NoSets??1;}
-    public IEnumerable<Round> Rounds(int r)=>_schedule?.GetRounds(r)??new List<Round>(); 
+    private int _currentRound = 0;
+
+    public int NoRounds { get => _schedule?.NoRounds ?? 0; }
+    public int NoSets { get => _t?.Format?.NoSets ?? 1; }
+    public int CurrentRound { get => _currentRound; }
+
+    public IEnumerable<Round> Rounds(int r) => _schedule?.GetRounds(r) ?? new List<Round>();
 
 
     public ScoringPageModel(ILogger<ScoringPageModel> log)
@@ -24,17 +29,25 @@ public class ScoringPageModel :PageModel
         _log = log;
     }
 
-    public async Task<IActionResult> OnGetAsync()
+    public void OnGet()
     {
-        await Task.CompletedTask;
         MakeDummyTournament();
-        Title = _t?.Label??"";
-        return Page();
+        Title = _t?.Label ?? "";
+    }
+
+    public void OnPost()
+    {
+        foreach (var kp in this.Request.Form)
+            Debug.Write(kp.Key + "=" + kp.Value + "\n");
+        string? strCR = this.Request.Form["current_round"];
+        _currentRound = int.Parse(strCR??"0");
+        MakeDummyTournament();
+        Title = _t?.Label ?? "";
     }
 
     private void MakeDummyTournament()
     {
-         //Assign
+        //Assign
         _t = new Tournament();
         _t.Type = new TournamentType(1, "Round Robbin");
         //1 for tennis for now.
@@ -58,7 +71,7 @@ public class ScoringPageModel :PageModel
                 currentTeam = new Team(i + 1, $"team_{i + 1}");
                 teams.Add(currentTeam);
             }
-            
+
             currentTeam?.AddPlayer(new Player
             {
                 Id = i + 1,
@@ -66,7 +79,7 @@ public class ScoringPageModel :PageModel
                 Last = $""
             });
 
-            
+
 
         }
 
@@ -80,32 +93,32 @@ public class ScoringPageModel :PageModel
 
     public string GetContent(int roundIdx, int subIndex, int match, int col)
     {
-        var list =  _schedule?.GetRoundAtIndex(roundIdx);
+        var list = _schedule?.GetRoundAtIndex(roundIdx);
         if (list is null) return "";
-        
+
         Round round = list[subIndex];
         Match m = round.GetMatchAtIndex(match);
-        
+
         if (m is null) return "";
 
         string gameType = m.IsDouble ? "Doubles" : "Singles";
-        string teamHome = m.IsDouble ? m.GetPlayerAt(0).ToString() + "/" +  m.GetPlayerAt(1).ToString()  : m.GetPlayerAt(0).ToString();
-        string teamAway = m.IsDouble ? m.GetPlayerAt(2).ToString() + "/" +  m.GetPlayerAt(3).ToString()  : m.GetPlayerAt(1).ToString();
-        int noSets = _t?.Format?.NoSets??1;
+        string teamHome = m.IsDouble ? m.GetPlayerAt(0).ToString() + "/" + m.GetPlayerAt(1).ToString() : m.GetPlayerAt(0).ToString();
+        string teamAway = m.IsDouble ? m.GetPlayerAt(2).ToString() + "/" + m.GetPlayerAt(3).ToString() : m.GetPlayerAt(1).ToString();
+        int noSets = _t?.Format?.NoSets ?? 1;
 
         int noColumns = noSets + 1;
         int rowIdx = col / noColumns;
-        int colIdx= col % noColumns;
-        
+        int colIdx = col % noColumns;
+
         if (rowIdx == 0 && col == 0) return gameType;
         else if (rowIdx == 0 && colIdx < noSets) return $"Set {col}";
         else if (rowIdx == 1 && colIdx == 0) return teamHome;
-        else if (rowIdx == 1 && colIdx < noSets ) return "<input class='border w-25'></input>";
-        else if (rowIdx == 2 && colIdx == 0 ) return teamAway;
-        else if (rowIdx == 2 && colIdx < noSets ) return "<input class='border w-25'></input>";
+        else if (rowIdx == 1 && colIdx < noSets) return "<input class='border w-25'></input>";
+        else if (rowIdx == 2 && colIdx == 0) return teamAway;
+        else if (rowIdx == 2 && colIdx < noSets) return "<input class='border w-25'></input>";
 
         return "";
-        
-        
+
+
     }
 }

@@ -79,8 +79,9 @@
             <ul class="nav nav-pills flex-nowrap gap-2 pb-2 mb-1" role="tablist" id="pills_round">
             @for(int i = 1 ; i <=  @Model.NoRounds; i++){
                 <li class="nav-item me-1" role="presentation">
-                @{ string active = (i == 1 ? "active" : "");}                    
-                 <button type="button" class="nav-link text-nowrap @active" id="published-tab" data-bs-toggle="pill" data-bs-target="#published" role="tab" aria-controls="published" > 
+                @{ string active = (i == (Model.CurrentRound+1) ? "active" : "");}                    
+                 <button type="button" class="nav-link text-nowrap @active" id="published-tab" data-bs-toggle="pill" data-bs-target="#published" role="tab" aria-controls="published"
+                 onclick="func1(@(i-1));" > 
                 @i
                  </button> 
                 </li>
@@ -116,62 +117,68 @@
             </div>
 
             <!-- Published listings -->
-            <div class="vstack gap-4" id="publishedSelection">
-                @{int rIdx = 0;}
-                @foreach(var round in  @Model.Rounds(0))
-                {
-                    rIdx++;
-                    <div><a class="btn btn-outline-secondary mb-3" href="#round_@rIdx" data-bs-toggle="collapse" role="button" aria-expanded="true" aria-controls="round_@rIdx">
-                        @round.GetSummary()
-                    </a></div>
-                    <div class="collapse show" id="round_@rIdx" aria-expanded="true">
-                    
-                        @for(int j = 0 ; j < round.NoMatches; j++)
-                        {
-                            Match match = round.GetMatchAtIndex(j);
+            <form asp-action="~/Scoring" method="post" id="the_form">
+                <input id="current_round" name="current_round" type="hidden" value="0"/>
+                <div class="vstack gap-4" id="publishedSelection">
+                    @{int rIdx = 0;}
+                    @foreach(var round in  Model.Rounds(Model.CurrentRound))
+                    {
+                        rIdx++;
+                        <div>
+                            <i class="fi-minus position-relative top-50 start-0 translate-middle-y" id="toogle_icon_round_@rIdx"></i>
+                            <a class="btn btn-outline-secondary mb-3" href="#round_@rIdx" data-bs-toggle="collapse" role="button" aria-expanded="true" aria-controls="round_@rIdx"
+                            onclick="toogleExpansion('toogle_icon_round_@rIdx')">
+                            @round.GetSummary()
+                        </a></div>
+                        <div class="collapse show" id="round_@rIdx" aria-expanded="true">
+                        
+                            @for(int j = 0 ; j < round.NoMatches; j++)
+                            {
+                                Match match = round.GetMatchAtIndex(j);
 
-                            <!-- Item -->
-                            <div class="d-sm-flex align-items-center border mb-2 pb-2" >
-                                <div class="d-inline-flex position-relative z-2 pt-1 pb-2 ps-2 p-sm-0 ms-2 ms-sm-0 me-sm-0 w-100"
-                                style="height:120px;">
-                                    @* <div class="form-check position-relative z-1 fs-lg m-0">
-                                    <input type="checkbox" class="form-check-input" checked>
-                                    </div> *@
-                                    @{ int totalCols = 3*@Model.NoSets + 2; int cols =2; }
+                                <!-- Item -->
+                                <div class="d-sm-flex align-items-center border mb-2 pb-2" >
+                                    <div class="d-inline-flex position-relative z-2 pt-1 pb-2 ps-2 p-sm-0 ms-2 ms-sm-0 me-sm-0 w-100"
+                                    style="height:120px;">
+                                        @* <div class="form-check position-relative z-1 fs-lg m-0">
+                                        <input type="checkbox" class="form-check-input" checked>
+                                        </div> *@
+                                        @{ int totalCols = 3*@Model.NoSets + 2; int cols =2; }
 
-                                    <div class="row row-cols-@cols row-cols-lg-@cols w-100 ms-0">
-                                        <div class="col mb-3 bg-body-secondary"><span>@(match.GetTitle())</span></div>
-                                        <!-- #headers  -->
-                                        @for(int i = 0; i < Model.NoSets;i++)
-                                        {
-                                            <div class="col mb-3 bg-body-secondary"><span>Set @(i+1)</span></div>
-                                        }
-                                        <div class="col pt-1" ><span>@(match.GetHomeTeam())</span></div>
-                                        @for(int i = 0; i < Model.NoSets;i++)
-                                        {
-                                            <div class="col">
-                                                <input class="border-black" style="width:90px"/>
-                                            </div>
-                                        }
-                                        <div class="col pt-1">@(match.GetAwayTeam())</div>
-                                        @for(int i = 0; i < Model.NoSets;i++)
-                                        {
-                                            <div class="col">
-                                                <input class="border-black" style="width:90px"/>
-                                            </div>
-                                        }
-                                        
+                                        <div class="row row-cols-@cols row-cols-lg-@cols w-100 ms-0">
+                                            <div class="col mb-3 bg-body-secondary"><span>@(match.GetTitle())</span></div>
+                                            <!-- #headers  -->
+                                            @for(int i = 0; i < Model.NoSets;i++)
+                                            {
+                                                <div class="col mb-3 bg-body-secondary"><span>Set @(i+1)</span></div>
+                                            }
+                                            <div class="col pt-1" ><span>@(match.GetHomeTeam())</span></div>
+                                            @for(int i = 0; i < Model.NoSets;i++)
+                                            {
+                                                <div class="col">
+                                                    <input class="form-control border-black pb-1" style="width:90px" name="home_match_@(j)_set_@(i+1)" >
+                                                </div>
+                                            }
+                                            <div class="col pt-1">@(match.GetAwayTeam())</div>
+                                            @for(int i = 0; i < Model.NoSets;i++)
+                                            {
+                                                <div class="col">
+                                                    <input class="form-control border-black pt-1" style="width:90px" name="away_match_@(j)_set_@(i+1)">
+                                                </div>
+                                            }
+                                            
+                                        </div>
+
                                     </div>
 
+                                
                                 </div>
-
-                            
-                            </div>
-                        }
-                    </div>
-                }
-     
-            </div>
+                            }
+                        </div>
+                    }
+        
+                </div>
+            </form>
             </div>
 
 
@@ -210,3 +217,22 @@
 
 <!-- Bootstrap + Theme scripts -->
 <script src="assets/js/theme.min.js"></script>
+<script >
+    function func1(round)
+    {
+        let n1 = document.getElementById("current_round");
+        n1.setAttribute("value", round);
+        
+        document.getElementById("the_form").submit();
+
+    }
+
+    function toogleExpansion(name)
+    {
+        let n1 = document.getElementById(name);
+        let c = n1.getAttribute("class");
+
+        if (c === "fi-plus position-relative top-50 start-0 translate-middle-y") n1.setAttribute("class", "fi-minus position-relative top-50 start-0 translate-middle-y");
+        else n1.setAttribute("class", "fi-plus position-relative top-50 start-0 translate-middle-y");
+    }
+</script>

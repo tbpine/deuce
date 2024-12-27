@@ -15,9 +15,9 @@ public static class RoundEx
         Team home = round.GetTeamAtIndex(0);
         Team away = round.GetTeamAtIndex(1);
 
-        string homePlayers = string.IsNullOrEmpty(home.Label)? home.GetPlayerCSV() : home.Label;
-        string awayPlayers = string.IsNullOrEmpty(away.Label)? away.GetPlayerCSV() : away.Label;
-        return $"TEAM: {homePlayers}\n TEAM: {awayPlayers}";
+        string homePlayers = String.IsNullOrEmpty(home.Label) ? home.GetPlayerCSV() : home.Label;
+        string awayPlayers =  String.IsNullOrEmpty(away.Label) ? away.GetPlayerCSV() : away.Label;
+        return $"{homePlayers} vs {awayPlayers}";
 
     }
 }

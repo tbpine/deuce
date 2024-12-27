@@ -5,8 +5,11 @@ Turns out that matching the upper half of the array with the lower half then
 rotating the array every round is how you make games.
 
 ## TODOs
-- [] Tournament wizard
+- [] Load/Save matches and rounds (with unit testing)
+- [] Knockout format
+- [] Print out for knockout format
 - [] CRUD tournament
+- [] Tournament wizard
 - [] Web Page tournament
 - [] Unit tests
 - [] Score cards, schedule
