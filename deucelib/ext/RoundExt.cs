@@ -6,18 +6,15 @@ namespace deuce.ext;
 public static class RoundEx 
 {
     /// <summary>
-    /// Get a string summary of the round.
+    /// 
     /// </summary>
-    /// <param name="round">Round to get the summary</param>
+    /// <param name="round">Round to count perms</param>
     /// <returns>string summary of the round.</returns>
-    public static string GetSummary(this Round round)
+    public static int NoGames(this Round round)
     {
-        Team home = round.GetTeamAtIndex(0);
-        Team away = round.GetTeamAtIndex(1);
-
-        string homePlayers = String.IsNullOrEmpty(home.Label) ? home.GetPlayerCSV() : home.Label;
-        string awayPlayers =  String.IsNullOrEmpty(away.Label) ? away.GetPlayerCSV() : away.Label;
-        return $"{homePlayers} vs {awayPlayers}";
-
+        int total = 0;
+        foreach(var p in round.Permutations)
+            foreach(Match m in p.Matches) total++;
+        return total;
     }
 }

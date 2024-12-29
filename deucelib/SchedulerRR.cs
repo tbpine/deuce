@@ -45,12 +45,12 @@ class SchedulerRR : SchedulerBase, IScheduler
                 //Schedule matches between each team.
                 if  (_tournament.Sport == 1)
                 {
-                    var round = _gameMaker.Create(_tournament, home, away, r);
-                    schedule.AddRound(round, r);
+                    var permutation = _gameMaker.Create(_tournament, home, away, r);
+                    schedule.AddPermutation(permutation, r);
                 }
            
             }
-
+            //Next Round
             var pop = _teams[0];
             _teams.RemoveAt(0);
             _teams.Add(pop);

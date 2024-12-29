@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using System.Reflection.PortableExecutable;
 using System.Runtime.InteropServices;
 
 namespace deuce;
@@ -16,9 +17,9 @@ public class GameMakerTennis : IGameMaker
     /// <param name="away">Away team</param>
     /// <param name="round">Round object</param>
     /// <returns>List of matches</returns>
-    public Round Create(Tournament t, Team home, Team away, int roundNo)
+    public Permutation Create(Tournament t, Team home, Team away, int roundNo)
     {
-        Round round = new(roundNo, new Team[] { home, away});
+        Permutation perm = new(roundNo, home, away);
         //Set up singles matches
         //TODO: Different ways to set up single
         var q1 = from p in home.Players orderby p.Ranking descending select p;
@@ -36,7 +37,9 @@ public class GameMakerTennis : IGameMaker
             Player pHome = a1[i];
             Player pAway = a2[i];
             Debug.Write($"({pHome},{pAway})");
-            round.AddMatch(new Match("",  roundNo, pHome, pAway ));
+            Match match = new Match("",  roundNo, pHome, pAway );
+            match.Permutation = perm;
+            perm.AddMatch(match);
 
         }
         Debug.Write($"|");
@@ -49,11 +52,13 @@ public class GameMakerTennis : IGameMaker
             Player pAway1 = a2[j % home.NoPlayers];
             Player pAway2 = a2[ (j+1) % home.NoPlayers];
             Debug.Write($"({pHome1} {pHome2},{pAway1} {pAway2})");
-            round.AddMatch(new Match("", roundNo, pHome1, pHome2, pAway1, pAway2 ));
+            Match match = new Match("", roundNo, pHome1, pHome2, pAway1, pAway2 );
+            match.Permutation = perm;
+            perm.AddMatch(match);
 
         }
 
 
-        return round;
+        return perm;
     }
 }

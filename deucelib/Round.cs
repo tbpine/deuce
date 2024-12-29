@@ -1,43 +1,33 @@
 namespace deuce;
 
 /// <summary>
-/// Team vs Team
+/// Rounds
 /// </summary>
 public class Round
 {
-    //The list of competing teams
-    private List<Team> _teams = new();
-    private List<Match> _matches = new();
+    private List<Permutation> _perms = new();
+    private Tournament? _tournament;
 
-    private readonly int _index;
-    public int RoundIndex { get => _index; }
-    public int NoMatches { get => _matches.Count; }
-    public int NoTeams { get => _teams.Count; }
+    private int _idx;
 
-    public IEnumerable<Team> Teams { get => _teams; }
-    public IEnumerable<Match> Matches { get => _matches; }
+    public IEnumerable<Permutation> Permutations  { get=>_perms; }
+    public int Index { get=>_idx; set=>_idx = value; }
 
-
-    /// <summary>
-    /// Construct with values
-    /// </summary>
-    public Round(int number, params Team[] teams)
-    {
-        _index = number;
-        _teams.AddRange(teams);
-    }
-
+    public Tournament? Tournament  {get { return _tournament; } set { _tournament = value; }}
     
 
-    /// <summary>
-    /// Get a team at index
-    /// </summary>
-    /// <param name="index">Index</param>
-    /// <returns>Team at index</returns>
-    public Team GetTeamAtIndex(int index) => _teams[index];
-    public Match GetMatchAtIndex(int index) => _matches[index];
+    public Round(int idx)
+    {
+        _idx = idx;
+    }
 
-    public void AddMatch(Match match)=>_matches.Add(match);
+    public void AddPerm(Permutation obj)
+    {
+        if (!_perms.Contains(obj)) _perms.Add(obj);
+    } 
 
-   
+    public Permutation GetAtIndex(int index)=>_perms[index];
+
+    public void AddRange(IEnumerable<Permutation> range) =>_perms.AddRange(range);
+
 }

@@ -1,4 +1,4 @@
-/******************************************************
+/*****************************************************
 * Schema for deuce. Tournaments.
 * Version 1.0 Tong Pine (1)
 * Dec 2024
@@ -6,6 +6,10 @@
 -- drop table `tournament`;
 -- drop table `venue`;
 -- drop table `player`;
+-- drop table `team`;
+-- drop table `permutation`;
+-- drop table `match`;
+
 CREATE TABLE IF NOT EXISTS `tournament_type` (
     `id` INT,
     `label` CHAR(20)
@@ -37,6 +41,7 @@ CREATE TABLE IF NOT EXISTS `player` (
     `id` INT PRIMARY KEY AUTO_INCREMENT,
     `first_name` VARCHAR(100),
     `last_name` VARCHAR(100),
+    `club`				INT,
     `utr` DECIMAL(6,2),
     `updated_datetime` TIMESTAMP,
     `created_datetime` TIMESTAMP
@@ -99,6 +104,51 @@ CREATE TABLE IF NOT EXISTS `club` (
     `created_datetime` TIMESTAMP
 );
 
+-- Collection of players/player
+-- with a label.
+
+CREATE TABLE IF NOT EXISTS `team` (
+    `id` 				INT PRIMARY KEY AUTO_INCREMENT,
+    `club`				INT,
+	`label` 		    VARCHAR(200),
+    `updated_datetime` 	TIMESTAMP,
+    `created_datetime` 	TIMESTAMP
+);
+
+-- Add players to a team
+CREATE TABLE IF NOT EXISTS `team_player` (
+    `team` 				INT,
+    `player` 			INT
+);
+
+-- The permutations for the  round robin
+-- format
+-- 
+CREATE TABLE IF NOT EXISTS `permutation` (
+    `id` 				INT PRIMARY KEY AUTO_INCREMENT,
+    `index` 			INT,
+    `round` 			INT,
+    `team_home` 		INT,
+    `team_away` 		VARCHAR(300),
+    `tournament` 		INT,
+    `updated_datetime` 	TIMESTAMP,
+    `created_datetime` 	TIMESTAMP
+);
+
+-- Contest between two players
+--
+--
+CREATE TABLE IF NOT EXISTS `match` (
+    `id` 				INT PRIMARY KEY AUTO_INCREMENT,
+    `player_home` 		INT,
+    `player_away` 		INT,
+    `permuation`		INT,
+    `round` 			INT,
+    `tournament` 		INT,
+    `updated_datetime` 	TIMESTAMP,
+    `created_datetime` 	TIMESTAMP
+);
+
 
 DROP VIEW IF EXISTS `tournament_details`;
 
@@ -120,3 +170,25 @@ CREATE VIEW `tournament_details` AS
     ORDER BY p.first_name , p.last_name;
 
 
+
+DROP VIEW IF EXISTS `club_teams`;
+
+CREATE VIEW `club_teams` AS
+SELECT 
+        c.id 'club_id',
+        c.`name`,
+        t.id 'team_id',
+        t.label 'team',
+        p.id 'player_id',
+        p.first_name,
+        p.last_name,
+        p.utr
+    FROM
+        team t
+            LEFT JOIN
+        team_player tp ON tp.team = t.id
+            LEFT JOIN
+        player p ON p.id = tp.player
+            LEFT JOIN
+        club c ON c.id = t.club
+    ORDER BY t.id , p.first_name , p.last_name;

@@ -16,10 +16,13 @@ public class Team
     private List<Player> _players = new ();
     private int _id;
     private int _index;
-    private string _label;
+    private string _label ="";
+    private Club? _club;
     public int Id { get { return _id; } set { _id = value; }}
     public int Index { get { return _index; } set { _index = value; }}
     public string Label { get { return _label; } set { _label = value; }}
+    public Club? Club { get { return _club; } set { _club = value; }}
+    
     public IEnumerable<Player> Players {get=>_players;}
     
     public void AddPlayer(Player player)    
@@ -37,6 +40,11 @@ public class Team
     {
         _id = id;
         _label = label;
+    }
+
+    public Team()
+    {
+        
     }
 
     public Player GetAt(int i) => _players[i];

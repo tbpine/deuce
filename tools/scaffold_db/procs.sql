@@ -162,6 +162,38 @@ SELECT LAST_INSERT_ID() 'id';
 
 END//
 
+DROP PROCEDURE IF EXISTS `sp_get_match`//
+
+CREATE PROCEDURE `sp_get_match`(
+)
+BEGIN
+
+	SELECT `id`,`player_home`,`player_away`,`round`,`tournament`,`updated_datetime`,`created_datetime`
+	FROM `match`
+	ORDER BY `id`;
+
+
+ END//
+
+
+DROP PROCEDURE IF EXISTS `sp_set_match`//
+
+CREATE PROCEDURE `sp_set_match`(
+IN p_id INT,
+IN p_player_home INT,
+IN p_player_away INT,
+IN p_round INT,
+IN p_tournament INT)
+
+BEGIN
+
+INSERT INTO `match`(`id`,`player_home`,`player_away`,`round`,`tournament`,`updated_datetime`,`created_datetime`) VALUES (p_id, p_player_home, p_player_away, p_round, p_tournament, NOW(), NOW())
+ON DUPLICATE KEY UPDATE `player_home` = p_player_home,`player_away` = p_player_away,`round` = p_round,`tournament` = p_tournament,`updated_datetime` = NOW();
+
+SELECT LAST_INSERT_ID() 'id';
+
+END//
+
 DROP PROCEDURE IF EXISTS `sp_get_player`//
 
 CREATE PROCEDURE `sp_get_player`(
@@ -220,6 +252,95 @@ BEGIN
 
 INSERT INTO `result`(`id`,`tournament`,`player_1`,`player_2`,`score`,`updated_datetime`,`created_datetime`) VALUES (p_id, p_tournament, p_player_1, p_player_2, p_score, NOW(), NOW())
 ON DUPLICATE KEY UPDATE `tournament` = p_tournament,`player_1` = p_player_1,`player_2` = p_player_2,`score` = p_score,`updated_datetime` = NOW();
+
+SELECT LAST_INSERT_ID() 'id';
+
+END//
+
+DROP PROCEDURE IF EXISTS `sp_get_round`//
+
+CREATE PROCEDURE `sp_get_round`(
+)
+BEGIN
+
+	SELECT `id`,`index`,`team_home`,`team_away`,`tournament`,`updated_datetime`,`created_datetime`
+	FROM `round`
+	ORDER BY `id`;
+
+
+ END//
+
+
+DROP PROCEDURE IF EXISTS `sp_set_round`//
+
+CREATE PROCEDURE `sp_set_round`(
+IN p_id INT,
+IN p_index INT,
+IN p_team_home INT,
+IN p_team_away VARCHAR(300),
+IN p_tournament INT)
+
+BEGIN
+
+INSERT INTO `round`(`id`,`index`,`team_home`,`team_away`,`tournament`,`updated_datetime`,`created_datetime`) VALUES (p_id, p_index, p_team_home, p_team_away, p_tournament, NOW(), NOW())
+ON DUPLICATE KEY UPDATE `index` = p_index,`team_home` = p_team_home,`team_away` = p_team_away,`tournament` = p_tournament,`updated_datetime` = NOW();
+
+SELECT LAST_INSERT_ID() 'id';
+
+END//
+
+DROP PROCEDURE IF EXISTS `sp_get_team`//
+
+CREATE PROCEDURE `sp_get_team`(
+)
+BEGIN
+
+	SELECT `id`,`label`,`updated_datetime`,`created_datetime`
+	FROM `team`
+	ORDER BY `id`;
+
+
+ END//
+
+
+DROP PROCEDURE IF EXISTS `sp_set_team`//
+
+CREATE PROCEDURE `sp_set_team`(
+IN p_id INT,
+IN p_label INT)
+
+BEGIN
+
+INSERT INTO `team`(`id`,`label`,`updated_datetime`,`created_datetime`) VALUES (p_id, p_label, NOW(), NOW())
+ON DUPLICATE KEY UPDATE `label` = p_label,`updated_datetime` = NOW();
+
+SELECT LAST_INSERT_ID() 'id';
+
+END//
+
+DROP PROCEDURE IF EXISTS `sp_get_team_player`//
+
+CREATE PROCEDURE `sp_get_team_player`(
+)
+BEGIN
+
+	SELECT `team`,`player`
+	FROM `team_player`;
+
+
+ END//
+
+
+DROP PROCEDURE IF EXISTS `sp_set_team_player`//
+
+CREATE PROCEDURE `sp_set_team_player`(
+IN p_team INT,
+IN p_player INT)
+
+BEGIN
+
+INSERT INTO `team_player`(`team`,`player`) VALUES (p_team, p_player)
+ON DUPLICATE KEY UPDATE `team` = p_team,`player` = p_player;
 
 SELECT LAST_INSERT_ID() 'id';
 

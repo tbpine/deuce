@@ -21,6 +21,10 @@ DROP PROCEDURE IF EXISTS `sp_get_interval`//
 
 DROP PROCEDURE IF EXISTS `sp_set_interval`//
 
+DROP PROCEDURE IF EXISTS `sp_get_match`//
+
+DROP PROCEDURE IF EXISTS `sp_set_match`//
+
 DROP PROCEDURE IF EXISTS `sp_get_player`//
 
 DROP PROCEDURE IF EXISTS `sp_set_player`//
@@ -28,6 +32,18 @@ DROP PROCEDURE IF EXISTS `sp_set_player`//
 DROP PROCEDURE IF EXISTS `sp_get_result`//
 
 DROP PROCEDURE IF EXISTS `sp_set_result`//
+
+DROP PROCEDURE IF EXISTS `sp_get_round`//
+
+DROP PROCEDURE IF EXISTS `sp_set_round`//
+
+DROP PROCEDURE IF EXISTS `sp_get_team`//
+
+DROP PROCEDURE IF EXISTS `sp_set_team`//
+
+DROP PROCEDURE IF EXISTS `sp_get_team_player`//
+
+DROP PROCEDURE IF EXISTS `sp_set_team_player`//
 
 DROP PROCEDURE IF EXISTS `sp_get_tournament`//
 

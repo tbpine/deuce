@@ -40,7 +40,7 @@ public class TemplateTennis
 
         MakeHeader(doc, tournament, roundNo);
 
-        List<Round> rounds = s.GetRounds(roundNo) ?? new();
+        IEnumerable<Permutation> perms = s.GetRounds(roundNo).Permutations;
         PdfCanvas canvas = new PdfCanvas(pdfdoc.AddNewPage());
 
         //Add header
@@ -50,13 +50,13 @@ public class TemplateTennis
         PdfFont cellFont = PdfFontFactory.CreateFont(StandardFonts.HELVETICA);
 
 
-        foreach (Round round in rounds)
+        foreach (Permutation perm in perms)
         {
             // Calculate how many boxes to print for scores:
             int noScores = tournament?.Format?.NoSets ?? 1;
 
-            var thome = round.GetTeamAtIndex(0);
-            var taway = round.GetTeamAtIndex(1);
+            var thome = perm.GetTeamAtIndex(0);
+            var taway = perm.GetTeamAtIndex(1);
 
             //Print Round info.
             Paragraph pvs = new Paragraph($"{thome.Label} vs {taway.Label}");
@@ -78,7 +78,7 @@ public class TemplateTennis
             List<float> colWidths = [noScores];
             for (int i = 0; i < noScores; i++) colWidths.Add(1);
 
-            foreach (Match match in round.Matches)
+            foreach (Match match in perm.Matches)
             {
 
                 Table tbl = new(colWidths.ToArray());

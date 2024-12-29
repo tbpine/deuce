@@ -6,7 +6,7 @@ using deuce.ext;
 
 namespace deuce;
 
-class DSTournamentType : IDB<TournamentType>
+public class DbRepoTournamentType : DbRepoBase<TournamentType>
 {
     //------------------------------------
     //| Internals                         |
@@ -17,12 +17,12 @@ class DSTournamentType : IDB<TournamentType>
     /// Construct with dependencies
     /// </summary>
     /// <param name="dbconn">Db Connection</param>
-    public DSTournamentType(DbConnection dbconn)
+    public DbRepoTournamentType(DbConnection dbconn)
     {
         _dbconn = dbconn;
     }
 
-    public async Task<List<TournamentType>> GetList()
+    public override async Task<List<TournamentType>> GetList()
     {
         //Open Connection
         await _dbconn.OpenAsync();

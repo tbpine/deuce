@@ -18,6 +18,8 @@ public class Tournament
 
     private bool _hasDuels;
 
+    private Schedule? _schedule;
+
     private Interval? _interval;
     public int Id { get { return _id; } set { _id = value; } }
     public string? Label { get { return _label; } set { _label = value; } }
@@ -33,6 +35,9 @@ public class Tournament
     public double Fee { get { return _fee; } set { _fee = value; } }
     public double Prize { get { return _prize; } set { _prize = value; } }
     public bool UseRanking { get { return _useRankings; } set { _useRankings = value; } }
-    public bool  HasDuels { get=>_hasDuels; set=>_hasDuels  = value; }
+
+    public Schedule? Schedule { get => _schedule; set => _schedule = value; }
+    public bool HasDuels { get => _hasDuels; set => _hasDuels = value; }
+
 
 }

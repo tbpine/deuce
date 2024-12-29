@@ -6,5 +6,5 @@ namespace deuce;
 /// </summary>
 public interface IGameMaker
 {
-    Round Create(Tournament t, Team home, Team Away, int round);
+    Permutation Create(Tournament t, Team home, Team Away, int round);
 };

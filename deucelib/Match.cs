@@ -14,6 +14,9 @@ public class Match
     private string? _score;
     private int _round;
 
+    private Permutation? _perm;
+    private int p_id;
+    
     //------------------------------------
     // Props
     //------------------------------------
@@ -23,7 +26,11 @@ public class Match
     //TODO: Not all sport have this property
     public bool IsDouble{ get=> _players.Count> 2;}
 
+    public Permutation? Permutation { get=>_perm; set=>_perm = value; }
+
     public IEnumerable<Player> Players { get => _players; }
+    public int Id { get { return p_id; } set { p_id = value; }}
+    
 
     /// <summary>
     /// Construct with values
@@ -36,6 +43,11 @@ public class Match
         _score = score;
         _players.AddRange(players);
         _round = round;
+    }
+
+    public Match()
+    {
+        
     }
 
 

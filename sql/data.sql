@@ -16,3 +16,6 @@ INSERT INTO `interval` VALUES (4, "Weekly");
 INSERT INTO `interval` VALUES (5, "Fortnightly");
 INSERT INTO `interval` VALUES (6, "Monthly");
 INSERT INTO `interval` VALUES (7, "Annually");
+
+DELETE FROM `club` WHERE id = 1;
+insert into `club` values (null, 'test_club', 'tester', null, 1, now(), now());

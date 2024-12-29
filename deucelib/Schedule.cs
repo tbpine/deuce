@@ -9,7 +9,7 @@ public class Schedule
     //| Internals                        |
     //------------------------------------
 
-    private Dictionary<int, List<Round>> _schedule = new();
+    private List<Round> _rounds = new();
     private Tournament Tournament { get; init; }
 
 
@@ -17,10 +17,10 @@ public class Schedule
     //| Props                            |
     //------------------------------------
 
-    public int NoRounds { get => _schedule.Keys.Count; }
-    public List<Round>? GetRounds(int round) => _schedule[round];
+    public int NoRounds { get => _rounds.Count; }
+    public Round GetRounds(int round) => _rounds[round];
 
-    public List<Round> GetRoundAtIndex(int index) => _schedule[index];
+    public Round GetRoundAtIndex(int index) => _rounds[index];
 
     /// <summary>
     /// Construct with dependencies
@@ -34,17 +34,22 @@ public class Schedule
     /// <summary>
     /// Add a macth
     /// </summary>
-    /// <param name="roundNo">Round to add</param>
-    public void AddRound(Round round, int roundNo)
+    /// <param name="permutation">Perm to add</param>
+    /// <param name="roundNo">Round number</param>
+    public void AddPermutation(Permutation permutation, int roundNo)
     {
-        //A a collection of matches for the round
-        List<Round> rounds = _schedule.ContainsKey(roundNo) ? _schedule[roundNo] :
-                new List<Round>();
+        var existing = _rounds.Find(e=>e.Index == roundNo);
+        Round round = existing is null ? new Round(roundNo) : existing;
+        
+        if (existing is null)
+        {
+            round.Tournament = Tournament;
+            _rounds.Add(round); 
 
-        if (!_schedule.ContainsKey(roundNo)) _schedule.Add(roundNo, rounds);
-
-        //Make the games
-        rounds.Add(round);
+        } 
+        //Soft Link
+        permutation.Round=round;
+        round.AddPerm(permutation);
 
     }
 
@@ -52,16 +57,21 @@ public class Schedule
     /// Add a range of matches
     /// </summary>
     /// <param name="roundNo">Round</param>
-    /// <param name="toAdd">List of matches</param>
-    public void AddRange(int roundNo, IEnumerable<Round> toAdd)
+    /// <param name="toAdd">List of permutations</param>
+    public void AddRange(int roundNo, IEnumerable<Permutation> toAdd)
     {
         //A a collection of matches for the round
-        List<Round> rounds = _schedule.ContainsKey(roundNo) ? _schedule[roundNo] :
-                new List<Round>();
-
-        if (!_schedule.ContainsKey(roundNo)) _schedule.Add(roundNo, rounds);
-
-        rounds.AddRange(toAdd);
+       var existing = _rounds.Find(e=>e.Index == roundNo);
+        Round round = existing is null ? new Round(roundNo) : existing;
+        
+        if (existing is null) 
+        {
+            round.Tournament = Tournament;
+            _rounds.Add(round);
+        }
+        
+        foreach(var perm in toAdd) perm.Round = round;
+        existing?.AddRange(toAdd);
 
     }
 }
