@@ -21,7 +21,7 @@ class TournamentRepo
         tournament.TeamSize = teamSize;
 
         IGameMaker gm = new GameMakerTennis();
-        List<Team> teams = await GetTeams(1);
+        //List<Team> teams = await GetTeams(1);
         List<Player> players = await GetPlayers(1);
 
         List<Team> selected = new();
@@ -37,7 +37,8 @@ class TournamentRepo
 
         for (int i = 0; i < noTeams; i++)
         {
-            Team team = teams[rand.Next() % teams.Count];
+            Team team = new Team(){ Id = -1, Label = RandomUtil.GetTeam()};
+
             for(int j = 0; j < teamSize; j++)
             {
                 Player player = players[rand.Next() % players.Count];
@@ -46,7 +47,7 @@ class TournamentRepo
             }   
 
             selected.Add(team);
-            teams.Remove(team);
+            
         }
 
         //Action
@@ -55,6 +56,7 @@ class TournamentRepo
         var mm = fac.Create(tournament, gm);
         var schedule = mm.Run(selected);
         tournament.Schedule = schedule;
+        tournament.Teams = selected;
         return tournament;
 
     }

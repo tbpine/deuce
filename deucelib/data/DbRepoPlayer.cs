@@ -41,6 +41,8 @@ public class DbRepoPlayer : DbRepoBase<Player>
 
                 players.Add(p);
             }
+
+            reader.Close();
         }
 
         return players;

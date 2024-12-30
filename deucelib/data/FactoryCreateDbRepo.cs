@@ -21,7 +21,7 @@ public class FactoryCreateDbRepo
         else if (obj.GetType() == typeof(Match)) return new DbRepoMatch(dbconn) as IDbRepo<T>;
         else if (obj.GetType() == typeof(Tournament)) return new DbRepoTournament(dbconn, references) as IDbRepo<T>;
         else if (obj.GetType() == typeof(Player)) return new DbRepoPlayer(dbconn, references) as IDbRepo<T>;
-        else if (obj.GetType() == typeof(Team)) return new DbRepoTeam(dbconn, references) as IDbRepo<T>;
+        else if (obj.GetType() == typeof(Team)) return new DbRepoTeam(dbconn) as IDbRepo<T>;
         else if (obj.GetType() == typeof(RecordSchedule)) return new DbRepoRecordSchedule(dbconn, references) as IDbRepo<T>;
         
 

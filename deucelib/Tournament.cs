@@ -18,6 +18,8 @@ public class Tournament
 
     private bool _hasDuels;
 
+    private List<Team>? _teams;
+
     private Schedule? _schedule;
 
     private Interval? _interval;
@@ -38,6 +40,8 @@ public class Tournament
 
     public Schedule? Schedule { get => _schedule; set => _schedule = value; }
     public bool HasDuels { get => _hasDuels; set => _hasDuels = value; }
+
+    public List<Team>? Teams { get=>_teams; set => _teams = value; }
 
 
 }

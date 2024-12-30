@@ -315,12 +315,14 @@ DROP PROCEDURE IF EXISTS `sp_set_team`//
 CREATE PROCEDURE `sp_set_team`(
 IN p_id INT,
 IN p_club INT,
+IN p_tournament INT,
 IN p_label VARCHAR(200))
 
 BEGIN
 
-INSERT INTO `team` (`id`,`label`,`club`,`updated_datetime`,`created_datetime`) VALUES (p_id, p_label, p_club,NOW(), NOW())
-ON DUPLICATE KEY UPDATE `label` = p_label,`club` = p_club, `updated_datetime` = NOW();
+INSERT INTO `team` (`id`,`label`,`club`,`tournament`,`updated_datetime`,`created_datetime`) 
+VALUES (p_id, p_label, p_club,p_tournament, NOW(), NOW())
+ON DUPLICATE KEY UPDATE `label` = p_label,`club` = p_club, `tournament` = p_tournament, `updated_datetime` = NOW();
 
 SELECT LAST_INSERT_ID() 'id';
 
@@ -465,8 +467,10 @@ IN p_tournament INT)
 
 BEGIN
 
-select m.id 'match_id', m.permutation, m.round, player_home, player_away
+select m.id 'match_id', m.permutation, m.round, player_home, player_away, home.team 'team_home', away.team 'team_away'
  from `match` m left join `match_player` p on p.`match`= m.id 
+ left join `team_player` home on home.player = p.player_home
+ left join `team_player` away on away.player = p.player_away
  order by m.round, m.permutation;
  
 END//
