@@ -1,4 +1,5 @@
 using System.Net;
+using System.Text;
 
 namespace deuce.ext;
 
@@ -17,29 +18,46 @@ public static class MatchExt {
     /// <returns>True if two matches have the same players in a the same round.</returns>
     public static bool IsSameGame (this Match m, Match other)
      {
-       bool samePlayers = false;
         //If all player in the other game
         //is the same as this game.
-        foreach (Player p in other.Players)
+        bool isSameHomePlayers = true;
+        bool isSameAwayPlayers = true;
+
+        //Check home players
+        foreach (Player p in other.Home)
         {
-            samePlayers = m.HasPlayer(p);
-            if (!samePlayers) break;
+            isSameHomePlayers = m.HasHomePlayer(p);
+            if (!isSameHomePlayers) return false;
         }
 
-        return other.Players.Count() == m.Players.Count() && samePlayers &&  other.Round == m.Round;
+        //Check away players
+        foreach (Player p in other.Away)
+        {
+            isSameAwayPlayers = m.HasAwayPlayer(p);
+            if (!isSameAwayPlayers) return false;
+        }
+
+
+        return other.Home.Count() == m.Home.Count() &&
+               other.Away.Count() == m.Away.Count() &&
+               isSameHomePlayers &&  isSameAwayPlayers &&  other.Round == m.Round;
 
      }
 
      public static string GetHomeTeam(this Match match)
      {
-        return match.IsDouble ? match.GetPlayerAt(0).ToString() + "/" + match.GetPlayerAt(1).ToString() :
-            match.GetPlayerAt(0).ToString();
+        StringBuilder sb= new();
+        for (int i = 0; i < match.Home.Count(); i++)
+            sb.Append(match.GetHomeAt(i).ToString() + (i == match.Home.Count()-1 ? "" : "/"));
+        return sb.ToString();
      }
 
      public static string GetAwayTeam(this Match match)
      {
-        return match.IsDouble ? match.GetPlayerAt(2).ToString() + "/" + match.GetPlayerAt(3).ToString() :
-            match.GetPlayerAt(1).ToString();
+        StringBuilder sb= new();
+        for (int i = 0; i < match.Away.Count(); i++)
+            sb.Append(match.GetAwayAt(i).ToString() + (i == match.Away.Count()-1 ? "" : "/"));
+        return sb.ToString();
      }
 
       public static string GetTitle(this Match match) => match.IsDouble ? "Doubles" : "Singles";

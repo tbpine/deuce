@@ -165,12 +165,14 @@ END//
 DROP PROCEDURE IF EXISTS `sp_get_match`//
 
 CREATE PROCEDURE `sp_get_match`(
+IN p_tournament int
 )
 BEGIN
 
-	SELECT `id`,`player_home`,`player_away`,`permutation`,`round`,`tournament`,`updated_datetime`,`created_datetime`
+	SELECT `id`,`permutation`,`round`,`tournament`,`updated_datetime`,`created_datetime`
 	FROM `match`
-	ORDER BY `id`;
+    where `tournament` = p_tournament
+	ORDER BY `round`, `permutation`;
 
 
  END//
@@ -180,16 +182,15 @@ DROP PROCEDURE IF EXISTS `sp_set_match`//
 
 CREATE PROCEDURE `sp_set_match`(
 IN p_id INT,
-IN p_player_home INT,
-IN p_player_away INT,
 IN p_permutation INT,
 IN p_round INT,
 IN p_tournament INT)
 
 BEGIN
 
-INSERT INTO `match`(`id`,`player_home`,`player_away`,`permutation`,`round`,`tournament`,`updated_datetime`,`created_datetime`) VALUES (p_id, p_player_home, p_player_away, p_round, p_tournament, NOW(), NOW())
-ON DUPLICATE KEY UPDATE `player_home` = p_player_home,`player_away` = p_player_away, `permutation` = p_permutation, `round` = p_round,`tournament` = p_tournament,`updated_datetime` = NOW();
+INSERT INTO `match`(`id`,`permutation`,`round`,`tournament`,`updated_datetime`,`created_datetime`) 
+VALUES (p_id, p_permutation, p_round, p_tournament, NOW(), NOW())
+ON DUPLICATE KEY UPDATE  `permutation` = p_permutation, `round` = p_round,`tournament` = p_tournament,`updated_datetime` = NOW();
 
 SELECT LAST_INSERT_ID() 'id';
 
@@ -198,13 +199,13 @@ END//
 DROP PROCEDURE IF EXISTS `sp_get_player`//
 
 CREATE PROCEDURE `sp_get_player`(
-IN p_club_id INT
+IN p_club INT
 )
 BEGIN
 
 	SELECT `id`,`club`,`first_name`,`last_name`,`utr`,`updated_datetime`,`created_datetime`
 	FROM `player`
-    WHERE `club` = p_club_id OR ISNULL(p_club_id)
+    WHERE `club` = p_club OR ISNULL(p_club)
 	ORDER BY `id`;
 
 
@@ -325,33 +326,36 @@ SELECT LAST_INSERT_ID() 'id';
 
 END//
 
-DROP PROCEDURE IF EXISTS `sp_get_team_player`//
-
-CREATE PROCEDURE `sp_get_team_player`(
-)
-BEGIN
-
-	SELECT `team`,`player`
-	FROM `team_player`;
-
-
- END//
-
-
 DROP PROCEDURE IF EXISTS `sp_set_team_player`//
 
 CREATE PROCEDURE `sp_set_team_player`(
 IN p_team INT,
-IN p_player INT)
+IN p_player INT,
+IN p_tournament INT)
 
 BEGIN
 
-INSERT INTO `team_player`(`team`,`player`) VALUES (p_team, p_player)
-ON DUPLICATE KEY UPDATE `team` = p_team,`player` = p_player;
+INSERT INTO `team_player`(`team`,`player`,`tournament`) VALUES (p_team, p_player, p_tournament)
+ON DUPLICATE KEY UPDATE `team` = p_team,`player` = p_player, `tournament` = p_tournament;
 
 SELECT LAST_INSERT_ID() 'id';
 
 END//
+
+DROP PROCEDURE IF EXISTS `sp_get_team_player`//
+
+CREATE PROCEDURE `sp_get_team_player`(
+IN p_tournament INT)
+
+BEGIN
+
+SELECT `id`, `team`, `player`, `tournament`, `updated_datetime`, `created_datetime`
+FROM `team_player`
+WHERE `tournament` = p_tournament
+ORDER BY `team`, `player`;
+
+END//
+
 
 DROP PROCEDURE IF EXISTS `sp_get_tournament`//
 
@@ -419,6 +423,53 @@ SELECT LAST_INSERT_ID() 'id';
 
 END//
 
+
+DROP PROCEDURE IF EXISTS `sp_set_match_player`//
+
+CREATE PROCEDURE `sp_set_match_player`(
+IN p_id INT,
+IN p_match INT,
+IN p_player_home INT,
+IN p_player_away INT)
+
+BEGIN
+
+INSERT INTO `match_player`(`id`,`match`,`player_home`,`player_away`,`updated_datetime`, `created_datetime`)
+ VALUES (p_id, p_match, p_player_home, p_player_away, NOW(), NOW())
+ON DUPLICATE KEY UPDATE `match` = p_match,`player_home` = p_player_home,`player_away` = p_player_away,
+`updated_datetime` = NOW();
+
+SELECT LAST_INSERT_ID() 'id';
+
+END//
+
+DROP PROCEDURE IF EXISTS `sp_get_match_player`//
+
+CREATE PROCEDURE `sp_get_match_player`(
+IN p_match INT)
+
+BEGIN
+
+SELECT `id`, `match`, `player_home`,`player_away`, `updated_datetime`, `created_datetime`
+FROM `match_player`
+ORDER BY `player_home`, `player_away`;
+
+END//
+
+
+
+DROP PROCEDURE IF EXISTS `sp_get_tournament_schedule`//
+
+CREATE PROCEDURE `sp_get_tournament_schedule`(
+IN p_tournament INT)
+
+BEGIN
+
+select m.id 'match_id', m.permutation, m.round, player_home, player_away
+ from `match` m left join `match_player` p on p.`match`= m.id 
+ order by m.round, m.permutation;
+ 
+END//
 
 
 DELIMITER ;

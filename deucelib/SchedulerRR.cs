@@ -29,16 +29,16 @@ class SchedulerRR : SchedulerBase, IScheduler
 
 
         int noRounds = _teams.Count - 1;
-        int noGames = _teams.Count / 2;
+        int noPermutations = _teams.Count / 2;
 
         for (int r = 0; r < noRounds; r++)
         {
             Debug.Write($"Round {r}:");
 
-            for (int g = 0; g < noGames; g++)
+            for (int p = 0; p < noPermutations; p++)
             {
-                Team home = _teams[g];
-                Team away = _teams[teams.Count - g - 1];
+                Team home = _teams[p];
+                Team away = _teams[teams.Count - p - 1];
 
                 Debug.Write("(" + home.Index + "," + away.Index + ")");
 
@@ -46,6 +46,7 @@ class SchedulerRR : SchedulerBase, IScheduler
                 if  (_tournament.Sport == 1)
                 {
                     var permutation = _gameMaker.Create(_tournament, home, away, r);
+                    permutation.Id = p;
                     schedule.AddPermutation(permutation, r);
                 }
            

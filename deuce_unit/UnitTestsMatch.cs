@@ -23,7 +23,7 @@ public class UnitTestsMatch
             conn.Open();
             //Create tournament
             TournamentRepo tourRepo = new();
-            Tournament tour = await tourRepo.Random(1, "test_tournament", 8, 1, 1,0,1, 1);
+            Tournament tour = await tourRepo.Random(1, "test_tournament", 8, 1, 1, 0,1, 1);
             Schedule? schedule = tour.Schedule;
 
             Assert.IsNotNull(schedule, "Tournment has no schedule");

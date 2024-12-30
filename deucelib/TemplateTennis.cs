@@ -89,11 +89,9 @@ public class TemplateTennis
 
                 // Could be doubles (4 players in a match specifies a doubles match)
                 //4 players, indicates doubles
-                string homeName = match.IsDouble ? $"{match.GetPlayerAt(0)} / {match.GetPlayerAt(1)}"
-                : $"{match.GetPlayerAt(0)}";
+                string homeName = match.GetHomeTeam();
 
-                string awayName = match.IsDouble ? $"{match.GetPlayerAt(2)} / {match.GetPlayerAt(3)}"
-                : $"{match.GetPlayerAt(1)}";
+                string awayName = match.GetAwayTeam();
 
                 //Add headers
                 string matchType = match.IsDouble ? "Doubles" : "Singles";

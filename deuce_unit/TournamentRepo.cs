@@ -53,7 +53,7 @@ class TournamentRepo
         //Assert
         FactorySchedulers fac = new();
         var mm = fac.Create(tournament, gm);
-        var schedule = mm.Run(teams);
+        var schedule = mm.Run(selected);
         tournament.Schedule = schedule;
         return tournament;
 

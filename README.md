@@ -6,7 +6,9 @@ rotating the array every round is how you make games.
 
 ## TODOs
 - [] Load/Save matches and rounds (with unit testing)
+    -[X] Match players seperated into 2 lists
     -[] Foriegn key constraints
+    -[] Rebuild schedule from the database
 - [] Knockout format
 - [] Print out for knockout format
 - [] CRUD tournament

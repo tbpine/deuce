@@ -7,8 +7,9 @@
 -- drop table `venue`;
 -- drop table `player`;
 -- drop table `team`;
--- drop table `permutation`;
 -- drop table `match`;
+-- drop table `match_player`;
+-- drop table `team_player`;
 
 CREATE TABLE IF NOT EXISTS `tournament_type` (
     `id` INT,
@@ -110,46 +111,42 @@ CREATE TABLE IF NOT EXISTS `club` (
 CREATE TABLE IF NOT EXISTS `team` (
     `id` 				INT PRIMARY KEY AUTO_INCREMENT,
     `club`				INT,
+    `tournament`		INT,
 	`label` 		    VARCHAR(200),
     `updated_datetime` 	TIMESTAMP,
     `created_datetime` 	TIMESTAMP
 );
 
--- Add players to a team
 CREATE TABLE IF NOT EXISTS `team_player` (
-    `team` 				INT,
-    `player` 			INT
-);
-
--- The permutations for the  round robin
--- format
--- 
-CREATE TABLE IF NOT EXISTS `permutation` (
     `id` 				INT PRIMARY KEY AUTO_INCREMENT,
-    `index` 			INT,
-    `round` 			INT,
-    `team_home` 		INT,
-    `team_away` 		VARCHAR(300),
-    `tournament` 		INT,
+    `team`				INT,
+    `player`			INT,
+    `tournament`		INT,
     `updated_datetime` 	TIMESTAMP,
     `created_datetime` 	TIMESTAMP
 );
+
 
 -- Contest between two players
 --
 --
 CREATE TABLE IF NOT EXISTS `match` (
     `id` 				INT PRIMARY KEY AUTO_INCREMENT,
-    `player_home` 		INT,
-    `player_away` 		INT,
-    `permuation`		INT,
+    `permutation`		INT,
     `round` 			INT,
     `tournament` 		INT,
     `updated_datetime` 	TIMESTAMP,
     `created_datetime` 	TIMESTAMP
 );
 
-
+CREATE TABLE IF NOT EXISTS `match_player` (
+    `id` 				INT PRIMARY KEY AUTO_INCREMENT,
+    `match`				INT,
+    `player_home` 		INT,
+    `player_away` 		INT,
+    `updated_datetime` 	TIMESTAMP,
+    `created_datetime` 	TIMESTAMP
+);
 DROP VIEW IF EXISTS `tournament_details`;
 
 CREATE VIEW `tournament_details` AS

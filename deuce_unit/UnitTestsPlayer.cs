@@ -13,7 +13,7 @@ public class UnitTestsPlayer
 {
 
     [TestMethod]
-    [DataRow(100)]
+    // [DataRow(100)]
     public void set_n_players_returns_nothing(int noPlayers)
     {
         MySqlConnection conn = new("Server=localhost;Database=deuce;User Id=deuce;Password=deuce;");

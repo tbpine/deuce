@@ -7,6 +7,7 @@ public class Filter
 {
 
     public int ClubId { get; set; }
+    public int TournamentId { get; set; }
     public Filter()
     {
 

@@ -22,6 +22,7 @@ public class FactoryCreateDbRepo
         else if (obj.GetType() == typeof(Tournament)) return new DbRepoTournament(dbconn, references) as IDbRepo<T>;
         else if (obj.GetType() == typeof(Player)) return new DbRepoPlayer(dbconn, references) as IDbRepo<T>;
         else if (obj.GetType() == typeof(Team)) return new DbRepoTeam(dbconn, references) as IDbRepo<T>;
+        else if (obj.GetType() == typeof(RecordSchedule)) return new DbRepoRecordSchedule(dbconn, references) as IDbRepo<T>;
         
 
         throw new ArgumentException("No DbRepo class for the specified type");

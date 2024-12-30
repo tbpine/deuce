@@ -29,7 +29,7 @@ public class DbRepoTeam : DbRepoBase<Team>
         {
             cmd.CommandText = "sp_get_team";
             cmd.CommandType = System.Data.CommandType.StoredProcedure;
-            cmd.Parameters.Add(cmd.CreateWithValue("p_club_id", filter.ClubId));
+            cmd.Parameters.Add(cmd.CreateWithValue("p_club", filter.ClubId));
             
             var reader = await cmd.ExecuteReaderAsync();
             

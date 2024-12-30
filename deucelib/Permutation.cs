@@ -11,8 +11,8 @@ public class Permutation
     private Round? _round;
     private int _id;
 
-    private readonly int _index;
-    public int RoundIndex { get => _index; }
+    // private int _index;
+    // public int RoundIndex { get => _index; }
     public int NoMatches { get => _matches.Count; }
     public int NoTeams { get => _teams.Count; }
     public Round? Round { get=>_round; set=>_round = value; }
@@ -26,7 +26,7 @@ public class Permutation
     /// </summary>
     public Permutation(int number, params Team[] teams)
     {
-        _index = number;
+        _id =number;
         _teams.AddRange(teams);
     }
 
