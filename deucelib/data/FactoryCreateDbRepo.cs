@@ -3,6 +3,9 @@ using iText.Forms.Fields.Merging;
 
 namespace deuce.lib;
 
+/// <summary>
+/// Do not use this class
+/// </summary>
 public class FactoryCreateDbRepo
 {
     /// <summary>
@@ -22,7 +25,7 @@ public class FactoryCreateDbRepo
         else if (obj.GetType() == typeof(Tournament)) return new DbRepoTournament(dbconn, references) as IDbRepo<T>;
         else if (obj.GetType() == typeof(Player)) return new DbRepoPlayer(dbconn, references) as IDbRepo<T>;
         else if (obj.GetType() == typeof(Team)) return new DbRepoTeam(dbconn) as IDbRepo<T>;
-        else if (obj.GetType() == typeof(RecordSchedule)) return new DbRepoRecordSchedule(dbconn, references) as IDbRepo<T>;
+        else if (obj.GetType() == typeof(RecordSchedule)) return new DbRepoRecordSchedule(dbconn) as IDbRepo<T>;
         
 
         throw new ArgumentException("No DbRepo class for the specified type");

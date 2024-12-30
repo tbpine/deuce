@@ -351,9 +351,11 @@ IN p_tournament INT)
 
 BEGIN
 
-SELECT `id`, `team`, `player`, `tournament`, `updated_datetime`, `created_datetime`
-FROM `team_player`
-WHERE `tournament` = p_tournament
+SELECT tp.`id`, t.club 'club', t.tournament, t.label 'team',  t.id 'team_id',
+p.id `player_id`,  p.first_name , p.last_name, p.utr
+FROM `team_player` tp JOIN `team` t ON t.id = tp.team
+JOIN `player` p ON p.id = tp.`player`
+WHERE tp.`tournament` = p_tournament
 ORDER BY `team`, `player`;
 
 END//

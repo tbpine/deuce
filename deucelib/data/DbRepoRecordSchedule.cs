@@ -14,7 +14,7 @@ public class DbRepoRecordSchedule : DbRepoBase<RecordSchedule>
     /// </summary>
     /// <param name="dbconn">The db connection</param>
     /// <param name="references">References</param>
-    public DbRepoRecordSchedule(DbConnection dbconn, params object[] references)
+    public DbRepoRecordSchedule(DbConnection dbconn)
     {
         _dbconn = dbconn;
 
