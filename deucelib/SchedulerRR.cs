@@ -1,4 +1,3 @@
-using System.Data;
 using System.Diagnostics;
 
 namespace deuce;
@@ -27,7 +26,7 @@ class SchedulerRR : SchedulerBase, IScheduler
 
         for (int i = 0; i < _teams.Count; i++) _teams[i].Index = i + 1;
 
-
+        //It work out this way
         int noRounds = _teams.Count - 1;
         int noPermutations = _teams.Count / 2;
 
@@ -43,7 +42,7 @@ class SchedulerRR : SchedulerBase, IScheduler
                 Debug.Write("(" + home.Index + "," + away.Index + ")");
 
                 //Schedule matches between each team.
-                if  (_tournament.Sport == 1)
+                if  (_tournament.Sport?.Id == 1)
                 {
                     var permutation = _gameMaker.Create(_tournament, home, away, r);
                     permutation.Id = p;

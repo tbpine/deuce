@@ -16,7 +16,7 @@ public class UnitTestsTeam
     public void set_n_team_return_teams(int noTeams)
     {
         //Assign
-        Club club = new Club() { Id = 1 };
+        Organization club = new Organization() { Id = 1 };
 
         //Players
         MySqlConnection conn = new("Server=localhost;Database=deuce;User Id=deuce;Password=deuce;");
@@ -67,7 +67,7 @@ public class UnitTestsTeam
 
         //Players
 
-        Club club = new Club() { Id = 1 };
+        Organization club = new Organization() { Id = 1 };
         MySqlConnection conn = new("Server=localhost;Database=deuce;User Id=deuce;Password=deuce;");
         conn.Open();
 

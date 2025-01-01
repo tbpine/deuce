@@ -17,11 +17,11 @@ public class Team
     private int _id;
     private int _index;
     private string _label ="";
-    private Club? _club;
+    private Organization? _club;
     public int Id { get { return _id; } set { _id = value; }}
     public int Index { get { return _index; } set { _index = value; }}
     public string Label { get { return _label; } set { _label = value; }}
-    public Club? Club { get { return _club; } set { _club = value; }}
+    public Organization? Club { get { return _club; } set { _club = value; }}
     
     public IEnumerable<Player> Players {get=>_players;}
     

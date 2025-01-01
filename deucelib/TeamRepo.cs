@@ -15,7 +15,7 @@ public class TeamRepo
     /// <param name="source"></param>
     /// <param name="players"></param>
     /// <returns></returns>
-    public List<Team> ExtractFromRecordTeamPlayer(List<RecordTeamPlayer> source, List<Player> players)
+    public List<Team> ExtractFromRecordTeamPlayer(List<RecordTeamPlayer> source, List<Player> players, Organization club)
     {
         List<Team> teams = new();
         foreach (RecordTeamPlayer rteamPlayer in source)
@@ -26,7 +26,8 @@ public class TeamRepo
                 team = new Team()
                 {
                     Id = rteamPlayer.TeamId,
-                    Label = rteamPlayer.Team
+                    Label = rteamPlayer.Team,
+                    Club = club
                 };
 
                 teams.Add(team);

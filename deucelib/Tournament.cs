@@ -10,7 +10,7 @@ public class Tournament
     private TournamentType? _type;
     private int _max;
     private int _TeamSize;
-    private int _sport;
+    private Sport? _sport;
     private Format? _format;
     private double _fee;
     private bool _useRankings;
@@ -30,7 +30,7 @@ public class Tournament
     public Interval? Interval { get { return _interval; } set { _interval = value; } }
     public int TeamSize { get { return _TeamSize; } set { _TeamSize = value; } }
     public int Steps { get { return _steps; } set { _steps = value; } }
-    public int Sport { get { return _sport; } set { _sport = value; } }
+    public Sport? Sport { get { return _sport; } set { _sport = value; } }
     public int Max { get { return _max; } set { _max = value; } }
     public Format? Format { get { return _format; } set { _format = value; } }
     public TournamentType? Type { get { return _type; } set { _type = value; } }

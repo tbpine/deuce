@@ -1,4 +1,6 @@
 using System.Data.Common;
+using System.Diagnostics;
+using System.Reflection;
 using System.Runtime.InteropServices;
 using deuce.lib;
 
@@ -37,33 +39,41 @@ public class BuilderSchedule
     /// <returns>Schedule object</returns>
     public Schedule Create()
     {
+        Debug.Assert(_players?.Count > 0);
+        Debug.Assert(_teams?.Count > 0);
+        Debug.Assert(_tournament is not null);
+        Debug.Assert(_dbconn is not null);
+
         //Keep state and iterate through each match
         StateBuilderSchedule state = new();
         Schedule schedule = new(_tournament!);
 
-        for(int i = 0; i < _records?.Count; i++)
+        for (int i = 0; i < _records?.Count; i++)
         {
-            RecordSchedule recordMatch  = _records[i];
+            RecordSchedule recordMatch = _records[i];
             //Current round
-            if (state.Round is null ||  state.Round?.Index != recordMatch.Round) 
+            if (state.Round is null || state.Round?.Index != recordMatch.Round)
             {
                 state.Round = new Round(recordMatch.Round);
                 //Reset state
                 state.Permutation = null;
                 state.Match = null;
             }
-            
-            if (state.Permutation is null || state.Permutation.Id  !=  recordMatch.Permutation)
+
+            if (state.Permutation is null || state.Permutation.Id != recordMatch.Permutation)
             {
                 //Change in permutation
-                state.Permutation =  new Permutation(recordMatch.Permutation);
+                state.Permutation = new Permutation(recordMatch.Permutation);
                 schedule.AddPermutation(state.Permutation, state.Round.Index);
+
+
             }
 
             if (state.Match is null || state.Match.Id != recordMatch.Match)
             {
                 //Change in match
-                state.Match = new Match(){
+                state.Match = new Match()
+                {
                     Id = recordMatch.Match,
                     Permutation = state.Permutation,
                     Round = state.Round.Index
@@ -74,22 +84,32 @@ public class BuilderSchedule
             }
 
             //Players
-            if (recordMatch.PlayerAway > 0) 
+            if (recordMatch.PlayerAway > 0)
             {
-                Player? playerAway = _players?.Find(e=>e.Id == recordMatch.PlayerAway);
-                if (playerAway != null) state.Match.AddAway(playerAway);
+                Player? playerAway = _players?.Find(e => e.Id == recordMatch.PlayerAway);
+                if (playerAway != null)
+                {
+                    state.Match.AddAway(playerAway);
+                    //Add teams to the permutation
+                    var foundTeam = _teams.Find(e => e.Id == recordMatch.TeamAway);
+                    if (foundTeam is not null) state.Permutation.AddTeam(foundTeam);
+
+                }
             }
             else if (recordMatch.PlayerHome > 0)
             {
-                Player? playerHome = _players?.Find(e=>e.Id == recordMatch.PlayerHome);
+                Player? playerHome = _players?.Find(e => e.Id == recordMatch.PlayerHome);
                 if (playerHome != null) state.Match.AddHome(playerHome);
+                //Add teams to the permutation
+                var foundTeam = _teams.Find(e => e.Id == recordMatch.TeamHome);
+                if (foundTeam is not null) state.Permutation.AddTeam(foundTeam);
             }
 
 
-        }       
+        }
 
         //Last set of games
-        
+
 
         return schedule;
     }

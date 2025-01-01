@@ -38,9 +38,13 @@ public class DbRepoRecordSchedule : DbRepoBase<RecordSchedule>
                                               reader.Parse<int>("permutation"),
                                               reader.Parse<int>("round"),
                                               reader.Parse<int>("player_home"),
-                                              reader.Parse<int>("player_away")));
+                                              reader.Parse<int>("player_away"),
+                                              reader.Parse<int>("team_home"),
+                                              reader.Parse<int>("team_away")
+                                              
+                                              ));
             }
-
+            reader.Close();
 
         }
 

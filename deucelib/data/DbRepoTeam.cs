@@ -9,7 +9,7 @@ public class DbRepoTeam : DbRepoBase<Team>
 {
     private readonly DbConnection _dbconn;
 
-    public Club? Club { get; set; }
+    public Organization? Club { get; set; }
     public Tournament? Tournament { get; set; }
 
     /// <summary>

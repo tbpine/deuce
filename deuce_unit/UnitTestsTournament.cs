@@ -17,7 +17,7 @@ public class UnitTestsTournament
         //Assign
         MySqlConnection conn = new("Server=localhost;Database=deuce;User Id=deuce;Password=deuce;");
         //players , permutation and round, and tournament
-        Club club = new Club() { Id = 1 };
+        Organization club = new Organization() { Id = 1 };
         try
         {
             conn.Open();

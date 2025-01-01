@@ -2,7 +2,7 @@ namespace deuce;
 /// <summary>
 /// 
 /// </summary>
-public class Club
+public class Organization
 {
     private bool _active;
     private string _abn = "";
@@ -22,7 +22,7 @@ public class Club
     /// <summary>
     /// Empty Constructor
     /// </summary>
-    public Club()
+    public Organization()
     {
 
     }

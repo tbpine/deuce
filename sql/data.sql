@@ -17,5 +17,13 @@ INSERT INTO `interval` VALUES (5, "Fortnightly");
 INSERT INTO `interval` VALUES (6, "Monthly");
 INSERT INTO `interval` VALUES (7, "Annually");
 
-DELETE FROM `club` WHERE id = 1;
-insert into `club` values (null, 'test_club', 'tester', null, 1, now(), now());
+DELETE FROM `organization` WHERE id = 1;
+insert into `organization` values (null, 'test_organization', 'tester', null, 1, now(), now());
+
+TRUNCATE `sport`;
+
+INSERT INTO `sport` VALUES (0, "Unknown");
+INSERT INTO `sport` VALUES (1, "Tennis");
+INSERT INTO `sport` VALUES (2, "Martial Arts");
+
+

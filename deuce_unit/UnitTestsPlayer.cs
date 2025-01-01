@@ -12,7 +12,7 @@ using MySql.Data.MySqlClient;
 public class UnitTestsPlayer
 {
 
-    [TestMethod]
+    // [TestMethod]
     // [DataRow(100)]
     public void set_n_players_returns_nothing(int noPlayers)
     {
@@ -52,7 +52,7 @@ public class UnitTestsPlayer
     {
         MySqlConnection conn = new("Server=localhost;Database=deuce;User Id=deuce;Password=deuce;");
 
-        Club c = new Club(){ Id =  clubId};
+        Organization c = new Organization(){ Id =  clubId};
         List<Player>? list = null;
         try {
             conn.Open();

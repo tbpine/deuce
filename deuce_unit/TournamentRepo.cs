@@ -65,7 +65,7 @@ class TournamentRepo
     {
         MySqlConnection dbconn = new("Server=localhost;Database=deuce;User Id=deuce;Password=deuce;");
         dbconn.Open();
-        Club club = new Club() { Id = cludId, Name = "test_club" };
+        Organization club = new Organization() { Id = cludId, Name = "test_club" };
         Filter filter = new() { ClubId = club.Id };
         var dbRepo = FactoryCreateDbRepo.Create<Team>(dbconn, club);
 
@@ -80,7 +80,7 @@ class TournamentRepo
     {
         MySqlConnection dbconn = new("Server=localhost;Database=deuce;User Id=deuce;Password=deuce;");
         dbconn.Open();
-        Club club = new Club() { Id = cludId, Name = "test_club" };
+        Organization club = new Organization() { Id = cludId, Name = "test_club" };
         Filter filter = new() { ClubId = club.Id };
 
         var dbRepo = FactoryCreateDbRepo.Create<Player>(dbconn, club);

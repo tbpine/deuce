@@ -21,7 +21,7 @@ public class ScoringPageModel : PageModel
     public int NoSets { get => _t?.Format?.NoSets ?? 1; }
     public int CurrentRound { get => _currentRound; }
 
-    public IEnumerable<Round> Rounds(int r) => _schedule?.GetRounds(r) ?? new List<Round>();
+    public Round Rounds(int r) => _schedule?.GetRounds(r) ?? new Round(0);
 
 
     public ScoringPageModel(ILogger<ScoringPageModel> log)
@@ -51,7 +51,7 @@ public class ScoringPageModel : PageModel
         _t = new Tournament();
         _t.Type = new TournamentType(1, "Round Robbin");
         //1 for tennis for now.
-        _t.Sport = 1;
+        _t.Sport = new Sport(1, "Tennis");
         _t.Format = new Format(2, 2, 1);
         _t.TeamSize = 2;
         _t.Start = DateTime.Now;
@@ -91,34 +91,5 @@ public class ScoringPageModel : PageModel
 
     }
 
-    public string GetContent(int roundIdx, int subIndex, int match, int col)
-    {
-        var list = _schedule?.GetRoundAtIndex(roundIdx);
-        if (list is null) return "";
-
-        Round round = list[subIndex];
-        Match m = round.GetMatchAtIndex(match);
-
-        if (m is null) return "";
-
-        string gameType = m.IsDouble ? "Doubles" : "Singles";
-        string teamHome = m.IsDouble ? m.GetPlayerAt(0).ToString() + "/" + m.GetPlayerAt(1).ToString() : m.GetPlayerAt(0).ToString();
-        string teamAway = m.IsDouble ? m.GetPlayerAt(2).ToString() + "/" + m.GetPlayerAt(3).ToString() : m.GetPlayerAt(1).ToString();
-        int noSets = _t?.Format?.NoSets ?? 1;
-
-        int noColumns = noSets + 1;
-        int rowIdx = col / noColumns;
-        int colIdx = col % noColumns;
-
-        if (rowIdx == 0 && col == 0) return gameType;
-        else if (rowIdx == 0 && colIdx < noSets) return $"Set {col}";
-        else if (rowIdx == 1 && colIdx == 0) return teamHome;
-        else if (rowIdx == 1 && colIdx < noSets) return "<input class='border w-25'></input>";
-        else if (rowIdx == 2 && colIdx == 0) return teamAway;
-        else if (rowIdx == 2 && colIdx < noSets) return "<input class='border w-25'></input>";
-
-        return "";
-
-
-    }
+   
 }

@@ -5,10 +5,11 @@ Turns out that matching the upper half of the array with the lower half then
 rotating the array every round is how you make games.
 
 ## TODOs
+- [] Configure players in a match
 - [] Load/Save matches and rounds (with unit testing)
+    -[] Rebuild schedule from the database
     -[X] Match players seperated into 2 lists
     -[] Foriegn key constraints
-    -[] Rebuild schedule from the database
 - [] Knockout format
 - [] Print out for knockout format
 - [] CRUD tournament

@@ -5,12 +5,12 @@ namespace deuce;
 public class DbRepoPlayer : DbRepoBase<Player>
 {
     private readonly DbConnection _dbconn;
-    private readonly Club? _club;
+    private readonly Organization? _club;
 
     public DbRepoPlayer(DbConnection dbconn, params object[] references)
     {
         _dbconn = dbconn;
-        _club = references[0] as Club;
+        _club = references[0] as Organization;
     }
 
     /// <summary>

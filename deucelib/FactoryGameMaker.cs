@@ -10,8 +10,9 @@ public class FactoryGameMaker
     /// </summary>
     /// <param name="sport">type of sport</param>
     /// <returns>IGameMaker implementer</returns>
-    public IGameMaker Create(int sport)
+    public IGameMaker Create(Sport sport)
     {
+        
         return new GameMakerTennis();
     }
 }
