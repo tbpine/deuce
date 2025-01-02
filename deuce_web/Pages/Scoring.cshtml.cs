@@ -49,9 +49,9 @@ public class ScoringPageModel : PageModel
     {
         //Assign
         _t = new Tournament();
-        _t.Type = new TournamentType(1, "Round Robbin");
+        _t.Type = new TournamentType(1, "Round Robbin","", "","");
         //1 for tennis for now.
-        _t.Sport = new Sport(1, "Tennis");
+        _t.Sport = new Sport(1, "Tennis", "", "", "");
         _t.Format = new Format(2, 2, 1);
         _t.TeamSize = 2;
         _t.Start = DateTime.Now;

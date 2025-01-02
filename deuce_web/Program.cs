@@ -1,5 +1,7 @@
 using MySql.Data.MySqlClient;
 using Microsoft.AspNetCore.HttpOverrides;
+using System.Data.Common;
+using deuce_web;
 
 var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
@@ -21,7 +23,8 @@ builder.Services.AddSession(options => {
 
 });
 
-builder.Services.AddScoped<MySqlConnection>();
+builder.Services.AddScoped<DbConnection, MySqlConnection>();
+builder.Services.AddSingleton<IFormValidator, FormValidator>();
 
 
 var app = builder.Build();

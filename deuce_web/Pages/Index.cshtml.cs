@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using MySql.Data.MySqlClient;
 using deuce;
+using System.Data.Common;
 
 namespace deuce_web.Pages;
 
@@ -23,7 +24,7 @@ public class IndexModel : PageModel
     {
         
         var scope = _sc.CreateScope();
-        MySqlConnection dbconn = scope.ServiceProvider.GetService<MySqlConnection>()!;
+        DbConnection dbconn = scope.ServiceProvider.GetService<DbConnection>()!;
         MySqlConnectionStringBuilder sb = new();
         sb.Server = "deuce-server.mysql.database.azure.com";
         sb.Port = 3306;

@@ -4,6 +4,7 @@
 * Dec 2024
 *******************************************************/
 -- drop table `tournament`;
+-- drop table `tournament_type`;
 -- drop table `player`;
 -- drop table `team`;
 -- drop table `match`;
@@ -13,7 +14,10 @@
 
 CREATE TABLE IF NOT EXISTS `tournament_type` (
     `id` INT,
-    `label` CHAR(20)
+    `label` VARCHAR(20),
+    `name` VARCHAR(100),
+    `key` VARCHAR(100),
+    `icon` VARCHAR(300)
 );
 
 CREATE TABLE IF NOT EXISTS `interval` (
@@ -23,7 +27,10 @@ CREATE TABLE IF NOT EXISTS `interval` (
 
 CREATE TABLE IF NOT EXISTS `sport` (
     `id` INT,
-    `label` CHAR(100)
+    `label` CHAR(100),
+    `name` CHAR(100),
+    `key` CHAR(100),
+    `icon` CHAR(200)
 );
 
 

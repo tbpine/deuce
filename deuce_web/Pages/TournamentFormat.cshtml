@@ -3,8 +3,10 @@
 @{
     Layout="_LayoutFinder";
 }
-
-        <!-- Page content -->
+<style> 
+ .zero-height { height: 0; overflow: hidden; }
+</style>
+   <!-- Page content -->
     <main class="content-wrapper">
       <div class="container pt-3 pt-sm-4 pt-md-5 pb-5">
         <div class="row pt-lg-2 pt-xl-3 pb-1 pb-sm-2 pb-md-3 pb-lg-4 pb-xl-5">
@@ -54,77 +56,77 @@
             </div>
           </aside>
 
-      <div class="col-lg-9 col-xl-8">
-    <!-- Property location inputs -->
-            <h1 class="h2 pb-1 pb-lg-2">Format</h1>
+      <form id="form_format" class="col-lg-9 col-xl-8" asp-action="~/TournamentFormat" method="post">
+          <!-- Property location inputs -->
+            <h1 class="h2 pb-1 pb-lg-2">@Model.Title</h1>
             <div class="row row-cols-2 row-cols-sm-2 g-3 g-sm-4 pb-3 pb-sm-4 mb-xl-2">
               <div class="col">
-                <label class="form-label" for="no_players">Number of entries</label>
-                <input class="form-control" id="no_players" placeholder="2" value="2"/>
+                <label class="form-label" for="NoPlayers">Total players *</label>
+                <input class="form-control form-control-lg" name="NoPlayers" id="NoPlayers" placeholder="2" value="@Model.NoPlayers" required/>
               </div>
               <div class="col">
-                <label class="form-label" for="games_per_set">Games format</label>
-                <select class="form-select form-select-lg" id="games_per_set">
-                  <option value="" selected>Specify Games format</option>
-                  <option value="1" >Standard( first to 6)</option>
-                  <option value="2">Fast 4</option>
-                  <option value="3">Fixed</option>
+                <label class="form-label" for="GamesPerSet">Games per set *</label>
+                <select class="form-select form-select-lg" asp-for="GamesPerSet" asp-items="Model.SelectGamesPerSet" id="GamesPerSet" onchange="showHideElement('GamesPerSet','fixed_game_2','99')">
                 </select>
               </div>
-
+              <div class="col invisible zero-height" id="">
+              </div>
+              <div class="col invisible zero-height" id="fixed_game_2">
+                <label class="form-label" for="CustomNoGames">Specify number of games *</label>
+                <input class="form-control form-control-lg" id="CustomNoGames" name="CustomNoGames" placeholder="2" value="@Model.CustomNoGames"/>
+              </div>
             </div>
 
+            <div class="row row-cols-2 row-cols-sm-2 g-3 g-sm-4 pb-3 pb-sm-4 mb-xl-2">
+              <div class="col">
+                <label class="form-label" for="TeamSize">Team Size *</label>
+                 <select class="form-select form-select-lg"  id="TeamSize"  onchange="showHideElement('TeamSize','team_size_cont','99')"
+                 asp-for="TeamSize" asp-items="Model.SelectTeamSize">
+                </select>
+              </div>
+              <div class="col">
+                <label class="form-label" for="Sets">Sets *</label>
+                <select class="form-select form-select-lg"  id="Sets" asp-for="Sets" 
+                asp-items="Model.SelectSets">
+                </select>
+              </div>
+              <div>
+                <div class="col invisible zero-height" id="team_size_cont">
+                  <label class="form-label" for="CustomTeamSize">Specify team Size *</label>
+                  <input class="form-control form-control-lg" id="CustomTeamSize" name="CustomTeamSize" placeholder="2" value="@Model.CustomTeamSize"/>
+                </div>
+                <div class="col invisible zero-height">
+                </div>
+              </div>
+            </div>
             <div class="row row-cols-1 row-cols-sm-2 g-3 g-sm-4 pb-3 pb-sm-4 mb-xl-2">
               <div class="col">
-                <label class="form-label" for="team_size">Team Size *</label>
-                 <select class="form-select form-select-lg"  id="team_size" required>
-                  <option value="" selected>Select team size</option>
-                  <option value="1" >1</option>
-                  <option value="2">2</option>
-                  <option value="3">3</option>
-                  <option value="4">4</option>
-                  <option value="5">5</option>
+                <label class="form-label" for="NoSingles">No Singles *</label>
+                <select class="form-select form-select-lg" id="NoSingles" onchange="showHideElement('NoSingles','no_singles_cont','99')"
+                asp-for="NoSingles" asp-items="Model.SelectNoGames">
                 </select>
               </div>
               <div class="col">
-                <label class="form-label">Sets *</label>
-                <select class="form-select form-select-lg"  required>
-                  <option value="" selected>Sets played</option>
-                  <option value="1" >1</option>
-                  <option value="2">2</option>
-                  <option value="3">3</option>
-                  <option value="4">4</option>
-                  <option value="5">5</option>
+                <label for="NoDoubles" class="form-label">No Doubles *</label>
+                <select class="form-select form-select-lg" id="NoDoubles" onchange="showHideElement('NoDoubles','no_doubles_cont','99')"
+                asp-for="NoDoubles" asp-items="Model.SelectNoGames">
                 </select>
               </div>
-            </div>
-            <div class="row row-cols-1 row-cols-sm-2 g-3 g-sm-4 pb-3 pb-sm-4 mb-xl-2">
-              <div class="col">
-                <label class="form-label" for="no_singles">No Singles *</label>
-                <select class="form-select form-select-lg" id="no_singles" required>
-                  <option value="" selected>Singles played</option>
-                  <option value="1" >1</option>
-                  <option value="2">2</option>
-                  <option value="3">3</option>
-                  <option value="4">4</option>
-                  <option value="5">5</option>
-                </select>
+              <div class="col invisible zero-height" id="no_singles_cont">
+                  <label class="form-label" for="CustomSingles">Specify number of singles *</label>
+                  <input class="form-control form-control-lg" id="CustomSingles" name="CustomSingles" placeholder="2" value="@Model.CustomSingles"/>
               </div>
-              <div class="col">
-                <label for="no_doubles" class="form-label">No Doubles *</label>
-                <select class="form-select form-select-lg" id="no_doubles" required>
-                  <option value="" selected>Doubles played</option>
-                  <option value="1">1</option>
-                  <option value="2">2</option>
-                  <option value="3">3</option>
-                  <option value="4">4</option>
-                  <option value="5">5</option>
-                </select>
-              </div>
-            </div>
 
-        </div>
-      </div>
+              <div class="col invisible zero-height" id="no_doubles_cont">
+                  <label class="form-label" for="CustomDoubles">Specify number of doubles *</label>
+                  <input class="form-control form-control-lg" id="CustomDoubles" name="CustomDoubles" placeholder="2" value="@Model.CustomDoubles"/>
+              </div>
+            </div>
+            @{
+              string showError = String.IsNullOrEmpty(Model.Error)? "invisible" : "visible";
+            }
+            <div><span class="text-bg-danger p-3 @showError">**&nbsp;@Model.Error</span></div>
+      </form>
       
       
     </main>
@@ -141,7 +143,9 @@
           <i class="fi-arrow-left animate-target fs-base ms-n1 me-2"></i>
           Back
         </a>
-        <a class="btn btn-dark animate-slide-end ms-auto" href="~/TournamentSchedule">
+        
+            
+        <a class="btn btn-dark animate-slide-end ms-auto" onclick="postForm('form_format');">
           Next
           <i class="fi-arrow-right animate-target fs-base ms-2 me-n1"></i>
         </a>
@@ -149,3 +153,55 @@
     </footer>
     <!-- Bootstrap + Theme scripts -->
     <script src="assets/js/theme.min.js"></script>
+
+    <script>
+      
+
+      function showHideElement(name, cont, val)
+      {
+        let node = document.getElementById(name);
+        let selected = node.options[node.selectedIndex].value;
+        if (selected == val)
+        {
+            document.getElementById(cont).classList.remove("invisible")
+            document.getElementById(cont).classList.add("visible")
+            document.getElementById(cont).classList.remove("zero-height")
+        }
+        else
+        {
+            document.getElementById(cont).classList.remove("visible")
+            document.getElementById(cont).classList.add("invisible")
+            document.getElementById(cont).classList.add("zero-height")
+
+        }
+
+      }
+
+      function postForm(name)
+      {
+          document.getElementById(name).submit();
+      }
+
+      document.addEventListener("DOMContentLoaded", function(){
+         let node = document.getElementById("GamesPerSet");
+
+         if (node.options[node.selectedIndex].value == "99")
+            showHideElement('GamesPerSet','fixed_game_2','99')
+
+         node = document.getElementById("TeamSize");
+         if (node.options[node.selectedIndex].value == "99")
+            showHideElement('TeamSize','team_size_cont','99')
+        
+          node = document.getElementById("NoSingles");
+
+         if (node.options[node.selectedIndex].value == "99")
+            showHideElement('NoSingles','no_singles_cont','99')
+          
+          node = document.getElementById("NoDoubles");
+          
+         if (node.options[node.selectedIndex].value == "99")
+            showHideElement('NoDoubles','no_doubles_cont','99')
+      });
+
+
+    </script>

@@ -1,3 +1,3 @@
 # TODOS
-- [] Create tournament page
+- [] Create tournament
 - [X] Fix the scoring sheet

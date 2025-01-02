@@ -405,8 +405,9 @@ CREATE PROCEDURE `sp_get_tournament_type`(
 )
 BEGIN
 
-	SELECT `id`,`label`
-	FROM `tournament_type`;
+	SELECT `id`,`label`, `name`, `key`,`icon`
+	FROM `tournament_type`
+    WHERE id > 0;
 
 
  END//
@@ -484,8 +485,10 @@ CREATE PROCEDURE `sp_get_sports`(
 
 BEGIN
 
-SELECT `id`, `label` 
-FROM sport order by `id`;
+SELECT `id`, `label` , `name`, `key`,`icon`
+FROM sport 
+WHERE `id` > 0
+ORDER BY `id`;
  
 END//
 

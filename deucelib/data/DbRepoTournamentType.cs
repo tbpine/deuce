@@ -24,8 +24,6 @@ public class DbRepoTournamentType : DbRepoBase<TournamentType>
 
     public override async Task<List<TournamentType>> GetList()
     {
-        //Open Connection
-        await _dbconn.OpenAsync();
         
         DbCommand cmd = _dbconn.CreateCommand();
         cmd.CommandText = "sp_get_tournament_type";
@@ -38,9 +36,15 @@ public class DbRepoTournamentType : DbRepoBase<TournamentType>
         {
             int id = reader.Parse<int>("id");
             string label = reader.Parse<string>("label");
+            string name = reader.Parse<string>("name");
+            string key = reader.Parse<string>("key");
+            string icon = reader.Parse<string>("icon");
 
-            list.Add(new TournamentType(id, label));
+            list.Add(new TournamentType(id, label, name, key, icon));
         }
+
+        reader.Close();
+        
         return list;
     }
 }

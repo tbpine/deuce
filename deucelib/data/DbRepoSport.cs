@@ -34,7 +34,10 @@ public class DbRepoSport : DbRepoBase<Sport>
             
             while (reader.Read())
             {
-                sports.Add(new Sport(reader.Parse<int>("id"), reader.Parse<string>("label")));
+                sports.Add(new Sport(reader.Parse<int>("id"), reader.Parse<string>("label"),
+                reader.Parse<string>("name"),
+                reader.Parse<string>("key"),
+                reader.Parse<string>("icon")));
             }
 
             reader.Close();
