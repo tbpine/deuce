@@ -12,9 +12,9 @@ public class UnitsPdfWriter
     {
         //Assign
         Tournament tournament = new Tournament();
-        tournament.Type = new TournamentType(1, "Round Robbin");
+        tournament.Type = new TournamentType(1, "Round Robbin","","","");
         //1 for tennis for now.
-        tournament.Sport = 1;
+        tournament.Sport = new Sport(1,"", "", "", "");
         tournament.Format = new Format(2, 2, 1);
         tournament.TeamSize = 2;
         tournament.Start = DateTime.Now;

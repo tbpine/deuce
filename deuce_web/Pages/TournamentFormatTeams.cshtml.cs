@@ -10,9 +10,9 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 /// <summary>
 /// 
 /// </summary>
-public class TournamentFormatPageModel : PageModel
+public class TournamentFormatTeamsPageModel : PageModel
 {
-    private readonly ILogger<TournamentFormatPageModel> _log;
+    private readonly ILogger<TournamentFormatTeamsPageModel> _log;
     private readonly IServiceProvider _serviceProvider;
     private readonly IConfiguration _config;
     private readonly IFormValidator _formValidator;
@@ -35,7 +35,7 @@ public class TournamentFormatPageModel : PageModel
     public string? NoDoubles { get; set; }
 
     [BindProperty]
-    public int NoPlayers { get; set; }
+    public int NoTeams { get; set; }
 
     [BindProperty]
     public int CustomNoGames { get; set; }
@@ -48,6 +48,8 @@ public class TournamentFormatPageModel : PageModel
 
     [BindProperty]
     public int CustomDoubles { get; set; }
+
+    public string? EntryTypeLabel { get; set; }
 
     public List<SelectListItem> SelectTeamSize = new List<SelectListItem>()
     {
@@ -91,7 +93,7 @@ public class TournamentFormatPageModel : PageModel
         new SelectListItem("Custom", "99")
     };
 
-    public TournamentFormatPageModel(ILogger<TournamentFormatPageModel> log, IServiceProvider sp,
+    public TournamentFormatTeamsPageModel(ILogger<TournamentFormatTeamsPageModel> log, IServiceProvider sp,
     IConfiguration cfg, IFormValidator formValidator)
     {
         _log = log;
@@ -100,11 +102,6 @@ public class TournamentFormatPageModel : PageModel
         _formValidator = formValidator;
         _formValidator.Page = this;
     }
-
-    private readonly string[] _valueKeys = new string[] {
-        "NoPlayers", "GamesPerSet", "custom_no_games", "team_size", "sets", "custom_team_size",
-        "no_singles", "no_doubles", "custom_singles", "custom_doubles"
-    };
 
     public async Task<IActionResult> OnGet()
     {
@@ -125,9 +122,6 @@ public class TournamentFormatPageModel : PageModel
         Title = sport?.Label ?? "";
         
         this.LoadFromSession();
-
-        return Page();
-
     }
 
     public IActionResult OnPost()
@@ -160,7 +154,7 @@ public class TournamentFormatPageModel : PageModel
 
     private bool ValidateForm(ref string err)
     {
-        if (NoPlayers < 2)
+        if (NoTeams < 2)
         {
             err = "Total players for this tournament must be greater than 2 (and a valid number) !";
             return false;

@@ -3,13 +3,14 @@
 @{
     Layout="_LayoutFinder";
 }
+@using deuce
    <!-- Page content -->
     <main class="content-wrapper">
       <div class="container pt-3 pt-sm-4 pt-md-5 pb-5">
         <div class="row pt-lg-2 pt-xl-3 pb-1 pb-sm-2 pb-md-3 pb-lg-4 pb-xl-5">
 
           <!-- Sidebar navigation -->
-          <aside class="col-lg-3 col-xl-4 mb-3" style="margin-top: -105px">
+          <aside class="col-lg-2 col-xl-3 mb-2" style="margin-top: -105px">
             <div class="sticky-top overflow-y-auto" style="padding-top: 100px">
               <ul class="nav flex-lg-column flex-nowrap gap-4 gap-lg-0 text-nowrap pb-2 pb-lg-0 active">
                 <li class="nat-item">
@@ -98,7 +99,7 @@
                     <label for="published-master" class="form-check-label fw-normal mt-1 ms-2">Unselect all</label>
                   </div>
                   <div class="d-flex flex-wrap" id="published-action-buttons">
-                    <a class="nav-link position-relative px-0 pe-sm-2 py-2 me-4" href="#!">
+                    <a class="nav-link position-relative px-0 pe-sm-2 py-2 me-4" href="#!" onclick="addTeam()">
                       <i class="fi-plus-square fs-base me-2"></i>
                       <span class="hover-effect-underline stretched-link d-none d-md-inline">Add Team</span>
                     </a>
@@ -120,57 +121,6 @@
                 <!-- Published listings -->
                 <div class="vstack gap-4" id="publishedSelection">
 
-                  <!-- Item -->
-                  <div class="d-sm-flex align-items-center">
-                    <div class="d-inline-flex position-relative z-2 pt-1 pb-2 ps-2 p-sm-0 ms-2 ms-sm-0 me-sm-2">
-                      <div class="form-check position-relative z-1 fs-lg m-0">
-                        <input type="checkbox" class="form-check-input" checked>
-                      </div>
-                      <span class="position-absolute top-0 start-0 w-100 h-100 bg-body border rounded d-sm-none"></span>
-                    </div>
-                    <article class="card w-100 p-2">
-                      <div class="d-sm-none" style="margin-top: -44px"></div>
-                      <div class="row row-cols-2 row-cols-sm-2 g-0 ">
-                        <div class="col-1">
-                          <label for="TeamName" class="form-label p-2">Team Name:</label>
-                        </div>
-                        <div class="col-2">
-                          <input id="TeamName" class="form-control p-2 w-75"/>
-                        </div>
-                        
-                      </div>
-                      <div class="row g-0 mb-2">
-                        <a class="nav-link position-relative px-0 pe-sm-2 py-2 me-4 ms-2" href="#!">
-                          <i class="fi-user-plus fs-base me-2"></i>
-                          <span class="hover-effect-underline stretched-link d-none d-md-inline">Add Player</span>
-                         </a>
-                      </div>
-                      <div class="row row-cols-3 row-cols-sm-3 g-0 mb-2">
-                        <div class="col-1"><span>Registered</span></div>
-                        <div class="col-1"><span>New Player</span></div>
-                        <div class="col-1"></div>
-                        <div class="col-1">
-                          <select class="form-control" placeholder="Club member">
-                            <option></option>
-                            <option>Fred</option>
-                            <option>Bob</option>
-                            <option>Dan</option>
-                            <option>Illy</option>
-                          </select>
-                        </div>
-                        <div class="col-1">
-                          <input class="col form-control" placeholder="New Player" aria-placeholder="New Player"/>
-                        </div>
-                        <div class="col-1">
-                          <a class="nav-link position-relative px-0 pe-sm-2 py-2 me-4 ms-2">
-                            <i class="fi-close-circle fs-base me-2"></i>
-                            <span class="hover-effect-underline stretched-link d-none d-md-inline">Delete</span>
-                          </a>
-                        </div>
-                      </div>
-
-                    </article>
-                  </div>
                   
                 </div>
               </div>
@@ -400,6 +350,12 @@
         </a>
       </div>
     </footer>
+    <script type="application/json" id="listOfPlayers">
+      @Html.Raw(@Model.JSONPlayers)
+    </script>
     <!-- Bootstrap + Theme scripts -->
-    <script src="assets/js/theme.min.js"></script>
+    <script src="~/assets/vendor/choices.js/choices.min.js"></script>
+    <script src="~/assets/js/theme.min.js"></script>
+    
+    <script src="~/js/players.js"></script>
 

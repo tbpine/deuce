@@ -206,7 +206,7 @@ BEGIN
 	SELECT `id`,`organization`,`first_name`,`last_name`,`utr`,`updated_datetime`,`created_datetime`
 	FROM `player`
     WHERE `organization` = p_organization OR ISNULL(p_organization)
-	ORDER BY `id`;
+	ORDER BY `first_name`,`last_name`;
 
 
  END//

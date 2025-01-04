@@ -29,7 +29,7 @@ public class DbRepoTeam : DbRepoBase<Team>
         {
             cmd.CommandText = "sp_get_team";
             cmd.CommandType = System.Data.CommandType.StoredProcedure;
-            cmd.Parameters.Add(cmd.CreateWithValue("p_club", filter.ClubId));
+            cmd.Parameters.Add(cmd.CreateWithValue("p_organization", filter.ClubId));
 
             var reader = await cmd.ExecuteReaderAsync();
 
@@ -63,7 +63,7 @@ public class DbRepoTeam : DbRepoBase<Team>
             cmd.CommandText = "sp_set_team";
             cmd.CommandType = System.Data.CommandType.StoredProcedure;
             cmd.Parameters.Add(cmd.CreateWithValue("p_id", obj.Id > 0 ? obj.Id : DBNull.Value));
-            cmd.Parameters.Add(cmd.CreateWithValue("p_club", Club?.Id ?? -1));
+            cmd.Parameters.Add(cmd.CreateWithValue("p_organization", Club?.Id ?? -1));
             cmd.Parameters.Add(cmd.CreateWithValue("p_tournament", Tournament?.Id ?? -1));
             cmd.Parameters.Add(cmd.CreateWithValue("p_label", obj.Label));
 

@@ -1,6 +1,7 @@
 using System.Data.Common;
 using System.Diagnostics;
 using deuce;
+using deuce_web.ext;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
@@ -18,6 +19,9 @@ public class TournamentDetailPageModel : PageModel
 
     public int SelectedSportId { get; set; }
     public int SelectedTourType { get; set; }
+
+    [BindProperty]
+    public int EntryType { get; set; }
 
     public TournamentDetailPageModel(ILogger<TournamentDetailPageModel> log, IServiceProvider sp,
     IConfiguration config)
@@ -54,6 +58,11 @@ public class TournamentDetailPageModel : PageModel
 
     public IActionResult OnPost()
     {
+        //Save page properties to session
+        //Todo: Move manual form values
+
+        this.SaveToSession();
+
         string? strSport = this.Request.Form["type"];
         string? strTournamentType = this.Request.Form["category"];
         int sportId = int.Parse(strSport ?? "");
@@ -61,10 +70,10 @@ public class TournamentDetailPageModel : PageModel
 
         this.HttpContext.Session.SetInt32("sport", sportId);
         this.HttpContext.Session.SetInt32("tournament_type", tournamentType);
-
-
-
-        return Redirect("/TournamentFormat");
+        if (EntryType == 1)
+            return Redirect("/TournamentFormatTeams");
+        else if (EntryType == 2)
+            return Redirect("/TournamentFormatPlayers");
     }
 
 }

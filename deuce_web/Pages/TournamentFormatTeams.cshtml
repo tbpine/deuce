@@ -1,5 +1,5 @@
 @page
-@model TournamentFormatPageModel
+@model TournamentFormatTeamsPageModel
 @{
     Layout="_LayoutFinder";
 }
@@ -61,8 +61,8 @@
             <h1 class="h2 pb-1 pb-lg-2">@Model.Title</h1>
             <div class="row row-cols-2 row-cols-sm-2 g-3 g-sm-4 pb-3 pb-sm-4 mb-xl-2">
               <div class="col">
-                <label class="form-label" for="NoPlayers">Total players *</label>
-                <input class="form-control form-control-lg" name="NoPlayers" id="NoPlayers" placeholder="2" value="@Model.NoPlayers" required/>
+                <label class="form-label" for="NoTeams">Number of teams *</label>
+                <input class="form-control form-control-lg" name="NoTeams" id="NoTeams" placeholder="2" value="@Model.NoTeams" required/>
               </div>
               <div class="col">
                 <label class="form-label" for="GamesPerSet">Games per set *</label>

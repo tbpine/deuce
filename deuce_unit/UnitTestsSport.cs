@@ -21,7 +21,7 @@ public class UnitTestsSport
         List<Sport> sports = await dbrepo.GetList();
         conn.Close();
 
-        foreach(Sport  sport in sports) Debug.WriteLine($"{sport.Id}|{sport.label}");
+        foreach(Sport  sport in sports) Debug.WriteLine($"{sport.Id}|{sport.Name}");
         
         Assert.IsNotNull(sports, "sports is null");
         Assert.IsTrue(sports.Count>0, "missing sports");

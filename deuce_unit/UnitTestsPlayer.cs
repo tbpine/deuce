@@ -12,8 +12,8 @@ using MySql.Data.MySqlClient;
 public class UnitTestsPlayer
 {
 
-    // [TestMethod]
-    // [DataRow(100)]
+     [TestMethod]
+     [DataRow(100)]
     public void set_n_players_returns_nothing(int noPlayers)
     {
         MySqlConnection conn = new("Server=localhost;Database=deuce;User Id=deuce;Password=deuce;");
@@ -25,16 +25,16 @@ public class UnitTestsPlayer
         Random random = new Random();
 
         cmd.Parameters.AddWithValue("p_id", DBNull.Value);
-        cmd.Parameters.AddWithValue("p_club", 1);
+        cmd.Parameters.AddWithValue("p_organization", 1);
         cmd.Parameters.AddWithValue("p_first_name", "");
         cmd.Parameters.AddWithValue("p_last_name", "");
         cmd.Parameters.AddWithValue("p_utr", 0d);
 
-        for (int i = 0; i < noPlayers; i++)
+        for (int i = 0; i < noPlayers && i < RandomUtil.GetNameCount(); i++)
         {
-            string[] rname = RandomUtil.GetPlayer().Split(new char[] { ' ' });
+            string[] rname = RandomUtil.GetNameAtIndex(i).Split(new char[] { ' ' });
 
-            cmd.Parameters["p_club"].Value = 1;
+            cmd.Parameters["p_organization"].Value = 1;
             cmd.Parameters["p_first_name"].Value = rname[0];
             cmd.Parameters["p_last_name"].Value = rname[1];
             cmd.Parameters["p_utr"].Value = random.NextDouble() * 10d;

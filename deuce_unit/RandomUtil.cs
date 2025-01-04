@@ -26,6 +26,13 @@ class RandomUtil
         return objs[r.Next() % objs.Length] as T;
     }
 
+    public static string GetNameAtIndex(int index)
+    {
+        return _players[index];
+    }
+
+    public static int GetNameCount() => _players.Length;
+
     private static string[] _team = new string[] { "Thunderbolts", "Wildcats", "Dragons", "Titans", "Mavericks", "Hurricanes", "Spartans", "Warriors", "Panthers", "Vipers", "Cyclones", "Knights", "Falcons", "Pioneers", "Gladiators", "Rangers", "Phoenix", "Cobras", "Lions", "Sharks", "Eagles", "Bears", "Wolves", "Tigers", "Bulls", "Stallions", "Raiders", "Pirates", "Samurai", "Ninjas", "Vikings", "Samurais", "Crusaders", "Rebels", "Outlaws", "Bandits", "Marauders", "Buccaneers", "Sentinels", "Guardians", "Defenders", "Avengers", "Champions", "Conquerors", "Invincibles", "Dynamos", "Juggernauts", "Behemoths", "Goliaths" };
 
     private static  string[] _players = new string[] {

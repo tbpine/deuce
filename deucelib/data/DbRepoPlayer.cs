@@ -26,7 +26,7 @@ public class DbRepoPlayer : DbRepoBase<Player>
             cmd.CommandText = "sp_get_player";
             cmd.CommandType = System.Data.CommandType.StoredProcedure;
 
-            cmd.Parameters.Add(cmd.CreateWithValue("p_club", filter.ClubId));
+            cmd.Parameters.Add(cmd.CreateWithValue("p_organization", filter.ClubId));
             var reader = await cmd.ExecuteReaderAsync();
 
             while (reader.Read())
