@@ -17,8 +17,10 @@ public class TournamentDetailPageModel : BasePageModel
     private IServiceProvider _serviceProvider;
     private IConfiguration _configuration;
 
-
+    [BindProperty]
     public int SelectedSportId { get; set; }
+    
+    [BindProperty]
     public int SelectedTourType { get; set; }
 
     [BindProperty]
@@ -36,6 +38,8 @@ public class TournamentDetailPageModel : BasePageModel
     public async Task<IActionResult> OnGet()
     {
 
+        this.LoadFromSession();
+
         var scope = _serviceProvider.CreateScope();
 
         var dbconn = scope.ServiceProvider.GetService<DbConnection>();
@@ -50,11 +54,13 @@ public class TournamentDetailPageModel : BasePageModel
         DbRepoTournamentType dbRepoTourType = new DbRepoTournamentType(dbconn);
         TournamentTypes = await dbRepoTourType.GetList();
 
-        SelectedSportId = this.HttpContext.Session.GetInt32("sport") ??1;
-        //Get page values from the session
-        SelectedTourType = this.HttpContext.Session.GetInt32("tournament_type")??1;
 
         await dbconn!.CloseAsync();
+        if (SelectedSportId == 0) SelectedSportId = 1;
+        if (SelectedTourType == 0) SelectedTourType = 1;
+        if (EntryType == 0) EntryType = 1;
+
+        
 
         return Page();
     }
@@ -66,21 +72,10 @@ public class TournamentDetailPageModel : BasePageModel
 
         this.SaveToSession();
 
-        string? strSport = this.Request.Form["type"];
-        string? strTournamentType = this.Request.Form["category"];
-        int sportId = int.Parse(strSport ?? "");
-        int tournamentType = int.Parse(strTournamentType ?? "");
-
-        this.HttpContext.Session.SetInt32("sport", sportId);
-        this.HttpContext.Session.SetInt32("tournament_type", tournamentType);
-        
-        //Update left nav items
-        this.SaveBackStack();
-
         if (EntryType == 1)
-            return Redirect("/TournamentFormatTeams");
+            return NextPage("/TournamentFormatTeams");
         else if (EntryType == 2)
-            return Redirect("/TournamentFormatPlayers");
+            return NextPage("/TournamentFormatPlayer");
 
         return Page();
     }

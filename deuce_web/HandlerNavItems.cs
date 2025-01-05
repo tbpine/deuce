@@ -15,8 +15,9 @@ public class HandlerNavItems : IHandlerNavItems
         _navItems.Add(new NavItem("Tournament Details", "/TournamentDetail", false, true));
         _navItems.Add(new NavItem("Format", "/TournamentFormat", false, true));
         _navItems.Add(new NavItem("Schedule", "/TournamentSchedule", false, true));
-        _navItems.Add(new NavItem("Price", "/TournamentPrice", false, true));
         _navItems.Add(new NavItem("Players", "/TournamentPlayers", false, true));
+        _navItems.Add(new NavItem("Venue", "/TournamentVenue", false, true));
+        _navItems.Add(new NavItem("Price", "/TournamentPrice", false, true));
     }
 
     /// <summary>

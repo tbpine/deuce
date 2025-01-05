@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
 using Microsoft.AspNetCore.Mvc.Filters;
+using Org.BouncyCastle.Asn1;
+using Microsoft.AspNetCore.Mvc;
 
 public class BasePageModel : PageModel
 {
@@ -38,7 +40,7 @@ public class BasePageModel : PageModel
         _showBackButton  = selectedIdx > 0 ? "visible" : "invisible";
         //Set the URI of the last page in the list of
         //nav items.
-        if (_showBackButton == "visible")  _backPage = _handlerNavItems.GetResourceAtIndex(selectedIdx-1);
+        if (_showBackButton == "visible")  _backPage = HttpContext.Request.PathBase + _handlerNavItems.GetResourceAtIndex(selectedIdx-1);
         
 
         // string? uname = this.HttpContext.Session.GetString("user_name");
@@ -50,20 +52,26 @@ public class BasePageModel : PageModel
         // _loggedIn = !isInvalid;
     }
 
-    protected void SaveBackStack()
+    protected IActionResult NextPage(string replacement)
     {
-        //"_handlerNavItems" is important!!
-        if (_handlerNavItems is null) return;
-        //Update navitems
-        int selectedIdx = _handlerNavItems.GetSelectedIndex();
-        if (selectedIdx>=0)
-        {
-            //If the current resource location 
-            //changed, then update the list of
-            //nav items.
-            string? selResource = _handlerNavItems.GetResourceAtIndex(selectedIdx)??string.Empty;
-            if (String.Compare(selResource, this.Request.PathBase, true) != 0) _handlerNavItems.UpdateResource(this.Request.PathBase);
-        }
-    }
+        if (_handlerNavItems is null) return Page();
 
+        if (!String.IsNullOrEmpty(replacement)) 
+        {
+            return Redirect(HttpContext.Request.PathBase + replacement);
+            
+        }
+        
+        int selectedIdx = _handlerNavItems?.GetSelectedIndex()??-1;
+        
+        if (selectedIdx >=0 )
+        {
+            string nextResource = _handlerNavItems?.GetResourceAtIndex(selectedIdx +1)??"";
+            return Redirect(HttpContext.Request.PathBase + nextResource);
+
+        } 
+
+        return Page();
+
+    }
 }

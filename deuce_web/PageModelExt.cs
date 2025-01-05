@@ -96,7 +96,7 @@ public static class PageModelExt
         foreach(PropertyInfo prop in properties)
         {
             var attr = prop.GetCustomAttribute<BindPropertyAttribute>();
-            if (attr is not null)
+            if (attr is not null && prop is not null)
             {
                 if (prop.PropertyType == typeof(string))
                 {

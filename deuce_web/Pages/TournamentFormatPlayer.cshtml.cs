@@ -1,4 +1,5 @@
 using System.Data.Common;
+using System.Diagnostics;
 using System.Reflection;
 using deuce;
 using deuce_web;
@@ -10,58 +11,29 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 /// <summary>
 /// 
 /// </summary>
-public class TournamentFormatTeamsPageModel : BasePageModel
+public class TournamentFormatPlayerPageModel : BasePageModel
 {
-    private readonly ILogger<TournamentFormatTeamsPageModel> _log;
+    private readonly ILogger<TournamentFormatPlayerPageModel> _log;
     private readonly IServiceProvider _serviceProvider;
     private readonly IConfiguration _config;
     private readonly IFormValidator _formValidator;
     public string? Title { get; set; }
     public string? Error { get; set; }
-    
+
+    [BindProperty]
+    public int NoPlayers { get; set; }
+
     [BindProperty]
     public string? GamesPerSet { get; set; }
     
-    [BindProperty]
-    public string? TeamSize { get; set; }
     
     [BindProperty]
     public string? Sets { get; set; }
 
-    [BindProperty]
-    public string? NoSingles { get; set; }
-
-    [BindProperty]
-    public string? NoDoubles { get; set; }
-
-    [BindProperty]
-    public int NoTeams { get; set; }
 
     [BindProperty]
     public int CustomNoGames { get; set; }
 
-    [BindProperty]
-    public int CustomTeamSize { get; set; }
-
-    [BindProperty]
-    public int CustomSingles { get; set; }
-
-    [BindProperty]
-    public int CustomDoubles { get; set; }
-
-    public string? EntryTypeLabel { get; set; }
-
-    public List<SelectListItem> SelectTeamSize = new List<SelectListItem>()
-    {
-        new SelectListItem("Select Team Size", ""),
-        new SelectListItem("1", "1"),
-        new SelectListItem("2", "2"),
-        new SelectListItem("3", "3"),
-        new SelectListItem("4", "4"),
-        new SelectListItem("5", "5"),
-        new SelectListItem("6", "6"),
-        new SelectListItem("Custom", "99")
-    };
 
     public List<SelectListItem> SelectSets = new List<SelectListItem>()
     {
@@ -73,27 +45,15 @@ public class TournamentFormatTeamsPageModel : BasePageModel
         new SelectListItem("5", "5")
     };
 
-    public List<SelectListItem> SelectNoGames = new List<SelectListItem>()
-    {
-        new SelectListItem("Number of Games", ""),
-        new SelectListItem("1", "1"),
-        new SelectListItem("2", "2"),
-        new SelectListItem("3", "3"),
-        new SelectListItem("4", "4"),
-        new SelectListItem("5", "5"),
-        new SelectListItem("6", "6"),
-        new SelectListItem("Custom", "99")
-    };
-
     public List<SelectListItem> SelectGamesPerSet = new List<SelectListItem>()
     {
-        new SelectListItem("Number of games per set", "0"),
+        new SelectListItem("Number of games per set", ""),
         new SelectListItem("6 (Standard rules)", "1"),
         new SelectListItem("4 (Fast four)", "2"),
         new SelectListItem("Custom", "99")
     };
 
-    public TournamentFormatTeamsPageModel(ILogger<TournamentFormatTeamsPageModel> log, IServiceProvider sp,
+    public TournamentFormatPlayerPageModel(ILogger<TournamentFormatPlayerPageModel> log, IServiceProvider sp,
     IConfiguration cfg, IFormValidator formValidator, IHandlerNavItems hNavItems) : base(hNavItems)
     {
         _log = log;
@@ -156,12 +116,12 @@ public class TournamentFormatTeamsPageModel : BasePageModel
 
     private bool ValidateForm(ref string err)
     {
-        if (NoTeams < 2)
+        if (NoPlayers < 2)
         {
             err = "Total players for this tournament must be greater than 2 (and a valid number) !";
             return false;
         }
-
+        Debug.WriteLine(GamesPerSet);
         if (String.IsNullOrEmpty(GamesPerSet))
         {
             err = "Select or specify how many games per set (Games per set *)";
@@ -174,18 +134,6 @@ public class TournamentFormatTeamsPageModel : BasePageModel
             return false;
         }
 
-        if (String.IsNullOrEmpty(TeamSize))
-        {
-            err = "Select or specify no of players in a team (Team Size *)";
-            return false;
-        }
-
-
-        if (TeamSize == "99" && CustomTeamSize == 0)
-        {
-            err = "Specify a team size";
-            return false;
-        }
 
         if (String.IsNullOrEmpty(Sets))
         {
@@ -193,29 +141,6 @@ public class TournamentFormatTeamsPageModel : BasePageModel
             return false;
         }
 
-        if (String.IsNullOrEmpty(NoSingles))
-        {
-            err = "Select or specify how many singles are played between teams (No Singles *)";
-            return false;
-        }
-
-        if (NoSingles == "99" && CustomSingles == 0)
-        {
-            err = "Specify a team size";
-            return false;
-        }
-
-        if (String.IsNullOrEmpty(NoDoubles))
-        {
-            err = "Select or specify how many doubles are played between teams (No Doubles *)";
-            return false;
-        }
-
-        if (NoDoubles == "99" && CustomDoubles == 0)
-        {
-            err = "Invalid number of custom doubles specified played between teams";
-            return false;
-        }
 
         return true;
 

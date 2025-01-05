@@ -1,0 +1,49 @@
+@page
+@model TournamentFormatPlayerPageModel
+@{
+    Layout="_LayoutWizard";
+}
+<style> 
+ .zero-height { height: 0; overflow: hidden; }
+</style>
+   <!-- Page content -->
+
+<form id="page_form" class="col-lg-9 col-xl-8" asp-action="~/TournamentFormatPlayer" method="post">
+    <!-- Property location inputs -->
+      <h1 class="h2 pb-1 pb-lg-2">@Model.Title</h1>
+      <div class="row row-cols-2 row-cols-sm-2 g-3 g-sm-4 pb-3 pb-sm-4 mb-xl-2">
+        <div class="col">
+          <label class="form-label" for="NoPlayers">Number of players *</label>
+          <input class="form-control form-control-lg" name="NoPlayers" id="NoPlayers" placeholder="2" value="@Model.NoPlayers" required/>
+        </div>
+        <div class="col">
+          <label class="form-label" for="GamesPerSet">Games per set *</label>
+          <select class="form-select form-select-lg" asp-for="GamesPerSet" asp-items="Model.SelectGamesPerSet" id="GamesPerSet" onchange="showHideElement('GamesPerSet','fixed_game_2','99')">
+          </select>
+        </div>
+        <div class="col invisible zero-height" id="">
+        </div>
+        <div class="col invisible zero-height" id="fixed_game_2">
+          <label class="form-label" for="CustomNoGames">Specify number of games *</label>
+          <input class="form-control form-control-lg" id="CustomNoGames" name="CustomNoGames" placeholder="2" value="@Model.CustomNoGames"/>
+        </div>
+      </div>
+
+      <div class="row row-cols-2 row-cols-sm-2 g-3 g-sm-4 pb-3 pb-sm-4 mb-xl-2">
+        <div class="col">
+          <label class="form-label" for="Sets">Sets *</label>
+          <select class="form-select form-select-lg"  id="Sets" asp-for="Sets" 
+          asp-items="Model.SelectSets">
+          </select>
+        </div>
+        <div>
+        </div>
+      </div>
+      
+      @{
+        string showError = String.IsNullOrEmpty(Model.Error)? "invisible" : "visible";
+      }
+      <div><span class="text-bg-danger p-3 @showError">**&nbsp;@Model.Error</span></div>
+</form>
+
+<script src="js/TournamentFormatPlayer.js"></script>

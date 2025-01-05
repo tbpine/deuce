@@ -1,0 +1,37 @@
+@page
+@model TournamentAskPlayersPageModel
+@{
+    Layout = "_LayoutWizard";
+}
+
+<form id="page_form" class="col-lg-9 col-xl-8" asp-action="~/TournamentFormatPlayer" method="post">
+    <!-- Property location inputs -->
+      <h1 class="h2 pb-1 pb-lg-2"></h1>
+      <div class="form-label">@Model.Title can added later once there are enough registrations, otherwise
+        you can define teams and  players in next step.
+      </div>
+      <label for="DefineTeamsYes" class="form-label">Add @Model.Title now</label>
+      <input type="radio" class="form-control-lg" name="DefineTeams" id="DefineTeamsYes" value="Yes">
+      <label for="DefineTeamsNo" class="form-label">Add @Model.Title later and proceed to scheduling</label>
+      <input type="radio" class="form-control-lg" name="DefineTeams" id="DefineTeamsNo" value="No">
+
+          <!-- Condition -->
+            <div class="pt-3 mt-3 mb-n2">
+              <h2 class="h6">Team or Players can added later once there are enough registered interests , otherwise
+        you can define teams and  players in next step *.</h2>
+              <div class="vstack gap-2">
+                <div class="form-check mb-1">
+                  <input type="radio" class="form-check-input" id="DefineTeamsYes" name="DefineTeams" checked>
+                  <label for="secondary" class="form-check-label">Yes, add @Model.Title now</label>
+                </div>
+                <div class="form-check mb-1">
+                  <input type="radio" class="form-check-input" id="DefineTeamsNo" name="DefineTeams">
+                  <label for="new" class="form-check-label">Add @Model.Title later, proceed to scheduling</label>
+                </div>
+              </div>
+            </div>
+      @{
+        string showError = String.IsNullOrEmpty(Model.Error)? "invisible" : "visible";
+      }
+      <div><span class="text-bg-danger p-3 @showError">**&nbsp;@Model.Error</span></div>
+</form>
