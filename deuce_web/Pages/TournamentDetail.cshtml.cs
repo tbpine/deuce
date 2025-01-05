@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 /// <summary>
 /// 
 /// </summary>
-public class TournamentDetailPageModel : PageModel
+public class TournamentDetailPageModel : BasePageModel
 {
     private readonly ILogger<TournamentDetailPageModel> _log;
 
@@ -17,24 +17,27 @@ public class TournamentDetailPageModel : PageModel
     private IServiceProvider _serviceProvider;
     private IConfiguration _configuration;
 
+
     public int SelectedSportId { get; set; }
     public int SelectedTourType { get; set; }
 
     [BindProperty]
     public int EntryType { get; set; }
 
+
     public TournamentDetailPageModel(ILogger<TournamentDetailPageModel> log, IServiceProvider sp,
-    IConfiguration config)
+    IConfiguration config, IHandlerNavItems hNavItems) : base(hNavItems)
     {
         _log = log;
         _serviceProvider= sp;
-        _configuration = config;    
+        _configuration = config;
     }
 
     public async Task<IActionResult> OnGet()
     {
 
         var scope = _serviceProvider.CreateScope();
+
         var dbconn = scope.ServiceProvider.GetService<DbConnection>();
         dbconn!.ConnectionString = _configuration.GetConnectionString("deuce_local");
 
@@ -70,10 +73,16 @@ public class TournamentDetailPageModel : PageModel
 
         this.HttpContext.Session.SetInt32("sport", sportId);
         this.HttpContext.Session.SetInt32("tournament_type", tournamentType);
+        
+        //Update left nav items
+        this.SaveBackStack();
+
         if (EntryType == 1)
             return Redirect("/TournamentFormatTeams");
         else if (EntryType == 2)
             return Redirect("/TournamentFormatPlayers");
+
+        return Page();
     }
 
 }

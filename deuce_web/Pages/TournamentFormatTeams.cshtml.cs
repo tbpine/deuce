@@ -10,7 +10,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 /// <summary>
 /// 
 /// </summary>
-public class TournamentFormatTeamsPageModel : PageModel
+public class TournamentFormatTeamsPageModel : BasePageModel
 {
     private readonly ILogger<TournamentFormatTeamsPageModel> _log;
     private readonly IServiceProvider _serviceProvider;
@@ -94,7 +94,7 @@ public class TournamentFormatTeamsPageModel : PageModel
     };
 
     public TournamentFormatTeamsPageModel(ILogger<TournamentFormatTeamsPageModel> log, IServiceProvider sp,
-    IConfiguration cfg, IFormValidator formValidator)
+    IConfiguration cfg, IFormValidator formValidator, IHandlerNavItems hNavItems) : base(hNavItems)
     {
         _log = log;
         _serviceProvider = sp;
@@ -122,6 +122,8 @@ public class TournamentFormatTeamsPageModel : PageModel
         Title = sport?.Label ?? "";
         
         this.LoadFromSession();
+
+        return Page();
     }
 
     public IActionResult OnPost()
@@ -140,6 +142,7 @@ public class TournamentFormatTeamsPageModel : PageModel
         }
         
         this.SaveToSession();
+        this.SaveBackStack();
 
         //No Error, hide the error message on page.
         Error = String.Empty;
