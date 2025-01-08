@@ -38,4 +38,12 @@ public class TournamentSchedulePageModel : BasePageModel
       this.LoadFromSession();
       return Page();
    }
+
+   public IActionResult OnPost()
+   {
+      this.SaveToSession();
+      
+      return NextPage("");
+
+   }
 }

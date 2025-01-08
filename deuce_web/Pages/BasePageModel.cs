@@ -40,7 +40,16 @@ public class BasePageModel : PageModel
         _showBackButton  = selectedIdx > 0 ? "visible" : "invisible";
         //Set the URI of the last page in the list of
         //nav items.
-        if (_showBackButton == "visible")  _backPage = HttpContext.Request.PathBase + _handlerNavItems.GetResourceAtIndex(selectedIdx-1);
+        if (_showBackButton == "visible") 
+        {
+            _backPage = HttpContext.Request.PathBase + _handlerNavItems.GetResourceAtIndex(selectedIdx-1);
+            if (_backPage.Contains("TournamentFormat"))
+            {
+                //case
+                int entryType= this.HttpContext.Session.GetInt32("EntryType")??1;
+                _backPage = HttpContext.Request.PathBase + (entryType == 1 ?  "/TournamentFormatTeams" : "/TournamentFormatPlayer");
+            }
+        } 
         
 
         // string? uname = this.HttpContext.Session.GetString("user_name");
