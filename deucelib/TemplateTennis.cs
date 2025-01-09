@@ -155,7 +155,8 @@ public class TemplateTennis
         PdfFont font = PdfFontFactory.CreateFont(StandardFonts.HELVETICA_BOLD);
         string tname = $"{t.Label}";
         //Find the date this round was held
-        DateTime roundDate = t.Start.AddDays(roundNo * Utils.GetNoDays(t?.Interval ?? new Interval(3, "Daily")));
+        Interval interval= new Interval(t.Interval, "");
+        DateTime roundDate = t.Start.AddDays(roundNo * Utils.GetNoDays(interval));
 
         string dates = $"{roundDate.ToString("dd MMM yyyy")}. Round {roundNo + 1}";
         string loc = $"Location :";

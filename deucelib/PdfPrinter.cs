@@ -40,7 +40,7 @@ public class PdfPrinter
 
         //Generate the document based on
         //the type of sport played.
-        if (tournament.Sport?.Id == 1)
+        if (tournament.Sport == 1)
         {
             TemplateTennis template = new ();
             

@@ -49,14 +49,14 @@ public class ScoringPageModel : PageModel
     {
         //Assign
         _t = new Tournament();
-        _t.Type = new TournamentType(1, "Round Robbin","", "","");
+        _t.Type = 1;
         //1 for tennis for now.
-        _t.Sport = new Sport(1, "Tennis", "", "", "");
+        _t.Sport = 1;
         _t.Format = new Format(2, 2, 1);
         _t.TeamSize = 2;
         _t.Start = DateTime.Now;
         _t.End = DateTime.Now;
-        _t.Interval = new Interval(1, "Weekly");
+        _t.Interval = 1;
         _t.Label = "Wicks Open";
 
         IGameMaker gm = new GameMakerTennis();

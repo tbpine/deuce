@@ -14,9 +14,9 @@ class TournamentRepo
     {
         //Assign
         Tournament tournament = new Tournament();
-        tournament.Type = new TournamentType(tournamentType, label,"","","");
+        tournament.Type = tournamentType;
         //1 for tennis for now.
-        tournament.Sport = new Sport(1, "", "", "", "");
+        tournament.Sport = sport;
         tournament.Format = new Format(noSingle, noDouble, sets);
         tournament.TeamSize = teamSize;
 

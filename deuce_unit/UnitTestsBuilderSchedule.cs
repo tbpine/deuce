@@ -17,7 +17,7 @@ public class UnitTestsBuilderSchedule
     {
         //Assign
         Organization club = new Organization() { Id = 1 };
-        Tournament tournament = new Tournament() { Id = tournamentId, Label = "test", Sport =new Sport(1,"","","","") };
+        Tournament tournament = new Tournament() { Id = tournamentId, Label = "test", Sport =1};
         tournament.Format = new Format(2, 2, 1);
 
         MySqlConnection conn = new("Server=localhost;Database=deuce;User Id=deuce;Password=deuce;");

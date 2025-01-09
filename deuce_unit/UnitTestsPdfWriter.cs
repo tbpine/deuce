@@ -12,14 +12,14 @@ public class UnitsPdfWriter
     {
         //Assign
         Tournament tournament = new Tournament();
-        tournament.Type = new TournamentType(1, "Round Robbin","","","");
+        tournament.Type = 1;
         //1 for tennis for now.
-        tournament.Sport = new Sport(1,"", "", "", "");
+        tournament.Sport = 1;
         tournament.Format = new Format(2, 2, 1);
         tournament.TeamSize = 2;
         tournament.Start = DateTime.Now;
         tournament.End = DateTime.Now;
-        tournament.Interval = new Interval(1, "Weekly");
+        tournament.Interval = 1;
         tournament.Label = "Wicks Open";
 
         IGameMaker gm = new GameMakerTennis();

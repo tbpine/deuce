@@ -1,6 +1,7 @@
 using System.Data;
 using System.Data.Common;
 using System.Diagnostics;
+using System.Net;
 using System.Runtime.InteropServices;
 using System.Transactions;
 using deuce.ext;
@@ -13,25 +14,7 @@ public class DbRepoTournament : DbRepoBase<Tournament>
     //| Internals                         |
     //------------------------------------
     private readonly DbConnection _dbconn;
-    private readonly List<TournamentType>? _types;
-    private readonly List<Interval>? _intervals;
-    private readonly List<Sport>? _sports;
     private readonly Organization? _organization;
-
-    /// <summary>
-    /// Construct with dependencies
-    /// </summary>
-    /// <param name="dbconn">Db Connection</param>
-    public DbRepoTournament(DbConnection dbconn,List<TournamentType> types, List<Interval> intervals,
-    List<Sport> sports, Organization organization)
-    {
-        _dbconn = dbconn;
-        _types = types;
-        _intervals = intervals;
-        _sports = sports;
-        _organization = organization;
-
-    }
 
     /// <summary>
     /// Construct with a db connection to the target db.
@@ -43,12 +26,13 @@ public class DbRepoTournament : DbRepoBase<Tournament>
         _organization = organization;
     }
 
-    public override async Task<List<Tournament>> GetList()
+    public override async Task<List<Tournament>> GetList(Filter filter)
     {
         DbCommand cmd = _dbconn.CreateCommand();
         cmd.CommandText = "sp_get_tournament";
         cmd.CommandType = CommandType.StoredProcedure;
-
+        cmd.Parameters.Add(cmd.CreateWithValue("p_id", filter.TournamentId));
+        
         DbDataReader reader = await cmd.ExecuteReaderAsync();
         List<Tournament> list = new();
 
@@ -69,24 +53,20 @@ public class DbRepoTournament : DbRepoBase<Tournament>
             bool useRanking = reader.Parse<int>("seedings") == 1;
             int sportId = reader.Parse<int>("sport");
 
-            Interval? inter = _intervals?.Find(e => e.Id == interval);
-            TournamentType? tt = _types?.Find(e => e.Id == type);
-            Sport? sport = _sports?.Find(e => e.Id == sportId );
-
             list.Add(new Tournament
             {
                 Id = id,
                 Label = label,
                 Start = start,
                 End = end,
-                Interval = inter,
+                Interval = interval,
                 Steps = steps,
-                Type = tt,
+                Type = type,
                 Max = max,
                 Fee = fee,
                 Prize = prize,
                 UseRanking = useRanking,
-                Sport = sport,
+                Sport = sportId,
                 Organization = _organization
             
             });
@@ -104,14 +84,14 @@ public class DbRepoTournament : DbRepoBase<Tournament>
         cmd.Parameters.Add(cmd.CreateWithValue("p_label", obj.Label??""));
         cmd.Parameters.Add(cmd.CreateWithValue("p_start", obj.Start));
         cmd.Parameters.Add(cmd.CreateWithValue("p_end",obj.End));
-        cmd.Parameters.Add(cmd.CreateWithValue("p_interval", obj.Interval?.Id??4)); //Weekly default
+        cmd.Parameters.Add(cmd.CreateWithValue("p_interval", obj.Interval)); //Weekly default
         cmd.Parameters.Add(cmd.CreateWithValue("p_steps", obj.Steps));
-        cmd.Parameters.Add(cmd.CreateWithValue("p_type", obj.Type?.Id??1));
+        cmd.Parameters.Add(cmd.CreateWithValue("p_type", obj.Type));
         cmd.Parameters.Add(cmd.CreateWithValue("p_max", obj.Max));
         cmd.Parameters.Add(cmd.CreateWithValue("p_fee", obj.Fee));
         cmd.Parameters.Add(cmd.CreateWithValue("p_prize", obj.Prize));
         cmd.Parameters.Add(cmd.CreateWithValue("p_seedings", obj.UseRanking ? 1:0));
-        cmd.Parameters.Add(cmd.CreateWithValue("p_sport", obj.Sport?.Id?? 1)); //default to tennis
+        cmd.Parameters.Add(cmd.CreateWithValue("p_sport", obj.Sport)); //default to tennis
         cmd.Parameters.Add(cmd.CreateWithValue("p_organization", obj.Organization?.Id??1)); //default to tennis
 
         var localTran = _dbconn.BeginTransaction();

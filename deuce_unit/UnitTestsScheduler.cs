@@ -13,9 +13,9 @@ public class UnitTestsScheduler
     {
         //Assign
         Tournament tournament = new Tournament();
-        tournament.Type = new TournamentType(1, "Round Robbin","","","");
+        tournament.Type = 1;
         //1 for tennis for now.
-        tournament.Sport = new Sport(1, "", "", "" ,"");
+        tournament.Sport = 1;
         tournament.Format = new Format(1, 1, 1);
         tournament.TeamSize = 1;
 
@@ -56,9 +56,9 @@ public class UnitTestsScheduler
     {
         //Assign
         Tournament tournament = new Tournament();
-        tournament.Type = new TournamentType(1, "Round Robbin","", "","");
+        tournament.Type = 1;
         //1 for tennis for now.
-        tournament.Sport = new Sport(1, "","", "", "");
+        tournament.Sport = 1;
         Format fmt = new Format(noSingles, noDoubles, 1);
         tournament.Format = fmt;
         tournament.TeamSize = teamSize;

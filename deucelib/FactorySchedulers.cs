@@ -13,7 +13,7 @@ public class FactorySchedulers
     /// <returns>A type defining IMatchFactory </returns>
     public IScheduler Create(Tournament t, IGameMaker gm)
     {
-        switch (t.Type?.Id??0)
+        switch (t.Type)
         {
             case 1: { return new SchedulerRR(t, gm); }
         }

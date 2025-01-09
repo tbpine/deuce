@@ -12,6 +12,8 @@ public class DbRepoTeam : DbRepoBase<Team>
     public Organization? Club { get; set; }
     public Tournament? Tournament { get; set; }
 
+    private int _tournamentId; 
+
     /// <summary>
     /// Construct with a db connection
     /// </summary>
@@ -19,6 +21,17 @@ public class DbRepoTeam : DbRepoBase<Team>
     public DbRepoTeam(DbConnection dbconn)
     {
         _dbconn = dbconn;
+    }
+
+    /// <summary>
+    /// Construct with a db connection
+    /// </summary>
+    /// <param name="dbconn">Db connection</param>
+    public DbRepoTeam(DbConnection dbconn, Organization organization, int tournamentId)
+    {
+        _dbconn = dbconn;
+        Club = organization;
+        _tournamentId = tournamentId;
     }
 
     public override async Task<List<Team>> GetList(Filter filter)
@@ -63,8 +76,8 @@ public class DbRepoTeam : DbRepoBase<Team>
             cmd.CommandText = "sp_set_team";
             cmd.CommandType = System.Data.CommandType.StoredProcedure;
             cmd.Parameters.Add(cmd.CreateWithValue("p_id", obj.Id > 0 ? obj.Id : DBNull.Value));
-            cmd.Parameters.Add(cmd.CreateWithValue("p_organization", Club?.Id ?? -1));
-            cmd.Parameters.Add(cmd.CreateWithValue("p_tournament", Tournament?.Id ?? -1));
+            cmd.Parameters.Add(cmd.CreateWithValue("p_organization", Club?.Id ?? 1));
+            cmd.Parameters.Add(cmd.CreateWithValue("p_tournament", _tournamentId));
             cmd.Parameters.Add(cmd.CreateWithValue("p_label", obj.Label));
 
             object? id = await cmd.ExecuteScalarAsync();

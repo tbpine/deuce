@@ -42,7 +42,7 @@ class SchedulerRR : SchedulerBase, IScheduler
                 Debug.Write("(" + home.Index + "," + away.Index + ")");
 
                 //Schedule matches between each team.
-                if  (_tournament.Sport?.Id == 1)
+                if  (_tournament.Sport  == 1)
                 {
                     var permutation = _gameMaker.Create(_tournament, home, away, r);
                     permutation.Id = p;

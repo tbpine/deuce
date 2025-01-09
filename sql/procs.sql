@@ -364,12 +364,14 @@ END//
 DROP PROCEDURE IF EXISTS `sp_get_tournament`//
 
 CREATE PROCEDURE `sp_get_tournament`(
+in p_id int
 )
 BEGIN
 
 	SELECT `id`,`label`,`start`,`end`,`interval`,`steps`,`type`,`max`,`fee`,`prize`,`seedings`,`sport`,
     `organization`,`updated_datetime`,`created_datetime`
 	FROM `tournament`
+    WHERE `id` = p_id
 	ORDER BY `id`;
 
 

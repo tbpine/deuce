@@ -91,8 +91,8 @@ public class TournamentDetailPageModel : BasePageModel
                 Organization org = new Organization() { Id = 1, Name = "testing"};
                 tournament.Id = currentTournamentId;
                 tournament.Label = EventLabel;
-                tournament.Sport = Sports?.First(e=>e.Id == SelectedSportId);
-                tournament.Type = TournamentTypes?.First(e=>e.Id == SelectedTourType);
+                tournament.Sport = SelectedSportId;
+                tournament.Type = SelectedTourType;
                 tournament.Organization = org;
                 DbRepoTournament dbrepoTour = new DbRepoTournament(dbconn,org);
                 //Save the tournament to db
