@@ -63,3 +63,35 @@ function addTeam()
     document.getElementById("publishedSelection").appendChild(div);
     const psel = new Choices(document.getElementById("player_select1"));
 }
+
+//------------------------------------
+//Hide the new player text box
+//------------------------------------
+
+function showHideNewPlayer(selectid, inputid)
+{
+  //Get the selected value
+  const nodeSelect = document.getElementById(selectid);
+  if (nodeSelect == null) return;
+
+  var selectedValue = nodeSelect.value;
+
+  let isNewPlayer =  selectedValue == "";
+
+  const node = document.getElementById(inputid);
+  if (node != null)
+  {
+    if (isNewPlayer)
+    {
+      node.classList.remove("invisible");
+      node.classList.remove("zero_height");
+    }
+    else
+    {
+      node.classList.add("invisible");
+      node.classList.add("zero height");
+    }
+
+  }
+  
+}

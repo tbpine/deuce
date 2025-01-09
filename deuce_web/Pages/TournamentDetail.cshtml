@@ -11,12 +11,13 @@
   <h1 class="h2 mb-n2 mb-lg-3">Event Details</h1>
   <!-- Type -->
   <div class="pt-3 mt-3">
+    <h2 class="h6 pb-1 mb-2">Label *</h2>
+    <input id="EventLabel" name="EventLabel" class="form-control mb-2" placeholder="Name the Event ?" value="@Model.EventLabel">
     <h2 class="h6 pb-1 mb-2">Sport *</h2>
     <div class="nav nav-pills row row-cols-2 row-cols-sm-3 row-cols-md-5 gap-0 g-3">
       @foreach(Sport sport in Model.Sports??Array.Empty<Sport>())
       {
         string isSelected  =  sport.Id == Model.SelectedSportId ? "checked": "" ;
-
         <div class="col">
           <input type="radio" class="btn-check" id="@(sport.Key)" name="SelectedSportId" value="@sport.Id" @isSelected>
           <label class="nav-link flex-column w-100 align-items-center gap-2 rounded p-3" for="@sport.Key">

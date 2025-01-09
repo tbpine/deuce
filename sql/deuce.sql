@@ -46,6 +46,8 @@ CREATE TABLE IF NOT EXISTS `tournament` (
     `fee` 				DECIMAL(10,2),
     `prize` 			DECIMAL(10,2),
     `seedings` 			INT,
+    `sport`				INT,
+    `organization`		INT,
     `updated_datetime`	TIMESTAMP,
     `created_datetime`	TIMESTAMP
 );
@@ -153,5 +155,6 @@ CREATE TABLE IF NOT EXISTS `match_player` (
     `updated_datetime` 	TIMESTAMP,
     `created_datetime` 	TIMESTAMP
 );
+
 
 

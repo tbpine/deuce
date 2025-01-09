@@ -99,13 +99,14 @@
                   <div class="col-5 me-2"><span>New Player</span></div>
                   <div class="col-1"></div>
                   <div class="col-5 me-2">
-                    <select id="@attrPlayerName" name="@attrPlayerName" class="form-select" aria-label="Select Player"
-                    asp-items="Model.SelectPlayer">
+                    <select id="@attrPlayerName" name="@attrPlayerName" class="form-select-lg" aria-label="Select Player"
+                    asp-items="Model.SelectPlayer" data-select='{"searchEnabled" : true , "classNames": {"containerInner": ["form-select", "form-select-lg"]}}'
+                    onchange="showHideNewPlayer('@attrPlayerName','@attrPlayerNameNew')">
                       
                       </select>
                   </div>
                   <div class="col-5 me-2">
-                    <input class="form-control" placeholder="New Player" aria-placeholder="New Player" name="@attrPlayerName" id="attrPlayerNameNew"/>
+                    <input class="form-control-lg" placeholder="New Player" aria-placeholder="New Player" name="@attrPlayerNameNew" id="@attrPlayerNameNew"/>
                   </div>
                   <div class="col-1">
                     <a class="nav-link position-relative px-0 pe-sm-2 py-2 me-4 ms-2 @attrCanDeletePlayer">

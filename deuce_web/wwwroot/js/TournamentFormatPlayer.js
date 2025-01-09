@@ -24,10 +24,6 @@ document.addEventListener("DOMContentLoaded", function(){
 
     if (node.options[node.selectedIndex].value == "99")
       showHideElement('GamesPerSet','fixed_game_2','99')
-
-    node = document.getElementById("TeamSize");
-    if (node.options[node.selectedIndex].value == "99")
-      showHideElement('TeamSize','team_size_cont','99')
   
 
 });

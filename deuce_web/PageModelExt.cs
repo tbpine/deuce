@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 using System.Reflection;
 using deuce_web.ext;
 using Microsoft.AspNetCore.Mvc;
+using Org.BouncyCastle.Bcpg.OpenPgp;
 
 namespace deuce_web.ext;
 
@@ -114,4 +115,17 @@ public static class PageModelExt
      
     }
 
+    public static int GetFormInt(this PageModel page,string key)
+    {
+        string? str = page.HttpContext.Request.Form[key];
+        int ival = int.TryParse(str??"", out ival) ? ival:  0;
+
+        return ival;
+    }
+
+    public static string GetFormString(this PageModel page,string key)
+    {
+        string? str = page.HttpContext.Request.Form[key];
+        return str??"";
+    }
 }

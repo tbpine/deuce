@@ -367,7 +367,8 @@ CREATE PROCEDURE `sp_get_tournament`(
 )
 BEGIN
 
-	SELECT `id`,`label`,`start`,`end`,`interval`,`steps`,`type`,`max`,`fee`,`prize`,`seedings`,`updated_datetime`,`created_datetime`
+	SELECT `id`,`label`,`start`,`end`,`interval`,`steps`,`type`,`max`,`fee`,`prize`,`seedings`,`sport`,
+    `organization`,`updated_datetime`,`created_datetime`
 	FROM `tournament`
 	ORDER BY `id`;
 
@@ -388,12 +389,17 @@ IN p_type INT,
 IN p_max INT,
 IN p_fee DECIMAL(10,2),
 IN p_prize DECIMAL(10,2),
-IN p_seedings INT)
+IN p_seedings INT,
+IN p_sport INT,
+IN p_organization INT)
 
 BEGIN
 
-INSERT INTO `tournament`(`id`,`label`,`start`,`end`,`interval`,`steps`,`type`,`max`,`fee`,`prize`,`seedings`,`updated_datetime`,`created_datetime`) VALUES (p_id, p_label, p_start, p_end, p_interval, p_steps, p_type, p_max, p_fee, p_prize, p_seedings, NOW(), NOW())
-ON DUPLICATE KEY UPDATE `label` = p_label,`start` = p_start,`end` = p_end,`interval` = p_interval,`steps` = p_steps,`type` = p_type,`max` = p_max,`fee` = p_fee,`prize` = p_prize,`seedings` = p_seedings,`updated_datetime` = NOW();
+INSERT INTO `tournament`(`id`,`label`,`start`,`end`,`interval`,`steps`,`type`,`max`,`fee`,`prize`,`seedings`,`sport`,`organization`,`updated_datetime`,`created_datetime`) 
+VALUES (p_id, p_label, p_start, p_end, p_interval, p_steps, p_type, p_max, p_fee, p_prize, p_seedings, p_sport, p_organization, NOW(), NOW())
+ON DUPLICATE KEY UPDATE `label` = p_label,`start` = p_start,`end` = p_end,`interval` = p_interval,
+`steps` = p_steps,`type` = p_type,`max` = p_max,`fee` = p_fee,`prize` = p_prize, `organization` = p_organization,
+`seedings` = p_seedings,`sport` = p_sport, `updated_datetime` = NOW();
 
 SELECT LAST_INSERT_ID() 'id';
 

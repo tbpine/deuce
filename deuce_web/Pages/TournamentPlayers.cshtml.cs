@@ -1,10 +1,8 @@
 using System.Data.Common;
-using System.Text.Json;
+using System.Text.RegularExpressions;
 using deuce;
 using deuce_web.ext;
-using Microsoft.AspNetCore.Authorization.Infrastructure;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
 public class TournamentPlayersPageModel : BasePageModel
@@ -52,12 +50,13 @@ public class TournamentPlayersPageModel : BasePageModel
             var listOfPlayers = await dbrpoPlayer.GetList(new Filter() { ClubId = orgId});
             SelectPlayer = new();
             //The empty player 
-            SelectPlayer.Add(new SelectListItem("",""));
+            SelectPlayer.Add(new SelectListItem("-- New Player --",""));
             foreach(Player player in listOfPlayers)
             {
                 SelectPlayer.Add(new SelectListItem(player.ToString(), player.Id.ToString()));
             }
-
+            //Default to a new player
+            SelectPlayer[0].Selected = true;
 
         }
         catch (Exception ex)
@@ -69,14 +68,60 @@ public class TournamentPlayersPageModel : BasePageModel
 
     }
 
-    public async Task<IActionResult> OnPost()
+    public IActionResult OnPost()
     {
         this.SaveToSession();
+        List<Team> teams = new();
+        //State
+        Team? currentTeam = null;
+        
         foreach(var kp in HttpContext.Request.Form)
         {
             Console.WriteLine($"{kp.Key}={kp.Value}");
+
+            var matches = Regex.Match(kp.Key, @"team_(\d+)(_player_)*(\d+)*(_new)*");
+
+            if (matches.Success)
+            {
+                string teamIdx = matches.Groups[1].Value;
+                string playerIdx = matches.Groups[3].Value;
+                bool  isNew = !string.IsNullOrEmpty(matches.Groups[4].Value);
+
+                if (!string.IsNullOrEmpty(teamIdx) && string.IsNullOrEmpty(playerIdx) && !isNew)
+                {
+                    //Team form variable
+                    string? strVal =  kp.Value;
+                    Team team = new () { Label = string.IsNullOrEmpty(strVal)? ("team_" + matches.Groups[1].Value) : strVal};
+                    currentTeam = team;
+                    teams.Add(currentTeam);
+
+                }
+                else if (!string.IsNullOrEmpty(teamIdx) && !string.IsNullOrEmpty(playerIdx) && !isNew)
+                {
+                    //Check if they selected a registered player
+                    int playerId = this.GetFormInt(kp.Key);
+                    if (playerId > 0)
+                    {
+                        Player player = new Player()  { Id = this.GetFormInt(kp.Key)};
+                        currentTeam?.AddPlayer(player);
+                    }
+                }
+                else if (!string.IsNullOrEmpty(teamIdx) && !string.IsNullOrEmpty(playerIdx) && isNew)
+                {
+                    string? strval = kp.Value; 
+                    //Split first and last names
+                    string[] names = (strval??"").Split(" ");
+                    string firstname = names.Length > 0 ? names[0] : "";
+                    string lastname = names.Length >1 ? names[1] : "";
+
+                    Player player = new Player()  { First = firstname, Last = lastname};
+                    currentTeam?.AddPlayer(player);
+                }
+            }
         }
 
+        //Save to the database
+        
         return NextPage("");
     }
 
