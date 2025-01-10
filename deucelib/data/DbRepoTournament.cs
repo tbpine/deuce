@@ -52,6 +52,7 @@ public class DbRepoTournament : DbRepoBase<Tournament>
             float prize = reader.Parse<float>("prize");
             bool useRanking = reader.Parse<int>("seedings") == 1;
             int sportId = reader.Parse<int>("sport");
+            int entryType = reader.Parse<int>("entry_type");
 
             list.Add(new Tournament
             {
@@ -67,8 +68,8 @@ public class DbRepoTournament : DbRepoBase<Tournament>
                 Prize = prize,
                 UseRanking = useRanking,
                 Sport = sportId,
-                Organization = _organization
-            
+                Organization = _organization,
+                EntryType = entryType            
             });
         }
         return list;
@@ -93,6 +94,7 @@ public class DbRepoTournament : DbRepoBase<Tournament>
         cmd.Parameters.Add(cmd.CreateWithValue("p_seedings", obj.UseRanking ? 1:0));
         cmd.Parameters.Add(cmd.CreateWithValue("p_sport", obj.Sport)); //default to tennis
         cmd.Parameters.Add(cmd.CreateWithValue("p_organization", obj.Organization?.Id??1)); //default to tennis
+        cmd.Parameters.Add(cmd.CreateWithValue("p_entry_type", obj.EntryType < 1 ? 1 : obj.EntryType)); //default to tennis
 
         var localTran = _dbconn.BeginTransaction();
         object? objret = null;
@@ -107,8 +109,12 @@ public class DbRepoTournament : DbRepoBase<Tournament>
             Debug.WriteLine(ex.Message);
         }
         
-        ulong newId = objret is null ? 0L : (ulong)objret;
-        obj.Id = (int)newId;
+        if (objret  is not null)
+        {
+            if (objret is int) obj.Id = (int)objret;
+            else if (objret is ulong) obj.Id = (int)(ulong)objret;
+        }
+        
 
     }
 

@@ -105,8 +105,8 @@ public class BasePageModel : PageModel
             DbRepoTournament dbRepoTour = new DbRepoTournament(dbconn, organization);
             //Select the tournment.Returns in the first element
             //Create filter
-            Filter tourFilter = new Filter() { TournamentId = tourId }
-            List<Tournament> listOfTour = await dbRepoTour.GetList();
+            Filter tourFilter = new Filter() { TournamentId = tourId };
+            List<Tournament> listOfTour = await dbRepoTour.GetList(tourFilter);
             await dbconn.CloseAsync();
 
             return listOfTour.FirstOrDefault();

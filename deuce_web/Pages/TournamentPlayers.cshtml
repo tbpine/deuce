@@ -19,6 +19,7 @@
       <li class="nav-item me-1" role="presentation">
         <button type="button" class="nav-link text-nowrap active" id="published-tab" data-bs-toggle="pill" data-bs-target="#published" role="tab" aria-controls="published" aria-selected="true">
         </button>
+    using iText.Forms.Xfdf;
     using Org.BouncyCastle.Asn1;
       </li>
     </ul> *@
@@ -56,11 +57,12 @@
       </div>
 
       <!-- Published listings -->
-      <form class="vstack gap-4" id="page_form"  asp-action="~/TournamentPlayers">
+      <form class="vstack gap-4 mb-4" id="page_form"  asp-action="~/TournamentPlayers">
         <!-- An Item  -->
         @for(int i = 0 ; i < Model.NoTeams; i++)
         {
-          string attrTeamName = $"team_{i}";
+          Team? iterTeam = Model.Teams?.ElementAt(i);
+          string attrTeamName = iterTeam?.Label??$"team_{i}";
           string attrTeamCtlVisible= Model.EntryType == 1 ? "visible" : "invisible zero_height";
           string attrCanAddPlayer = "invisible zero_height";
           string attrCanDeletePlayer = "invisible";
@@ -93,6 +95,11 @@
               {
                 string attrPlayerName = $"team_{i}_player_{j}";
                 string attrPlayerNameNew = $"team_{i}_player_{j}_new";
+                Player? iterPlayer = iterTeam?.Players.ElementAt(j);
+
+                List<SelectListItem>? playerList = Model.SelectPlayer?.ElementAt(i*Model.TeamSize + j);
+                var selectedPlayer = playerList?.Find(e=>e.Value == iterPlayer?.Id.ToString());
+                if (selectedPlayer is not null) selectedPlayer.Selected = true;
 
                 <div class="row row-cols-*-3 g-0 mb-2">
                   <div class="col-5 me-2"><span>Registered</span></div>
@@ -100,7 +107,7 @@
                   <div class="col-1"></div>
                   <div class="col-5 me-2">
                     <select id="@attrPlayerName" name="@attrPlayerName" class="form-select-lg" aria-label="Select Player"
-                    asp-items="Model.SelectPlayer" data-select='{"searchEnabled" : true , "classNames": {"containerInner": ["form-select", "form-select-lg"]}}'
+                    asp-items="@playerList" data-select='{"searchEnabled" : true , "classNames": {"containerInner": ["form-select", "form-select-lg"]}}'
                     onchange="showHideNewPlayer('@attrPlayerName','@attrPlayerNameNew')">
                       
                       </select>
@@ -120,6 +127,7 @@
         }
         
       </form>
+      <div><span class="text-danger">@Model.Error</span></div>
     </div>
 
   </div>

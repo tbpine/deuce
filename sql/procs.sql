@@ -333,12 +333,24 @@ DROP PROCEDURE IF EXISTS `sp_set_team_player`//
 CREATE PROCEDURE `sp_set_team_player`(
 IN p_team INT,
 IN p_player INT,
-IN p_tournament INT)
+IN p_player_first VARCHAR(100),
+IN p_player_last VARCHAR(100),
+IN p_tournament INT,
+IN p_organization INT)
 
 BEGIN
+-- add new players 
+SET @p_id = p_player;
 
-INSERT INTO `team_player`(`team`,`player`,`tournament`) VALUES (p_team, p_player, p_tournament)
-ON DUPLICATE KEY UPDATE `team` = p_team,`player` = p_player, `tournament` = p_tournament;
+IF @p_id < 1  THEN
+
+	INSERT INTO `player` VALUES ( NULL, p_player_first,p_player_last, p_organization, 1.0, now(), now());
+    SELECT last_insert_id() INTO @p_id;
+END IF;
+
+
+INSERT INTO `team_player`(`team`,`player`,`tournament`) VALUES (p_team, @p_id, p_tournament)
+ON DUPLICATE KEY UPDATE `team` = p_team,`player` = @p_id, `tournament` = p_tournament;
 
 SELECT LAST_INSERT_ID() 'id';
 
@@ -369,10 +381,29 @@ in p_id int
 BEGIN
 
 	SELECT `id`,`label`,`start`,`end`,`interval`,`steps`,`type`,`max`,`fee`,`prize`,`seedings`,`sport`,
-    `organization`,`updated_datetime`,`created_datetime`
+    `organization`,`entry_type`,`updated_datetime`,`created_datetime`
 	FROM `tournament`
     WHERE `id` = p_id
 	ORDER BY `id`;
+
+
+END//
+
+DROP PROCEDURE IF EXISTS `sp_get_tournament_list`//
+
+CREATE PROCEDURE `sp_get_tournament_list`(
+in p_organization int
+)
+BEGIN
+
+	SELECT t.`id`,t.`label`,`start`,`end`,`interval`, i.Label 'interval_label',
+    `steps`,`type`,tt.`label` 'type_label', `max`,`fee`,`prize`,`seedings`,`sport`,
+    s.`label` 'sport_label', `organization`,`updated_datetime`,`created_datetime`
+	FROM `tournament` t JOIN `tournament_type` tt ON tt.id = t.`type`
+    JOIN `interval` i ON i.id = t.`interval`
+    JOIN `sport` s ON s.id = t.`sport`
+    WHERE t.`organization` = p_organization
+	ORDER BY t.`start`;
 
 
  END//
@@ -393,17 +424,22 @@ IN p_fee DECIMAL(10,2),
 IN p_prize DECIMAL(10,2),
 IN p_seedings INT,
 IN p_sport INT,
-IN p_organization INT)
+IN p_organization INT,
+IN p_entry_type INT)
 
 BEGIN
 
-INSERT INTO `tournament`(`id`,`label`,`start`,`end`,`interval`,`steps`,`type`,`max`,`fee`,`prize`,`seedings`,`sport`,`organization`,`updated_datetime`,`created_datetime`) 
-VALUES (p_id, p_label, p_start, p_end, p_interval, p_steps, p_type, p_max, p_fee, p_prize, p_seedings, p_sport, p_organization, NOW(), NOW())
+INSERT INTO `tournament`(`id`,`label`,`start`,`end`,`interval`,`steps`,`type`,`max`,`fee`,`prize`,`seedings`,`sport`,`organization`,`entry_type`,`updated_datetime`,`created_datetime`) 
+VALUES (p_id, p_label, p_start, p_end, p_interval, p_steps, p_type, p_max, p_fee, p_prize, p_seedings, p_sport, p_organization, p_entry_type,NOW(), NOW())
 ON DUPLICATE KEY UPDATE `label` = p_label,`start` = p_start,`end` = p_end,`interval` = p_interval,
 `steps` = p_steps,`type` = p_type,`max` = p_max,`fee` = p_fee,`prize` = p_prize, `organization` = p_organization,
-`seedings` = p_seedings,`sport` = p_sport, `updated_datetime` = NOW();
+`seedings` = p_seedings,`sport` = p_sport, `entry_type` = p_entry_type ,`updated_datetime` = NOW();
 
-SELECT LAST_INSERT_ID() 'id';
+if ifnull(p_id, 0)<1 then
+	SELECT LAST_INSERT_ID() 'id';
+else
+	SELECT p_id 'id';
+end if;
 
 END//
 

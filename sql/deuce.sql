@@ -48,6 +48,7 @@ CREATE TABLE IF NOT EXISTS `tournament` (
     `seedings` 			INT,
     `sport`				INT,
     `organization`		INT,
+    `entry_type`		INT,
     `updated_datetime`	TIMESTAMP,
     `created_datetime`	TIMESTAMP
 );

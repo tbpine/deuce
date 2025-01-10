@@ -1,4 +1,5 @@
 using System.Data.Common;
+using System.Diagnostics;
 using deuce.ext;
 
 namespace deuce;
@@ -12,7 +13,9 @@ public class DbRepoTeam : DbRepoBase<Team>
     public Organization? Club { get; set; }
     public Tournament? Tournament { get; set; }
 
-    private int _tournamentId; 
+    
+    private int _tournamentId;
+    private bool _ignoreEmptyPlayers;
 
     /// <summary>
     /// Construct with a db connection
@@ -27,11 +30,15 @@ public class DbRepoTeam : DbRepoBase<Team>
     /// Construct with a db connection
     /// </summary>
     /// <param name="dbconn">Db connection</param>
-    public DbRepoTeam(DbConnection dbconn, Organization organization, int tournamentId)
+    /// <param name="organization">Organization</param>
+    /// <param name="tournamentId">Tournament id</param>
+    /// <param name="ignoreEmptyPlayers">true to save players with no name</param>
+    public DbRepoTeam(DbConnection dbconn, Organization organization, int tournamentId, bool ignoreEmptyPlayers)
     {
         _dbconn = dbconn;
         Club = organization;
         _tournamentId = tournamentId;
+        _ignoreEmptyPlayers = ignoreEmptyPlayers;
     }
 
     public override async Task<List<Team>> GetList(Filter filter)
@@ -70,9 +77,14 @@ public class DbRepoTeam : DbRepoBase<Team>
     /// <returns></returns>
     public override async Task Set(Team obj)
     {
-        //Insert into the team table
-        using (DbCommand cmd = _dbconn.CreateCommand())
+        var localtran = _dbconn.BeginTransaction();
+
+        try
         {
+
+            //Insert into the team table
+            DbCommand cmd = _dbconn.CreateCommand();
+            cmd.Transaction = localtran;
             cmd.CommandText = "sp_set_team";
             cmd.CommandType = System.Data.CommandType.StoredProcedure;
             cmd.Parameters.Add(cmd.CreateWithValue("p_id", obj.Id > 0 ? obj.Id : DBNull.Value));
@@ -80,31 +92,48 @@ public class DbRepoTeam : DbRepoBase<Team>
             cmd.Parameters.Add(cmd.CreateWithValue("p_tournament", _tournamentId));
             cmd.Parameters.Add(cmd.CreateWithValue("p_label", obj.Label));
 
-            object? id = await cmd.ExecuteScalarAsync();
+            object? id = null;
+            id = await cmd.ExecuteScalarAsync();
 
             obj.Id = (int)(ulong)(id ?? 0L);
 
-
-        }
-        using (DbCommand cmd = _dbconn.CreateCommand())
-        {
+            cmd = _dbconn.CreateCommand();
+            cmd.Transaction = localtran;
             cmd.CommandText = "sp_set_team_player";
             cmd.CommandType = System.Data.CommandType.StoredProcedure;
-            cmd.Parameters.Add(cmd.CreateWithValue("p_team", obj.Id ));
+            cmd.Parameters.Add(cmd.CreateWithValue("p_team", obj.Id));
             cmd.Parameters.Add(cmd.CreateWithValue("p_player", -1));
+            cmd.Parameters.Add(cmd.CreateWithValue("p_player_first", -1));
+            cmd.Parameters.Add(cmd.CreateWithValue("p_player_last", -1));
             cmd.Parameters.Add(cmd.CreateWithValue("p_tournament", -1));
+            cmd.Parameters.Add(cmd.CreateWithValue("p_organization", -1));
+
 
             //Save team players
             foreach (Player player in obj.Players)
             {
+                //Don't save players with no names
+                if (string.IsNullOrEmpty(player.First) ||  string.IsNullOrEmpty(player.Last)) continue;
+
                 cmd.Parameters["p_team"].Value = obj.Id;
                 cmd.Parameters["p_player"].Value = player.Id;
-                cmd.Parameters["p_tournament"].Value = Tournament?.Id??-1;
+                cmd.Parameters["p_player_first"].Value = string.IsNullOrEmpty(player.First) ? DBNull.Value : player.First;
+                cmd.Parameters["p_player_last"].Value = string.IsNullOrEmpty(player.Last) ? DBNull.Value : player.Last;
+                cmd.Parameters["p_tournament"].Value = _tournamentId;
+                cmd.Parameters["p_organization"].Value = Club?.Id ?? 1;
 
                 await cmd.ExecuteNonQueryAsync();
 
-                
+
             }
+
+            localtran.Commit();
         }
+        catch(DbException ex)  
+        {
+            localtran.Rollback();
+            Debug.WriteLine(ex.Message);
+        }
+
     }
 }

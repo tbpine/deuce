@@ -11,6 +11,7 @@ public class Tournament
     private int _max;
     private int _TeamSize;
     private int _sport;
+    private int _entryType;
     private Format? _format;
     private double _fee;
     private bool _useRankings;
@@ -36,6 +37,7 @@ public class Tournament
     public int Max { get { return _max; } set { _max = value; } }
     public Format? Format { get { return _format; } set { _format = value; } }
     public int Type { get { return _type; } set { _type = value; } }
+    public int EntryType { get { return _entryType; } set { _entryType = value; } }
     public double Fee { get { return _fee; } set { _fee = value; } }
     public double Prize { get { return _prize; } set { _prize = value; } }
     public bool UseRanking { get { return _useRankings; } set { _useRankings = value; } }

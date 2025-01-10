@@ -42,6 +42,17 @@ public class TournamentDetailPageModel : BasePageModel
     public async Task<IActionResult> OnGet()
     {
         this.LoadFromSession();
+        //Database overrides ?
+
+        Organization organization= new Organization(){Id = 1, Name="testing"};
+        Tournament? currentTour = await this.GetCurrentTournament(_serviceProvider, _configuration, organization);
+        if (currentTour is not null)
+        {
+            SelectedSportId = currentTour.Sport;
+            SelectedTourType = currentTour.Type;
+            EventLabel = currentTour.Label??EventLabel;
+            EntryType = currentTour.EntryType;
+        }
         
         var scope = _serviceProvider.CreateScope();
 
@@ -55,6 +66,7 @@ public class TournamentDetailPageModel : BasePageModel
         Sports  = await dbRepoSport.GetList();
 
         DbRepoTournamentType dbRepoTourType = new DbRepoTournamentType(dbconn);
+
         TournamentTypes = await dbRepoTourType.GetList();
 
         await dbconn!.CloseAsync();
@@ -94,6 +106,8 @@ public class TournamentDetailPageModel : BasePageModel
                 tournament.Sport = SelectedSportId;
                 tournament.Type = SelectedTourType;
                 tournament.Organization = org;
+                tournament.EntryType = EntryType;
+                
                 DbRepoTournament dbrepoTour = new DbRepoTournament(dbconn,org);
                 //Save the tournament to db
                 await dbrepoTour.Set(tournament);
