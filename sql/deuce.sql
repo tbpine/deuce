@@ -4,6 +4,7 @@
 * Dec 2024
 *******************************************************/
 -- drop table `tournament`;
+-- drop table `tournament_detail`;
 -- drop table `tournament_type`;
 -- drop table `player`;
 -- drop table `team`;
@@ -52,6 +53,16 @@ CREATE TABLE IF NOT EXISTS `tournament` (
     `updated_datetime`	TIMESTAMP,
     `created_datetime`	TIMESTAMP
 );
+
+CREATE TABLE IF NOT EXISTS `tournament_detail` (
+    `tournament` 		INT PRIMARY KEY,
+    `no_entries` 		INT,
+    `sets` 				INT,
+    `games` 			INT,
+    `updated_datetime`	TIMESTAMP,
+    `created_datetime`	TIMESTAMP
+);
+
 
 
 CREATE TABLE IF NOT EXISTS `player` (

@@ -25,8 +25,8 @@ public class TournamentFormatPlayerPageModel : BasePageModel
 
     [BindProperty]
     public string? GamesPerSet { get; set; }
-    
-    
+
+
     [BindProperty]
     public string? Sets { get; set; }
 
@@ -65,6 +65,9 @@ public class TournamentFormatPlayerPageModel : BasePageModel
 
     public async Task<IActionResult> OnGet()
     {
+        this.LoadFromSession();
+        
+        Organization thisOrg = new() { Id = 1, Name = "testing" };
 
         var scope = _serviceProvider.CreateScope();
         var dbconn = scope.ServiceProvider.GetService<DbConnection>();
@@ -73,15 +76,40 @@ public class TournamentFormatPlayerPageModel : BasePageModel
 
         DbRepoSport dbRepoSport = new(dbconn);
         var sports = await dbRepoSport.GetList();
+        //Load tournament details
+        //If there's a current tournament
 
-        int sportId = this.HttpContext.Session.GetInt32("sport") ?? 0;
-        int tournamentType = this.HttpContext.Session.GetInt32("tournament_type") ?? 0;
+        int currentTourId = HttpContext.Session.GetInt32("CurrentTournament") ?? 0;
 
-        var sport = sports.Find(e => e.Id == sportId);
+        if (currentTourId > 0)
+        {
+            DbRepoTournamentDetail repoTourDetail = new(dbconn, organization: thisOrg);
+            Filter filter = new() { TournamentId = currentTourId };
+            var tourDetail = (await repoTourDetail.GetList(filter))?.FirstOrDefault();
 
-        Title = sport?.Label ?? "";
+            if (tourDetail is not null)
+            {
+                //Set page values
+                NoPlayers = tourDetail.NoEntries;
+                GamesPerSet = tourDetail.Games.ToString();
+                Sets = tourDetail.Sets.ToString();
+            }
+
+            var tour = await GetCurrentTournament(_serviceProvider, _config, thisOrg);
+
+            int sportId = tour?.Sport??1;
+
+            var sport = sports.Find(e => e.Id == sportId);
+
+            Title = sport?.Label ?? "";
+
+
+        }
+
+        await dbconn.CloseAsync();
+
+
         
-        this.LoadFromSession();
 
         return Page();
     }
@@ -100,9 +128,9 @@ public class TournamentFormatPlayerPageModel : BasePageModel
             this.SaveToSession();
             return Page();
         }
-        
+
         this.SaveToSession();
-        
+
         //No Error, hide the error message on page.
         Error = String.Empty;
 

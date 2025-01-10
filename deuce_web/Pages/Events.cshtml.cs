@@ -41,7 +41,7 @@ public class EventsPageModel : PageModel
     }
 
 
-    public async Task<IActionResult> OnPostAsync()
+    public  IActionResult OnPostAsync()
     {
         string? strTourId = this.Request.Form["TournamentId"];
         int tourId = int.TryParse(strTourId, out tourId) ? tourId : 0;

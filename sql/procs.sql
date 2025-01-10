@@ -561,8 +561,36 @@ DELETE FROM `tournament` WHERE `id` = p_tournament;
  
 END//
 
+DROP PROCEDURE IF EXISTS `sp_get_tournament_detail`//
+
+CREATE PROCEDURE `sp_get_tournament_detail`(
+IN p_tour INT
+)
+BEGIN
+
+	SELECT `tournament`,`no_entries`,`sets`,`games`,`updated_datetime`,`created_datetime`
+	FROM `tournament_detail`
+    where `tournament` = p_tour
+	ORDER BY `tournament`;
 
 
+ END//
+
+
+DROP PROCEDURE IF EXISTS `sp_set_tournament_detail`//
+
+CREATE PROCEDURE `sp_set_tournament_detail`(
+IN p_tournament INT,
+IN p_no_entries INT,
+IN p_sets INT,
+IN p_games INT)
+
+BEGIN
+
+INSERT INTO `tournament_detail`(`tournament`,`no_entries`,`sets`,`games`,`updated_datetime`,`created_datetime`) VALUES (p_tournament, p_no_entries, p_sets, p_games, NOW(), NOW())
+ON DUPLICATE KEY UPDATE `no_entries` = p_no_entries,`sets` = p_sets,`games` = p_games,`updated_datetime` = NOW();
+
+END//
 
 DELIMITER ;
 
