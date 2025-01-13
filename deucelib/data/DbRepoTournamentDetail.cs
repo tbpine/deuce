@@ -58,6 +58,7 @@ public class DbRepoTournamentDetail : DbRepoBase<TournamentDetail>
 
             });
         }
+        reader.Close();
         return list;
     }
 

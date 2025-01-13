@@ -88,6 +88,9 @@ public class TournamentDetailPageModel : BasePageModel
 
         }
 
+        //Save to session
+        if (_sessionProxy is not null) _sessionProxy.EntryType = EntryType;
+
         if (EntryType == 1)
             return NextPage("/TournamentFormatTeams");
         else if (EntryType == 2)

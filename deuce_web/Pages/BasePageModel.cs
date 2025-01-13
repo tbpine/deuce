@@ -58,7 +58,7 @@ public class BasePageModel : PageModel
             if (_backPage.Contains("TournamentFormat"))
             {
                 //case
-                int entryType = this.HttpContext.Session.GetInt32("EntryType") ?? 1;
+                int entryType = _sessionProxy.EntryType;
                 _backPage = HttpContext.Request.PathBase + (entryType == 1 ? "/TournamentFormatTeams" : "/TournamentFormatPlayer");
             }
         }
@@ -99,12 +99,15 @@ public class BasePageModel : PageModel
     protected async Task<Tournament?> GetCurrentTournament(DbConnection? dbconn)
     {
         //On demand connection
+        bool closeConnection = false;
+
         if (dbconn is null)
         {
             var scope = _serviceProvider.CreateScope();
             dbconn = scope.ServiceProvider.GetRequiredService<DbConnection>();
             dbconn.ConnectionString = _config.GetConnectionString("deuce_local");
             await dbconn.OpenAsync();
+            closeConnection = true;
         }
 
         //Check if there's a tournament saved
@@ -121,7 +124,8 @@ public class BasePageModel : PageModel
         //Create filter
         Filter tourFilter = new Filter() { TournamentId = tourId };
         List<Tournament> listOfTour = await dbRepoTour.GetList(tourFilter);
-        await dbconn.CloseAsync();
+        //Close if it was created.
+        if (closeConnection ) await dbconn.CloseAsync();
 
         return listOfTour.FirstOrDefault();
 

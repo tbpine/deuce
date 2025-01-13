@@ -6,6 +6,7 @@ public class SessionProxy : ISessionProxy
     //Define session keys in one place.
     private const string Key_Current_Session = "CurrentTournament";
     private const string Key_Current_OrganizationId = "OrganizationId";
+    private const string Key_Current_EntryType = "EntryType";
     //Keep reference to the browser session
     private  readonly ISession? _session;
 
@@ -20,6 +21,12 @@ public class SessionProxy : ISessionProxy
     {
         get=>_session?.GetInt32(Key_Current_OrganizationId)??1;
         set=>_session?.SetInt32(Key_Current_OrganizationId, value);
+    }
+
+    public int EntryType
+    {
+        get=>_session?.GetInt32(Key_Current_EntryType)??1;
+        set=>_session?.SetInt32(Key_Current_EntryType, value);
     }
 
 }
