@@ -10,8 +10,6 @@ using Mysqlx;
 public class TournamentPlayersPageModel : BasePageModel
 {
     private readonly ILogger<TournamentPlayersPageModel> _log;
-    private readonly IServiceProvider _serviceProvider;
-    private readonly IConfiguration _config;
     private List<Team>? _teams;
     public string? JSONPlayers { get; set; }
 
@@ -24,17 +22,22 @@ public class TournamentPlayersPageModel : BasePageModel
     public List<Team>? Teams { get => _teams; }
 
     public TournamentPlayersPageModel(ILogger<TournamentPlayersPageModel> log, IServiceProvider sp,
-    IConfiguration config, IHandlerNavItems handlerNavItems) : base(handlerNavItems)
+    IConfiguration config, IHandlerNavItems handlerNavItems) : base(handlerNavItems, sp, config)
     {
         _log = log;
-        _serviceProvider = sp;
-        _config = config;
         _teams = null;
     }
 
     public async Task<IActionResult> OnGet()
     {
-        await LoadPage();
+        try
+        {
+            await LoadPage();
+        }
+        catch(Exception ex)
+        {
+            _log.LogError(ex.Message); 
+        }
 
         return Page();
 
@@ -141,9 +144,13 @@ public class TournamentPlayersPageModel : BasePageModel
         var dbconn = scope.ServiceProvider.GetRequiredService<DbConnection>();
         dbconn.ConnectionString = _config.GetConnectionString("deuce_local");
 
+
+
         try
         {
             await dbconn.OpenAsync();
+            //Current tornament
+
             //Select all players in a club
             Organization organization = new Organization() { Id = orgId };
             //For select elements
@@ -160,23 +167,45 @@ public class TournamentPlayersPageModel : BasePageModel
             }
             //Default to a new player
             playerList[0].Selected = true;
-            for(int i = 0 ; i < NoTeams*TeamSize; i++)
+            for (int i = 0; i < NoTeams * TeamSize; i++)
             {
                 List<SelectListItem> copiedPlayerList = new(playerList);
                 SelectPlayer?.Add(copiedPlayerList);
             }
 
             //Deflat saved teams
-            int currentTourId = HttpContext.Session.GetInt32("CurrentTournament")??0;
-            //Load teams
-            DbRepoRecordTeamPlayer dbRepoRecordTP = new DbRepoRecordTeamPlayer(dbconn);
-            Filter filterTeamPlayer = new Filter() { ClubId = organization.Id, TournamentId = currentTourId};
-            //Get the listing of players for the tournament.
-            List<RecordTeamPlayer> tourTeamPlayersRec = await dbRepoRecordTP.GetList(filterTeamPlayer);
-            //Create the team /player graph
-            TeamRepo teamRepo = new TeamRepo();
-            _teams =  teamRepo.ExtractFromRecordTeamPlayer(tourTeamPlayersRec,orgPlayers, organization);
-            
+            var currentTour = await GetCurrentTournament(dbconn);
+            if (currentTour is not null)
+            {
+                
+
+                //Load tournament details
+                DbRepoTournamentDetail dbRepoTourDetail= new(dbconn, organization);
+                Filter filter  = new() { ClubId = organization.Id, TournamentId = currentTour.Id };
+                var listTourDetail = await dbRepoTourDetail.GetList(filter);
+                var tourDetail = listTourDetail.FirstOrDefault();
+
+                EntryType = currentTour.EntryType;
+                NoTeams = tourDetail?.NoEntries??2;
+                TeamSize  = tourDetail?.TeamSize??1;
+
+                //Load teams
+                DbRepoRecordTeamPlayer dbRepoRecordTP = new DbRepoRecordTeamPlayer(dbconn);
+                Filter filterTeamPlayer = new Filter() { ClubId = organization.Id, TournamentId = currentTour.Id };
+                //Get the listing of players for the tournament.
+                List<RecordTeamPlayer> tourTeamPlayersRec = await dbRepoRecordTP.GetList(filterTeamPlayer);
+                //Create the team /player graph
+                TeamRepo teamRepo = new TeamRepo();
+                _teams = teamRepo.ExtractFromRecordTeamPlayer(tourTeamPlayersRec, orgPlayers, organization);
+            }
+            else
+            {
+                //Defauls;
+                EntryType = 1; 
+                NoTeams = 2;
+                TeamSize  = 2;
+            }
+
 
         }
         catch (Exception ex)

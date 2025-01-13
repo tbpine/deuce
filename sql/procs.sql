@@ -614,6 +614,21 @@ delete from `tournament` where `id` = p_tournament;
 
 END//
 
+
+DROP PROCEDURE IF EXISTS `sp_set_tournament_schedule`//
+
+CREATE PROCEDURE `sp_set_tournament_schedule`(
+IN p_tournament INT,
+IN p_interval INT,
+IN p_start DATETIME
+)
+
+BEGIN
+UPDATE `tournament` SET `interval` =  p_interval, `start` = p_start
+WHERE `tournament` = p_tournament;
+
+END//
+
 DELIMITER ;
 
 

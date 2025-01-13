@@ -12,8 +12,6 @@ public class TournamentDetailPageModel : BasePageModel
 
     public IEnumerable<Sport>? Sports { get; set; }
     public IEnumerable<TournamentType>? TournamentTypes { get; set; }
-    private IServiceProvider _serviceProvider;
-    private IConfiguration _configuration;
 
     [BindProperty]
     public int SelectedSportId { get; set; }
@@ -29,11 +27,9 @@ public class TournamentDetailPageModel : BasePageModel
 
 
     public TournamentDetailPageModel(ILogger<TournamentDetailPageModel> log, IServiceProvider sp,
-    IConfiguration config, IHandlerNavItems hNavItems) : base(hNavItems)
+    IConfiguration config, IHandlerNavItems hNavItems) : base(hNavItems, sp, config)
     {
         _log = log;
-        _serviceProvider = sp;
-        _configuration = config;
     }
 
     public async Task<IActionResult> OnGet()
@@ -59,21 +55,20 @@ public class TournamentDetailPageModel : BasePageModel
         string tmpEventLabel = string.IsNullOrEmpty(EventLabel) ? Randomizer.GetRandomString(32) : EventLabel;
         EventLabel = tmpEventLabel;
 
-        this.SaveToSession();
-
         using (var scope = _serviceProvider.CreateScope())
         {
             DbConnection? dbconn = scope.ServiceProvider.GetService<DbConnection>();
             if (dbconn is not null)
             {
-                dbconn.ConnectionString = _configuration.GetConnectionString("deuce_local");
+                dbconn.ConnectionString = _config.GetConnectionString("deuce_local");
                 await dbconn?.OpenAsync()!;
 
                 Tournament tournament = new();
 
                 //Load the current tournament id
-                int currentTournamentId = this.HttpContext.Session.GetInt32("CurrentTournament") ?? 0;
+                int currentTournamentId = _sessionProxy?.TournamentId??0;
                 Organization org = new Organization() { Id = 1, Name = "testing" };
+
                 tournament.Id = currentTournamentId;
                 tournament.Label = EventLabel;
                 tournament.Sport = SelectedSportId;
@@ -86,7 +81,7 @@ public class TournamentDetailPageModel : BasePageModel
                 await dbrepoTour.Set(tournament);
                 //Save tournament id
 
-                this.HttpContext.Session.SetInt32("CurrentTournament", tournament.Id);
+                if (_sessionProxy is not null)  _sessionProxy.TournamentId =  tournament.Id;
 
             }
             await dbconn?.CloseAsync()!;
@@ -106,7 +101,7 @@ public class TournamentDetailPageModel : BasePageModel
         var scope = _serviceProvider.CreateScope();
 
         var dbconn = scope.ServiceProvider.GetService<DbConnection>();
-        dbconn!.ConnectionString = _configuration.GetConnectionString("deuce_local");
+        dbconn!.ConnectionString = _config.GetConnectionString("deuce_local");
         await dbconn!.OpenAsync();
 
         //Load page options from the from the database
@@ -117,14 +112,13 @@ public class TournamentDetailPageModel : BasePageModel
 
         TournamentTypes = await dbRepoTourType.GetList();
 
-        await dbconn!.CloseAsync();
         // this.LoadFromSession();
         //Load from database
         //Set default vales;
 
         Organization organization = new Organization() { Id = 1, Name = "testing" };
-        
-        Tournament? currentTour = await this.GetCurrentTournament(_serviceProvider, _configuration, organization);
+
+        Tournament? currentTour = await this.GetCurrentTournament(dbconn);
         if (currentTour is not null)
         {
             SelectedSportId = currentTour.Sport;
@@ -140,6 +134,8 @@ public class TournamentDetailPageModel : BasePageModel
             EntryType = 1;
             //Default values
         }
+        await dbconn!.CloseAsync();
+
 
     }
 

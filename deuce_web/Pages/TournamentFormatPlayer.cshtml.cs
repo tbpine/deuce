@@ -14,8 +14,6 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 public class TournamentFormatPlayerPageModel : BasePageModel
 {
     private readonly ILogger<TournamentFormatPlayerPageModel> _log;
-    private readonly IServiceProvider _serviceProvider;
-    private readonly IConfiguration _config;
     private readonly IFormValidator _formValidator;
     public string? Title { get; set; }
     public string? Error { get; set; }
@@ -54,11 +52,9 @@ public class TournamentFormatPlayerPageModel : BasePageModel
     };
 
     public TournamentFormatPlayerPageModel(ILogger<TournamentFormatPlayerPageModel> log, IServiceProvider sp,
-    IConfiguration cfg, IFormValidator formValidator, IHandlerNavItems hNavItems) : base(hNavItems)
+    IConfiguration cfg, IFormValidator formValidator, IHandlerNavItems hNavItems) : base(hNavItems, sp, cfg)
     {
         _log = log;
-        _serviceProvider = sp;
-        _config = cfg;
         _formValidator = formValidator;
         _formValidator.Page = this;
     }
@@ -197,7 +193,7 @@ public class TournamentFormatPlayerPageModel : BasePageModel
 
             }
 
-            var tour = await GetCurrentTournament(_serviceProvider, _config, thisOrg);
+            var tour = await GetCurrentTournament(dbconn);
 
             int sportId = tour?.Sport ?? 1;
 

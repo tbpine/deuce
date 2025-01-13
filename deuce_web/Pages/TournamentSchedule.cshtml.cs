@@ -1,3 +1,4 @@
+using System.Data.Common;
 using deuce;
 using deuce_web.ext;
 using Microsoft.AspNetCore.Mvc;
@@ -10,8 +11,6 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 public class TournamentSchedulePageModel : BasePageModel
 {
    private readonly ILogger<TournamentSchedulePageModel> _log;
-   private readonly IConfiguration _config;
-   private readonly IServiceProvider _service;
 
 
    private List<SelectListItem> _selectInterval = new List<SelectListItem>()
@@ -26,23 +25,20 @@ public class TournamentSchedulePageModel : BasePageModel
    public List<SelectListItem> SelectInterval { get => _selectInterval; }
 
    [BindProperty]
-   public int RepeatInterval { get; set; }
+   public int Interval { get; set; }
 
    [BindProperty]
    public string? StartDate { get; set; }
 
    public TournamentSchedulePageModel(ILogger<TournamentSchedulePageModel> log, IHandlerNavItems handlerNavItems,
    IConfiguration cfg, IServiceProvider sp)
-   : base(handlerNavItems)
+   : base(handlerNavItems, sp, cfg)
    {
       _log = log;
-      _config = cfg;
-      _service = sp;
    }
 
    public ActionResult OnGet()
    {
-      this.LoadFromSession();
       return Page();
    }
 
@@ -50,28 +46,37 @@ public class TournamentSchedulePageModel : BasePageModel
    {
       try
       {
-         this.SaveToSession();
          //Load the current tournament from the database
          Organization thisOrg = new Organization() { Id = 1, Name = "testing" };
-         var currentTour = await GetCurrentTournament(_service, _config, thisOrg);
-         if (currentTour is not null)
+
+         int currentTourId = _sessionProxy?.TournamentId ?? 0;
+         if (currentTourId > 0)
          {
+
             //Set start date and interval
             DateTime tmpStartDate = DateTime.TryParse(this.StartDate, out tmpStartDate) ? tmpStartDate : DateTime.MinValue;
+            //Partial object
+            Tournament tmp = new()
+            {
+               Id = currentTourId,
+               Start = tmpStartDate.Equals(DateTime.MinValue) ? DateTime.Now : tmpStartDate,
+               Interval = Interval
+            };
 
-            currentTour.Start = tmpStartDate.Equals(DateTime.MinValue) ? DateTime.Now : tmpStartDate;
+            var scope = _serviceProvider.CreateScope();
+            var dbconn = scope.ServiceProvider.GetService<DbConnection>();
+            dbconn!.ConnectionString = _config.GetConnectionString("deuce_local");
+            await dbconn!.OpenAsync();
 
-            currentTour.Interval = this.RepeatInterval;
-
+            DbRepoTournamentProps dbRepo = new(dbconn);
             //Save to the database.
+            await dbRepo.Set(tmp);
 
-            await SetCurrentTournament(currentTour, _service, _config, thisOrg);
          }
-
 
          return NextPage("");
       }
-      catch(Exception ex)
+      catch (Exception ex)
       {
          _log.LogError(ex.Message);
       }
