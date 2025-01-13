@@ -18,6 +18,9 @@ public class BasePageModel : PageModel
 
     protected SessionProxy? _sessionProxy;
 
+    protected IServiceProvider _serviceProvider;
+    protected IConfiguration _config;
+
 
     protected IHandlerNavItems? _handlerNavItems;
     public IEnumerable<NavItem>? NavItems { get => _handlerNavItems?.NavItems; }
@@ -27,9 +30,11 @@ public class BasePageModel : PageModel
     public string? ShowBackButton { get => _showBackButton; set => _showBackButton = value; }
     public string? BackPage { get => _backPage; set => _backPage = value; }
 
-    public BasePageModel(IHandlerNavItems handlerNavItems)
+    public BasePageModel(IHandlerNavItems handlerNavItems, IServiceProvider sp, IConfiguration config)
     {
         _handlerNavItems = handlerNavItems;
+        _serviceProvider = sp;
+        _config = config;
     }
 
     public override void OnPageHandlerExecuting(PageHandlerExecutingContext context)
@@ -91,33 +96,36 @@ public class BasePageModel : PageModel
 
     }
 
-    protected async Task<Tournament?> GetCurrentTournament(IServiceProvider serviceProvider, IConfiguration cfg, Organization organization)
+    protected async Task<Tournament?> GetCurrentTournament(DbConnection? dbconn)
     {
+        //On demand connection
+        if (dbconn is null)
+        {
+            var scope = _serviceProvider.CreateScope();
+            dbconn = scope.ServiceProvider.GetRequiredService<DbConnection>();
+            dbconn.ConnectionString = _config.GetConnectionString("deuce_local");
+            await dbconn.OpenAsync();
+        }
+
         //Check if there's a tournament saved
-        int tourId = _sessionProxy?.TournamentId??0;
+        int tourId = _sessionProxy?.TournamentId ?? 0;
         if (tourId < 1) return null;
+
+        Organization thisOrg = new() { Id = _sessionProxy?.OrganizationId??1 , Name=""};
 
         //Load a the current tournament from the database
         //Create a scoped db connection.
-        using (var scope = serviceProvider.CreateScope())
-        {
-            var dbconn = scope.ServiceProvider.GetService<DbConnection>();
-            if (dbconn is null) return null;
-            //open the connection
-            dbconn.ConnectionString = cfg.GetConnectionString("deuce_local");
-            await dbconn.OpenAsync();
-            //Use a DBRepo to build the object
-            DbRepoTournament dbRepoTour = new DbRepoTournament(dbconn, organization);
-            //Select the tournment.Returns in the first element
-            //Create filter
-            Filter tourFilter = new Filter() { TournamentId = tourId };
-            List<Tournament> listOfTour = await dbRepoTour.GetList(tourFilter);
-            await dbconn.CloseAsync();
+        //Use a DBRepo to build the object
+        DbRepoTournament dbRepoTour = new DbRepoTournament(dbconn, thisOrg);
+        //Select the tournment.Returns in the first element
+        //Create filter
+        Filter tourFilter = new Filter() { TournamentId = tourId };
+        List<Tournament> listOfTour = await dbRepoTour.GetList(tourFilter);
+        await dbconn.CloseAsync();
 
-            return listOfTour.FirstOrDefault();
+        return listOfTour.FirstOrDefault();
 
 
-        }
     }
 
     protected async Task SetCurrentTournament(Tournament obj, IServiceProvider serviceProvider, IConfiguration cfg, Organization organization)
@@ -126,13 +134,13 @@ public class BasePageModel : PageModel
         using (var scope = serviceProvider.CreateScope())
         {
             var dbconn = scope.ServiceProvider.GetService<DbConnection>();
-            if (dbconn is null) return ;
+            if (dbconn is null) return;
             //open the connection
             dbconn.ConnectionString = cfg.GetConnectionString("deuce_local");
             await dbconn.OpenAsync();
             //Use a DBRepo to build the object
             DbRepoTournament dbRepoTour = new DbRepoTournament(dbconn, organization);
-            
+
             await dbRepoTour.Set(obj);
             await dbconn.CloseAsync();
 

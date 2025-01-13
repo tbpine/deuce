@@ -1,5 +1,6 @@
 using System.Data.Common;
 using System.Reflection;
+using System.Xml.Linq;
 using deuce;
 using deuce_web;
 using deuce_web.ext;
@@ -13,32 +14,30 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 public class TournamentFormatTeamsPageModel : BasePageModel
 {
     private readonly ILogger<TournamentFormatTeamsPageModel> _log;
-    private readonly IServiceProvider _serviceProvider;
-    private readonly IConfiguration _config;
     private readonly IFormValidator _formValidator;
     public string? Title { get; set; }
     public string? Error { get; set; }
-    
-    [BindProperty]
-    public string? GamesPerSet { get; set; }
-    
-    [BindProperty]
-    public string? TeamSize { get; set; }
-    
-    [BindProperty]
-    public string? Sets { get; set; }
 
     [BindProperty]
-    public string? NoSingles { get; set; }
+    public int Games { get; set; }
 
     [BindProperty]
-    public string? NoDoubles { get; set; }
+    public int TeamSize { get; set; }
 
     [BindProperty]
-    public int NoTeams { get; set; }
+    public int Sets { get; set; }
 
     [BindProperty]
-    public int CustomNoGames { get; set; }
+    public int NoSingles { get; set; }
+
+    [BindProperty]
+    public int NoDoubles { get; set; }
+
+    [BindProperty]
+    public int NoEntries { get; set; }
+
+    [BindProperty]
+    public int CustomGames { get; set; }
 
     [BindProperty]
     public int CustomTeamSize { get; set; }
@@ -94,11 +93,9 @@ public class TournamentFormatTeamsPageModel : BasePageModel
     };
 
     public TournamentFormatTeamsPageModel(ILogger<TournamentFormatTeamsPageModel> log, IServiceProvider sp,
-    IConfiguration cfg, IFormValidator formValidator, IHandlerNavItems hNavItems) : base(hNavItems)
+    IConfiguration cfg, IFormValidator formValidator, IHandlerNavItems hNavItems) : base(hNavItems, sp, cfg)
     {
         _log = log;
-        _serviceProvider = sp;
-        _config = cfg;
         _formValidator = formValidator;
         _formValidator.Page = this;
     }
@@ -114,19 +111,48 @@ public class TournamentFormatTeamsPageModel : BasePageModel
         DbRepoSport dbRepoSport = new(dbconn);
         var sports = await dbRepoSport.GetList();
 
-        int sportId = this.HttpContext.Session.GetInt32("sport") ?? 0;
-        int tournamentType = this.HttpContext.Session.GetInt32("tournament_type") ?? 0;
 
-        var sport = sports.Find(e => e.Id == sportId);
+        //Load tournament
+        var currentTour = await GetCurrentTournament(dbconn);
 
-        Title = sport?.Label ?? "";
-        
-        this.LoadFromSession();
+        if (currentTour is not null)
+        {
+
+            var sport = sports.Find(e => e.Id == (currentTour?.Sport ?? 0));
+
+            Title = sport?.Label ?? "";
+
+            //Load Tournament detais
+            Organization thisOrg = new() { Id = 1, Name = "testing" };
+
+            DbRepoTournamentDetail repoTourDetail = new(dbconn, organization: thisOrg);
+            Filter filter = new() { TournamentId = currentTour.Id };
+            var tourDetail = (await repoTourDetail.GetList(filter))?.FirstOrDefault();
+
+            if (tourDetail is not null)
+            {
+                //Set page values
+                NoEntries = tourDetail.NoEntries;
+                Games = tourDetail.Games;
+                CustomGames = tourDetail.CustomGames;
+                Sets = tourDetail.Sets;
+                CustomGames = tourDetail.CustomGames;
+                TeamSize = tourDetail.TeamSize;
+                NoSingles = tourDetail.NoSingles  < 6 ? tourDetail.NoSingles : 99 ;
+                NoDoubles = tourDetail.NoDoubles < 6 ? tourDetail.NoDoubles : 99;
+                CustomSingles = tourDetail.NoSingles  < 6 ? 0 : tourDetail.NoSingles ;
+                CustomDoubles = tourDetail.NoDoubles < 6 ? 0 :  tourDetail.NoDoubles ;
+
+            }
+        }
+
+
+        await dbconn.CloseAsync();
 
         return Page();
     }
 
-    public IActionResult OnPost()
+    public async Task<IActionResult> OnPost()
     {
 
 
@@ -137,17 +163,39 @@ public class TournamentFormatTeamsPageModel : BasePageModel
         if (!ValidateForm(ref err))
         {
             Error = err;// GetErrorMessage(_formValidator.ErrorElement ?? "");
-            this.SaveToSession();
             return Page();
         }
-        
-        this.SaveToSession();
-        
+
+
         //No Error, hide the error message on page.
         Error = String.Empty;
 
         //Everything is fine, proceed to
         //the tournament schedule page.
+        //Save to db
+        int currentTournamentId = _sessionProxy?.TournamentId ?? 0;
+        if (currentTournamentId > 0)
+        {
+            TournamentDetail tourDetail = new()
+            {
+                TournamentId = currentTournamentId,
+                NoEntries = NoEntries,
+                Sets = Sets,
+                Games = Games,
+                CustomGames = CustomGames,
+                NoSingles = NoSingles < 6 ? NoSingles : CustomSingles,
+                NoDoubles = NoDoubles < 6 ? NoDoubles : CustomDoubles,
+                TeamSize = TeamSize
+            };
+
+            var scope = _serviceProvider.CreateScope();
+            var dbconn = scope.ServiceProvider.GetService<DbConnection>();
+            dbconn!.ConnectionString = _config.GetConnectionString("deuce_local");
+            await dbconn.OpenAsync();
+            Organization thisOrg = new() { Id = _sessionProxy?.OrganizationId ?? 1 };
+            DbRepoTournamentDetail dbRepoTournameDetail = new(dbconn, thisOrg);
+            await dbRepoTournameDetail.Set(tourDetail);
+        }
 
         return NextPage("");
 
@@ -156,64 +204,29 @@ public class TournamentFormatTeamsPageModel : BasePageModel
 
     private bool ValidateForm(ref string err)
     {
-        if (NoTeams < 2)
+        if (NoEntries < 2)
         {
             err = "Total players for this tournament must be greater than 2 (and a valid number) !";
             return false;
         }
 
-        if (String.IsNullOrEmpty(GamesPerSet))
-        {
-            err = "Select or specify how many games per set (Games per set *)";
-            return false;
-        }
-
-        if (GamesPerSet == "99" && CustomNoGames == 0)
-        {
-            err = "Invalid number of custom games per set";
-            return false;
-        }
-
-        if (String.IsNullOrEmpty(TeamSize))
+        if (TeamSize < 1)
         {
             err = "Select or specify no of players in a team (Team Size *)";
             return false;
         }
 
 
-        if (TeamSize == "99" && CustomTeamSize == 0)
-        {
-            err = "Specify a team size";
-            return false;
-        }
-
-        if (String.IsNullOrEmpty(Sets))
-        {
-            err = "Select number of sets played per match (Sets *)";
-            return false;
-        }
-
-        if (String.IsNullOrEmpty(NoSingles))
+        if (NoSingles < 1)
         {
             err = "Select or specify how many singles are played between teams (No Singles *)";
             return false;
         }
 
-        if (NoSingles == "99" && CustomSingles == 0)
-        {
-            err = "Specify a team size";
-            return false;
-        }
 
-        if (String.IsNullOrEmpty(NoDoubles))
+        if (NoDoubles < 1)
         {
             err = "Select or specify how many doubles are played between teams (No Doubles *)";
-            return false;
-        }
-
-        if (NoDoubles == "99" && CustomDoubles == 0)
-        {
-            err = "Invalid number of custom doubles specified played between teams";
             return false;
         }
 

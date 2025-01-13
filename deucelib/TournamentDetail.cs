@@ -9,6 +9,7 @@ public class TournamentDetail
     private int _customGames;
     private int _noSingles;
     private int _noDoubles;
+    private int _teamSize;
 
     public int TournamentId { get { return _tournamentId; } set { _tournamentId = value; } }
     public int NoEntries { get { return _noEntries; } set { _noEntries = value; } }
@@ -17,6 +18,7 @@ public class TournamentDetail
     public int CustomGames { get { return _customGames; } set { _customGames = value; } }
     public int NoSingles { get { return _noSingles; } set { _noSingles = value; } }
     public int NoDoubles { get { return _noDoubles; } set { _noDoubles = value; } }
+    public int TeamSize { get { return _teamSize; } set { _teamSize = value; } }
 
 
 }

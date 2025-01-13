@@ -4,4 +4,5 @@
 public interface ISessionProxy
 {
     public int TournamentId { get; set; }
+    public int OrganizationId { get; set; }
 }
