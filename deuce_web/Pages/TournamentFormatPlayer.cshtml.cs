@@ -21,18 +21,18 @@ public class TournamentFormatPlayerPageModel : BasePageModel
     public string? Error { get; set; }
 
     [BindProperty]
-    public int NoPlayers { get; set; }
+    public int NoEntries { get; set; }
 
     [BindProperty]
-    public string? GamesPerSet { get; set; }
-
-
-    [BindProperty]
-    public string? Sets { get; set; }
+    public int Games { get; set; }
 
 
     [BindProperty]
-    public int CustomNoGames { get; set; }
+    public int Sets { get; set; }
+
+
+    [BindProperty]
+    public int CustomGames { get; set; }
 
 
     public List<SelectListItem> SelectSets = new List<SelectListItem>()
@@ -65,8 +65,110 @@ public class TournamentFormatPlayerPageModel : BasePageModel
 
     public async Task<IActionResult> OnGet()
     {
-        this.LoadFromSession();
+
+        //Load tournament details
+        //If there's a current tournament
+        try
+        {
+            return await LoadPage();
+        }
+        catch (Exception ex)
+        {
+            _log.LogError(ex.Message);
+        }
+
+
+        return Page();
+    }
+
+    public async Task<IActionResult> OnPost()
+    {
+
+        try
+        {
+            //Save what you can to the session
+            //Form validation.
+            //Check required form values
+            string err = "";
+            if (!ValidateForm(ref err))
+            {
+                Error = err;// GetErrorMessage(_formValidator.ErrorElement ?? "");
+                            // this.SaveToSession();
+                return await LoadPage();
+            }
+
+            // this.SaveToSession();
+
+            //No Error, hide the error message on page.
+            Error = String.Empty;
+
+            int currentTourId = _sessionProxy?.TournamentId ?? 0;
+            if (currentTourId > 0)
+            {
+                TournamentDetail tourDetails = new()
+                {
+                    TournamentId = currentTourId,
+                    NoEntries = NoEntries,
+                    Games = Games,
+                    Sets = Sets,
+                    CustomGames = CustomGames
+
+                };
+                Organization thisOrg = new Organization(){Id=1, Name="testing"};
+                //Save to DB
+                var scope = _serviceProvider.CreateScope();
+                var dbconn = scope.ServiceProvider.GetService<DbConnection>();
+                
+                if (dbconn is not null)
+                {
+                    dbconn.ConnectionString = _config.GetConnectionString("deuce_local");
+                    await dbconn.OpenAsync();
+                    DbRepoTournamentDetail dbRepoTourDetail = new (dbconn, thisOrg);
+                    await dbRepoTourDetail.Set(tourDetails);
+                    await dbconn.CloseAsync();
+
+                }
+
+            }
+
+        }
+        catch (Exception ex)
+        {
+            _log.LogError(ex.Message);
+        }
+
+
+
+        return NextPage("");
+
+    }
+
+
+    private bool ValidateForm(ref string err)
+    {
+        if (NoEntries < 2)
+        {
+            err = "Total players for this tournament must be greater than 2 (and a valid number) !";
+            return false;
+        }
         
+
+        if (Games == 99 && CustomGames == 0)
+        {
+            err = "Invalid number of custom games per set";
+            return false;
+        }
+
+
+        return true;
+
+    }
+
+
+    private async Task<IActionResult> LoadPage()
+    {
+        // this.LoadFromSession();
+
         Organization thisOrg = new() { Id = 1, Name = "testing" };
 
         var scope = _serviceProvider.CreateScope();
@@ -76,10 +178,8 @@ public class TournamentFormatPlayerPageModel : BasePageModel
 
         DbRepoSport dbRepoSport = new(dbconn);
         var sports = await dbRepoSport.GetList();
-        //Load tournament details
-        //If there's a current tournament
 
-        int currentTourId = HttpContext.Session.GetInt32("CurrentTournament") ?? 0;
+        int currentTourId = _sessionProxy?.TournamentId ?? 0;
 
         if (currentTourId > 0)
         {
@@ -90,14 +190,16 @@ public class TournamentFormatPlayerPageModel : BasePageModel
             if (tourDetail is not null)
             {
                 //Set page values
-                NoPlayers = tourDetail.NoEntries;
-                GamesPerSet = tourDetail.Games.ToString();
-                Sets = tourDetail.Sets.ToString();
+                NoEntries = tourDetail.NoEntries;
+                Games = tourDetail.Games;
+                Sets = tourDetail.Sets;
+                CustomGames = tourDetail.CustomGames;
+
             }
 
             var tour = await GetCurrentTournament(_serviceProvider, _config, thisOrg);
 
-            int sportId = tour?.Sport??1;
+            int sportId = tour?.Sport ?? 1;
 
             var sport = sports.Find(e => e.Id == sportId);
 
@@ -107,72 +209,6 @@ public class TournamentFormatPlayerPageModel : BasePageModel
         }
 
         await dbconn.CloseAsync();
-
-
-        
-
         return Page();
     }
-
-    public IActionResult OnPost()
-    {
-
-
-        //Save what you can to the session
-        //Form validation.
-        //Check required form values
-        string err = "";
-        if (!ValidateForm(ref err))
-        {
-            Error = err;// GetErrorMessage(_formValidator.ErrorElement ?? "");
-            this.SaveToSession();
-            return Page();
-        }
-
-        this.SaveToSession();
-
-        //No Error, hide the error message on page.
-        Error = String.Empty;
-
-        //Everything is fine, proceed to
-        //the tournament schedule page.
-
-        return NextPage("");
-
-    }
-
-
-    private bool ValidateForm(ref string err)
-    {
-        if (NoPlayers < 2)
-        {
-            err = "Total players for this tournament must be greater than 2 (and a valid number) !";
-            return false;
-        }
-        Debug.WriteLine(GamesPerSet);
-        if (String.IsNullOrEmpty(GamesPerSet))
-        {
-            err = "Select or specify how many games per set (Games per set *)";
-            return false;
-        }
-
-        if (GamesPerSet == "99" && CustomNoGames == 0)
-        {
-            err = "Invalid number of custom games per set";
-            return false;
-        }
-
-
-        if (String.IsNullOrEmpty(Sets))
-        {
-            err = "Select number of sets played per match (Sets *)";
-            return false;
-        }
-
-
-        return true;
-
-    }
-
-
 }

@@ -1,10 +1,7 @@
 using System.Data.Common;
-using System.Diagnostics;
 using deuce;
 using deuce_web.ext;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
-using MySqlX.XDevAPI;
 
 /// <summary>
 /// 
@@ -13,14 +10,14 @@ public class TournamentDetailPageModel : BasePageModel
 {
     private readonly ILogger<TournamentDetailPageModel> _log;
 
-    public IEnumerable<Sport>? Sports{ get; set; }
-    public IEnumerable<TournamentType>? TournamentTypes{ get; set; }
+    public IEnumerable<Sport>? Sports { get; set; }
+    public IEnumerable<TournamentType>? TournamentTypes { get; set; }
     private IServiceProvider _serviceProvider;
     private IConfiguration _configuration;
 
     [BindProperty]
     public int SelectedSportId { get; set; }
-    
+
     [BindProperty]
     public int SelectedTourType { get; set; }
 
@@ -35,46 +32,22 @@ public class TournamentDetailPageModel : BasePageModel
     IConfiguration config, IHandlerNavItems hNavItems) : base(hNavItems)
     {
         _log = log;
-        _serviceProvider= sp;
+        _serviceProvider = sp;
         _configuration = config;
     }
 
     public async Task<IActionResult> OnGet()
     {
-        this.LoadFromSession();
-        //Database overrides ?
 
-        Organization organization= new Organization(){Id = 1, Name="testing"};
-        Tournament? currentTour = await this.GetCurrentTournament(_serviceProvider, _configuration, organization);
-        if (currentTour is not null)
+        try
         {
-            SelectedSportId = currentTour.Sport;
-            SelectedTourType = currentTour.Type;
-            EventLabel = currentTour.Label??EventLabel;
-            EntryType = currentTour.EntryType;
+            await LoadPage();
         }
-        
-        var scope = _serviceProvider.CreateScope();
+        catch (Exception ex)
+        {
+            _log.LogError(ex.Message);
+        }
 
-        var dbconn = scope.ServiceProvider.GetService<DbConnection>();
-        dbconn!.ConnectionString = _configuration.GetConnectionString("deuce_local");
-
-        await dbconn!.OpenAsync();
-
-        //Load page options from e from the database
-        DbRepoSport dbRepoSport = new DbRepoSport(dbconn);
-        Sports  = await dbRepoSport.GetList();
-
-        DbRepoTournamentType dbRepoTourType = new DbRepoTournamentType(dbconn);
-
-        TournamentTypes = await dbRepoTourType.GetList();
-
-        await dbconn!.CloseAsync();
-        if (SelectedSportId == 0) SelectedSportId = 1;
-        if (SelectedTourType == 0) SelectedTourType = 1;
-        if (EntryType == 0) EntryType = 1;
-
-        
 
         return Page();
     }
@@ -83,7 +56,7 @@ public class TournamentDetailPageModel : BasePageModel
     {
         //Save page properties to session
         //Todo: Move manual form values
-        string tmpEventLabel = string.IsNullOrEmpty(EventLabel)? Randomizer.GetRandomString(32) : EventLabel;
+        string tmpEventLabel = string.IsNullOrEmpty(EventLabel) ? Randomizer.GetRandomString(32) : EventLabel;
         EventLabel = tmpEventLabel;
 
         this.SaveToSession();
@@ -91,7 +64,7 @@ public class TournamentDetailPageModel : BasePageModel
         using (var scope = _serviceProvider.CreateScope())
         {
             DbConnection? dbconn = scope.ServiceProvider.GetService<DbConnection>();
-            if (dbconn is not null) 
+            if (dbconn is not null)
             {
                 dbconn.ConnectionString = _configuration.GetConnectionString("deuce_local");
                 await dbconn?.OpenAsync()!;
@@ -99,16 +72,16 @@ public class TournamentDetailPageModel : BasePageModel
                 Tournament tournament = new();
 
                 //Load the current tournament id
-                int currentTournamentId = this.HttpContext.Session.GetInt32("CurrentTournament")??0;
-                Organization org = new Organization() { Id = 1, Name = "testing"};
+                int currentTournamentId = this.HttpContext.Session.GetInt32("CurrentTournament") ?? 0;
+                Organization org = new Organization() { Id = 1, Name = "testing" };
                 tournament.Id = currentTournamentId;
                 tournament.Label = EventLabel;
                 tournament.Sport = SelectedSportId;
                 tournament.Type = SelectedTourType;
                 tournament.Organization = org;
                 tournament.EntryType = EntryType;
-                
-                DbRepoTournament dbrepoTour = new DbRepoTournament(dbconn,org);
+
+                DbRepoTournament dbrepoTour = new DbRepoTournament(dbconn, org);
                 //Save the tournament to db
                 await dbrepoTour.Set(tournament);
                 //Save tournament id
@@ -126,6 +99,48 @@ public class TournamentDetailPageModel : BasePageModel
             return NextPage("/TournamentFormatPlayer");
 
         return Page();
+    }
+
+    private async Task LoadPage()
+    {
+        var scope = _serviceProvider.CreateScope();
+
+        var dbconn = scope.ServiceProvider.GetService<DbConnection>();
+        dbconn!.ConnectionString = _configuration.GetConnectionString("deuce_local");
+        await dbconn!.OpenAsync();
+
+        //Load page options from the from the database
+        DbRepoSport dbRepoSport = new DbRepoSport(dbconn);
+        Sports = await dbRepoSport.GetList();
+
+        DbRepoTournamentType dbRepoTourType = new DbRepoTournamentType(dbconn);
+
+        TournamentTypes = await dbRepoTourType.GetList();
+
+        await dbconn!.CloseAsync();
+        // this.LoadFromSession();
+        //Load from database
+        //Set default vales;
+
+        Organization organization = new Organization() { Id = 1, Name = "testing" };
+        
+        Tournament? currentTour = await this.GetCurrentTournament(_serviceProvider, _configuration, organization);
+        if (currentTour is not null)
+        {
+            SelectedSportId = currentTour.Sport;
+            SelectedTourType = currentTour.Type;
+            EventLabel = currentTour.Label ?? EventLabel;
+            EntryType = currentTour.EntryType;
+        }
+        else
+        {
+            SelectedSportId = 1;
+            SelectedTourType = 1;
+            EventLabel = "";
+            EntryType = 1;
+            //Default values
+        }
+
     }
 
 }

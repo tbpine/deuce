@@ -5,6 +5,7 @@ using Org.BouncyCastle.Asn1;
 using Microsoft.AspNetCore.Mvc;
 using deuce;
 using System.Data.Common;
+using MySqlX.XDevAPI;
 
 public class BasePageModel : PageModel
 {
@@ -14,6 +15,8 @@ public class BasePageModel : PageModel
     protected bool _loggedIn = false;
     protected string? _showBackButton;
     protected string? _backPage;
+
+    protected SessionProxy? _sessionProxy;
 
 
     protected IHandlerNavItems? _handlerNavItems;
@@ -32,6 +35,8 @@ public class BasePageModel : PageModel
     public override void OnPageHandlerExecuting(PageHandlerExecutingContext context)
     {
         base.OnPageHandlerExecuting(context);
+        //Manage session
+        _sessionProxy = new SessionProxy(context.HttpContext.Session);
 
         if (_handlerNavItems is null) return;
 
@@ -89,7 +94,7 @@ public class BasePageModel : PageModel
     protected async Task<Tournament?> GetCurrentTournament(IServiceProvider serviceProvider, IConfiguration cfg, Organization organization)
     {
         //Check if there's a tournament saved
-        int tourId = HttpContext.Session.GetInt32("CurrentTournament") ?? 0;
+        int tourId = _sessionProxy?.TournamentId??0;
         if (tourId < 1) return null;
 
         //Load a the current tournament from the database
