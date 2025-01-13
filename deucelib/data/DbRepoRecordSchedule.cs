@@ -30,21 +30,21 @@ public class DbRepoRecordSchedule : DbRepoBase<RecordSchedule>
             cmd.CommandType = System.Data.CommandType.StoredProcedure;
             cmd.Parameters.Add(cmd.CreateWithValue("p_tournament", filter.TournamentId));
 
-            var reader = await cmd.ExecuteReaderAsync();
+            var reader = new SafeDataReader(await cmd.ExecuteReaderAsync());
 
-            while(reader.Read())
+            while(reader.Target.Read())
             {
-                result.Add(new RecordSchedule(reader.Parse<int>("match_id"),
-                                              reader.Parse<int>("permutation"),
-                                              reader.Parse<int>("round"),
-                                              reader.Parse<int>("player_home"),
-                                              reader.Parse<int>("player_away"),
-                                              reader.Parse<int>("team_home"),
-                                              reader.Parse<int>("team_away")
+                result.Add(new RecordSchedule(reader.Target.Parse<int>("match_id"),
+                                              reader.Target.Parse<int>("permutation"),
+                                              reader.Target.Parse<int>("round"),
+                                              reader.Target.Parse<int>("player_home"),
+                                              reader.Target.Parse<int>("player_away"),
+                                              reader.Target.Parse<int>("team_home"),
+                                              reader.Target.Parse<int>("team_away")
                                               
                                               ));
             }
-            reader.Close();
+            reader.Target.Close();
 
         }
 

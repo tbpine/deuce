@@ -17,7 +17,6 @@ public class DbRepoTournamentProps : DbRepoBase<Tournament>
 
     public override async Task Set(Tournament obj)
     {
-        List<Sport> sports = new();
 
         //Insert into the team table
         var cmd = _dbconn.CreateCommand();

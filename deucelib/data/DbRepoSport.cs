@@ -30,17 +30,17 @@ public class DbRepoSport : DbRepoBase<Sport>
             cmd.CommandText = "sp_get_sports";
             cmd.CommandType = System.Data.CommandType.StoredProcedure;
 
-            var reader = await cmd.ExecuteReaderAsync();
+            var reader = new SafeDataReader(await cmd.ExecuteReaderAsync());
             
-            while (reader.Read())
+            while (reader.Target.Read())
             {
-                sports.Add(new Sport(reader.Parse<int>("id"), reader.Parse<string>("label"),
-                reader.Parse<string>("name"),
-                reader.Parse<string>("key"),
-                reader.Parse<string>("icon")));
+                sports.Add(new Sport(reader.Target.Parse<int>("id"), reader.Target.Parse<string>("label"),
+                reader.Target.Parse<string>("name"),
+                reader.Target.Parse<string>("key"),
+                reader.Target.Parse<string>("icon")));
             }
 
-            reader.Close();
+            reader.Target.Close();
 
         }
 

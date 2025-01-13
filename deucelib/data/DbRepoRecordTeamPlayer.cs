@@ -24,27 +24,27 @@ public class DbRepoRecordTeamPlayer : DbRepoBase<RecordTeamPlayer>
             cmd.CommandType = System.Data.CommandType.StoredProcedure;
 
             cmd.Parameters.Add(cmd.CreateWithValue("p_tournament", filter.TournamentId));
-            var reader = await cmd.ExecuteReaderAsync();
+            var reader = new SafeDataReader(await cmd.ExecuteReaderAsync());
 
-            while (reader.Read())
+            while (reader.Target.Read())
             {
                 RecordTeamPlayer recordTeamPlayer = new(
-                    reader.Parse<int>("id"),
-                    reader.Parse<int>("club"),
-                    reader.Parse<int>("tournament"),
-                    reader.Parse<string>("team"),
-                    reader.Parse<int>("team_id"),
-                    reader.Parse<int>("player_id"),
-                    reader.Parse<string>("first_name"),
-                    reader.Parse<string>("last_name"),
-                    reader.Parse<double>("utr")
+                    reader.Target.Parse<int>("id"),
+                    reader.Target.Parse<int>("club"),
+                    reader.Target.Parse<int>("tournament"),
+                    reader.Target.Parse<string>("team"),
+                    reader.Target.Parse<int>("team_id"),
+                    reader.Target.Parse<int>("player_id"),
+                    reader.Target.Parse<string>("first_name"),
+                    reader.Target.Parse<string>("last_name"),
+                    reader.Target.Parse<double>("utr")
 
                 );
 
                 list.Add(recordTeamPlayer);
             }
 
-            reader.Close();
+            reader.Target.Close();
         }
 
         return list;

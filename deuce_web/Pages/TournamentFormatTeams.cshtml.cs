@@ -105,6 +105,7 @@ public class TournamentFormatTeamsPageModel : BasePageModel
 
         var scope = _serviceProvider.CreateScope();
         var dbconn = scope.ServiceProvider.GetService<DbConnection>();
+
         dbconn!.ConnectionString = _config.GetConnectionString("deuce_local");
         await dbconn.OpenAsync();
 

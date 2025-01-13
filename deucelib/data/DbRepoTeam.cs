@@ -51,14 +51,14 @@ public class DbRepoTeam : DbRepoBase<Team>
             cmd.CommandType = System.Data.CommandType.StoredProcedure;
             cmd.Parameters.Add(cmd.CreateWithValue("p_organization", filter.ClubId));
 
-            var reader = await cmd.ExecuteReaderAsync();
+            var reader = new SafeDataReader(await cmd.ExecuteReaderAsync());
 
-            while (reader.Read())
+            while (reader.Target.Read())
             {
                 Team team = new()
                 {
-                    Id = reader.Parse<int>("id"),
-                    Label = reader.Parse<string>("label")
+                    Id = reader.Target.Parse<int>("id"),
+                    Label = reader.Target.Parse<string>("label")
                 };
                 team.Club = Club;
 

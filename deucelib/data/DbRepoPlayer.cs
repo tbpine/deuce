@@ -27,22 +27,22 @@ public class DbRepoPlayer : DbRepoBase<Player>
             cmd.CommandType = System.Data.CommandType.StoredProcedure;
 
             cmd.Parameters.Add(cmd.CreateWithValue("p_organization", filter.ClubId));
-            var reader = await cmd.ExecuteReaderAsync();
+            var reader = new SafeDataReader(await cmd.ExecuteReaderAsync());
 
-            while (reader.Read())
+            while (reader.Target.Read())
             {
                 Player p = new() {
-                    Id = reader.Parse<int>("id"),
+                    Id = reader.Target.Parse<int>("id"),
                     Club = _club,
-                    First = reader.Parse<string>("first_name"),
-                    Last = reader.Parse<string>("last_name"),
-                    Ranking = reader.Parse<double>("utr")
+                    First = reader.Target.Parse<string>("first_name"),
+                    Last = reader.Target.Parse<string>("last_name"),
+                    Ranking = reader.Target.Parse<double>("utr")
                 };
 
                 players.Add(p);
             }
 
-            reader.Close();
+            reader.Target.Close();
         }
 
         return players;

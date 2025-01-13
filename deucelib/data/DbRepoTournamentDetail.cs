@@ -33,18 +33,18 @@ public class DbRepoTournamentDetail : DbRepoBase<TournamentDetail>
         cmd.CommandType = CommandType.StoredProcedure;
         cmd.Parameters.Add(cmd.CreateWithValue("p_tour", filter.TournamentId));
 
-        DbDataReader reader = await cmd.ExecuteReaderAsync();
+        var reader = new SafeDataReader(await cmd.ExecuteReaderAsync());
         List<TournamentDetail> list = new();
 
-        while (reader.Read())
+        while (reader.Target.Read())
         {
-            int tournamentId = reader.Parse<int>("tournament");
-            int entries = reader.Parse<int>("no_entries");
-            int sets = reader.Parse<int>("sets");
-            int games = reader.Parse<int>("games");
-            int customGames = reader.Parse<int>("custom_games");
-            int noSingles = reader.Parse<int>("no_singles");
-            int noDoubles = reader.Parse<int>("no_doubles");
+            int tournamentId = reader.Target.Parse<int>("tournament");
+            int entries = reader.Target.Parse<int>("no_entries");
+            int sets = reader.Target.Parse<int>("sets");
+            int games = reader.Target.Parse<int>("games");
+            int customGames = reader.Target.Parse<int>("custom_games");
+            int noSingles = reader.Target.Parse<int>("no_singles");
+            int noDoubles = reader.Target.Parse<int>("no_doubles");
 
             list.Add(new TournamentDetail
             {
@@ -58,7 +58,7 @@ public class DbRepoTournamentDetail : DbRepoBase<TournamentDetail>
 
             });
         }
-        reader.Close();
+        reader.Target.Close();
         return list;
     }
 

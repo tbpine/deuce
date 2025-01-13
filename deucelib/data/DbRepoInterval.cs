@@ -27,18 +27,18 @@ public class DbRepoInterval : DbRepoBase<Interval>
         cmd.CommandText = "sp_get_interval";
         cmd.CommandType = CommandType.StoredProcedure;
 
-        DbDataReader reader = await cmd.ExecuteReaderAsync();
+        var reader = new SafeDataReader(await cmd.ExecuteReaderAsync());
         List<Interval> list=new();
 
-        while(reader.Read())
+        while(reader.Target.Read())
         {
-            int id = reader.Parse<int>("id");
-            string label = reader.Parse<string>("label");
+            int id = reader.Target.Parse<int>("id");
+            string label = reader.Target.Parse<string>("label");
 
             list.Add(new Interval(id, label));
         }
 
-        reader.Close();
+        reader.Target.Close();
         
         return list;
     }

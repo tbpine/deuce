@@ -29,21 +29,21 @@ public class DbRepoTournamentType : DbRepoBase<TournamentType>
         cmd.CommandText = "sp_get_tournament_type";
         cmd.CommandType = CommandType.StoredProcedure;
 
-        DbDataReader reader = await cmd.ExecuteReaderAsync();
+        var reader =new SafeDataReader(await cmd.ExecuteReaderAsync());
         List<TournamentType> list=new();
 
-        while(reader.Read())
+        while(reader.Target.Read())
         {
-            int id = reader.Parse<int>("id");
-            string label = reader.Parse<string>("label");
-            string name = reader.Parse<string>("name");
-            string key = reader.Parse<string>("key");
-            string icon = reader.Parse<string>("icon");
+            int id = reader.Target.Parse<int>("id");
+            string label = reader.Target.Parse<string>("label");
+            string name = reader.Target.Parse<string>("name");
+            string key = reader.Target.Parse<string>("key");
+            string icon = reader.Target.Parse<string>("icon");
 
             list.Add(new TournamentType(id, label, name, key, icon));
         }
 
-        reader.Close();
+        reader.Target.Close();
         
         return list;
     }

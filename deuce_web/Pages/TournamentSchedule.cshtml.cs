@@ -65,12 +65,15 @@ public class TournamentSchedulePageModel : BasePageModel
 
             var scope = _serviceProvider.CreateScope();
             var dbconn = scope.ServiceProvider.GetService<DbConnection>();
-            dbconn!.ConnectionString = _config.GetConnectionString("deuce_local");
-            await dbconn!.OpenAsync();
+            if (dbconn is not null)
+            {
+               dbconn.ConnectionString = _config.GetConnectionString("deuce_local");
+               await dbconn.OpenAsync();
 
-            DbRepoTournamentProps dbRepo = new(dbconn);
-            //Save to the database.
-            await dbRepo.Set(tmp);
+               DbRepoTournamentProps dbRepo = new(dbconn);
+               //Save to the database.
+               await dbRepo.Set(tmp);
+            }
 
          }
 

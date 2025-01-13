@@ -625,7 +625,29 @@ IN p_start DATETIME
 
 BEGIN
 UPDATE `tournament` SET `interval` =  p_interval, `start` = p_start
-WHERE `tournament` = p_tournament;
+WHERE `id` = p_tournament;
+
+END//
+
+
+DROP PROCEDURE IF EXISTS `sp_clear_all_tour`//
+
+CREATE PROCEDURE `sp_clear_all_tour`(
+)  BEGIN
+
+truncate `team_player`;
+truncate `team`;
+truncate `match`;
+truncate `match_player`;
+truncate `tournament`;
+truncate `tournament_detail`;
+
+alter table `team_player` auto_increment = 1;
+alter table `team` auto_increment = 1;
+alter table `match` auto_increment = 1;
+alter table `match_player` auto_increment = 1;
+alter table `tournament` auto_increment = 1;
+alter table `tournament_detail` auto_increment = 1;
 
 END//
 

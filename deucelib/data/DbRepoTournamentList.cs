@@ -33,25 +33,25 @@ public class DbRepoTournamentList : DbRepoBase<Tournament>
         cmd.CommandType = CommandType.StoredProcedure;
         cmd.Parameters.Add(cmd.CreateWithValue("p_organization", filter.ClubId));
         
-        DbDataReader reader = await cmd.ExecuteReaderAsync();
+        var reader = new SafeDataReader(await cmd.ExecuteReaderAsync());
         List<Tournament> list = new();
 
-        while (reader.Read())
+        while (reader.Target.Read())
         {
-            int id = reader.Parse<int>("id");
-            string label = reader.Parse<string>("label");
-            DateTime start = reader.Parse<DateTime>("start");
-            DateTime end = reader.Parse<DateTime>("end");
+            int id = reader.Target.Parse<int>("id");
+            string label = reader.Target.Parse<string>("label");
+            DateTime start = reader.Target.Parse<DateTime>("start");
+            DateTime end = reader.Target.Parse<DateTime>("end");
 
-            int interval = reader.Parse<int>("interval");
-            int steps = reader.Parse<int>("steps");
-            int type = reader.Parse<int>("type");
-            int max = reader.Parse<int>("max");
+            int interval = reader.Target.Parse<int>("interval");
+            int steps = reader.Target.Parse<int>("steps");
+            int type = reader.Target.Parse<int>("type");
+            int max = reader.Target.Parse<int>("max");
 
-            float fee = reader.Parse<float>("fee");
-            float prize = reader.Parse<float>("prize");
-            bool useRanking = reader.Parse<int>("seedings") == 1;
-            int sportId = reader.Parse<int>("sport");
+            float fee = reader.Target.Parse<float>("fee");
+            float prize = reader.Target.Parse<float>("prize");
+            bool useRanking = reader.Target.Parse<int>("seedings") == 1;
+            int sportId = reader.Target.Parse<int>("sport");
 
             list.Add(new Tournament
             {
