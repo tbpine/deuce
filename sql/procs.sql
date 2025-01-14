@@ -569,7 +569,7 @@ IN p_tour INT
 BEGIN
 
 	SELECT `tournament`,`no_entries`,`sets`,`games`,`updated_datetime`,`created_datetime`,
-    `custom_games`,`no_singles`,`no_doubles`
+    `team_size`, `custom_games`,`no_singles`,`no_doubles`
 	FROM `tournament_detail`
     where `tournament` = p_tour
 	ORDER BY `tournament`;
@@ -586,16 +586,17 @@ IN p_no_entries INT,
 IN p_sets INT,
 IN p_games INT,
 IN p_custom_games INT,
+IN p_team_size INT,
 IN p_no_singles INT,
 IN p_no_doubles INT
 )
 
 BEGIN
 
-INSERT INTO `tournament_detail`(`tournament`,`no_entries`,`sets`,`games`,`custom_games`,`no_singles`,`no_doubles`, `updated_datetime`,`created_datetime`) 
-VALUES (p_tournament, p_no_entries, p_sets, p_games, p_custom_games, p_no_singles, no_doubles, NOW(), NOW())
+INSERT INTO `tournament_detail`(`tournament`,`no_entries`,`sets`,`games`,`custom_games`,`team_size`,`no_singles`,`no_doubles`, `updated_datetime`,`created_datetime`) 
+VALUES (p_tournament, p_no_entries, p_sets, p_games, p_custom_games, p_team_size, p_no_singles, no_doubles, NOW(), NOW())
 ON DUPLICATE KEY UPDATE `no_entries` = p_no_entries,`sets` = p_sets, `games` = p_games, `custom_games` = p_custom_games,
-`no_singles` = p_no_singles , `no_doubles` = p_no_doubles, `updated_datetime` = NOW();
+`team_size` = p_team_size, `no_singles` = p_no_singles , `no_doubles` = p_no_doubles, `updated_datetime` = NOW();
 
 END//
 

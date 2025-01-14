@@ -4,6 +4,7 @@ using deuce_web.ext;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.VisualBasic;
 
 /// <summary>
 /// 
@@ -11,7 +12,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 public class TournamentSchedulePageModel : BasePageModel
 {
    private readonly ILogger<TournamentSchedulePageModel> _log;
-
+   private const string DateFormat = "dd/MM/yyyy";
 
    private List<SelectListItem> _selectInterval = new List<SelectListItem>()
    {
@@ -37,8 +38,23 @@ public class TournamentSchedulePageModel : BasePageModel
       _log = log;
    }
 
-   public ActionResult OnGet()
+   public async Task<ActionResult> OnGet()
    {
+      //Load tournament schedule here
+      var currentTour = await GetCurrentTournament(null);
+      if (currentTour is not null)
+      {
+         Interval = currentTour.Interval;
+         StartDate = currentTour.Start.ToString(DateFormat);
+      }
+
+      //Defaults
+
+
+      if (StartDate == DateTime.MinValue.ToString(DateFormat)) StartDate = DateTime.Now.ToString(DateFormat);
+      if (Interval < 1) Interval = 4;
+
+      //Set page values
       return Page();
    }
 
@@ -54,12 +70,12 @@ public class TournamentSchedulePageModel : BasePageModel
          {
 
             //Set start date and interval
-            DateTime tmpStartDate = DateTime.TryParse(this.StartDate, out tmpStartDate) ? tmpStartDate : DateTime.MinValue;
+            DateTime tmpStartDate = DateTime.TryParse(StartDate, out tmpStartDate) ? tmpStartDate : DateTime.Now;
             //Partial object
             Tournament tmp = new()
             {
                Id = currentTourId,
-               Start = tmpStartDate.Equals(DateTime.MinValue) ? DateTime.Now : tmpStartDate,
+               Start = tmpStartDate,
                Interval = Interval
             };
 

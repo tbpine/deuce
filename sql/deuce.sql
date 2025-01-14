@@ -60,6 +60,7 @@ CREATE TABLE IF NOT EXISTS `tournament_detail` (
     `sets` 				INT,
     `games` 			INT,
     `custom_games`		INT,
+    `team_size`			INT,
     `no_singles`		INT,
     `no_doubles`		INT,
     `updated_datetime`	TIMESTAMP,

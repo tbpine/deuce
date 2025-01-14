@@ -13,7 +13,7 @@
           <div class="col">
             <label class="form-label">Start *</label>
             <div class="position-relative">
-              <input type="text" class="form-control form-icon-end" id="StartDate" data-datepicker placeholder="Choose date" name="StartDate" value="@Model.StartDate">
+              <input type="text" class="form-control form-icon-end" asp-for="StartDate"  data-datepicker='{"dateFormat": "d/m/Y"}' placeholder="Choose date" >
     
               <i class="fi-calendar position-absolute top-50 end-0 translate-middle-y me-3"></i>
             </div>

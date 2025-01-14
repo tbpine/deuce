@@ -45,6 +45,7 @@ public class DbRepoTournamentDetail : DbRepoBase<TournamentDetail>
             int customGames = reader.Target.Parse<int>("custom_games");
             int noSingles = reader.Target.Parse<int>("no_singles");
             int noDoubles = reader.Target.Parse<int>("no_doubles");
+            int teamSize = reader.Target.Parse<int>("team_size");
 
             list.Add(new TournamentDetail
             {
@@ -54,7 +55,8 @@ public class DbRepoTournamentDetail : DbRepoBase<TournamentDetail>
                 Games = games,
                 CustomGames = customGames,
                 NoSingles = noSingles,
-                NoDoubles = noDoubles
+                NoDoubles = noDoubles,
+                TeamSize = teamSize
 
             });
         }
@@ -75,6 +77,8 @@ public class DbRepoTournamentDetail : DbRepoBase<TournamentDetail>
         cmd.Parameters.Add(cmd.CreateWithValue("p_custom_games", obj.CustomGames));
         cmd.Parameters.Add(cmd.CreateWithValue("p_no_singles", obj.NoSingles));
         cmd.Parameters.Add(cmd.CreateWithValue("p_no_doubles", obj.NoDoubles));
+        cmd.Parameters.Add(cmd.CreateWithValue("p_team_size", obj.TeamSize));
+
         var localTran = _dbconn.BeginTransaction();
         object? objret = null;
         try
