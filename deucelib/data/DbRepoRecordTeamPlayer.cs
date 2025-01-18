@@ -20,37 +20,26 @@ public class DbRepoRecordTeamPlayer : DbRepoBase<RecordTeamPlayer>
     public override async Task<List<RecordTeamPlayer>> GetList(Filter filter)
     {
         List<RecordTeamPlayer> list = new();
-        using (DbCommand cmd = _dbconn.CreateCommand())
-        {
-            cmd.CommandText = "sp_get_team_player";
-            cmd.CommandType = System.Data.CommandType.StoredProcedure;
-
-            cmd.Parameters.Add(cmd.CreateWithValue("p_tournament", filter.TournamentId));
-            var reader = new SafeDataReader(await cmd.ExecuteReaderAsync());
-
-            while (reader.Target.Read())
-            {
+        await _dbconn.CreateReaderStoreProcAsync("sp_get_team_player", ["p_tournament"],
+         [filter.TournamentId], reader=>{
                 RecordTeamPlayer recordTeamPlayer = new(
-                    reader.Target.Parse<int>("id"),
-                    reader.Target.Parse<int>("organization"),
-                    reader.Target.Parse<int>("tournament"),
-                    reader.Target.Parse<string>("team"),
-                    reader.Target.Parse<int>("team_id"),
-                    reader.Target.Parse<int>("team_index"),
-                    reader.Target.Parse<int>("player_id"),
-                    reader.Target.Parse<int>("player_index"),
-                    reader.Target.Parse<string>("first_name"),
-                    reader.Target.Parse<string>("last_name"),
-                    reader.Target.Parse<double>("utr"),
-                    reader.Target.Parse<int>("team_player_id")
+                    reader.Parse<int>("id"),
+                    reader.Parse<int>("organization"),
+                    reader.Parse<int>("tournament"),
+                    reader.Parse<string>("team"),
+                    reader.Parse<int>("team_id"),
+                    reader.Parse<int>("team_index"),
+                    reader.Parse<int>("player_id"),
+                    reader.Parse<int>("player_index"),
+                    reader.Parse<string>("first_name"),
+                    reader.Parse<string>("last_name"),
+                    reader.Parse<double>("utr"),
+                    reader.Parse<int>("team_player_id")
                 );
 
                 list.Add(recordTeamPlayer);
-            }
 
-            reader.Target.Close();
-        }
-
+         });
         return list;
         
     }

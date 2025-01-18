@@ -1,6 +1,7 @@
 using System.Data;
 using System.Data.Common;
 using deuce.ext;
+using iText.Kernel.Utils.Objectpathitems;
 
 namespace deuce;
 
@@ -22,24 +23,19 @@ public class DbRepoInterval : DbRepoBase<Interval>
 
     public override async Task<List<Interval>> GetList()
     {
-        
-        DbCommand cmd = _dbconn.CreateCommand();
-        cmd.CommandText = "sp_get_interval";
-        cmd.CommandType = CommandType.StoredProcedure;
+        //Return
+        List<Interval> list = new();
+        //Select rows asynchronisly
 
-        var reader = new SafeDataReader(await cmd.ExecuteReaderAsync());
-        List<Interval> list=new();
-
-        while(reader.Target.Read())
+        await _dbconn.CreateReaderStoreProcAsync("sp_get_interval", [], [],
+        r =>
         {
-            int id = reader.Target.Parse<int>("id");
-            string label = reader.Target.Parse<string>("label");
+            int id = r.Parse<int>("id");
+            string label = r.Parse<string>("label");
 
             list.Add(new Interval(id, label));
-        }
+        });
 
-        reader.Target.Close();
-        
         return list;
     }
 }

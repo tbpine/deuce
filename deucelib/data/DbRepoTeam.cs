@@ -89,60 +89,31 @@ public class DbRepoTeam : DbRepoBase<Team>
         try
         {
 
+
             //Insert into the team table
-            DbCommand cmd = _dbconn.CreateCommand();
-            cmd.Transaction = localtran;
-            cmd.CommandText = "sp_set_team";
-            cmd.CommandType = System.Data.CommandType.StoredProcedure;
-            cmd.Parameters.Add(cmd.CreateWithValue("p_id", obj.Id > 0 ? obj.Id : DBNull.Value));
-            cmd.Parameters.Add(cmd.CreateWithValue("p_organization", Club?.Id ?? 1));
-            cmd.Parameters.Add(cmd.CreateWithValue("p_tournament", _tournamentId));
-            cmd.Parameters.Add(cmd.CreateWithValue("p_label", obj.Label));
-            cmd.Parameters.Add(cmd.CreateWithValue("p_index", obj.Index));
+            DbCommand cmd = _dbconn.CreateCommandStoreProc("sp_set_team",
+            ["p_id", "p_organization", "p_tournament", "p_label", "p_index"],
+            [obj.Id, Club?.Id ?? 1, _tournamentId, obj.Label, obj.Index],
+            localtran);
 
             object? id = null;
             id = await cmd.ExecuteScalarAsync();
-
             obj.Id = cmd.GetIntegerFromScaler(id);
-
-            cmd = _dbconn.CreateCommand();
-            cmd.Transaction = localtran;
-            cmd.CommandText = "sp_set_team_player";
-            cmd.CommandType = System.Data.CommandType.StoredProcedure;
-
-            cmd.Parameters.Add(cmd.CreateWithValue("p_id", obj.Id));
-            cmd.Parameters.Add(cmd.CreateWithValue("p_team", obj.Id));
-            cmd.Parameters.Add(cmd.CreateWithValue("p_player", -1));
-            cmd.Parameters.Add(cmd.CreateWithValue("p_player_first", -1));
-            cmd.Parameters.Add(cmd.CreateWithValue("p_player_last", -1));
-            cmd.Parameters.Add(cmd.CreateWithValue("p_tournament", -1));
-            cmd.Parameters.Add(cmd.CreateWithValue("p_organization", -1));
-            cmd.Parameters.Add(cmd.CreateWithValue("p_index", -1));
-
 
             //Save team players
             foreach (Player player in obj.Players)
             {
-                //Don't save new players with no names
-                if (!player.IsStorable()) continue;
-
-                cmd.Parameters["p_id"].Value = player.TeamPlayerId > 0 ? player.TeamPlayerId : DBNull.Value;
-                cmd.Parameters["p_team"].Value = obj.Id;
-                cmd.Parameters["p_player"].Value = player.Id;
-                cmd.Parameters["p_player_first"].Value = string.IsNullOrEmpty(player.First) ? DBNull.Value : player.First;
-                cmd.Parameters["p_player_last"].Value = string.IsNullOrEmpty(player.Last) ? DBNull.Value : player.Last;
-                cmd.Parameters["p_tournament"].Value = _tournamentId;
-                cmd.Parameters["p_organization"].Value = Club?.Id ?? 1;
-                cmd.Parameters["p_index"].Value = player.Index;
+                DbCommand cmd2 = _dbconn.CreateCommandStoreProc("sp_set_team_player",
+                ["p_id", "p_team", "p_player", "p_player_first", "p_player_last", "p_tournament", "p_organization", "p_index"],
+                [ player.TeamPlayerId , obj.Id, player.Id, string.IsNullOrEmpty(player.First) ? DBNull.Value : player.First,
+                string.IsNullOrEmpty(player.Last) ? DBNull.Value : player.Last,  _tournamentId, Club?.Id ?? 1,player.Index],
+                localtran);
 
                 await cmd.ExecuteNonQueryAsync();
-
 
             }
 
             localtran.Commit();
-
-
 
 
         }
@@ -252,11 +223,11 @@ public class DbRepoTeam : DbRepoBase<Team>
             }
 
 
-               localtran.Commit();
+            localtran.Commit();
         }
         catch (Exception ex)
         {
-             localtran.Rollback();
+            localtran.Rollback();
             Debug.WriteLine(ex.ToString());
         }
 
@@ -268,45 +239,21 @@ public class DbRepoTeam : DbRepoBase<Team>
     private void UpdateTeam(Team team, Filter filter, DbTransaction dbTransaction)
     {
         //Update team details.
-        var cmd = _dbconn.CreateCommand();
-        cmd.CommandText = "sp_set_team";
-        cmd.CommandType = System.Data.CommandType.StoredProcedure;
-        cmd.Parameters.Add(cmd.CreateWithValue("p_id", team.Id < 1 ? DBNull.Value : team.Id));
-        cmd.Parameters.Add(cmd.CreateWithValue("p_organization", filter.ClubId));
-        cmd.Parameters.Add(cmd.CreateWithValue("p_tournament", filter.TournamentId));
-        cmd.Parameters.Add(cmd.CreateWithValue("p_label", team.Label));
-        cmd.Parameters.Add(cmd.CreateWithValue("p_index", team.Index));
-        cmd.Transaction = dbTransaction;
+        var cmd = _dbconn.CreateCommandStoreProc("sp_set_team", ["p_id", "p_organization", "p_tournament", "p_label", "p_index"]
+        , [team.Id, filter.ClubId, filter.TournamentId, team.Label, team.Index], dbTransaction);
 
         //  A new row is inserted. Store the id.
         team.Id = cmd.GetIntegerFromScaler(cmd.ExecuteScalar());
 
 
-
-        //set team players
-        var cmd2 = _dbconn.CreateCommand();
-        cmd2.CommandText = "sp_set_team_player";
-        cmd2.CommandType = System.Data.CommandType.StoredProcedure;
-        cmd2.Parameters.Add(cmd.CreateWithValue("p_id", DBNull.Value));
-        cmd2.Parameters.Add(cmd.CreateWithValue("p_team", 0));
-        cmd2.Parameters.Add(cmd.CreateWithValue("p_player", 0));
-        cmd2.Parameters.Add(cmd.CreateWithValue("p_player_first", ""));
-        cmd2.Parameters.Add(cmd.CreateWithValue("p_player_last", ""));
-        cmd2.Parameters.Add(cmd.CreateWithValue("p_tournament", 0));
-        cmd2.Parameters.Add(cmd.CreateWithValue("p_organization", 0));
-        cmd2.Parameters.Add(cmd.CreateWithValue("p_index", 0));
-        cmd2.Transaction = dbTransaction;
-
         foreach (Player player in team.Players)
         {
-            cmd2.Parameters["p_id"].Value = DBNull.Value;
-            cmd2.Parameters["p_team"].Value = team.Id;
-            cmd2.Parameters["p_player"].Value = player.Id;
-            cmd2.Parameters["p_player_first"].Value = player.First;
-            cmd2.Parameters["p_player_last"].Value = player.Last;
-            cmd2.Parameters["p_tournament"].Value = filter.TournamentId;
-            cmd2.Parameters["p_organization"].Value = filter.ClubId;
-            cmd2.Parameters["p_index"].Value = player.Index;
+            //set team players
+            DbCommand cmd2 = _dbconn.CreateCommandStoreProc("sp_set_team_player",
+            ["p_id", "p_team", "p_player", "p_player_first", "p_player_last", "p_tournament", "p_organization", "p_index"],
+            [ player.TeamPlayerId , team.Id, player.Id, string.IsNullOrEmpty(player.First) ? DBNull.Value : player.First,
+                string.IsNullOrEmpty(player.Last) ? DBNull.Value : player.Last,  _tournamentId, Club?.Id ?? 1,player.Index],
+            dbTransaction);
 
 
             var reader = cmd2.ExecuteReader();
@@ -320,15 +267,8 @@ public class DbRepoTeam : DbRepoBase<Team>
     public void UpdateTeamDetail(Team team, Filter filter, DbTransaction dbTransaction)
     {
         //Update team details.
-        var cmd = _dbconn.CreateCommand();
-        cmd.CommandText = "sp_set_team";
-        cmd.CommandType = System.Data.CommandType.StoredProcedure;
-        cmd.Parameters.Add(cmd.CreateWithValue("p_id", team.Id < 1 ? DBNull.Value : team.Id));
-        cmd.Parameters.Add(cmd.CreateWithValue("p_organization", filter.ClubId));
-        cmd.Parameters.Add(cmd.CreateWithValue("p_tournament", filter.TournamentId));
-        cmd.Parameters.Add(cmd.CreateWithValue("p_label", team.Label));
-        cmd.Parameters.Add(cmd.CreateWithValue("p_index", team.Index));
-        cmd.Transaction = dbTransaction;
+        var cmd = _dbconn.CreateCommandStoreProc("sp_set_team", ["p_id", "p_organization", "p_tournament", "p_label", "p_index"]
+        , [team.Id, filter.ClubId, filter.TournamentId, team.Label, team.Index], dbTransaction);
 
         var teamScalerId = cmd.ExecuteScalar();
         //Returns the last inserted row id
@@ -340,26 +280,18 @@ public class DbRepoTeam : DbRepoBase<Team>
 
     private void DeleteTeam(Team team, DbTransaction dbTransaction)
     {
+        //Delete a team
+        var cmd = _dbconn.CreateCommandStoreProc("sp_delete_team", ["p_id"]
+        , [team.Id], dbTransaction);
         //Update team details.
-        var cmd = _dbconn.CreateCommand();
-        cmd.CommandText = "sp_delete_team";
-        cmd.CommandType = System.Data.CommandType.StoredProcedure;
-        cmd.Parameters.Add(cmd.CreateWithValue("p_id", team.Id));
-        cmd.Transaction = dbTransaction;
         cmd.ExecuteNonQuery();
     }
 
 
     private void DeleteTeamPlayer(int teamId, int playerId, int tournamentId, DbTransaction tran)
     {
-        //Update team details.
-        var cmd = _dbconn.CreateCommand();
-        cmd.CommandText = "sp_delete_team_player";
-        cmd.CommandType = System.Data.CommandType.StoredProcedure;
-        cmd.Parameters.Add(cmd.CreateWithValue("p_team", teamId));
-        cmd.Parameters.Add(cmd.CreateWithValue("p_player", playerId));
-        cmd.Parameters.Add(cmd.CreateWithValue("p_tournament", tournamentId));
-        cmd.Transaction = tran;
+        var cmd = _dbconn.CreateCommandStoreProc("sp_delete_team_player", ["p_team", "p_player", "p_tournament"]
+       , [teamId, playerId, tournamentId], tran);
         cmd.ExecuteNonQuery();
 
     }
@@ -368,20 +300,11 @@ public class DbRepoTeam : DbRepoBase<Team>
     int orgId, int pIndex, DbTransaction tran)
     {
 
-        //set team players
-        var cmd2 = _dbconn.CreateCommand();
-        cmd2.CommandText = "sp_set_team_player";
-        cmd2.CommandType = System.Data.CommandType.StoredProcedure;
-        cmd2.Parameters.Add(cmd2.CreateWithValue("p_id", DBNull.Value));
-        cmd2.Parameters.Add(cmd2.CreateWithValue("p_team", teamId));
-        cmd2.Parameters.Add(cmd2.CreateWithValue("p_player", playerId));
-        cmd2.Parameters.Add(cmd2.CreateWithValue("p_player_first", first));
-        cmd2.Parameters.Add(cmd2.CreateWithValue("p_player_last", last));
-        cmd2.Parameters.Add(cmd2.CreateWithValue("p_tournament", tournamentId));
-        cmd2.Parameters.Add(cmd2.CreateWithValue("p_organization", orgId));
-        cmd2.Parameters.Add(cmd2.CreateWithValue("p_index", pIndex));
-        cmd2.Transaction = tran;
-        
+        DbCommand cmd2 = _dbconn.CreateCommandStoreProc("sp_set_team_player",
+        ["p_id", "p_team", "p_player", "p_player_first", "p_player_last", "p_tournament", "p_organization", "p_index"],
+        [DBNull.Value , teamId, playerId, first, last,  tournamentId, orgId,pIndex],
+        tran);
+
         var reader = cmd2.ExecuteReader();
         if (reader.Read()) Debug.WriteLine(reader.GetInt32(reader.GetOrdinal("player_id")));
         reader.Close();

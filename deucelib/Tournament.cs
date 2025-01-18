@@ -25,8 +25,9 @@ public class Tournament
 
     private int _interval;
     private Organization? _organization;
-
+    
     public int Id { get { return _id; } set { _id = value; } }
+
     public string? Label { get { return _label; } set { _label = value; } }
     public DateTime Start { get { return _start; } set { _start = value; } }
     public DateTime End { get { return _end; } set { _end = value; } }

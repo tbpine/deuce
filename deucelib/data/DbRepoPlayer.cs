@@ -13,7 +13,7 @@ public class DbRepoPlayer : DbRepoBase<Player>
         _organization = references[0] as Organization;
     }
 
-     public DbRepoPlayer(DbConnection dbconn, Organization organization)
+    public DbRepoPlayer(DbConnection dbconn, Organization organization)
     {
         _dbconn = dbconn;
         _organization = organization;
@@ -27,39 +27,31 @@ public class DbRepoPlayer : DbRepoBase<Player>
     public override async Task<List<Player>> GetList(Filter filter)
     {
         List<Player> players = new();
-        using (DbCommand cmd = _dbconn.CreateCommand())
+        await _dbconn.CreateReaderStoreProcAsync("sp_get_player", ["p_organization" ], [ filter.ClubId ],
+        r =>
         {
-            cmd.CommandText = "sp_get_player";
-            cmd.CommandType = System.Data.CommandType.StoredProcedure;
-
-            cmd.Parameters.Add(cmd.CreateWithValue("p_organization", filter.ClubId));
-            var reader = new SafeDataReader(await cmd.ExecuteReaderAsync());
-
-            while (reader.Target.Read())
+            Player p = new()
             {
-                Player p = new() {
-                    Id = reader.Target.Parse<int>("id"),
-                    Club = _organization,
-                    First = reader.Target.Parse<string>("first_name"),
-                    Last = reader.Target.Parse<string>("last_name"),
-                    Ranking = reader.Target.Parse<double>("utr")
-                };
+                Id = r.Parse<int>("id"),
+                Club = _organization,
+                First = r.Parse<string>("first_name"),
+                Last = r.Parse<string>("last_name"),
+                Ranking = r.Parse<double>("utr")
+            };
 
-                players.Add(p);
-            }
+            players.Add(p);
 
-            reader.Target.Close();
-        }
+        });
 
         return players;
-        
+
     }
 
     public override void Set(Player obj)
     {
-        var command = _dbconn.CreateCommandStoreProc("sp_set_player", new string[] {"p_id", "p_organization", "p_first_name", "p_last_name",
-        "p_utr"}, new object[] { obj.Id , _organization?.Id??1, obj.First??"", obj.Last??"", obj.Ranking} );
+        var command = _dbconn.CreateCommandStoreProc("sp_set_player", ["p_id", "p_organization", "p_first_name", "p_last_name",
+        "p_utr"], [obj.Id, _organization?.Id ?? 1, obj.First ?? "", obj.Last ?? "", obj.Ranking ]);
         obj.Id = command.GetIntegerFromScaler(command.ExecuteScalar());
-        
+
     }
 }

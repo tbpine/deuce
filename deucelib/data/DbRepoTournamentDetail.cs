@@ -1,9 +1,6 @@
 using System.Data;
 using System.Data.Common;
 using System.Diagnostics;
-using System.Net;
-using System.Runtime.InteropServices;
-using System.Transactions;
 using deuce.ext;
 
 namespace deuce;
@@ -14,7 +11,7 @@ public class DbRepoTournamentDetail : DbRepoBase<TournamentDetail>
     //| Internals                         |
     //------------------------------------
     private readonly DbConnection _dbconn;
-    private readonly Organization? _organization;
+    
 
     /// <summary>
     /// Construct with a db connection to the target db.
@@ -23,29 +20,23 @@ public class DbRepoTournamentDetail : DbRepoBase<TournamentDetail>
     public DbRepoTournamentDetail(DbConnection dbconn, Organization organization)
     {
         _dbconn = dbconn;
-        _organization = organization;
     }
 
     public override async Task<List<TournamentDetail>> GetList(Filter filter)
     {
-        DbCommand cmd = _dbconn.CreateCommand();
-        cmd.CommandText = "sp_get_tournament_detail";
-        cmd.CommandType = CommandType.StoredProcedure;
-        cmd.Parameters.Add(cmd.CreateWithValue("p_tour", filter.TournamentId));
-
-        var reader = new SafeDataReader(await cmd.ExecuteReaderAsync());
+        //return collection
         List<TournamentDetail> list = new();
 
-        while (reader.Target.Read())
-        {
-            int tournamentId = reader.Target.Parse<int>("tournament");
-            int entries = reader.Target.Parse<int>("no_entries");
-            int sets = reader.Target.Parse<int>("sets");
-            int games = reader.Target.Parse<int>("games");
-            int customGames = reader.Target.Parse<int>("custom_games");
-            int noSingles = reader.Target.Parse<int>("no_singles");
-            int noDoubles = reader.Target.Parse<int>("no_doubles");
-            int teamSize = reader.Target.Parse<int>("team_size");
+        await  _dbconn.CreateReaderStoreProcAsync("sp_get_tournament_detail", ["p_tour"], [filter.TournamentId],
+        reader=>{
+            int tournamentId = reader.Parse<int>("tournament");
+            int entries = reader.Parse<int>("no_entries");
+            int sets = reader.Parse<int>("sets");
+            int games = reader.Parse<int>("games");
+            int customGames = reader.Parse<int>("custom_games");
+            int noSingles = reader.Parse<int>("no_singles");
+            int noDoubles = reader.Parse<int>("no_doubles");
+            int teamSize = reader.Parse<int>("team_size");
 
             list.Add(new TournamentDetail
             {
@@ -59,31 +50,25 @@ public class DbRepoTournamentDetail : DbRepoBase<TournamentDetail>
                 TeamSize = teamSize
 
             });
-        }
-        reader.Target.Close();
+
+        });
+
+     
         return list;
     }
 
     public override async Task SetAsync(TournamentDetail obj)
     {
-        DbCommand cmd = _dbconn.CreateCommand();
-        cmd.CommandText = "sp_set_tournament_detail";
-        cmd.CommandType = CommandType.StoredProcedure;
-
-        cmd.Parameters.Add(cmd.CreateWithValue("p_tournament", obj.TournamentId));
-        cmd.Parameters.Add(cmd.CreateWithValue("p_no_entries", obj.NoEntries));
-        cmd.Parameters.Add(cmd.CreateWithValue("p_sets", obj.Sets));
-        cmd.Parameters.Add(cmd.CreateWithValue("p_games", obj.Games));
-        cmd.Parameters.Add(cmd.CreateWithValue("p_custom_games", obj.CustomGames));
-        cmd.Parameters.Add(cmd.CreateWithValue("p_no_singles", obj.NoSingles));
-        cmd.Parameters.Add(cmd.CreateWithValue("p_no_doubles", obj.NoDoubles));
-        cmd.Parameters.Add(cmd.CreateWithValue("p_team_size", obj.TeamSize));
 
         var localTran = _dbconn.BeginTransaction();
-        object? objret = null;
+        DbCommand cmd = _dbconn.CreateCommandStoreProc("sp_set_tournament_detail",
+        ["p_tournament","p_no_entries", "p_sets", "p_games", "p_custom_games","p_no_singles", "p_no_doubles", "p_team_size"],
+        [obj.TournamentId,obj.NoEntries, obj.Sets,obj.Games, obj.CustomGames, obj.NoSingles,obj.NoDoubles,obj.TeamSize],
+        localTran);
+
         try
         {
-            objret = await cmd.ExecuteNonQueryAsync();
+            object? objret = await cmd.ExecuteNonQueryAsync();
             localTran.Commit();
 
         }

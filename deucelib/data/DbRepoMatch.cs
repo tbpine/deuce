@@ -29,54 +29,25 @@ public class DbRepoMatch : DbRepoBase<Match>
     public override async Task SetAsync(Match obj)
     {
 
+        var cmd = _dbconn.CreateCommandStoreProc("sp_set_match", ["p_id", "p_permutation", "p_round", "p_tournament" ],
+        [ obj.Id, obj.Permutation?.Id ?? 0, obj.Permutation?.Round?.Index ?? 0, obj.Permutation?.Round?.Tournament?.Id ?? 0 ],
+        null);
+        object? id = await cmd.ExecuteScalarAsync();
+        obj.Id = (int)(ulong)(id ?? 0L);
 
-        using (DbCommand cmd = _dbconn.CreateCommand())
+        //Save home players
+        foreach (Player player in obj.Home)
         {
-            cmd.CommandText = "sp_set_match";
-            cmd.CommandType = System.Data.CommandType.StoredProcedure;
-
-            cmd.Parameters.Add(cmd.CreateWithValue("p_id", obj.Id <= 0 ? DBNull.Value : obj.Id));
-            cmd.Parameters.Add(cmd.CreateWithValue("p_permutation", obj.Permutation?.Id ?? 0));
-            cmd.Parameters.Add(cmd.CreateWithValue("p_round", obj.Permutation?.Round?.Index ?? 0));
-            cmd.Parameters.Add(cmd.CreateWithValue("p_tournament", obj.Permutation?.Round?.Tournament?.Id ?? 0));
-            object? id = await cmd.ExecuteScalarAsync();
-            obj.Id = (int)(ulong)(id ?? 0L);
-
+            var cmd2 = _dbconn.CreateCommandStoreProc("sp_set_match_player", ["p_id","p_match", "p_player_home", "p_player_away"],
+            [DBNull.Value, obj.Id,  player.Id,  DBNull.Value ], null);
+            await cmd2.ExecuteNonQueryAsync();
         }
 
-        //Save players
-        using (DbCommand cmd = _dbconn.CreateCommand())
+        foreach (Player player in obj.Away)
         {
-            cmd.CommandText = "sp_set_match_player";
-            cmd.CommandType = System.Data.CommandType.StoredProcedure;
-
-            cmd.Parameters.Add(cmd.CreateWithValue("p_id", DBNull.Value));
-            cmd.Parameters.Add(cmd.CreateWithValue("p_match", 0));
-            cmd.Parameters.Add(cmd.CreateWithValue("p_player_home", 0));
-            cmd.Parameters.Add(cmd.CreateWithValue("p_player_away", 0));
-
-            //Save home players
-            foreach (Player player in obj.Home)
-            {
-                cmd.Parameters["p_match"].Value = obj.Id;
-                cmd.Parameters["p_player_home"].Value = player.Id;
-                cmd.Parameters["p_player_away"].Value = DBNull.Value;
-
-                await cmd.ExecuteNonQueryAsync();
-            }
-
-            //Save away players
-            foreach (Player player in obj.Away)
-            {
-                cmd.Parameters["p_match"].Value = obj.Id;
-                cmd.Parameters["p_player_home"].Value = DBNull.Value;
-                cmd.Parameters["p_player_away"].Value = player.Id;
-
-                await cmd.ExecuteNonQueryAsync();
-            }
-
-
+            var cmd2 = _dbconn.CreateCommandStoreProc("sp_set_match_player", ["p_id","p_match", "p_player_home", "p_player_away"],
+            [DBNull.Value, obj.Id,  DBNull.Value,  player.Id ], null);
+            await cmd2.ExecuteNonQueryAsync();
         }
-
     }
 }

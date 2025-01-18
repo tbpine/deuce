@@ -19,14 +19,9 @@ public class DbRepoTournamentProps : DbRepoBase<Tournament>
     {
 
         //Insert into the team table
-        var cmd = _dbconn.CreateCommand();
         var localtran = _dbconn.BeginTransaction();
-        cmd.CommandText = "sp_set_tournament_schedule";
-        cmd.CommandType = System.Data.CommandType.StoredProcedure;
-        cmd.Transaction = localtran;
-        cmd.Parameters.Add(cmd.CreateWithValue("p_tournament", obj.Id));
-        cmd.Parameters.Add(cmd.CreateWithValue("p_interval", obj.Interval));
-        cmd.Parameters.Add(cmd.CreateWithValue("p_start", obj.Start));
+        var cmd = _dbconn.CreateCommandStoreProc("sp_set_tournament_schedule", ["p_tournament", "p_interval", "p_start"],
+        [obj.Id, obj.Interval, obj.Start ], localtran);
 
         try
         {

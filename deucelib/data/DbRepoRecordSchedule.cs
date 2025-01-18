@@ -1,5 +1,6 @@
 using System.Data.Common;
 using deuce.ext;
+using Org.BouncyCastle.Cms;
 
 namespace deuce;
 /// <summary>
@@ -23,30 +24,19 @@ public class DbRepoRecordSchedule : DbRepoBase<RecordSchedule>
     public async override Task<List<RecordSchedule>> GetList(Filter filter)
     {
         List<RecordSchedule> result = new();
-
-        using (DbCommand cmd = _dbconn.CreateCommand())
+        await _dbconn.CreateReaderStoreProcAsync("", ["p_tournament" ], [ "filter.TournamentId" ],
+        r =>
         {
-            cmd.CommandText = "sp_get_tournament_schedule";
-            cmd.CommandType = System.Data.CommandType.StoredProcedure;
-            cmd.Parameters.Add(cmd.CreateWithValue("p_tournament", filter.TournamentId));
+            result.Add(new RecordSchedule(r.Parse<int>("match_id"),
+                                        r.Parse<int>("permutation"),
+                                        r.Parse<int>("round"),
+                                        r.Parse<int>("player_home"),
+                                        r.Parse<int>("player_away"),
+                                        r.Parse<int>("team_home"),
+                                        r.Parse<int>("team_away")
+                                                          ));
+        });
 
-            var reader = new SafeDataReader(await cmd.ExecuteReaderAsync());
-
-            while(reader.Target.Read())
-            {
-                result.Add(new RecordSchedule(reader.Target.Parse<int>("match_id"),
-                                              reader.Target.Parse<int>("permutation"),
-                                              reader.Target.Parse<int>("round"),
-                                              reader.Target.Parse<int>("player_home"),
-                                              reader.Target.Parse<int>("player_away"),
-                                              reader.Target.Parse<int>("team_home"),
-                                              reader.Target.Parse<int>("team_away")
-                                              
-                                              ));
-            }
-            reader.Target.Close();
-
-        }
 
         return result;
     }
