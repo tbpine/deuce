@@ -39,7 +39,7 @@ public class UnitTestsMatch
                     foreach(Match match in p.Matches)
                     {
                         if(dbrepo is not null)
-                            await dbrepo.Set(match);
+                            await dbrepo.SetAsync(match);
                     }
                 }
             }

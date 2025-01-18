@@ -17,7 +17,7 @@ public class UnitTestsTeam
         //Assigns
         Organization organization = new Organization() { Id = 1 };
         Tournament tournament = new() { Id = 1 };
-        ActionTeamPlayer.Clear(tournament.Id);
+        AssignTeamPlayer.Clear(tournament.Id);
 
         //Make teams
         Team team1 = new Team() { Id = 0, Index = 0, Label = "test_team1" };
@@ -54,7 +54,7 @@ public class UnitTestsTeam
         //Assigns
         Organization organization = new Organization() { Id = 1 };
         Tournament tournament = new() { Id = 1 };
-        ActionTeamPlayer.Clear(tournament.Id);
+        AssignTeamPlayer.Clear(tournament.Id);
 
         //Make teams
         Team team1 = new Team() { Id = 0, Index = 0, Label = "test_team1" };
@@ -101,7 +101,7 @@ public class UnitTestsTeam
         //Assigns
         Organization organization = new Organization() { Id = 1 };
         Tournament tournament = new() { Id = 1 };
-        ActionTeamPlayer.Clear(tournament.Id);
+        AssignTeamPlayer.Clear(tournament.Id);
 
         //Make teams
         Team team1 = new Team() { Id = 0, Index = 0, Label = "test_team1" };
@@ -149,7 +149,7 @@ public class UnitTestsTeam
         //Assigns
         Organization organization = new Organization() { Id = 1 };
         Tournament tournament = new() { Id = 1 };
-        ActionTeamPlayer.Clear(tournament.Id);
+        AssignTeamPlayer.Clear(tournament.Id);
 
         //Make teams
         Team team1 = new Team() { Id = 0, Index = 0, Label = "test_team1" };
@@ -192,7 +192,7 @@ public class UnitTestsTeam
         //Assigns
         Organization organization = new Organization() { Id = 1 };
         Tournament tournament = new() { Id = 1 };
-        ActionTeamPlayer.Clear(tournament.Id);
+        AssignTeamPlayer.Clear(tournament.Id);
 
         //Make teams
         Team team1 = new Team() { Id = 0, Index = 0, Label = "test_team1" };
@@ -242,7 +242,7 @@ public class UnitTestsTeam
     //Assigns
         Organization organization = new Organization() { Id = 1 };
         Tournament tournament = new() { Id = 1 };
-        ActionTeamPlayer.Clear(tournament.Id, true);
+        AssignTeamPlayer.Clear(tournament.Id, true);
         
         //Collection of teams.
         List<Team> teams = new List<Team>();
@@ -295,7 +295,7 @@ public class UnitTestsTeam
         //Assigns
         Organization organization = new Organization() { Id = 1 };
         Tournament tournament = new() { Id = 1 };
-        ActionTeamPlayer.Clear(tournament.Id, true);
+        AssignTeamPlayer.Clear(tournament.Id, true);
         
         //Collection of teams.
         List<Team> teams = new List<Team>();

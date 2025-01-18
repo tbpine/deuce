@@ -1,6 +1,6 @@
 using System.Net;
 
-class ActionTeamPlayer
+class AssignTeamPlayer
 {
     public static void Clear(int tournamentId, bool clearAllPlayers = false)
     {
