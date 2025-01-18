@@ -77,7 +77,7 @@ public class DbRepoTournament : DbRepoBase<Tournament>
         return list;
     }
 
-    public override async Task Set(Tournament obj) 
+    public override async Task SetAsync(Tournament obj) 
     {
         DbCommand cmd = _dbconn.CreateCommand();
         cmd.CommandText = "sp_set_tournament";

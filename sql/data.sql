@@ -28,4 +28,6 @@ INSERT INTO `sport` VALUES (2, "Martial Arts","type", "ma","assets/icons/martial
 INSERT INTO `sport` VALUES (3, "Badminton", "type", "badminton","assets/icons/tennis.svg");
 INSERT INTO `sport` VALUES (4, "Table Tennis", "type", "table_tennis","assets/icons/tennis.svg");
 
+DELETE FROM `tournament` WHERE id = 1;
+INSERT INTO `tournament` VALUES (1, "test_tournament", "2025-01-01", null, 4, 0, 1, 0, 0 , 0 , 0, 1, 1, 1, now(), now());
 

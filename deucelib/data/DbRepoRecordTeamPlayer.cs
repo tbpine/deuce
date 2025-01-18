@@ -1,5 +1,7 @@
 using System.Data.Common;
+using System.Diagnostics;
 using deuce.ext;
+using iText.StyledXmlParser.Jsoup.Nodes;
 
 namespace deuce;
 public class DbRepoRecordTeamPlayer : DbRepoBase<RecordTeamPlayer>
@@ -30,15 +32,17 @@ public class DbRepoRecordTeamPlayer : DbRepoBase<RecordTeamPlayer>
             {
                 RecordTeamPlayer recordTeamPlayer = new(
                     reader.Target.Parse<int>("id"),
-                    reader.Target.Parse<int>("club"),
+                    reader.Target.Parse<int>("organization"),
                     reader.Target.Parse<int>("tournament"),
                     reader.Target.Parse<string>("team"),
                     reader.Target.Parse<int>("team_id"),
+                    reader.Target.Parse<int>("team_index"),
                     reader.Target.Parse<int>("player_id"),
+                    reader.Target.Parse<int>("player_index"),
                     reader.Target.Parse<string>("first_name"),
                     reader.Target.Parse<string>("last_name"),
-                    reader.Target.Parse<double>("utr")
-
+                    reader.Target.Parse<double>("utr"),
+                    reader.Target.Parse<int>("team_player_id")
                 );
 
                 list.Add(recordTeamPlayer);
@@ -50,4 +54,5 @@ public class DbRepoRecordTeamPlayer : DbRepoBase<RecordTeamPlayer>
         return list;
         
     }
+
 }

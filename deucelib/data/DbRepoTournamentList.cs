@@ -74,9 +74,9 @@ public class DbRepoTournamentList : DbRepoBase<Tournament>
         return list;
     }
 
-    public override async Task Set(Tournament obj) 
+    public override void Set(Tournament obj) 
     {
-        await Task.CompletedTask;
+        
     }
 
 }

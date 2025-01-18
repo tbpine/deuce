@@ -316,43 +316,68 @@ CREATE PROCEDURE `sp_set_team`(
 IN p_id INT,
 IN p_organization INT,
 IN p_tournament INT,
-IN p_label VARCHAR(200))
+IN p_label VARCHAR(200),
+IN p_index INT)
 
 BEGIN
 
-INSERT INTO `team` (`id`,`label`,`organization`,`tournament`,`updated_datetime`,`created_datetime`) 
-VALUES (p_id, p_label, p_organization,p_tournament, NOW(), NOW())
-ON DUPLICATE KEY UPDATE `label` = p_label,`organization` = p_organization, `tournament` = p_tournament, `updated_datetime` = NOW();
+INSERT INTO `team` (`id`,`label`,`organization`,`tournament`,`index`, `updated_datetime`,`created_datetime`) 
+VALUES (p_id, p_label, p_organization,p_tournament, p_index,NOW(), NOW())
+ON DUPLICATE KEY UPDATE `label` = p_label,`organization` = p_organization, `tournament` = p_tournament, `updated_datetime` = NOW(),
+`index` = p_index;
 
-SELECT LAST_INSERT_ID() 'id';
+-- Send back the id column for new 
+-- inserts , else just send back the
+-- current id
+
+IF ISNULL(p_id) THEN
+	SELECT LAST_INSERT_ID() 'id';
+ELSE
+	SELECT p_id 'id';
+END IF;
+
+END//
+
+
+DROP PROCEDURE IF EXISTS `sp_delete_team`//
+
+CREATE PROCEDURE `sp_delete_team`(
+IN p_id INT
+)
+
+BEGIN
+DELETE FROM `team` WHERE `id` = p_id;
 
 END//
 
 DROP PROCEDURE IF EXISTS `sp_set_team_player`//
 
 CREATE PROCEDURE `sp_set_team_player`(
+IN p_id	  INT,
 IN p_team INT,
 IN p_player INT,
 IN p_player_first VARCHAR(100),
 IN p_player_last VARCHAR(100),
 IN p_tournament INT,
-IN p_organization INT)
+IN p_organization INT,
+IN p_index INT)
 
 BEGIN
 -- add new players 
-SET @p_id = p_player;
+SET @p_newPlayerId = p_player;
 
-IF @p_id < 1  THEN
+IF @p_newPlayerId < 1  THEN
 
 	INSERT INTO `player` VALUES ( NULL, p_player_first,p_player_last, p_organization, 1.0, now(), now());
-    SELECT last_insert_id() INTO @p_id;
+    SELECT last_insert_id() INTO @p_newPlayerId;
 END IF;
 
 
-INSERT INTO `team_player`(`team`,`player`,`tournament`) VALUES (p_team, @p_id, p_tournament)
-ON DUPLICATE KEY UPDATE `team` = p_team,`player` = @p_id, `tournament` = p_tournament;
+INSERT INTO `team_player`(`id`,`team`,`player`,`tournament`, `index`, `updated_datetime`, `created_datetime`) 
+VALUES (p_id ,p_team, @p_newPlayerId, p_tournament, p_index, now(), now())
+ON DUPLICATE KEY UPDATE `team` = p_team,`player` = @p_newPlayerId, `tournament` = p_tournament, `index` = p_index, `updated_datetime` = now();
 
-SELECT LAST_INSERT_ID() 'id';
+SELECT LAST_INSERT_ID() 'id', @p_newPlayerId 'player_id';
 
 END//
 
@@ -363,15 +388,29 @@ IN p_tournament INT)
 
 BEGIN
 
-SELECT tp.`id`, t.organization 'organization', t.tournament, t.label 'team',  t.id 'team_id',
-p.id `player_id`,  p.first_name , p.last_name, p.utr
+SELECT tp.`id`, t.organization 'organization', t.tournament, t.label 'team',  t.id 'team_id', t.`index` 'team_index',
+p.id `player_id`, tp.`index` 'player_index', p.first_name , p.last_name, p.utr, tp.id 'team_player_id'
 FROM `team_player` tp JOIN `team` t ON t.id = tp.team
 JOIN `player` p ON p.id = tp.`player`
 WHERE tp.`tournament` = p_tournament
-ORDER BY `team`, `player`;
+ORDER BY `team_index`, `player_index`;
 
 END//
 
+
+DROP PROCEDURE IF EXISTS `sp_delete_team_player`//
+
+CREATE PROCEDURE `sp_delete_team_player`(
+IN p_team			INT,
+IN p_player			INT,
+IN p_tournament 	INT)
+
+BEGIN
+
+DELETE FROM `team_player` WHERE `player` = p_player AND `team` = p_team AND `tournament` = p_tournament;
+
+
+END//
 
 DROP PROCEDURE IF EXISTS `sp_get_tournament`//
 
@@ -594,7 +633,7 @@ IN p_no_doubles INT
 BEGIN
 
 INSERT INTO `tournament_detail`(`tournament`,`no_entries`,`sets`,`games`,`custom_games`,`team_size`,`no_singles`,`no_doubles`, `updated_datetime`,`created_datetime`) 
-VALUES (p_tournament, p_no_entries, p_sets, p_games, p_custom_games, p_team_size, p_no_singles, no_doubles, NOW(), NOW())
+VALUES (p_tournament, p_no_entries, p_sets, p_games, p_custom_games, p_team_size, p_no_singles, p_no_doubles, NOW(), NOW())
 ON DUPLICATE KEY UPDATE `no_entries` = p_no_entries,`sets` = p_sets, `games` = p_games, `custom_games` = p_custom_games,
 `team_size` = p_team_size, `no_singles` = p_no_singles , `no_doubles` = p_no_doubles, `updated_datetime` = NOW();
 

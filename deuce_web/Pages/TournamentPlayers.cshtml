@@ -59,10 +59,13 @@
       <!-- Published listings -->
       <form class="vstack gap-4 mb-4" id="page_form"  asp-action="~/TournamentPlayers">
         <!-- An Item  -->
-        @for(int i = 0 ; i < Model.NoTeams; i++)
+        @for(int i = 0 ; i < Model.Teams?.Count; i++)
         {
-          Team? iterTeam = Model.Teams?.ElementAt(i);
-          string attrTeamName = iterTeam?.Label??$"team_{i}";
+          Team? iterTeam = Model.Teams[i];
+          int teamId = iterTeam?.Id??0;
+          //Pathing
+          string attrTeamName =$"team_{iterTeam?.Index??i}_{teamId}";
+          string attrTeamLable =iterTeam?.Label??"";
           string attrTeamCtlVisible= Model.EntryType == 1 ? "visible" : "invisible zero_height";
           string attrCanAddPlayer = "invisible zero_height";
           string attrCanDeletePlayer = "invisible";
@@ -81,7 +84,7 @@
                   <label for="@attrTeamName" class="form-label p-2">Team Name:</label>
                 </div>
                 <div class="col-2">
-                  <input id="TeamName" class="form-control p-2 w-75" name="@attrTeamName"/>
+                  <input id="TeamName" class="form-control p-2 w-75" name="@attrTeamName" value="@attrTeamLable"/>
                 </div>
                 
               </div>
@@ -93,13 +96,19 @@
               </div>
               @for(int j = 0; j < Model.TeamSize ; j++)
               {
-                string attrPlayerName = $"team_{i}_player_{j}";
-                string attrPlayerNameNew = $"team_{i}_player_{j}_new";
                 Player? iterPlayer = iterTeam?.Players.ElementAt(j);
+                int playerId = iterPlayer?.Id??0;
+                
+                string attrPlayerName = $"team_{i}_{teamId}_player_{j}_{playerId}";
+                string attrPlayerNameNew = $"team_{i}_{teamId}_player_{j}_{playerId}_new";
 
-                List<SelectListItem>? playerList = Model.SelectPlayer?.ElementAt(i*Model.TeamSize + j);
+                int selectionIdx = i*Model.TeamSize + j;
+                List<SelectListItem>? playerList = Model.SelectPlayer?.ElementAt(selectionIdx);
+                playerList?.All(e=>{e.Selected = false; return true;});
+
                 var selectedPlayer = playerList?.Find(e=>e.Value == iterPlayer?.Id.ToString());
-                if (selectedPlayer is not null) selectedPlayer.Selected = true;
+                if (selectedPlayer is not null)selectedPlayer.Selected = true;
+                else if (playerList is not null && playerList.Count > 0) playerList[0].Selected = true;
 
                 <div class="row row-cols-*-3 g-0 mb-2">
                   <div class="col-5 me-2"><span>Registered</span></div>
@@ -113,7 +122,7 @@
                       </select>
                   </div>
                   <div class="col-5 me-2">
-                    <input class="form-control-lg" placeholder="New Player" aria-placeholder="New Player" name="@attrPlayerNameNew" id="@attrPlayerNameNew"/>
+                    <input class="form-control" placeholder="New Player" aria-placeholder="New Player" name="@attrPlayerNameNew" id="@attrPlayerNameNew"/>
                   </div>
                   <div class="col-1">
                     <a class="nav-link position-relative px-0 pe-sm-2 py-2 me-4 ms-2 @attrCanDeletePlayer">
@@ -132,6 +141,5 @@
 
   </div>
 </div>
-
 <script src="~/js/players.js"></script>
 

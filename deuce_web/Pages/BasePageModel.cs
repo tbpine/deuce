@@ -88,7 +88,14 @@ public class BasePageModel : PageModel
         if (selectedIdx >= 0)
         {
             string nextResource = _handlerNavItems?.GetResourceAtIndex(selectedIdx + 1) ?? "";
-            return Redirect(HttpContext.Request.PathBase + nextResource);
+            if (string.IsNullOrEmpty(nextResource))
+            {
+                //End of wizard
+                //Redirct to finishing point
+                return Redirect(HttpContext.Request.PathBase + "/OrgIdx");
+            }
+            else
+                return Redirect(HttpContext.Request.PathBase + nextResource);
 
         }
 

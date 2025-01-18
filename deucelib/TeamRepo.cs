@@ -4,9 +4,10 @@ namespace deuce;
 /// </summary>
 public class TeamRepo
 {
-    public TeamRepo()
+    private List<RecordTeamPlayer> _source;
+    public TeamRepo(List<RecordTeamPlayer> src)
     {
-
+        _source = src;
     }
 
     /// <summary>
@@ -15,10 +16,10 @@ public class TeamRepo
     /// <param name="source"></param>
     /// <param name="players"></param>
     /// <returns></returns>
-    public List<Team> ExtractFromRecordTeamPlayer(List<RecordTeamPlayer> source, List<Player> players, Organization club)
+    public List<Team> ExtractFromRecordTeamPlayer()
     {
         List<Team> teams = new();
-        foreach (RecordTeamPlayer rteamPlayer in source)
+        foreach (RecordTeamPlayer rteamPlayer in _source)
         {
             Team? team = teams.Find(e => e.Id == rteamPlayer.TeamId);
             if (team is null)
@@ -27,15 +28,23 @@ public class TeamRepo
                 {
                     Id = rteamPlayer.TeamId,
                     Label = rteamPlayer.Team,
-                    Club = club
+                    Index = rteamPlayer.TeamIndex
                 };
 
                 teams.Add(team);
             }
 
             //Get players for this team
-            var player = players.Find(e => e.Id == rteamPlayer.PlayerId);
-            if (player is not null) team.AddPlayer(player);
+            Player player = new();
+            //Soft link to the parent object
+            player.Team = team;
+            player.Id = rteamPlayer.PlayerId;
+            player.Index = rteamPlayer.PlayerIndex;
+            player.TeamPlayerId = rteamPlayer.TeamPlayerId;
+            player.First = rteamPlayer.FirstName;
+            player.Last = rteamPlayer.LastName;
+
+            team.AddPlayer(player);
 
 
         }

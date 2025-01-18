@@ -28,7 +28,7 @@ public class TournamentRepo
         };
 
         foreach (Team team in _tournament.Teams!)
-            await dbRepoTeam.Set(team);
+            await dbRepoTeam.SetAsync(team);
         //Save matches
         var dbrepo = FactoryCreateDbRepo.Create<Match>(_dbconn);
 
@@ -40,7 +40,7 @@ public class TournamentRepo
                 foreach (Match match in p.Matches)
                 {
                     if (dbrepo is not null)
-                        await dbrepo.Set(match);
+                        await dbrepo.SetAsync(match);
                 }
             }
         }

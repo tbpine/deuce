@@ -52,6 +52,6 @@ public class HandlerNavItems : IHandlerNavItems
 
     public string? GetResourceAtIndex(int index)
     {
-        return index >= 0 && index <= _navItems.Count ? _navItems[index].Resource : null;
+        return index >= 0 && index < _navItems.Count ? _navItems[index].Resource : null;
     }
 }

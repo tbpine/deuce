@@ -4,10 +4,11 @@
 * Dec 2024
 *******************************************************/
 -- drop table `tournament`;
--- drop table `tournament_detail`;
+--  drop table `tournament_detail`;
 -- drop table `tournament_type`;
 -- drop table `player`;
 -- drop table `team`;
+-- drop table `team_player`;
 -- drop table `match`;
 -- drop table `match_player`;
 -- drop table `team_player`;
@@ -54,6 +55,8 @@ CREATE TABLE IF NOT EXISTS `tournament` (
     `created_datetime`	TIMESTAMP
 );
 
+ALTER TABLE `tournament` AUTO_INCREMENT = 100;
+
 CREATE TABLE IF NOT EXISTS `tournament_detail` (
     `tournament` 		INT PRIMARY KEY,
     `no_entries` 		INT,
@@ -78,6 +81,8 @@ CREATE TABLE IF NOT EXISTS `player` (
     `updated_datetime` 			TIMESTAMP,
     `created_datetime` 			TIMESTAMP
 );
+
+ALTER TABLE `player` auto_increment = 1000;
 
 CREATE TABLE IF NOT EXISTS `result` (
     `id` 					INT PRIMARY KEY AUTO_INCREMENT,
@@ -127,14 +132,16 @@ CREATE TABLE IF NOT EXISTS `organization` (
     `updated_datetime` TIMESTAMP,
     `created_datetime` TIMESTAMP
 );
+ALTER TABLE `organization` AUTO_INCREMENT = 100;
 
 -- Collection of players/player
 -- with a label.
 
 CREATE TABLE IF NOT EXISTS `team` (
     `id` 				INT PRIMARY KEY AUTO_INCREMENT,
-    `organization`				INT,
+    `organization`		INT,
     `tournament`		INT,
+    `index`				INT,
 	`label` 		    VARCHAR(200),
     `updated_datetime` 	TIMESTAMP,
     `created_datetime` 	TIMESTAMP
@@ -144,6 +151,7 @@ CREATE TABLE IF NOT EXISTS `team_player` (
     `id` 				INT PRIMARY KEY AUTO_INCREMENT,
     `team`				INT,
     `player`			INT,
+    `index`				INT,
     `tournament`		INT,
     `updated_datetime` 	TIMESTAMP,
     `created_datetime` 	TIMESTAMP

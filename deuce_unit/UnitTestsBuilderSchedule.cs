@@ -33,10 +33,10 @@ public class UnitTestsBuilderSchedule
             List<RecordTeamPlayer> teamplayers = await dbrepotp.GetList(new Filter() { TournamentId = tournament.Id });
 
             PlayerRepo playerRepo = new PlayerRepo();
-            TeamRepo teamRepo = new TeamRepo();
+            TeamRepo teamRepo = new TeamRepo(teamplayers);
 
             List<Player> players = playerRepo.ExtractFromRecordTeamPlayer(teamplayers);
-            List<Team> teams = teamRepo.ExtractFromRecordTeamPlayer(teamplayers, players, club);
+            List<Team> teams = teamRepo.ExtractFromRecordTeamPlayer();
             tournament.Teams = teams;
 
             BuilderSchedule builderSchedule = new BuilderSchedule(recordsSched, players, teams, tournament, conn);

@@ -26,7 +26,7 @@ public class DbRepoMatch : DbRepoBase<Match>
     /// </summary>
     /// <param name="obj">Match object to store</param>
     /// <returns></returns>
-    public override async Task Set(Match obj)
+    public override async Task SetAsync(Match obj)
     {
 
 

@@ -11,8 +11,25 @@ public class DbRepoBase<T> : IDbRepo<T>
         return Task.FromResult(new List<T>());
     }
 
-    public virtual Task Set(T obj)
+    public virtual Task SetAsync(T obj)
     {
         return Task.FromResult(obj);
     }
+
+    public virtual void Set(T obj)
+    {
+        
+    }
+
+
+    public virtual Task Delete(T obj)
+    {
+        return Task.FromResult(obj);
+    }
+
+    public virtual Task Sync(List<T> obj, Filter filter)
+    {
+        return Task.FromResult(obj);
+    }
+
 }

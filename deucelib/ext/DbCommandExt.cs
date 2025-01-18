@@ -21,4 +21,34 @@ public static class DbCommandExt
         parameter.Value = value;
         return parameter;
     }
+
+    /// <summary>
+    /// Returns a integer from a database column
+    /// </summary>
+    /// <param name="command">DbCommand object</param>
+    /// <param name="scaler">the value</param>
+    /// <returns>A DbPrameter object</returns>
+    public static int GetIntegerFromScaler(this DbCommand command, object? scaler)
+    {
+        //handle nulls
+        if (scaler is null) return default(int);
+
+        //Check what type of object "scaler" is
+        //and return the native type int
+        //by mutli-casting
+
+        if (scaler is long) return (int)(long)scaler;
+        else if (scaler is ulong) return (int)(ulong)scaler;
+        else if (scaler is short ) return (short)scaler;
+        else if (scaler is ushort ) return (ushort)scaler;
+        else 
+        {
+            int i = 0;
+            try { i = (int)scaler;}catch{ return default(int); }
+            return i;
+        }
+
+        
+    }
+
 }

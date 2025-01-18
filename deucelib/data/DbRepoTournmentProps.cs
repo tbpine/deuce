@@ -15,7 +15,7 @@ public class DbRepoTournamentProps : DbRepoBase<Tournament>
         _dbconn = dbconn;
     }
 
-    public override async Task Set(Tournament obj)
+    public override async Task SetAsync(Tournament obj)
     {
 
         //Insert into the team table

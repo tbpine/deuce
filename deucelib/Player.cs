@@ -14,14 +14,19 @@ public class Player
     private double _ranking;
     private string? _last;
     private int _index;
+    private int _teamPlayerId;
     private Organization? _club;
+
+    private Team? _team;
 
     public int Id { get { return _id; } set { _id = value; } }
     public string? First { get { return _first; } set { _first = value; } }
     public string? Last { get { return _last; } set { _last = value; } }
     public double Ranking { get { return _ranking; } set { _ranking = value; } }
     public int Index { get { return _index; } set { _index = value; } }
+    public int TeamPlayerId { get { return _teamPlayerId; } set { _teamPlayerId = value; } }
     public Organization? Club { get { return _club; } set { _club = value; }}
+    public Team? Team { get { return _team; } set { _team = value; }}
     
     public IEnumerable<Match> History { get => _history; }
     /// <summary>

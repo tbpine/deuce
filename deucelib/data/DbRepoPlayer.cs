@@ -5,12 +5,18 @@ namespace deuce;
 public class DbRepoPlayer : DbRepoBase<Player>
 {
     private readonly DbConnection _dbconn;
-    private readonly Organization? _club;
+    private readonly Organization? _organization;
 
     public DbRepoPlayer(DbConnection dbconn, params object[] references)
     {
         _dbconn = dbconn;
-        _club = references[0] as Organization;
+        _organization = references[0] as Organization;
+    }
+
+     public DbRepoPlayer(DbConnection dbconn, Organization organization)
+    {
+        _dbconn = dbconn;
+        _organization = organization;
     }
 
     /// <summary>
@@ -33,7 +39,7 @@ public class DbRepoPlayer : DbRepoBase<Player>
             {
                 Player p = new() {
                     Id = reader.Target.Parse<int>("id"),
-                    Club = _club,
+                    Club = _organization,
                     First = reader.Target.Parse<string>("first_name"),
                     Last = reader.Target.Parse<string>("last_name"),
                     Ranking = reader.Target.Parse<double>("utr")
@@ -46,6 +52,14 @@ public class DbRepoPlayer : DbRepoBase<Player>
         }
 
         return players;
+        
+    }
+
+    public override void Set(Player obj)
+    {
+        var command = _dbconn.CreateCommandStoreProc("sp_set_player", new string[] {"p_id", "p_organization", "p_first_name", "p_last_name",
+        "p_utr"}, new object[] { obj.Id , _organization?.Id??1, obj.First??"", obj.Last??"", obj.Ranking} );
+        obj.Id = command.GetIntegerFromScaler(command.ExecuteScalar());
         
     }
 }
