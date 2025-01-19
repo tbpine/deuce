@@ -24,7 +24,7 @@ public class DbRepoRecordSchedule : DbRepoBase<RecordSchedule>
     public async override Task<List<RecordSchedule>> GetList(Filter filter)
     {
         List<RecordSchedule> result = new();
-        await _dbconn.CreateReaderStoreProcAsync("", ["p_tournament" ], [ "filter.TournamentId" ],
+        await _dbconn.CreateReaderStoreProcAsync("sp_get_tournament_schedule", ["p_tournament" ], [ filter.TournamentId ],
         r =>
         {
             result.Add(new RecordSchedule(r.Parse<int>("match_id"),

@@ -329,9 +329,6 @@ public class UnitTestsTeam
         //Action: make changes here
         //Add players to an existing team
 
-        DbRepoPlayer depoPlayer = new DbRepoPlayer(conn);
-        
-
         //Load back the saved team
         DbRepoRecordTeamPlayer dbRepoRecordTeamPlayer= new DbRepoRecordTeamPlayer(conn);
         //Load the test tournament

@@ -12,18 +12,25 @@ public class UnitTestsBuilderSchedule
 {
 
     [TestMethod]
-    [DataRow(3)]
-    public async Task build_schedule_for_tournament(int tournamentId)
+    public async Task build_schedule_for_tournament()
     {
         //Assign
         Organization club = new Organization() { Id = 1 };
-        Tournament tournament = new Tournament() { Id = tournamentId, Label = "test", Sport =1};
-        tournament.Format = new Format(2, 2, 1);
-
+        //Make a random tournament
+        TournamentRepo tourRepo = new();
+        Tournament tournament = await tourRepo.Random(1, "testing_tournament", 8, 1, 2, 2, 1, 2);
+        //Open db connection
         MySqlConnection conn = new("Server=localhost;Database=deuce;User Id=deuce;Password=deuce;");
         await conn.OpenAsync();
+        //Save the tournament
+        DbRepoTournament dbRepoTour = new(conn, club);
+
+        await dbRepoTour.SetAsync(tournament);
+
+
         var dbrepo = new DbRepoRecordSchedule(conn);
-        List<RecordSchedule> recordsSched = await dbrepo.GetList(new Filter() { TournamentId = tournamentId });
+        //Load schedule for tournament 3 , tournament must exist
+        List<RecordSchedule> recordsSched = await dbrepo.GetList(new Filter() { TournamentId = tournament.Id });
 
         //Action
         try

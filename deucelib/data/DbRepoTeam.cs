@@ -1,5 +1,6 @@
 using System.Data.Common;
 using System.Diagnostics;
+using System.Net;
 using System.Runtime.ExceptionServices;
 using System.Runtime.Versioning;
 using deuce.ext;
@@ -240,7 +241,7 @@ public class DbRepoTeam : DbRepoBase<Team>
     {
         //Update team details.
         var cmd = _dbconn.CreateCommandStoreProc("sp_set_team", ["p_id", "p_organization", "p_tournament", "p_label", "p_index"]
-        , [team.Id, filter.ClubId, filter.TournamentId, team.Label, team.Index], dbTransaction);
+        , [DBNull.Value, filter.ClubId, filter.TournamentId, team.Label, team.Index], dbTransaction);
 
         //  A new row is inserted. Store the id.
         team.Id = cmd.GetIntegerFromScaler(cmd.ExecuteScalar());
@@ -251,8 +252,8 @@ public class DbRepoTeam : DbRepoBase<Team>
             //set team players
             DbCommand cmd2 = _dbconn.CreateCommandStoreProc("sp_set_team_player",
             ["p_id", "p_team", "p_player", "p_player_first", "p_player_last", "p_tournament", "p_organization", "p_index"],
-            [ player.TeamPlayerId , team.Id, player.Id, string.IsNullOrEmpty(player.First) ? DBNull.Value : player.First,
-                string.IsNullOrEmpty(player.Last) ? DBNull.Value : player.Last,  _tournamentId, Club?.Id ?? 1,player.Index],
+            [ DBNull.Value, team.Id, player.Id, string.IsNullOrEmpty(player.First) ? DBNull.Value : player.First,
+                string.IsNullOrEmpty(player.Last) ? DBNull.Value : player.Last,  filter.TournamentId, filter.ClubId,player.Index],
             dbTransaction);
 
 

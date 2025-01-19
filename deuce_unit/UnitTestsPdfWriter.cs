@@ -42,8 +42,6 @@ public class UnitsPdfWriter
                 Last = $""
             });
 
-            
-
         }
 
         //Action
