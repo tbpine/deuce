@@ -29,8 +29,11 @@ public class DbRepoMatch : DbRepoBase<Match>
     public override async Task SetAsync(Match obj)
     {
 
+        //Explicitly insert new rows if id < 1
+        object primaryKeyId = obj.Id < 1 ? DBNull.Value : obj.Id;
         var cmd = _dbconn.CreateCommandStoreProc("sp_set_match", ["p_id", "p_permutation", "p_round", "p_tournament" ],
-        [ obj.Id, obj.Permutation?.Id ?? 0, obj.Permutation?.Round?.Index ?? 0, obj.Permutation?.Round?.Tournament?.Id ?? 0 ],
+        
+        [ primaryKeyId, obj.Permutation?.Id ?? 0, obj.Permutation?.Round?.Index ?? 0, obj.Permutation?.Round?.Tournament?.Id ?? 0 ],
         null);
         object? id = await cmd.ExecuteScalarAsync();
         obj.Id = (int)(ulong)(id ?? 0L);

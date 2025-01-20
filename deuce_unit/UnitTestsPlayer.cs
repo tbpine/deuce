@@ -3,9 +3,8 @@ namespace deuce_unit;
 using System.Data;
 using System.Diagnostics;
 using deuce;
-using deuce.lib;
 using MySql.Data.MySqlClient;
-using deuce.ext;
+
 
 
 [TestClass]
@@ -62,7 +61,7 @@ public class UnitTestsPlayer
         {
             conn.Open();
 
-            var fac = FactoryCreateDbRepo.Create<Player>(conn!, c);
+            var fac = new DbRepoPlayer(conn, c);
             Filter filter = new() { ClubId = c.Id };
             list = await fac!.GetList(filter) ?? new List<Player>();
 

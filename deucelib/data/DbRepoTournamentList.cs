@@ -69,9 +69,5 @@ public class DbRepoTournamentList : DbRepoBase<Tournament>
         return list;
     }
 
-    public override void Set(Tournament obj) 
-    {
-        
-    }
-
+   
 }

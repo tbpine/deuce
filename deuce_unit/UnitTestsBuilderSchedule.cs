@@ -1,8 +1,5 @@
 using System.Diagnostics;
-using System.Xml.Serialization;
 using deuce;
-using deuce.ext;
-using deuce.lib;
 using MySql.Data.MySqlClient;
 
 namespace deuce_unit;
@@ -17,8 +14,8 @@ public class UnitTestsBuilderSchedule
         //Assign
         Organization club = new Organization() { Id = 1 };
         //Make a random tournament
-        TournamentRepo tourRepo = new();
-        Tournament tournament = await tourRepo.Random(1, "testing_tournament", 8, 1, 2, 2, 1, 2);
+        AssignTournament tourRepo = new();
+        Tournament tournament = await tourRepo.MakeRandom(1, "testing_tournament", 8, 1, 2, 2, 1, 2);
         //Open db connection
         MySqlConnection conn = new("Server=localhost;Database=deuce;User Id=deuce;Password=deuce;");
         await conn.OpenAsync();
@@ -26,6 +23,13 @@ public class UnitTestsBuilderSchedule
         DbRepoTournament dbRepoTour = new(conn, club);
 
         await dbRepoTour.SetAsync(tournament);
+
+        //Save teams
+        DbRepoTeam dbRepoTeam= new(conn, club, tournament.Id);
+        foreach(Team iterTeam in tournament.Teams??new List<Team>())
+             await dbRepoTeam.SetAsync(iterTeam);
+        //Save schedule
+
 
 
         var dbrepo = new DbRepoRecordSchedule(conn);

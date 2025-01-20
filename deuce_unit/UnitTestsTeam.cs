@@ -1,9 +1,6 @@
 namespace deuce_unit;
-using deuce.ext;
 using deuce;
 using MySql.Data.MySqlClient;
-using System.Data.Common;
-using deuce.lib;
 using System.Diagnostics;
 
 [TestClass]

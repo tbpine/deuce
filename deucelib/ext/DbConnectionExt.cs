@@ -135,6 +135,7 @@ public static class DbDataConnectionExt
                         command.Parameters.Add(command.CreateWithValue(paramNames[i], paramValues[i]));
 #if DEBUG
                         if (paramValues[i] is string) sbProcCall.Append($"'{paramValues[i]}'");
+                        else if (DBNull.Value.Equals(paramValues[i])) sbProcCall.Append($"null");
                         else sbProcCall.Append($"{paramValues[i]}");
                         if (i < paramNames.Length - 1) sbProcCall.Append(",");
 #endif

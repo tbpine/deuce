@@ -49,8 +49,11 @@ public class DbRepoPlayer : DbRepoBase<Player>
 
     public override void Set(Player obj)
     {
+         //Explicitly insert new rows if id < 1
+        object primaryKeyId = obj.Id < 1 ? DBNull.Value : obj.Id;
+
         var command = _dbconn.CreateCommandStoreProc("sp_set_player", ["p_id", "p_organization", "p_first_name", "p_last_name",
-        "p_utr"], [obj.Id, _organization?.Id ?? 1, obj.First ?? "", obj.Last ?? "", obj.Ranking ]);
+        "p_utr"], [primaryKeyId, _organization?.Id ?? 1, obj.First ?? "", obj.Last ?? "", obj.Ranking ]);
         obj.Id = command.GetIntegerFromScaler(command.ExecuteScalar());
 
     }

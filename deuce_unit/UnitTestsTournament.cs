@@ -1,7 +1,5 @@
 using System.Diagnostics;
 using deuce;
-using deuce.ext;
-using deuce.lib;
 using MySql.Data.MySqlClient;
 
 namespace deuce_unit;
@@ -22,8 +20,8 @@ public class UnitTestsTournament
         {
             conn.Open();
             //Create tournament
-            TournamentRepo tourRepo = new();
-            Tournament tour = await tourRepo.Random(1, "test_tournament", 8, 1, 2, 2, 1, 2);
+            AssignTournament tourRepo = new();
+            Tournament tour = await tourRepo.MakeRandom(1, "test_tournament", 8, 1, 2, 2, 1, 2);
             tour.Id = tournamentId;
             Schedule? schedule = tour.Schedule;
 
@@ -32,13 +30,13 @@ public class UnitTestsTournament
             //Teams
             var dbRepoTeam = new DbRepoTeam(conn)
             {
-                Club = club,
+                Organization = club,
                 Tournament = tour
             };
             foreach (Team team in tour.Teams!)
                 await dbRepoTeam.SetAsync(team);
             //Save matches
-            var dbrepo = FactoryCreateDbRepo.Create<Match>(conn);
+            var dbrepo = new DbRepoMatch(conn);
 
             for (int i = 0; i < tour.Schedule!.NoRounds; i++)
             {

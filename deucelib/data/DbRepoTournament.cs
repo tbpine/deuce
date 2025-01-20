@@ -1,9 +1,5 @@
-using System.Data;
 using System.Data.Common;
 using System.Diagnostics;
-using System.Net;
-using System.Runtime.InteropServices;
-using System.Transactions;
 using deuce.ext;
 
 namespace deuce;
@@ -30,7 +26,7 @@ public class DbRepoTournament : DbRepoBase<Tournament>
     {
         List<Tournament> list = new();
 
-        await  _dbconn.CreateReaderStoreProcAsync("sp_get_tournament", [ "p_id" ], [ filter.TournamentId ],
+        await _dbconn.CreateReaderStoreProcAsync("sp_get_tournament", ["p_id"], [filter.TournamentId],
         reader =>
         {
             int id = reader.Parse<int>("id");
@@ -75,14 +71,18 @@ public class DbRepoTournament : DbRepoBase<Tournament>
     public override async Task SetAsync(Tournament obj)
     {
         var localTran = _dbconn.BeginTransaction();
-        object? objret = null;
-        DbCommand cmd = _dbconn.CreateCommandStoreProc("sp_set_tournament", 
-        ["p_id","p_label", "p_start", "p_end", "p_interval", "p_steps", "p_type","p_max", "p_fee","p_prize", "p_seedings", "p_sport", "p_organization", "p_entry_type" ],
-        [obj.Id, obj.Label??"",obj.Start,obj.End,obj.Interval,obj.Steps,obj.Type ,obj.Max,obj.Fee,obj.Prize, obj.UseRanking,obj.Sport, obj.Organization?.Id ?? 1,obj.EntryType < 1 ? 1 : obj.EntryType],localTran);
+        
+        //Explicitly insert new rows if id < 1
+        object primaryKeyId = obj.Id < 1 ? DBNull.Value : obj.Id;
+
+        DbCommand cmd = _dbconn.CreateCommandStoreProc("sp_set_tournament",
+        ["p_id", "p_label", "p_start", "p_end", "p_interval", "p_steps", "p_type", "p_max", "p_fee", "p_prize", "p_seedings", "p_sport", "p_organization", "p_entry_type"],
+        [primaryKeyId, obj.Label ?? "", obj.Start, obj.End, obj.Interval, obj.Steps, obj.Type, obj.Max, obj.Fee, obj.Prize, obj.UseRanking, obj.Sport, obj.Organization?.Id ?? 1, obj.EntryType < 1 ? 1 : obj.EntryType], localTran);
 
         try
         {
-            objret = await cmd.ExecuteScalarAsync();
+            obj.Id  =cmd.GetIntegerFromScaler(await cmd.ExecuteScalarAsync());
+
             localTran.Commit();
 
         }
@@ -92,11 +92,6 @@ public class DbRepoTournament : DbRepoBase<Tournament>
             Debug.WriteLine(ex.Message);
         }
 
-        if (objret is not null)
-        {
-            if (objret is int) obj.Id = (int)objret;
-            else if (objret is ulong) obj.Id = (int)(ulong)objret;
-        }
 
 
     }

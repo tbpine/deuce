@@ -321,6 +321,7 @@ IN p_index INT)
 
 BEGIN
 
+
 INSERT INTO `team` (`id`,`label`,`organization`,`tournament`,`index`, `updated_datetime`,`created_datetime`) 
 VALUES (p_id, p_label, p_organization,p_tournament, p_index,NOW(), NOW())
 ON DUPLICATE KEY UPDATE `label` = p_label,`organization` = p_organization, `tournament` = p_tournament, `updated_datetime` = NOW(),

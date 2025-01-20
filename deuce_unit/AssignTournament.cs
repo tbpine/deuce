@@ -1,16 +1,13 @@
-using System.Globalization;
 using deuce;
-using deuce.lib;
 using MySql.Data.MySqlClient;
-using ZstdSharp.Unsafe;
 
-class TournamentRepo
+class AssignTournament
 {
     /// <summary>
     /// Make a random tournament
     /// </summary>
     /// <returns>A tournamnet object</returns>
-    public async Task<Tournament> Random(int tournamentType, string label, int noPlayers, int sport,
+    public async Task<Tournament> MakeRandom(int tournamentType, string label, int noPlayers, int sport,
     int noSingle, int noDouble, int sets, int teamSize)
     {
         //Remove all players for the tournament
@@ -65,7 +62,7 @@ class TournamentRepo
 
         for (int i = 0; i < noTeams; i++)
         {
-            Team team = new Team() { Id = -1, Label = $"team_{i}" };
+            Team team = new Team() { Id = -1, Label = $"team_{i}" ,Index = i};
 
             for (int j = 0; j < teamSize; j++)
             {
@@ -77,6 +74,7 @@ class TournamentRepo
             selected.Add(team);
 
         }
+
 
         //Action
         //Assert

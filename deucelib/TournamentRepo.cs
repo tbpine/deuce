@@ -1,18 +1,25 @@
 using System.Data.Common;
-using deuce.lib;
+
 
 namespace deuce;
 public class TournamentRepo
 {
     private readonly DbConnection _dbconn;
     private readonly Tournament _tournament;
-    private readonly Organization _club;
+    private readonly Organization _organization;
 
-    public TournamentRepo(DbConnection dbconn, Tournament tournament, Organization club)
+    /// <summary>
+    /// Save a tournament to the database, breaking
+    /// down to matches per round.
+    /// </summary>
+    /// <param name="dbconn">The database connection</param>
+    /// <param name="tournament">The tournament to save</param>
+    /// <param name="org">The organization</param>
+    public TournamentRepo(DbConnection dbconn, Tournament tournament, Organization org)
     {
         _dbconn = dbconn;
         _tournament = tournament;
-        _club = club;
+        _organization = org;
     }
 
     public async Task<bool> Save()
@@ -23,14 +30,14 @@ public class TournamentRepo
         //Teams
         var dbRepoTeam = new DbRepoTeam(_dbconn)
         {
-            Club = _club,
+            Organization = _organization,
             Tournament = _tournament
         };
 
         foreach (Team team in _tournament.Teams!)
             await dbRepoTeam.SetAsync(team);
         //Save matches
-        var dbrepo = FactoryCreateDbRepo.Create<Match>(_dbconn);
+        var dbrepo = new DbRepoMatch(_dbconn);
 
         for (int i = 0; i < _tournament.Schedule!.NoRounds; i++)
         {

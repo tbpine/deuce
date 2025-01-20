@@ -1,7 +1,6 @@
 using System.Diagnostics;
 using deuce;
 using deuce.ext;
-using deuce.lib;
 using MySql.Data.MySqlClient;
 
 namespace deuce_unit;
@@ -22,14 +21,14 @@ public class UnitTestsMatch
         {
             conn.Open();
             //Create tournament
-            TournamentRepo tourRepo = new();
-            Tournament tour = await tourRepo.Random(1, "test_tournament", 8, 1, 1, 0,1, 1);
+            AssignTournament tourRepo = new();
+            Tournament tour = await tourRepo.MakeRandom(1, "test_tournament", 8, 1, 1, 0,1, 1);
             Schedule? schedule = tour.Schedule;
 
             Assert.IsNotNull(schedule, "Tournment has no schedule");
             Debug.WriteLine($"No of rounds = {schedule.NoRounds}");
             //Data storage
-            var dbrepo = FactoryCreateDbRepo.Create<Match>(conn);
+            var dbrepo = new DbRepoMatch(conn);
 
             for (int i = 0; i < schedule.NoRounds; i++)
             {

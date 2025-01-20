@@ -1,7 +1,6 @@
 using System.Data;
 using System.Data.Common;
 using System.Runtime.InteropServices;
-using deuce.lib;
 using deuce.ext;
 
 namespace deuce;

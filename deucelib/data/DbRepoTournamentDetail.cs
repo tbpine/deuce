@@ -60,6 +60,7 @@ public class DbRepoTournamentDetail : DbRepoBase<TournamentDetail>
     public override async Task SetAsync(TournamentDetail obj)
     {
 
+
         var localTran = _dbconn.BeginTransaction();
         DbCommand cmd = _dbconn.CreateCommandStoreProc("sp_set_tournament_detail",
         ["p_tournament","p_no_entries", "p_sets", "p_games", "p_custom_games","p_no_singles", "p_no_doubles", "p_team_size"],
