@@ -125,12 +125,12 @@ public class DbRepoTeam : DbRepoBase<Team>
 
     }
 
-     /// <summary>
+    /// <summary>
     /// Save a team to the database
     /// </summary>
     /// <param name="obj"></param>
     /// <returns></returns>
-    public override  void Set(Team obj)
+    public override void Set(Team obj)
     {
         var localtran = _dbconn.BeginTransaction();
 
@@ -175,11 +175,12 @@ public class DbRepoTeam : DbRepoBase<Team>
 
     }
 
-    public override async Task Sync(List<Team> src, Filter filter)
+    public override async Task Sync(List<Team> src)
     {
         //Get a list of destination records
         DbRepoRecordTeamPlayer dbRepoTeamPlayer = new(_dbconn);
-        var teamplayers = await dbRepoTeamPlayer.GetList(filter);
+        Filter filterTeams = new Filter() { ClubId = Organization?.Id ?? 1, TournamentId = _tournamentId };
+        var teamplayers = await dbRepoTeamPlayer.GetList(filterTeams);
 
         TeamRepo teamRepo = new(teamplayers);
         var dest = teamRepo.ExtractFromRecordTeamPlayer();
@@ -250,9 +251,9 @@ public class DbRepoTeam : DbRepoBase<Team>
         try
         {
             //Add new teams
-            foreach (Team team in addList) UpdateTeam(team, filter, localtran);
+            foreach (Team team in addList) InsertTeam(team, localtran);
             //Update existing teams
-            foreach (Team team in updateList) UpdateTeamDetail(team, filter, localtran);
+            foreach (Team team in updateList) UpdateTeamDetail(team, localtran);
             //Remove teams 
             foreach (Team team in delList) DeleteTeam(team, localtran);
 
@@ -262,14 +263,14 @@ public class DbRepoTeam : DbRepoBase<Team>
             foreach (TeamPlayer teamPlayer in addTeamPlayer)
             {
                 InsertTeamPlayer(teamPlayer.TeamId, teamPlayer.Player.Id, teamPlayer.Player.First ?? "",
-                teamPlayer.Player.Last ?? "", filter.TournamentId, filter.ClubId, teamPlayer.Player.Index, localtran);
+                teamPlayer.Player.Last ?? "", _tournamentId, Organization?.Id??1, teamPlayer.Player.Index, localtran);
             }
 
             //Remove players from a team
 
             foreach (TeamPlayer teamPlayer in delTeamPlayer)
             {
-                DeleteTeamPlayer(teamPlayer.TeamId, teamPlayer.Player.Id, filter.TournamentId, localtran);
+                DeleteTeamPlayer(teamPlayer.TeamId, teamPlayer.Player.Id, _tournamentId, localtran);
             }
 
 
@@ -286,12 +287,17 @@ public class DbRepoTeam : DbRepoBase<Team>
         //Deletes
     }
 
-    private void UpdateTeam(Team team, Filter filter, DbTransaction dbTransaction)
+    /// <summary>
+    /// Insert rows into the team , team_player table.
+    /// </summary>
+    /// <param name="team">Team to save</param>
+    /// <param name="dbTransaction">Transaction if any</param>
+    private void InsertTeam(Team team, DbTransaction dbTransaction)
     {
         //Update team details.
-        
+
         var cmdSetTeam = _dbconn.CreateCommandStoreProc("sp_set_team", ["p_id", "p_organization", "p_tournament", "p_label", "p_index"]
-        , [DBNull.Value, filter.ClubId, filter.TournamentId, team.Label, team.Index], dbTransaction);
+        , [DBNull.Value, Organization?.Id ?? 1, _tournamentId, team.Label, team.Index], dbTransaction);
 
         //  A new row is inserted. Store the id.
         team.Id = cmdSetTeam.GetIntegerFromScaler(cmdSetTeam.ExecuteScalar());
@@ -303,7 +309,7 @@ public class DbRepoTeam : DbRepoBase<Team>
             DbCommand cmdSetTeamPlayer = _dbconn.CreateCommandStoreProc("sp_set_team_player",
             ["p_id", "p_team", "p_player", "p_player_first", "p_player_last", "p_tournament", "p_organization", "p_index"],
             [ DBNull.Value, team.Id, player.Id, string.IsNullOrEmpty(player.First) ? DBNull.Value : player.First,
-                string.IsNullOrEmpty(player.Last) ? DBNull.Value : player.Last,  filter.TournamentId, filter.ClubId,player.Index],
+                string.IsNullOrEmpty(player.Last) ? DBNull.Value : player.Last,  _tournamentId, Organization?.Id??1,player.Index],
             dbTransaction);
 
 
@@ -315,11 +321,16 @@ public class DbRepoTeam : DbRepoBase<Team>
 
     }
 
-    public void UpdateTeamDetail(Team team, Filter filter, DbTransaction dbTransaction)
+    /// <summary>
+    /// Update a row in the team table
+    /// </summary>
+    /// <param name="team">Team to update</param>
+    /// <param name="dbTransaction">Transaction if any</param>
+    private void UpdateTeamDetail(Team team, DbTransaction dbTransaction)
     {
         //Update team details.
         var cmdSetTeam = _dbconn.CreateCommandStoreProc("sp_set_team", ["p_id", "p_organization", "p_tournament", "p_label", "p_index"]
-        , [team.Id, filter.ClubId, filter.TournamentId, team.Label, team.Index], dbTransaction);
+        , [team.Id, Organization?.Id ?? 1, _tournamentId, team.Label, team.Index], dbTransaction);
 
         var teamScalerId = cmdSetTeam.ExecuteScalar();
         //Returns the last inserted row id
@@ -353,7 +364,7 @@ public class DbRepoTeam : DbRepoBase<Team>
 
         DbCommand cmdSetTeamPlayer = _dbconn.CreateCommandStoreProc("sp_set_team_player",
         ["p_id", "p_team", "p_player", "p_player_first", "p_player_last", "p_tournament", "p_organization", "p_index"],
-        [DBNull.Value , teamId, playerId, first, last,  tournamentId, orgId,pIndex],
+        [DBNull.Value, teamId, playerId, first, last, tournamentId, orgId, pIndex],
         tran);
 
         var reader = cmdSetTeamPlayer.ExecuteReader();

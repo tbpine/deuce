@@ -9,5 +9,5 @@ public interface IDbRepo<T>
     Task SetAsync(T obj);
     void Set(T obj);
     Task Delete(T obj);
-    Task Sync(List<T> obj,Filter filter);
+    Task Sync(List<T> obj);
 }

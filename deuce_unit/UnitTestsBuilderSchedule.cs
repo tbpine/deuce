@@ -12,24 +12,17 @@ public class UnitTestsBuilderSchedule
     public async Task build_schedule_for_tournament()
     {
         //Assign
-        Organization club = new Organization() { Id = 1 };
+        Organization orgainization = new Organization() { Id = 1 };
         //Make a random tournament
-        AssignTournament tourRepo = new();
-        Tournament tournament = await tourRepo.MakeRandom(1, "testing_tournament", 8, 1, 2, 2, 1, 2);
+        AssignTournament assignTour = new();
+        Tournament tournament = await assignTour.MakeRandom(1, "testing_tournament", 8, 1, 2, 2, 1, 2);
         //Open db connection
         MySqlConnection conn = new("Server=localhost;Database=deuce;User Id=deuce;Password=deuce;");
         await conn.OpenAsync();
-        //Save the tournament
-        DbRepoTournament dbRepoTour = new(conn, club);
-
-        await dbRepoTour.SetAsync(tournament);
-
-        //Save teams
-        DbRepoTeam dbRepoTeam= new(conn, club, tournament.Id);
-        foreach(Team iterTeam in tournament.Teams??new List<Team>())
-             await dbRepoTeam.SetAsync(iterTeam);
-        //Save schedule
-
+        //Save the tournament using the tour repo
+        //class. Saves teams as well.
+        TournamentRepo tourRepo = new(conn, tournament, orgainization);
+        await tourRepo.Save();
 
 
         var dbrepo = new DbRepoRecordSchedule(conn);

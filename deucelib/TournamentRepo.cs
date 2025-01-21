@@ -27,15 +27,10 @@ public class TournamentRepo
         //players , permutation and round, and tournament
         //Action
         //What is needed to save the tournament for recreation ?
-        //Teams
-        var dbRepoTeam = new DbRepoTeam(_dbconn)
-        {
-            Organization = _organization,
-            Tournament = _tournament
-        };
+        //Sync Teams
+        var dbRepoTeam = new DbRepoTeam(_dbconn, _organization, _tournament.Id);
+        await dbRepoTeam.Sync(_tournament.Teams ?? new List<Team>());
 
-        foreach (Team team in _tournament.Teams!)
-            await dbRepoTeam.SetAsync(team);
         //Save matches
         var dbrepo = new DbRepoMatch(_dbconn);
 

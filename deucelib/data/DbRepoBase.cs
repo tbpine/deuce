@@ -27,7 +27,7 @@ public class DbRepoBase<T> : IDbRepo<T>
         return Task.FromResult(obj);
     }
 
-    public virtual Task Sync(List<T> obj, Filter filter)
+    public virtual Task Sync(List<T> obj)
     {
         return Task.FromResult(obj);
     }

@@ -26,16 +26,14 @@ public class UnitTestsTeam
 
         MySqlConnection conn = new("Server=localhost;Database=deuce;User Id=deuce;Password=deuce;");
         await conn.OpenAsync();
-        DbRepoTeam dbRepoTeam = new DbRepoTeam(conn);
-        List<Team> teams = new List<Team>();
-        teams.Add(team1);
-        teams.Add(team2);
-        Filter filter = new Filter() { ClubId = organization.Id, TournamentId = tournament.Id };
+        DbRepoTeam dbRepoTeam = new DbRepoTeam(conn, organization, tournament.Id);
+        List<Team> teams = [team1, team2];
+        
         //Action
-        await dbRepoTeam.Sync(teams, filter);
+        await dbRepoTeam.Sync(teams);
 
-        DbRepoRecordTeamPlayer dbRepoRTeamPlayer= new(conn);
-        var records = await dbRepoRTeamPlayer.GetList(new Filter(){TournamentId = tournament.Id});
+        DbRepoRecordTeamPlayer dbRepoTeamPlayer= new(conn);
+        var records = await dbRepoTeamPlayer.GetList(new Filter(){TournamentId = tournament.Id});
 
         //Assert
         Assert.IsTrue(records.Count == 2, "Incorrect number of players");
@@ -63,18 +61,15 @@ public class UnitTestsTeam
 
         MySqlConnection conn = new("Server=localhost;Database=deuce;User Id=deuce;Password=deuce;");
         await conn.OpenAsync();
-        DbRepoTeam dbRepoTeam = new DbRepoTeam(conn);
-        List<Team> teams = new List<Team>();
-        teams.Add(team1);
-        teams.Add(team2);
-        Filter filter = new Filter() { ClubId = organization.Id, TournamentId = tournament.Id };
+        DbRepoTeam dbRepoTeam = new DbRepoTeam(conn, organization, tournament.Id);
+        List<Team> teams = [team1, team2];
         //Action
-        await dbRepoTeam.Sync(teams, filter);
+        await dbRepoTeam.Sync(teams);
 
         //Update 
         team1.Label = "team1 changed";
 
-        await dbRepoTeam.Sync(teams, filter);
+        await dbRepoTeam.Sync(teams);
 
         //Assert
         DbRepoRecordTeamPlayer dbRepoRTeamPlayer= new(conn);
@@ -110,20 +105,17 @@ public class UnitTestsTeam
 
         MySqlConnection conn = new("Server=localhost;Database=deuce;User Id=deuce;Password=deuce;");
         await conn.OpenAsync();
-        DbRepoTeam dbRepoTeam = new DbRepoTeam(conn);
-        List<Team> teams = new List<Team>();
-        teams.Add(team1);
-        teams.Add(team2);
-        Filter filter = new Filter() { ClubId = organization.Id, TournamentId = tournament.Id };
+        DbRepoTeam dbRepoTeam = new DbRepoTeam(conn, organization, tournament.Id);
+        List<Team> teams = [team1, team2];
         //Action
-        await dbRepoTeam.Sync(teams, filter);
+        await dbRepoTeam.Sync(teams);
 
         //Update 
         Team team3 = new Team() { Id = 0, Index = 0, Label = "test_team3" };
         team3.AddPlayer(new Player() { Id = 0, First = "test_player3", Last = "", Index = 0, Ranking = 0d });
         teams.Add(team3);
 
-        await dbRepoTeam.Sync(teams, filter);
+        await dbRepoTeam.Sync(teams);
 
         //Assert
         DbRepoRecordTeamPlayer dbRepoRTeamPlayer= new(conn);
@@ -158,17 +150,14 @@ public class UnitTestsTeam
 
         MySqlConnection conn = new("Server=localhost;Database=deuce;User Id=deuce;Password=deuce;");
         await conn.OpenAsync();
-        DbRepoTeam dbRepoTeam = new DbRepoTeam(conn);
-        List<Team> teams = new List<Team>();
-        teams.Add(team1);
-        teams.Add(team2);
-        Filter filter = new Filter() { ClubId = organization.Id, TournamentId = tournament.Id };
+        DbRepoTeam dbRepoTeam = new DbRepoTeam(conn, organization, tournament.Id);
+        List<Team> teams = [team1, team2];
         //Action
-        await dbRepoTeam.Sync(teams, filter);
+        await dbRepoTeam.Sync(teams);
 
         //Update 
         teams.Remove(team2);
-        await dbRepoTeam.Sync(teams, filter);
+        await dbRepoTeam.Sync(teams);
 
         //Assert
         DbRepoRecordTeamPlayer dbRepoRTeamPlayer= new(conn);
@@ -201,13 +190,10 @@ public class UnitTestsTeam
 
         MySqlConnection conn = new("Server=localhost;Database=deuce;User Id=deuce;Password=deuce;");
         await conn.OpenAsync();
-        DbRepoTeam dbRepoTeam = new DbRepoTeam(conn);
-        List<Team> teams = new List<Team>();
-        teams.Add(team1);
-        teams.Add(team2);
-        Filter filter = new Filter() { ClubId = organization.Id, TournamentId = tournament.Id };
+        DbRepoTeam dbRepoTeam = new DbRepoTeam(conn, organization, tournament.Id);
+        List<Team> teams = [team1, team2];
         //Action
-        await dbRepoTeam.Sync(teams, filter);
+        await dbRepoTeam.Sync(teams);
 
         //Update 
         //Add a new player
@@ -218,7 +204,7 @@ public class UnitTestsTeam
 
         team1.AddPlayer(newPlayer);
 
-        await dbRepoTeam.Sync(teams, filter);
+        await dbRepoTeam.Sync(teams);
 
         //Assert
         DbRepoRecordTeamPlayer dbRepoRTeamPlayer= new(conn);
@@ -264,16 +250,16 @@ public class UnitTestsTeam
 
         MySqlConnection conn = new("Server=localhost;Database=deuce;User Id=deuce;Password=deuce;");
         await conn.OpenAsync();
-        DbRepoTeam dbRepoTeam = new DbRepoTeam(conn);
+        DbRepoTeam dbRepoTeam = new DbRepoTeam(conn, organization, tournament.Id);
         
-        Filter filter = new Filter() { ClubId = organization.Id, TournamentId = tournament.Id };
         //Action
-        await dbRepoTeam.Sync(teams, filter);
+        await dbRepoTeam.Sync(teams);
 
         //Load back the saved team
         DbRepoRecordTeamPlayer dbRepoRecordTeamPlayer= new DbRepoRecordTeamPlayer(conn);
+        Filter filterTeamPlayer = new() { ClubId = organization.Id, TournamentId = tournament.Id };
         //Load the test tournament
-        var records = await dbRepoRecordTeamPlayer.GetList(filter);
+        var records = await dbRepoRecordTeamPlayer.GetList(filterTeamPlayer);
         //Print out teams
         for(int i = 0; i < records.Count; i++)
             Debug.WriteLine(records[i].ToString());
@@ -317,11 +303,10 @@ public class UnitTestsTeam
 
         MySqlConnection conn = new("Server=localhost;Database=deuce;User Id=deuce;Password=deuce;");
         await conn.OpenAsync();
-        DbRepoTeam dbRepoTeam = new DbRepoTeam(conn);
+        DbRepoTeam dbRepoTeam = new DbRepoTeam(conn, organization, tournament.Id);
         
-        Filter filter = new Filter() { ClubId = organization.Id, TournamentId = tournament.Id };
         //Action
-        await dbRepoTeam.Sync(teams, filter);
+        await dbRepoTeam.Sync(teams);
         
         //Action: make changes here
         //Add players to an existing team
@@ -329,7 +314,8 @@ public class UnitTestsTeam
         //Load back the saved team
         DbRepoRecordTeamPlayer dbRepoRecordTeamPlayer= new DbRepoRecordTeamPlayer(conn);
         //Load the test tournament
-        var records = await dbRepoRecordTeamPlayer.GetList(filter);
+        Filter filterTeamPlayer = new Filter() { ClubId = organization.Id, TournamentId = tournament.Id };
+        var records = await dbRepoRecordTeamPlayer.GetList(filterTeamPlayer);
         //Print out teams
         for(int i = 0; i < records.Count; i++)
             Debug.WriteLine(records[i].ToString());
