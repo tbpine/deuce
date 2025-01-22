@@ -128,30 +128,15 @@
                         <!-- Body (Navigation) -->
                         <div class="offcanvas-body d-block pt-2 pt-lg-4 pb-lg-0">
                         <nav class="list-group list-group-borderless">
-                            <a class="list-group-item list-group-item-action d-flex align-items-center" href="account-profile.html">
-                            <i class="fi-user fs-base opacity-75 me-2"></i>
-                            My profile
-                            </a>
-                            <a class="list-group-item list-group-item-action d-flex align-items-center" aria-current="page" href="account-listings.html">
-                            <i class="fi-layers fs-base opacity-75 me-2"></i>
-                            Events
-                            </a>
-                            <a class="list-group-item list-group-item-action d-flex align-items-center active" aria-current="page" href="account-listings.html">
-                            <i class="fi-layers fs-base opacity-75 me-2"></i>
-                            Scores
-                            </a>
-                            <a class="list-group-item list-group-item-action d-flex align-items-center" href="account-payment.html">
-                            <i class="fi-credit-card fs-base opacity-75 me-2"></i>
-                            Payment details
-                            </a>
-                            <a class="list-group-item list-group-item-action d-flex align-items-center" href="account-settings.html">
-                            <i class="fi-settings fs-base opacity-75 me-2"></i>
-                            Account settings
-                            </a>
-                            <a class="list-group-item list-group-item-action d-flex align-items-center" href="help-topics-v1.html">
-                            <i class="fi-help-circle fs-base opacity-75 me-2"></i>
-                            Help center
-                            </a>
+                            <!-- #nav item  -->
+                            @foreach (NavItem navItem in Model.NavItems)
+                            {
+                                string attIsActive = navItem.IsSelected ? "active" : "";
+                                <a class="list-group-item list-group-item-action d-flex align-items-center @attIsActive" aria-current="page" href="@navItem.Resource">
+                                <i class="@navItem.Icon fs-base opacity-75 me-2"></i>
+                                    @navItem.Label
+                                </a>
+                            }
                         </nav>
                         <nav class="list-group list-group-borderless pt-3">
                             <a class="list-group-item list-group-item-action d-flex align-items-center" href="account-signin.html">

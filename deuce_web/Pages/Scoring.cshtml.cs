@@ -6,7 +6,7 @@ using System.Diagnostics;
 /// <summary>
 /// 
 /// </summary>
-public class ScoringPageModel : PageModel
+public class ScoringPageModel : AccBasePageModel
 {
     private readonly ILogger<ScoringPageModel> _log;
 
@@ -24,7 +24,8 @@ public class ScoringPageModel : PageModel
     public Round Rounds(int r) => _schedule?.GetRounds(r) ?? new Round(0);
 
 
-    public ScoringPageModel(ILogger<ScoringPageModel> log)
+    public ScoringPageModel(ILogger<ScoringPageModel> log, ISideMenuHandler handlerNavItems, IServiceProvider sp, IConfiguration config)
+    :base(handlerNavItems, sp,  config)
     {
         _log = log;
     }

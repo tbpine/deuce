@@ -6,22 +6,18 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 /// <summary>
 /// 
 /// </summary>
-public class TournamentsPageModel : PageModel
+public class TournamentsPageModel : AccBasePageModel
 {
     private readonly ILogger<TournamentsPageModel> _log;
-    private readonly IConfiguration _config;
-    private readonly IServiceProvider _serviceProvider;
-
     private List<Tournament>? _tournaments;
 
     public List<Tournament>? Tournaments { get=>_tournaments; }
 
 
-    public TournamentsPageModel(ILogger<TournamentsPageModel> log, IServiceProvider serviceProvider, IConfiguration cfg)
+    public TournamentsPageModel(ILogger<TournamentsPageModel> log,  ISideMenuHandler handlerNavItems, IServiceProvider sp, IConfiguration config)
+    :base(handlerNavItems, sp,  config)
     {
         _log = log;
-        _serviceProvider = serviceProvider;
-        _config = cfg;
     }
 
     public async Task<IActionResult> OnGetAsync()
