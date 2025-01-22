@@ -6,9 +6,9 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 /// <summary>
 /// 
 /// </summary>
-public class EventsPageModel : PageModel
+public class TournamentsPageModel : PageModel
 {
-    private readonly ILogger<EventsPageModel> _log;
+    private readonly ILogger<TournamentsPageModel> _log;
     private readonly IConfiguration _config;
     private readonly IServiceProvider _serviceProvider;
 
@@ -17,7 +17,7 @@ public class EventsPageModel : PageModel
     public List<Tournament>? Tournaments { get=>_tournaments; }
 
 
-    public EventsPageModel(ILogger<EventsPageModel> log, IServiceProvider serviceProvider, IConfiguration cfg)
+    public TournamentsPageModel(ILogger<TournamentsPageModel> log, IServiceProvider serviceProvider, IConfiguration cfg)
     {
         _log = log;
         _serviceProvider = serviceProvider;

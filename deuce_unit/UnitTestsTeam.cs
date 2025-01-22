@@ -25,7 +25,7 @@ public class UnitTestsTeam
         team2.AddPlayer(new Player() { Id = 0, First = "test_player2", Last = "", Index = 0, Ranking = 0d });
 
         MySqlConnection conn = new("Server=localhost;Database=deuce;User Id=deuce;Password=deuce;");
-        await conn.OpenAsync();
+        await conn.OpenAsync(); 
         DbRepoTeam dbRepoTeam = new DbRepoTeam(conn, organization, tournament.Id);
         List<Team> teams = [team1, team2];
         

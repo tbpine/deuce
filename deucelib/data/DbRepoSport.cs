@@ -23,7 +23,7 @@ public class DbRepoSport : DbRepoBase<Sport>
     public async override Task<List<Sport>> GetList()
     {
         List<Sport> sports = new();
-        await _dbconn.CreateReaderStoreProcAsync("sp_get_sports", [""], [], reader=>{
+        await _dbconn.CreateReaderStoreProcAsync("sp_get_sports", [], [], reader=>{
             sports.Add(new Sport(reader.Parse<int>("id"), reader.Parse<string>("label"),
                 reader.Parse<string>("name"),
                 reader.Parse<string>("key"),

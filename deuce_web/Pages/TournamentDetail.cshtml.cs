@@ -78,7 +78,7 @@ public class TournamentDetailPageModel : BasePageModel
 
                 DbRepoTournament dbrepoTour = new DbRepoTournament(dbconn, org);
                 //Save the tournament to db
-                await dbrepoTour.Set(tournament);
+                await dbrepoTour.SetAsync(tournament);
                 //Save tournament id
 
                 if (_sessionProxy is not null)  _sessionProxy.TournamentId =  tournament.Id;

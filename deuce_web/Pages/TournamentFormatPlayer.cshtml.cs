@@ -120,7 +120,7 @@ public class TournamentFormatPlayerPageModel : BasePageModel
                     dbconn.ConnectionString = _config.GetConnectionString("deuce_local");
                     await dbconn.OpenAsync();
                     DbRepoTournamentDetail dbRepoTourDetail = new (dbconn, thisOrg);
-                    await dbRepoTourDetail.Set(tourDetails);
+                    await dbRepoTourDetail.SetAsync(tourDetails);
                     await dbconn.CloseAsync();
 
                 }

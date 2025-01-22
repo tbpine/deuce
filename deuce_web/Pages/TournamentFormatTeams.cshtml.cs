@@ -195,7 +195,7 @@ public class TournamentFormatTeamsPageModel : BasePageModel
             await dbconn.OpenAsync();
             Organization thisOrg = new() { Id = _sessionProxy?.OrganizationId ?? 1 };
             DbRepoTournamentDetail dbRepoTournameDetail = new(dbconn, thisOrg);
-            await dbRepoTournameDetail.Set(tourDetail);
+            await dbRepoTournameDetail.SetAsync(tourDetail);
         }
 
         return NextPage("");

@@ -37,6 +37,8 @@ class AssignTournament
         //Assign
         Tournament tournament = new Tournament();
         tournament.Type = tournamentType;
+        tournament.Label = label;
+        
         //1 for tennis for now.
         tournament.Sport = sport;
         tournament.Format = new Format(noSingle, noDouble, sets);

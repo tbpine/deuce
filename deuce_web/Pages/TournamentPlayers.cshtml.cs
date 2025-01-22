@@ -146,8 +146,8 @@ public class TournamentPlayersPageModel : BasePageModel
                 foreach (Team iterTeam in teams)
                 {
                     //Saves player as well
-                    DbRepoTeam dbRepoTeam = new DbRepoTeam(dbconn, thisOrg, currentTourId, true);
-                    await dbRepoTeam.Set(iterTeam);
+                    DbRepoTeam dbRepoTeam = new DbRepoTeam(dbconn, thisOrg, currentTourId);
+                    await dbRepoTeam.SetAsync(iterTeam);
                 }
             }
 
@@ -200,8 +200,8 @@ public class TournamentPlayersPageModel : BasePageModel
                 //Get the listing of players for the tournament.
                 List<RecordTeamPlayer> tourTeamPlayersRec = await dbRepoRecordTP.GetList(filterTeamPlayer);
                 //Create the team /player graph
-                TeamRepo teamRepo = new TeamRepo();
-                _teams = teamRepo.ExtractFromRecordTeamPlayer(tourTeamPlayersRec, orgPlayers, organization);
+                TeamRepo teamRepo = new TeamRepo(tourTeamPlayersRec);
+                _teams = teamRepo.ExtractFromRecordTeamPlayer();
             }
             else
             {

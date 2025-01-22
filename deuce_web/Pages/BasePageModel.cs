@@ -152,7 +152,7 @@ public class BasePageModel : PageModel
             //Use a DBRepo to build the object
             DbRepoTournament dbRepoTour = new DbRepoTournament(dbconn, organization);
 
-            await dbRepoTour.Set(obj);
+            await dbRepoTour.SetAsync(obj);
             await dbconn.CloseAsync();
 
         }

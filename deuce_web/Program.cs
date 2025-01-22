@@ -24,7 +24,7 @@ builder.Services.AddSession(options => {
 });
 
 builder.Services.AddScoped<DbConnection, MySqlConnection>();
-builder.Services.AddScoped<IHandlerNavItems, HandlerNavItems>();
+builder.Services.AddScoped<IHandlerNavItems, HandlerNavItems>());
 builder.Services.AddSingleton<IFormValidator, FormValidator>();
 
 

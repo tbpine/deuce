@@ -88,7 +88,7 @@ public class TournamentSchedulePageModel : BasePageModel
 
                DbRepoTournamentProps dbRepo = new(dbconn);
                //Save to the database.
-               await dbRepo.Set(tmp);
+               await dbRepo.SetAsync(tmp);
             }
 
          }

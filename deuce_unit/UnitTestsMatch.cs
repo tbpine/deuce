@@ -22,11 +22,16 @@ public class UnitTestsMatch
             conn.Open();
             //Create tournament
             AssignTournament tourRepo = new();
-            Tournament tour = await tourRepo.MakeRandom(1, "test_tournament", 8, 1, 1, 0,1, 1);
+            Tournament tour = await tourRepo.MakeRandom(1, "UnitTestsMatch test tour", 8, 1, 1, 0,1, 1);
             Schedule? schedule = tour.Schedule;
 
             Assert.IsNotNull(schedule, "Tournment has no schedule");
             Debug.WriteLine($"No of rounds = {schedule.NoRounds}");
+            //Save tournament, but not details and teams
+            Organization org = new() { Id = 1, Name = "test org"};
+            DbRepoTournament dbRepoTournament = new(conn, org);
+            await dbRepoTournament.SetAsync(tour);
+
             //Data storage
             var dbrepo = new DbRepoMatch(conn);
 
