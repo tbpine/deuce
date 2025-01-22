@@ -1,9 +1,4 @@
-using System.Data;
 using System.Data.Common;
-using System.Diagnostics;
-using System.Net;
-using System.Runtime.InteropServices;
-using System.Transactions;
 using deuce.ext;
 
 namespace deuce;
@@ -29,7 +24,7 @@ public class DbRepoTournamentList : DbRepoBase<Tournament>
     public override async Task<List<Tournament>> GetList(Filter filter)
     {
         List<Tournament> list = new();
-        await _dbconn.CreateReaderStoreProcAsync("", ["sp_get_tournament_list"], [filter.ClubId],
+        await _dbconn.CreateReaderStoreProcAsync("sp_get_tournament_list", ["p_organization"], [filter.ClubId],
         reader=>{
             int id = reader.Parse<int>("id");
             string label = reader.Parse<string>("label");
