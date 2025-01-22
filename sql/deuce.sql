@@ -3,16 +3,15 @@
 * Version 1.0 Tong Pine (1)
 * Dec 2024
 *******************************************************/
---  drop table `tournament`;
---  drop table `tournament_detail`;
---  drop table `tournament_type`;
---  drop table `player`;
---  drop table `team`;
---  drop table `team_player`;
---  drop table `match`;
---  drop table `match_player`;
---  drop table `team_player`;
---  drop table `sport`;
+-- drop table if exists  `tournament`;
+-- drop table if exists  `tournament_detail`;
+-- drop table if exists  `tournament_type`;
+-- drop table if exists  `player`;
+-- drop table if exists  `team`;
+-- drop table if exists  `team_player`;
+-- drop table if exists  `match`;
+-- drop table if exists  `match_player`;
+-- drop table if exists  `sport`;
 
 CREATE TABLE IF NOT EXISTS `tournament_type` (
     `id` INT,
