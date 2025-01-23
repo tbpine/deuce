@@ -107,7 +107,8 @@ public class TournamentFormatPlayerPageModel : BasePageModel
                     NoEntries = NoEntries,
                     Games = Games,
                     Sets = Sets,
-                    CustomGames = CustomGames
+                    CustomGames = CustomGames,
+                    TeamSize = 1
 
                 };
                 Organization thisOrg = new Organization(){Id=1, Name="testing"};
