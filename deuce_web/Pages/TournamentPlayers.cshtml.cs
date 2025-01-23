@@ -110,7 +110,7 @@ public class TournamentPlayersPageModel : BasePageModel
                     string lastname = names.Length > 1 ? names[1].Trim() : "";
                     int idxPlayer = int.TryParse(playerIdx, out idxPlayer) ? idxPlayer : 0;
 
-                    Player player = new Player() { First = firstname, Last = lastname, Index = idxPlayer };
+                    Player player = new Player() { Id = -1, First = firstname, Last = lastname, Index = idxPlayer };
                     currentTeam?.AddPlayer(player);
                 }
             }
