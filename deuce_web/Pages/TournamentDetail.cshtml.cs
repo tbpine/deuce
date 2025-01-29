@@ -52,8 +52,6 @@ public class TournamentDetailPageModel : BasePageModel
     {
         //Save page properties to session
         //Todo: Move manual form values
-        string tmpEventLabel = string.IsNullOrEmpty(EventLabel) ? Randomizer.GetRandomString(32) : EventLabel;
-        EventLabel = tmpEventLabel;
 
         using (var scope = _serviceProvider.CreateScope())
         {

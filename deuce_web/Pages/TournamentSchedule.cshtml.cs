@@ -26,10 +26,12 @@ public class TournamentSchedulePageModel : BasePageModel
    public List<SelectListItem> SelectInterval { get => _selectInterval; }
 
    [BindProperty]
-   public int Interval { get; set; }
+   public string? Interval { get; set; }
 
    [BindProperty]
    public string? StartDate { get; set; }
+
+   public bool Validated { get; set; }
 
    public TournamentSchedulePageModel(ILogger<TournamentSchedulePageModel> log, IHandlerNavItems handlerNavItems,
    IConfiguration cfg, IServiceProvider sp)
@@ -40,11 +42,12 @@ public class TournamentSchedulePageModel : BasePageModel
 
    public async Task<ActionResult> OnGet()
    {
+      Validated = false;
       //Load tournament schedule here
       var currentTour = await GetCurrentTournament(null);
       if (currentTour is not null)
       {
-         Interval = currentTour.Interval;
+         Interval = currentTour.Interval.ToString();
          StartDate = currentTour.Start.ToString(DateFormat);
       }
 
@@ -52,7 +55,7 @@ public class TournamentSchedulePageModel : BasePageModel
 
 
       if (StartDate == DateTime.MinValue.ToString(DateFormat)) StartDate = DateTime.Now.ToString(DateFormat);
-      if (Interval < 1) Interval = 4;
+      if (Interval == "0") Interval = "4";
 
       //Set page values
       return Page();
@@ -62,6 +65,7 @@ public class TournamentSchedulePageModel : BasePageModel
    {
       try
       {
+         Validated = true;
          //Load the current tournament from the database
          Organization thisOrg = new Organization() { Id = 1, Name = "testing" };
 
@@ -71,12 +75,12 @@ public class TournamentSchedulePageModel : BasePageModel
 
             //Set start date and interval
             DateTime tmpStartDate = DateTime.TryParse(StartDate, out tmpStartDate) ? tmpStartDate : DateTime.Now;
-            //Partial object
+            //Tournament DTO
             Tournament tmp = new()
             {
                Id = currentTourId,
                Start = tmpStartDate,
-               Interval = Interval
+               Interval = int.Parse(Interval)
             };
 
             var scope = _serviceProvider.CreateScope();

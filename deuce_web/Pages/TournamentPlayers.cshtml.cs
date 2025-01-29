@@ -115,20 +115,16 @@ public class TournamentPlayersPageModel : BasePageModel
                 }
             }
         }
+        //Validations
 
-        
+        //Check for teams with zero players
+        List<Team> removeTeamList = new();
         foreach (Team team in teams)
-        {
-            bool allPlayersValid = team.Players.All(e => String.IsNullOrEmpty(e.First) && String.IsNullOrEmpty(e.Last));
-            if (!allPlayersValid)
-            {
-                Error = "Missing Player names";
-                //Return the page
-                await LoadPage();
-                return Page();
-            }
+            //Don't add teams with no players
+            if (team.Players.Count() == 0) removeTeamList.Add(team);
 
-        }
+        //Remove empty teams
+        foreach(Team rmTeam in removeTeamList) teams.Remove(rmTeam);
 
         //Save teams to the database
         var scope = _serviceProvider.CreateScope();

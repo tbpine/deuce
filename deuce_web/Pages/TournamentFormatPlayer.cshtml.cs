@@ -16,21 +16,22 @@ public class TournamentFormatPlayerPageModel : BasePageModel
     private readonly ILogger<TournamentFormatPlayerPageModel> _log;
     private readonly IFormValidator _formValidator;
     public string? Title { get; set; }
-    public string? Error { get; set; }
+    
+    [BindProperty]
+    public string? NoEntries { get; set; }
 
     [BindProperty]
-    public int NoEntries { get; set; }
-
-    [BindProperty]
-    public int Games { get; set; }
-
-
-    [BindProperty]
-    public int Sets { get; set; }
+    public string? Games { get; set; }
 
 
     [BindProperty]
-    public int CustomGames { get; set; }
+    public string? Sets { get; set; }
+
+
+    [BindProperty]
+    public string? CustomGames { get; set; }
+
+    public bool Validated { get; set; }
 
 
     public List<SelectListItem> SelectSets = new List<SelectListItem>()
@@ -66,6 +67,7 @@ public class TournamentFormatPlayerPageModel : BasePageModel
         //If there's a current tournament
         try
         {
+            Validated = false;
             return await LoadPage();
         }
         catch (Exception ex)
@@ -82,21 +84,19 @@ public class TournamentFormatPlayerPageModel : BasePageModel
 
         try
         {
+            Validated = true;
             //Save what you can to the session
             //Form validation.
             //Check required form values
-            string err = "";
-            if (!ValidateForm(ref err))
+            if (!ValidateForm())
             {
-                Error = err;// GetErrorMessage(_formValidator.ErrorElement ?? "");
-                            // this.SaveToSession();
-                return await LoadPage();
+                return Page();
             }
 
             // this.SaveToSession();
 
             //No Error, hide the error message on page.
-            Error = String.Empty;
+            
 
             int currentTourId = _sessionProxy?.TournamentId ?? 0;
             if (currentTourId > 0)
@@ -104,10 +104,10 @@ public class TournamentFormatPlayerPageModel : BasePageModel
                 TournamentDetail tourDetails = new()
                 {
                     TournamentId = currentTourId,
-                    NoEntries = NoEntries,
-                    Games = Games,
-                    Sets = Sets,
-                    CustomGames = CustomGames,
+                    NoEntries = int.Parse(NoEntries??"2"),
+                    Games = int.Parse(Games??"1"),
+                    Sets = int.Parse(Sets??"1"),
+                    CustomGames = int.Parse(CustomGames??"8"),
                     TeamSize = 1
 
                 };
@@ -141,20 +141,41 @@ public class TournamentFormatPlayerPageModel : BasePageModel
     }
 
 
-    private bool ValidateForm(ref string err)
+    private bool ValidateForm()
     {
-        if (NoEntries < 2)
-        {
-            err = "Total players for this tournament must be greater than 2 (and a valid number) !";
-            return false;
-        }
         
-
-        if (Games == 99 && CustomGames == 0)
+        int iNumEntries = int.TryParse(NoEntries, out iNumEntries) ? iNumEntries : 2;
+        if (iNumEntries < 2) 
         {
-            err = "Invalid number of custom games per set";
+            NoEntries = "";
             return false;
         }
+
+        //Check custom games
+        if (string.IsNullOrEmpty(Games))
+        {
+            Games = "";
+            return false;
+        } 
+
+        if (Games == "99")
+        {
+            int iCustomGame = int.TryParse(CustomGames, out iCustomGame) ? iCustomGame : 0;
+            if (iCustomGame < 1)    
+            {
+                CustomGames = "";
+                return false;
+            }
+            
+        }
+
+        //Sets
+        if (string.IsNullOrEmpty(Sets))
+        {
+            Sets = "";
+            return false;
+        } 
+
 
 
         return true;
@@ -164,7 +185,7 @@ public class TournamentFormatPlayerPageModel : BasePageModel
 
     private async Task<IActionResult> LoadPage()
     {
-        // this.LoadFromSession();
+        //No validation done on loaded values.
 
         Organization thisOrg = new() { Id = 1, Name = "testing" };
 
@@ -173,6 +194,8 @@ public class TournamentFormatPlayerPageModel : BasePageModel
         dbconn!.ConnectionString = _config.GetConnectionString("deuce_local");
         await dbconn.OpenAsync();
 
+        //Set the title for this page 
+        //to the selected sport
         DbRepoSport dbRepoSport = new(dbconn);
         var sports = await dbRepoSport.GetList();
 
@@ -180,17 +203,20 @@ public class TournamentFormatPlayerPageModel : BasePageModel
 
         if (currentTourId > 0)
         {
+            //Load the tournament details 
+            //from the database
             DbRepoTournamentDetail repoTourDetail = new(dbconn, organization: thisOrg);
             Filter filter = new() { TournamentId = currentTourId };
             var tourDetail = (await repoTourDetail.GetList(filter))?.FirstOrDefault();
 
+            //Set page values
             if (tourDetail is not null)
             {
                 //Set page values
-                NoEntries = tourDetail.NoEntries;
-                Games = tourDetail.Games;
-                Sets = tourDetail.Sets;
-                CustomGames = tourDetail.CustomGames;
+                NoEntries = tourDetail.NoEntries.ToString();
+                Games = tourDetail.Games.ToString();
+                Sets = tourDetail.Sets.ToString();
+                CustomGames = tourDetail.CustomGames.ToString();
 
             }
 

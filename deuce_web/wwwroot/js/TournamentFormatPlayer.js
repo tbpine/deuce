@@ -20,7 +20,7 @@ function showHideElement(name, cont, val)
 
 
 document.addEventListener("DOMContentLoaded", function(){
-    let node = document.getElementById("GamesPerSet");
+    let node = document.getElementById("Games");
 
     if (node.options[node.selectedIndex].value == "99")
       showHideElement('GamesPerSet','fixed_game_2','99')

@@ -6,6 +6,7 @@
 -- drop table if exists  `tournament`;
 -- drop table if exists  `tournament_detail`;
 -- drop table if exists  `tournament_type`;
+-- drop table if exists  `tournament_venue`;
 -- drop table if exists  `player`;
 -- drop table if exists  `team`;
 -- drop table if exists  `team_player`;
@@ -65,6 +66,18 @@ CREATE TABLE IF NOT EXISTS `tournament_detail` (
     `team_size`			INT,
     `no_singles`		INT,
     `no_doubles`		INT,
+    `updated_datetime`	TIMESTAMP,
+    `created_datetime`	TIMESTAMP
+);
+
+CREATE TABLE IF NOT EXISTS `tournament_venue` (
+    `id` 				INT PRIMARY KEY AUTO_INCREMENT,
+    `tournament` 		INT,
+    `street`			VARCHAR(300),
+    `suburb`			VARCHAR(100),
+	`state`				VARCHAR(100),
+    `post_code`			VARCHAR(100),
+    `country`			VARCHAR(100),
     `updated_datetime`	TIMESTAMP,
     `created_datetime`	TIMESTAMP
 );
