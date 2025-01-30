@@ -1,14 +1,9 @@
 using System.Data.Common;
-using System.Text.Json;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks.Dataflow;
 using deuce;
 using deuce_web.ext;
-using iText.Layout.Properties.Grid;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using Mysqlx;
 
 public class TournamentPlayersPageModel : BasePageModel
 {

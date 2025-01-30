@@ -66,6 +66,12 @@ public class TournamentSchedulePageModel : BasePageModel
       try
       {
          Validated = true;
+         
+         //Check entries.
+         if (!ValidatePage()) {
+            return Page(); 
+         }
+
          //Load the current tournament from the database
          Organization thisOrg = new Organization() { Id = 1, Name = "testing" };
 
@@ -75,12 +81,13 @@ public class TournamentSchedulePageModel : BasePageModel
 
             //Set start date and interval
             DateTime tmpStartDate = DateTime.TryParse(StartDate, out tmpStartDate) ? tmpStartDate : DateTime.Now;
+
             //Tournament DTO
             Tournament tmp = new()
             {
                Id = currentTourId,
                Start = tmpStartDate,
-               Interval = int.Parse(Interval)
+               Interval = int.Parse(Interval ?? "")
             };
 
             var scope = _serviceProvider.CreateScope();
@@ -106,5 +113,22 @@ public class TournamentSchedulePageModel : BasePageModel
 
       return Page();
 
+   }
+
+   /// <summary>
+   /// Check page values
+   /// </summary>
+   /// <returns>true if all values on the page are correct</returns>
+   private bool ValidatePage()
+   {
+      //Check in interval
+      int ival = int.TryParse(Interval, out ival) ? ival : -1;
+      if (ival < 0)
+      {
+         Interval = "";
+         return false;
+      } 
+
+      return true;
    }
 }

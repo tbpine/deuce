@@ -61,8 +61,11 @@ public class TournamentDetailPageModel : BasePageModel
                 dbconn.ConnectionString = _config.GetConnectionString("deuce_local");
                 await dbconn?.OpenAsync()!;
 
-                Tournament tournament = new();
-
+                //Load the current tournament
+                Tournament? tournament = (_sessionProxy?.TournamentId ?? 0) > 0 ?
+                 await GetCurrentTournament(dbconn) : null;
+                if (tournament is null) tournament = new();
+                
                 //Load the current tournament id
                 int currentTournamentId = _sessionProxy?.TournamentId??0;
                 Organization org = new Organization() { Id = 1, Name = "testing" };

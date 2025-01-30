@@ -728,6 +728,19 @@ SELECT LAST_INSERT_ID() 'id';
 
 END//
 
+DROP PROCEDURE IF EXISTS `sp_set_tournament_fee`//
+
+-- Tournament costings
+CREATE PROCEDURE `sp_set_tournament_fee`(
+IN p_tournament INT,
+IN p_fee DOUBLE)
+
+BEGIN
+
+UPDATE `tournament` SET `fee` = p_fee WHERE `id` = p_tournament;
+
+END//
+
 
 DELIMITER ;
 

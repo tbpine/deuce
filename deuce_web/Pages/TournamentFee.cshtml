@@ -1,0 +1,25 @@
+@page
+@model TournamentPricePageModel
+@{
+    Layout="_LayoutWizard";
+}
+<!-- Page content -->
+ <div class="col-lg-9">
+  <h1 class="h2 pb-2 pb-lg-3">Fee</h1>
+  <div class="pb-2 pb-lg-3"><span >How much per Entry ?</span></div>
+  <div class="vstack gap-4">
+    <!-- Settings form -->
+     @{
+        string attrValidated = Model.Validated ? "was-validated" : "";
+     }
+
+    <form class="needs-validation @attrValidated" novalidate id="page_form" action="~/TournamentVenue" method="POST">
+      <div class="position-relative mb-4">
+        <label asp-for="Fee" class="form-label fs-base">Fee *</label>
+        <input type="text" class="form-control form-control-lg" asp-for="Fee" required  value="@Model.Fee">
+        <div class="invalid-feedback">Enter a valid price!</div>
+      </div>
+    </form>
+  </div>
+
+</div>

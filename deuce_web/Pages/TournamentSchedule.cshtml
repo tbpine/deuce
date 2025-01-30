@@ -25,8 +25,7 @@
         <div class="row row-cols-2 row-cols-sm-2 g-3 g-sm-4 pb-3 pb-sm-4 mb-xl-2">
           <div class="col-md-8">
             <label class="form-label">Repeats *</label>
-            <select class="form-select form-select-lg" aria-label="Repeat Interval" name="RepeatInterval"
-            asp-for="Interval" asp-items="Model.SelectInterval" required>
+            <select class="form-select form-select-lg" asp-for="Interval" asp-items="Model.SelectInterval" required>
             </select>
             <div class="invalid-feedback">Specify interval</div>
           </div>

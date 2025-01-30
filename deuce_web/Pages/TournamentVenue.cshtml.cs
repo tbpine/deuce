@@ -41,13 +41,13 @@ public class TournamentVenuePageModel : BasePageModel
       _log = log;
    }
 
-   public IActionResult OnGet()
+   public async Task<IActionResult> OnGet()
    {
       try
       {
          Validated = false;
-
-         return LoadPage();
+            
+         return await LoadPage();
       }
       catch (Exception ex)
       {
@@ -60,10 +60,7 @@ public class TournamentVenuePageModel : BasePageModel
    {
       //Page validation
       Validated = true;
-      if (!ValidatePage())
-      {
-         return LoadPage();
-      }
+      if (!ValidatePage()) return Page();
 
       //Tournament DTO
       Tournament tourDTO = new Tournament() { Id = _sessionProxy?.TournamentId ?? 0 };
@@ -107,7 +104,7 @@ public class TournamentVenuePageModel : BasePageModel
    /// Load page content
    /// </summary>
    /// <returns></returns>
-   private IActionResult LoadPage()
+   private async Task<IActionResult> LoadPage()
    {
       var firstOption = new SelectListItem("", "");
       firstOption.Selected = true;
@@ -117,6 +114,41 @@ public class TournamentVenuePageModel : BasePageModel
       _countries.Add(new SelectListItem("US", "us"));
       _countries.Add(new SelectListItem("UK", "uk"));
       _countries.Add(new SelectListItem("New Zealand", "nz"));
+
+      //Load the venue where this tournament is
+      //to be held.
+      var scope = _serviceProvider.CreateScope();
+      var dbconn = scope.ServiceProvider.GetRequiredService<DbConnection>();
+      if (dbconn is not null)
+      {
+         dbconn.ConnectionString = _config.GetConnectionString("deuce_local");
+         await dbconn.OpenAsync();
+
+         DbRepoVenue repoVenue = new DbRepoVenue(dbconn);
+         Filter filter = new Filter()
+         {
+            TournamentId = _sessionProxy?.TournamentId ?? 0,
+            ClubId = 1
+         };
+
+         var listOfVenues = await repoVenue.GetList(filter);
+         dbconn.Close();
+         
+         //Set values
+         if (listOfVenues.Count >0)
+         {
+            TournamentVenue loadedVenue = listOfVenues[0];
+            //Set binded properties that will
+            //be displayed on the page.
+            Street = loadedVenue.Street;
+            Suburb = loadedVenue.Suburb;
+            State = loadedVenue.State;
+            PostCode = loadedVenue.PostCode.ToString();
+            Country = loadedVenue.Country;
+
+         }
+      }
+
 
 
       return Page();

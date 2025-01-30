@@ -34,7 +34,7 @@ public class DbRepoVenue : DbRepoBase<TournamentVenue>
                 Street = r.Parse<string>("street"),
                 Suburb = r.Parse<string>("suburb"),
                 State = r.Parse<string>("state"),
-                PostCode = r.Parse<int>("int")
+                PostCode = r.Parse<int>("post_code")
             };
 
             venues.Add(venue);

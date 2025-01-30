@@ -76,7 +76,7 @@ CREATE TABLE IF NOT EXISTS `tournament_venue` (
     `street`			VARCHAR(300),
     `suburb`			VARCHAR(100),
 	`state`				VARCHAR(100),
-    `post_code`			VARCHAR(100),
+    `post_code`			INT,
     `country`			VARCHAR(100),
     `updated_datetime`	TIMESTAMP,
     `created_datetime`	TIMESTAMP
