@@ -34,7 +34,8 @@ public class DbRepoVenue : DbRepoBase<TournamentVenue>
                 Street = r.Parse<string>("street"),
                 Suburb = r.Parse<string>("suburb"),
                 State = r.Parse<string>("state"),
-                PostCode = r.Parse<int>("post_code")
+                PostCode = r.Parse<int>("post_code"),
+                Country =r.Parse<string>("country")
             };
 
             venues.Add(venue);
@@ -53,7 +54,7 @@ public class DbRepoVenue : DbRepoBase<TournamentVenue>
         var dbTrans = _dbconn.BeginTransaction();
         try
         {
-                var command = _dbconn.CreateCommandStoreProc("sp_set_tournament_venue", ["p_id", "p_tournament", "p_street", "p_suburb",
+            var command = _dbconn.CreateCommandStoreProc("sp_set_tournament_venue", ["p_id", "p_tournament", "p_street", "p_suburb",
             "p_state", "p_post_code", "p_country"], [primaryKeyId, obj.Tournament?.Id??0, obj.Street, obj.Suburb , obj.State,
             obj.PostCode, obj.Country ],dbTrans);
 

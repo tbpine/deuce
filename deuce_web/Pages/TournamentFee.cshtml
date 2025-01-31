@@ -13,7 +13,7 @@
         string attrValidated = Model.Validated ? "was-validated" : "";
      }
 
-    <form class="needs-validation @attrValidated" novalidate id="page_form" action="~/TournamentVenue" method="POST">
+    <form class="needs-validation @attrValidated" novalidate id="page_form" action="~/TournamentFee" method="POST">
       <div class="position-relative mb-4">
         <label asp-for="Fee" class="form-label fs-base">Fee *</label>
         <input type="text" class="form-control form-control-lg" asp-for="Fee" required  value="@Model.Fee">

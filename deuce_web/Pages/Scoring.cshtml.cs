@@ -32,7 +32,7 @@ public class ScoringPageModel : AccBasePageModel
 
     public void OnGet()
     {
-        MakeDummyTournament();
+        LoadCurrentTournament();
         Title = _t?.Label ?? "";
     }
 
@@ -42,12 +42,13 @@ public class ScoringPageModel : AccBasePageModel
             Debug.Write(kp.Key + "=" + kp.Value + "\n");
         string? strCR = this.Request.Form["current_round"];
         _currentRound = int.Parse(strCR??"0");
-        MakeDummyTournament();
+        LoadCurrentTournament();
         Title = _t?.Label ?? "";
     }
 
-    private void MakeDummyTournament()
+    private void LoadCurrentTournament()
     {
+
         //Assign
         _t = new Tournament();
         _t.Type = 1;

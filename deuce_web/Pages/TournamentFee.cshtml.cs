@@ -1,4 +1,5 @@
 using System.Data.Common;
+using System.Threading.Tasks;
 using deuce;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -24,10 +25,30 @@ public class TournamentPricePageModel : BasePageModel
       _log = log;
    }
 
-   public IActionResult OnGet()
+   public async Task<IActionResult> OnGet()
    {
       //Entries not validated
       Validated = false;
+
+      //Select the current tourament
+      //to get the fee charged.
+            var scope = _serviceProvider.CreateScope();
+      var dbconn = scope.ServiceProvider.GetRequiredService<DbConnection>();
+      if (dbconn is not null)
+      {
+         dbconn.ConnectionString = _config.GetConnectionString("deuce_local");
+         await dbconn.OpenAsync();
+
+         var currentTournament = await GetCurrentTournament(dbconn);
+
+         if (currentTournament is not null)
+         {
+            //Set the fee.
+            Fee = currentTournament.Fee.ToString("F2");
+         }
+
+         await dbconn.CloseAsync();
+      }
 
       return Page();
    }
@@ -57,8 +78,8 @@ public class TournamentPricePageModel : BasePageModel
          dbconn.ConnectionString = _config.GetConnectionString("deuce_local");
          await dbconn.OpenAsync();
 
-         DbRepoTournamentFee repoVenue = new(dbconn);
-         repoVenue.Set(tempTour);
+         DbRepoTournamentFee repoFee = new(dbconn);
+         await repoFee.SetAsync(tempTour);
          dbconn.Close();
       }
 
