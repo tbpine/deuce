@@ -15,7 +15,7 @@ public class OrgPageIdxModel : AccBasePageModel
     /// <param name="sp">Service provider</param>
     /// <param name="config">Configuration framework</param>
     public OrgPageIdxModel( ILogger<OrgPageIdxModel> log,
-    ISideMenuHandler handlerSideMenu, IServiceProvider sp, IConfiguration config) : base(handlerSideMenu, sp, config)
+    ISideMenuHandler handlerSideMenu, IServiceProvider sp, IConfiguration config, ITournamentGateway tgateway) : base(handlerSideMenu, sp, config, tgateway)
     { 
         _log = log;
     }

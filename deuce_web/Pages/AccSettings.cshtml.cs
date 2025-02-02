@@ -15,7 +15,7 @@ public class AccSettingsPageModel : AccBasePageModel
     /// <param name="sp">Service provider</param>
     /// <param name="config">Configuration framework</param>
     public AccSettingsPageModel( ILogger<AccSettingsPageModel> log,
-    ISideMenuHandler handlerSideMenu, IServiceProvider sp, IConfiguration config) : base(handlerSideMenu, sp, config)
+    ISideMenuHandler handlerSideMenu, IServiceProvider sp, IConfiguration config, ITournamentGateway tgeteway) : base(handlerSideMenu, sp, config,tgeteway)
     { 
         _log = log;
     }

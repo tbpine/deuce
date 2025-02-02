@@ -6,8 +6,9 @@ public class PaymentDetailsPageModel : AccBasePageModel
     private readonly ILogger<PaymentDetailsPageModel> _log;
 
 
-    public PaymentDetailsPageModel(ILogger<PaymentDetailsPageModel> log, ISideMenuHandler handlerNavItems, IServiceProvider sp, IConfiguration config)
-    :base(handlerNavItems, sp,  config)
+    public PaymentDetailsPageModel(ILogger<PaymentDetailsPageModel> log, ISideMenuHandler handlerNavItems, IServiceProvider sp, IConfiguration config,
+    ITournamentGateway tgateway)
+    :base(handlerNavItems, sp,  config, tgateway)
     {
         _log = log;
     }

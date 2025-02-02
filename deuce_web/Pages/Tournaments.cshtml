@@ -9,26 +9,30 @@
 
 
 <!-- Events go here-->
-<form class="col-lg-7" asp-action="~/Events" method="post" id="page_form">
+<form class="col-lg-7" asp-action="~/Tournaments" method="post" id="page_form">
     <table  class="table">
         <thead>
             <th>Label</th>
             <th>Start</th>
-            <th>End</th>
             <th>Interval</th>
             <th>Type</th>
+            <th></th>
             <th></th>
         <thead>
             <tbody>
                 @foreach(Tournament iterTour in Model.Tournaments??new List<Tournament>())
                 {
+                    string intervalLabel = Model.Intervals?.Find(e=>e.Id == iterTour.Interval)?.Label??"";
+                    string tourTypeLabel = Model.TourTypes?.Find(e=>e.Id == iterTour.Type)?.Label??"";
+
+    
                     <tr>
                         <td>@iterTour.Label</td>
                         <td>@iterTour.Start.ToString("dd/MM/yyyy")</td>
-                        <td>@iterTour.End.ToString("dd/MM/yyyy")</td>
-                        <td>@iterTour.Interval</td>
-                        <td>@iterTour.Type</td>
-                        <td><a class="btn" onclick="func(@iterTour.Id)">Edit</a>
+                        <td>@intervalLabel</td>
+                        <td>@tourTypeLabel</td>
+                        <td><a class="btn" onclick="func(@iterTour.Id,'Edit')">Edit</a>
+                        <td><a class="btn" onclick="func(@iterTour.Id,'Scores')">Scores</a>
                         </td>
                     </tr>
                 }
@@ -36,12 +40,16 @@
 
     </table>
     <input id="TournamentId" name="TournamentId" type="hidden"/>
+    <input id="Action" name="Action" type="hidden"/>
 </form>
 
 <script>
-    function func(tournamentId)
+    function func(tournamentId, action)
     {
         document.getElementById("TournamentId").setAttribute("value", tournamentId);
+        document.getElementById("Action").setAttribute("value", action);
+        
         document.getElementById("page_form").submit();
+
     }
 </script>

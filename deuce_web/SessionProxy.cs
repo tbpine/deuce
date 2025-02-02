@@ -8,9 +8,18 @@ public class SessionProxy : ISessionProxy
     private const string Key_Current_OrganizationId = "OrganizationId";
     private const string Key_Current_EntryType = "EntryType";
     //Keep reference to the browser session
-    private readonly ISession? _session;
+    private  ISession? _session;
 
+    /// <summary>
+    /// Default constructor
+    /// </summary>
+    public SessionProxy()
+    {
+
+    }
+    
     public SessionProxy(ISession session) => _session = session;
+    public ISession? Session {  set=>_session = value; }
     public int TournamentId
     {
         get => _session?.GetInt32(Key_Current_Session) ?? 0;

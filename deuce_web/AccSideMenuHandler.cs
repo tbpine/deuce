@@ -13,7 +13,6 @@ public class AccSideMenuHandler : ISideMenuHandler
     {
         _navItems.Add(new NavItem("My profile", "/OrgIdx", false, true, "fi-user"));
         _navItems.Add(new NavItem("Tournaments", "/Tournaments", false, true, "fi-layers"));
-        _navItems.Add(new NavItem("Scores", "/Scoring", false, true, "fi-layers"));
         _navItems.Add(new NavItem("Payment details", "/PaymentDetails", false, true, "fi-credit-card"));
         _navItems.Add(new NavItem("Account settings", "/AccSettings", false, true, "fi-settings"));
         _navItems.Add(new NavItem("Help centre", "/HelpCentre", false, true, "fi-help-circle"));

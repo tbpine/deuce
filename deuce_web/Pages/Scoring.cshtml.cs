@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using deuce;
 using System.Diagnostics;
+using System.Data.Common;
 
 /// <summary>
 /// 
@@ -24,8 +25,9 @@ public class ScoringPageModel : AccBasePageModel
     public Round Rounds(int r) => _schedule?.GetRounds(r) ?? new Round(0);
 
 
-    public ScoringPageModel(ILogger<ScoringPageModel> log, ISideMenuHandler handlerNavItems, IServiceProvider sp, IConfiguration config)
-    :base(handlerNavItems, sp,  config)
+    public ScoringPageModel(ILogger<ScoringPageModel> log, ISideMenuHandler handlerNavItems, IServiceProvider sp, IConfiguration config,
+    ITournamentGateway tgateway)
+    : base(handlerNavItems, sp, config, tgateway)
     {
         _log = log;
     }
@@ -41,57 +43,41 @@ public class ScoringPageModel : AccBasePageModel
         foreach (var kp in this.Request.Form)
             Debug.Write(kp.Key + "=" + kp.Value + "\n");
         string? strCR = this.Request.Form["current_round"];
-        _currentRound = int.Parse(strCR??"0");
+        _currentRound = int.Parse(strCR ?? "0");
         LoadCurrentTournament();
         Title = _t?.Label ?? "";
     }
 
-    private void LoadCurrentTournament()
+    private async Task LoadCurrentTournament()
     {
-
-        //Assign
-        _t = new Tournament();
-        _t.Type = 1;
-        //1 for tennis for now.
-        _t.Sport = 1;
-        _t.Format = new Format(2, 2, 1);
-        _t.TeamSize = 2;
-        _t.Start = DateTime.Now;
-        _t.End = DateTime.Now;
-        _t.Interval = 1;
-        _t.Label = "Wicks Open";
+        //Get the current tournament
+        //DB access
+        var tournament = await _tourGatway?.GetCurrentTournament();
+        if (tournament is  null) return;
 
         IGameMaker gm = new GameMakerTennis();
-        //Teams
-        List<Team> teams = new();
-        Team? currentTeam = null;
 
-        for (int i = 0; i < 8; i++)
-        {
-            if (i % _t.TeamSize == 0)
-            {
-                currentTeam = new Team(i + 1, $"team_{i + 1}");
-                teams.Add(currentTeam);
-            }
-
-            currentTeam?.AddPlayer(new Player
-            {
-                Id = i + 1,
-                First = $"player_{i}",
-                Last = $""
-            });
-
-
-
-        }
+        //Get teams for this tournament
+         var scope = _serviceProvider.CreateScope();
+        var dbconn = scope.ServiceProvider.GetRequiredService<DbConnection>();
+        
+        if (dbconn is  null)  return;
+        
+        dbconn.ConnectionString = _config.GetConnectionString("deuce_local");
+        await dbconn.OpenAsync();
+        DbRepoRecordTeamPlayer dbRepoTeamPlayer = new(dbconn);
+        var recordsTeamPlayers = await dbRepoTeamPlayer.GetList();
+        //Extract teams and players
+        TeamRepo teamRepo = new TeamRepo(recordsTeamPlayers);
+        List<Team> listOfTeams = teamRepo.ExtractFromRecordTeamPlayer();
 
         //Action
         //Assert
         FactorySchedulers fac = new();
-        var mm = fac.Create(_t, gm);
-        _schedule = mm.Run(teams);
+        var matchMaker = fac.Create(tournament, gm);
+        _schedule = matchMaker.Run(listOfTeams);
 
     }
 
-   
+
 }

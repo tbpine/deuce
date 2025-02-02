@@ -22,6 +22,8 @@ public class AccBasePageModel : PageModel
     protected IServiceProvider _serviceProvider;
     protected IConfiguration _config;
 
+    //Load tournament details
+    protected ITournamentGateway? _tourGatway;
 
     protected ISideMenuHandler? _handlerNavItems;
     public IEnumerable<NavItem>? NavItems { get => _handlerNavItems?.NavItems; }
@@ -31,18 +33,21 @@ public class AccBasePageModel : PageModel
     public string? ShowBackButton { get => _showBackButton; set => _showBackButton = value; }
     public string? BackPage { get => _backPage; set => _backPage = value; }
 
-    public AccBasePageModel(ISideMenuHandler handlerNavItems, IServiceProvider sp, IConfiguration config)
+    public AccBasePageModel(ISideMenuHandler handlerNavItems, IServiceProvider sp, IConfiguration config,
+    ITournamentGateway tgateway, SessionProxy? sessionProxy)
     {
         _handlerNavItems = handlerNavItems;
         _serviceProvider = sp;
         _config = config;
+        _tourGatway = tgateway;
+        _sessionProxy = sessionProxy;   
     }
 
     public override void OnPageHandlerExecuting(PageHandlerExecutingContext context)
     {
         base.OnPageHandlerExecuting(context);
         //Manage session
-        _sessionProxy = new SessionProxy(context.HttpContext.Session);
+        if (_sessionProxy is not null) _sessionProxy.Session = context.HttpContext.Session;
 
         if (_handlerNavItems is null) return;
 
@@ -90,5 +95,6 @@ public class AccBasePageModel : PageModel
         return Page();
 
     }
+
 
 }
