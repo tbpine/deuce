@@ -17,15 +17,13 @@ public class Tournament
     private bool _useRankings;
     private double _prize;
 
-    private bool _hasDuels;
-
     private List<Team>? _teams;
 
     private Schedule? _schedule;
 
     private int _interval;
     private Organization? _organization;
-    
+
     public int Id { get { return _id; } set { _id = value; } }
 
     public string? Label { get { return _label; } set { _label = value; } }
@@ -42,12 +40,11 @@ public class Tournament
     public double Fee { get { return _fee; } set { _fee = value; } }
     public double Prize { get { return _prize; } set { _prize = value; } }
     public bool UseRanking { get { return _useRankings; } set { _useRankings = value; } }
-    
-   public Schedule? Schedule { get => _schedule; set => _schedule = value; }
-    public bool HasDuels { get => _hasDuels; set => _hasDuels = value; }
 
-    public List<Team>? Teams { get=>_teams; set => _teams = value; }
-    public Organization? Organization { get=>_organization; set=>_organization = value; }
+    public Schedule? Schedule { get => _schedule; set => _schedule = value; }
+
+    public List<Team>? Teams { get => _teams; set => _teams = value; }
+    public Organization? Organization { get => _organization; set => _organization = value; }
 
 
 }

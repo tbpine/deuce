@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 /// <summary>
 /// 
 /// </summary>
-public class TournamentVenuePageModel : BasePageModel
+public class TournamentVenuePageModel : BasePageModelWizard
 {
    private readonly ILogger<TournamentVenuePageModel> _log;
 

@@ -1,9 +1,10 @@
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using MySqlX.XDevAPI;
 
 /// <summary>
 /// Controller for  Account settings.
 /// </summary>
-public class AccSettingsPageModel : AccBasePageModel
+public class AccSettingsPageModel : BasePageModelAcc
 {
     private ILogger<AccSettingsPageModel> _log;
 
@@ -15,7 +16,7 @@ public class AccSettingsPageModel : AccBasePageModel
     /// <param name="sp">Service provider</param>
     /// <param name="config">Configuration framework</param>
     public AccSettingsPageModel( ILogger<AccSettingsPageModel> log,
-    ISideMenuHandler handlerSideMenu, IServiceProvider sp, IConfiguration config, ITournamentGateway tgeteway) : base(handlerSideMenu, sp, config,tgeteway)
+    ISideMenuHandler handlerSideMenu, IServiceProvider sp, IConfiguration config, ITournamentGateway tgeteway, SessionProxy sessionProxy) : base(handlerSideMenu, sp, config,tgeteway, sessionProxy)
     { 
         _log = log;
     }

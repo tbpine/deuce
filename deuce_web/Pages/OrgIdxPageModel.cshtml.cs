@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 /// <summary>
 /// 
 /// </summary>
-public class OrgPageIdxModel : AccBasePageModel
+public class OrgPageIdxModel : BasePageModelAcc
 {
     private ILogger<OrgPageIdxModel> _log;
 
@@ -15,7 +15,8 @@ public class OrgPageIdxModel : AccBasePageModel
     /// <param name="sp">Service provider</param>
     /// <param name="config">Configuration framework</param>
     public OrgPageIdxModel( ILogger<OrgPageIdxModel> log,
-    ISideMenuHandler handlerSideMenu, IServiceProvider sp, IConfiguration config, ITournamentGateway tgateway) : base(handlerSideMenu, sp, config, tgateway)
+    ISideMenuHandler handlerSideMenu, IServiceProvider sp, IConfiguration config, ITournamentGateway tgateway, SessionProxy sessionProxy) : base(handlerSideMenu, sp, config, tgateway,
+    sessionProxy)
     { 
         _log = log;
     }

@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 /// <summary>
 /// 
 /// </summary>
-public class TournamentsPageModel : AccBasePageModel
+public class TournamentsPageModel : BasePageModelAcc
 {
     private readonly ILogger<TournamentsPageModel> _log;
     private List<Tournament>? _tournaments;
@@ -21,8 +21,8 @@ public class TournamentsPageModel : AccBasePageModel
 
 
     public TournamentsPageModel(ILogger<TournamentsPageModel> log,  ISideMenuHandler handlerNavItems, IServiceProvider sp, IConfiguration config,
-    ITournamentGateway tgateway)
-    :base(handlerNavItems, sp,  config, tgateway)
+    ITournamentGateway tgateway, SessionProxy sessionProxy)
+    :base(handlerNavItems, sp,  config, tgateway, sessionProxy)
     {
         _log = log;
     }

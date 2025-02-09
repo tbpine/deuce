@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 /// <summary>
 /// Entry costs
 /// </summary>
-public class TournamentPricePageModel : BasePageModel
+public class TournamentPricePageModel : BasePageModelWizard
 {
    private readonly ILogger<TournamentPricePageModel> _log;
 

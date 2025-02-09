@@ -10,15 +10,17 @@ public class SessionProxy : ISessionProxy
     //Keep reference to the browser session
     private  ISession? _session;
 
-    /// <summary>
-    /// Default constructor
-    /// </summary>
     public SessionProxy()
     {
+       
+    } 
+    /// <summary>
+    /// This constructor is for the class "BasePageModelWizard".
+    /// It doesn't dependency inject the "SessionProxy"class.
+    /// </summary>
+    /// <param name="session">Web browser Session </param>
+    public SessionProxy(ISession session)=>_session = session;
 
-    }
-    
-    public SessionProxy(ISession session) => _session = session;
     public ISession? Session {  set=>_session = value; }
     public int TournamentId
     {

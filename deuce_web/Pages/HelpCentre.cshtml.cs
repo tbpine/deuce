@@ -1,14 +1,14 @@
 /// <summary>
 /// Account payment details page
 /// </summary>
-public class HelpCenterPageModel : AccBasePageModel
+public class HelpCenterPageModel : BasePageModelAcc
 {
     private readonly ILogger<HelpCenterPageModel> _log;
 
 
     public HelpCenterPageModel(ILogger<HelpCenterPageModel> log, ISideMenuHandler handlerNavItems, IServiceProvider sp, IConfiguration config,
-    ITournamentGateway tgateway)
-    :base(handlerNavItems, sp,  config, tgateway)
+    ITournamentGateway tgateway, SessionProxy sessionProxy)
+    :base(handlerNavItems, sp,  config, tgateway, sessionProxy)
     {
         _log = log;
     }

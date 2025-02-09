@@ -26,9 +26,11 @@ builder.Services.AddSession(options => {
 builder.Services.AddScoped<DbConnection, MySqlConnection>();
 builder.Services.AddScoped<IHandlerNavItems, HandlerNavItems>();
 builder.Services.AddScoped<ISideMenuHandler, AccSideMenuHandler>();
+//Singletons
 builder.Services.AddSingleton<IFormValidator, FormValidator>();
-builder.Services.AddSingleton<ITournamentGateway, DBTournamentGateway>();
 builder.Services.AddSingleton<SessionProxy>();
+builder.Services.AddSingleton<ITournamentGateway, DBTournamentGateway>();
+
 
 
 

@@ -1,5 +1,6 @@
 using deuce;
 using System.Data.Common;
+using System.Diagnostics;
 /// <summary>
 /// Load tournament objects from the database
 /// </summary>
@@ -26,7 +27,8 @@ public class DBTournamentGateway : ITournamentGateway
     {
 
         var scope = _serviceProvider.CreateScope();
-        var dbconn = scope.ServiceProvider.GetRequiredService<DbConnection>();
+        //Calls the IAsyncDisposable interface
+        await using var dbconn = scope.ServiceProvider.GetRequiredService<DbConnection>();
         if (dbconn is  null)  return null;
         
         dbconn.ConnectionString = _config.GetConnectionString("deuce_local");
@@ -35,7 +37,9 @@ public class DBTournamentGateway : ITournamentGateway
         //Check if there's a tournament saved
         int tourId = _sessionProxy?.TournamentId ?? 0;
         if (tourId < 1) return null;
-
+        
+        Debug.Print($"Select tournament #{tourId}");
+        
         Organization thisOrg = new() { Id = _sessionProxy?.OrganizationId ?? 1, Name = "" };
 
         //Load a the current tournament from the database
@@ -43,13 +47,13 @@ public class DBTournamentGateway : ITournamentGateway
         //Use a DBRepo to build the object
         DbRepoTournament dbRepoTour = new DbRepoTournament(dbconn, thisOrg);
         
-        //Close the connection
-        await dbconn.CloseAsync();
         //Select the tournment.Returns in the first element
         //Create filter
         Filter tourFilter = new Filter() { TournamentId = tourId };
         List<Tournament> listOfTour = await dbRepoTour.GetList(tourFilter);
         //Close if it was created.
+
+        
 
         return listOfTour.FirstOrDefault();
 

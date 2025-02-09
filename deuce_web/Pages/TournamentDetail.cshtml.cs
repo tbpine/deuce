@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 /// <summary>
 /// 
 /// </summary>
-public class TournamentDetailPageModel : BasePageModel
+public class TournamentDetailPageModel : BasePageModelWizard
 {
     private readonly ILogger<TournamentDetailPageModel> _log;
 

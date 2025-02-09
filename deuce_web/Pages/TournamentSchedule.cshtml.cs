@@ -9,7 +9,7 @@ using Microsoft.VisualBasic;
 /// <summary>
 /// 
 /// </summary>
-public class TournamentSchedulePageModel : BasePageModel
+public class TournamentSchedulePageModel : BasePageModelWizard
 {
    private readonly ILogger<TournamentSchedulePageModel> _log;
    private const string DateFormat = "dd/MM/yyyy";

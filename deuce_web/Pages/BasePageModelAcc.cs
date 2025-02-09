@@ -8,7 +8,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 /// All pages in the account section must inherit from this
 /// class.
 /// </summary>
-public class AccBasePageModel : PageModel
+public class BasePageModelAcc : PageModel
 {
     protected string _userName = string.Empty;
     protected int _userId = 0;
@@ -33,7 +33,7 @@ public class AccBasePageModel : PageModel
     public string? ShowBackButton { get => _showBackButton; set => _showBackButton = value; }
     public string? BackPage { get => _backPage; set => _backPage = value; }
 
-    public AccBasePageModel(ISideMenuHandler handlerNavItems, IServiceProvider sp, IConfiguration config,
+    public BasePageModelAcc(ISideMenuHandler handlerNavItems, IServiceProvider sp, IConfiguration config,
     ITournamentGateway tgateway, SessionProxy? sessionProxy)
     {
         _handlerNavItems = handlerNavItems;

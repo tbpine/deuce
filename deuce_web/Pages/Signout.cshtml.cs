@@ -8,14 +8,16 @@ class SignoutPageModel : PageModel
 {
     //The  log
     private readonly ILogger<SignoutPageModel> _log;
+    private readonly SessionProxy _sessionProxy;
 
     /// <summary>
     /// Construct with dependencies
     /// </summary>
     /// <param name="log">Web log</param>
-    public SignoutPageModel(ILogger<SignoutPageModel> log)
+    public SignoutPageModel(ILogger<SignoutPageModel> log, SessionProxy sessionProxy)
     {
         _log = log;
+        _sessionProxy = sessionProxy;
     }
 
     /// <summary>
@@ -26,8 +28,9 @@ class SignoutPageModel : PageModel
     {
         //Clear session 
         //Redirect back to the index page.
-        SessionProxy sessionProxy = new SessionProxy(this.HttpContext.Session);
-        sessionProxy.Clear();
+        //  SessionProxy sessionProxy = new SessionProxy(this.HttpContext);
+         
+        _sessionProxy.Clear();
         return Redirect(HttpContext.Request.PathBase + "/Index");
         
     }

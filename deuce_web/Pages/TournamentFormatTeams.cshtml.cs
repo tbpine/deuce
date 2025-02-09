@@ -11,7 +11,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 /// <summary>
 /// 
 /// </summary>
-public class TournamentFormatTeamsPageModel : BasePageModel
+public class TournamentFormatTeamsPageModel : BasePageModelWizard
 {
     private readonly ILogger<TournamentFormatTeamsPageModel> _log;
     private readonly IFormValidator _formValidator;

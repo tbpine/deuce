@@ -5,7 +5,7 @@ using deuce_web.ext;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
-public class TournamentPlayersPageModel : BasePageModel
+public class TournamentPlayersPageModel : BasePageModelWizard
 {
     private readonly ILogger<TournamentPlayersPageModel> _log;
     private List<Team>? _teams;

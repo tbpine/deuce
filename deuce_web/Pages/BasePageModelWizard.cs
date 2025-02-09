@@ -1,13 +1,15 @@
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
 using Microsoft.AspNetCore.Mvc.Filters;
-using Org.BouncyCastle.Asn1;
 using Microsoft.AspNetCore.Mvc;
 using deuce;
 using System.Data.Common;
-using MySqlX.XDevAPI;
 
-public class BasePageModel : PageModel
+/// <summary>
+/// Common class used during tournament creation
+/// via the wizard.
+/// </summary>
+public class BasePageModelWizard : PageModel
 {
     protected string _userName = string.Empty;
     protected int _userId = 0;
@@ -16,6 +18,8 @@ public class BasePageModel : PageModel
     protected string? _showBackButton;
     protected string? _backPage;
 
+    //Late binding variable create when the page
+    //is accessed.
     protected SessionProxy? _sessionProxy;
 
     protected IServiceProvider _serviceProvider;
@@ -30,7 +34,7 @@ public class BasePageModel : PageModel
     public string? ShowBackButton { get => _showBackButton; set => _showBackButton = value; }
     public string? BackPage { get => _backPage; set => _backPage = value; }
 
-    public BasePageModel(IHandlerNavItems handlerNavItems, IServiceProvider sp, IConfiguration config)
+    public BasePageModelWizard(IHandlerNavItems handlerNavItems, IServiceProvider sp, IConfiguration config)
     {
         _handlerNavItems = handlerNavItems;
         _serviceProvider = sp;
@@ -41,7 +45,7 @@ public class BasePageModel : PageModel
     {
         base.OnPageHandlerExecuting(context);
         //Manage session
-        _sessionProxy = new SessionProxy(context.HttpContext.Session);
+         _sessionProxy = new SessionProxy(this.HttpContext.Session);
 
         if (_handlerNavItems is null) return;
 
@@ -58,7 +62,7 @@ public class BasePageModel : PageModel
             if (_backPage.Contains("TournamentFormat"))
             {
                 //case
-                int entryType = _sessionProxy.EntryType;
+                int entryType = _sessionProxy?.EntryType??1;
                 _backPage = HttpContext.Request.PathBase + (entryType == 1 ? "/TournamentFormatTeams" : "/TournamentFormatPlayer");
             }
         }
