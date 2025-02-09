@@ -17,6 +17,9 @@ public class Tournament
     private bool _useRankings;
     private double _prize;
 
+
+    TournamentStatus _status;
+
     private List<Team>? _teams;
 
     private Schedule? _schedule;
@@ -46,5 +49,8 @@ public class Tournament
     public List<Team>? Teams { get => _teams; set => _teams = value; }
     public Organization? Organization { get => _organization; set => _organization = value; }
 
-
+    /// <summary>
+    /// A flag indicating the state of the tournament
+    /// </summary>
+    public TournamentStatus Status { get=>_status ; set=>_status = value; }
 }

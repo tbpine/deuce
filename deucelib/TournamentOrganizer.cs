@@ -1,3 +1,6 @@
+namespace deuce;
+
+using System.Data.SqlTypes;
 using deuce;
 
 /// <summary>
@@ -20,13 +23,25 @@ public class TournamentOrganizer
         //Make sure that there's enough teams
         //Check the number of teams
 
-        //keep track of created teams
-        int newTeamIdx = 0;
-        int newPlayerIdx = 0;
-        
+        //keep track of created teams and players
+        List<Team> teamHolders = new();
+        List<Player> playerHolders = new();
+
         for(int i = 0; i <  tournament.TeamSize; i++)
         {
             //Make sure there's enough players
+            if (tournament.Teams is not null && i >= tournament.Teams.Count)
+            {
+                //Add a new team
+                Team newTeam = new Team() { Id = 0, Label = $"team {teamHolders.Count+1}"};
+                //Add the required players
+
+                for(int j = 0; j < tournament.TeamSize; j++)
+                {
+                    
+                }
+
+            }
         }
 
         //Has the tournament been scheduled ?
