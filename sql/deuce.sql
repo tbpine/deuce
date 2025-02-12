@@ -3,7 +3,7 @@
 * Version 1.0 Tong Pine (1)
 * Dec 2024
 *******************************************************/
--- drop table if exists  `tournament`;
+--  drop table if exists  `tournament`;
 -- drop table if exists  `tournament_detail`;
 -- drop table if exists  `tournament_type`;
 -- drop table if exists  `tournament_venue`;
@@ -52,7 +52,8 @@ CREATE TABLE IF NOT EXISTS `tournament` (
     `organization`		INT,
     `entry_type`		INT,
     `updated_datetime`	TIMESTAMP,
-    `created_datetime`	TIMESTAMP
+    `created_datetime`	TIMESTAMP,
+    `status`		    INT DEFAULT(0)
 );
 
 ALTER TABLE `tournament` AUTO_INCREMENT = 100;

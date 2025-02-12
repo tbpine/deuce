@@ -96,6 +96,8 @@ public class BasePageModelWizard : PageModel
             {
                 //End of wizard
                 //Redirct to finishing point
+                //Schedule tournament
+                
                 return Redirect(HttpContext.Request.PathBase + "/OrgIdx");
             }
             else
@@ -109,6 +111,10 @@ public class BasePageModelWizard : PageModel
 
     protected async Task<Tournament?> GetCurrentTournament(DbConnection? dbconn)
     {
+        //Check if there's a tournament saved
+        int tourId = _sessionProxy?.TournamentId ?? 0;
+        if (tourId < 1) return null;
+
         //On demand connection
         bool closeConnection = false;
 
@@ -121,9 +127,6 @@ public class BasePageModelWizard : PageModel
             closeConnection = true;
         }
 
-        //Check if there's a tournament saved
-        int tourId = _sessionProxy?.TournamentId ?? 0;
-        if (tourId < 1) return null;
 
         Organization thisOrg = new() { Id = _sessionProxy?.OrganizationId??1 , Name=""};
 

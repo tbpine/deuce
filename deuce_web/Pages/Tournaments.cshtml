@@ -32,7 +32,11 @@
                         <td>@intervalLabel</td>
                         <td>@tourTypeLabel</td>
                         <td><a class="btn" onclick="func(@iterTour.Id,'Edit')">Edit</a>
-                        <td><a class="btn" onclick="func(@iterTour.Id,'Scores')">Scores</a>
+                        <td>
+                            @if (iterTour.Status == TournamentStatus.Scheduled)
+                            {
+                                <a class="btn" onclick="func(@iterTour.Id,'Scores')">Scores</a>
+                            }
                         </td>
                     </tr>
                 }

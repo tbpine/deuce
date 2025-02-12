@@ -62,6 +62,7 @@ public class TournamentDetailPageModel : BasePageModelWizard
                 await dbconn?.OpenAsync()!;
 
                 //Load the current tournament
+                //.Set the status for new tournament
                 Tournament? tournament = (_sessionProxy?.TournamentId ?? 0) > 0 ?
                  await GetCurrentTournament(dbconn) : null;
                 if (tournament is null) tournament = new();
@@ -76,6 +77,8 @@ public class TournamentDetailPageModel : BasePageModelWizard
                 tournament.Type = SelectedTourType;
                 tournament.Organization = org;
                 tournament.EntryType = EntryType;
+                //Load or not, if the id is zero , set it's status to new.
+                tournament.Status  = currentTournamentId == 0 ? TournamentStatus.New : tournament.Status;
 
                 DbRepoTournament dbrepoTour = new DbRepoTournament(dbconn, org);
                 //Save the tournament to db
@@ -102,6 +105,20 @@ public class TournamentDetailPageModel : BasePageModelWizard
 
     private async Task LoadPage()
     {
+        //uri query parameters could contain
+        //key "new" equaling 1 meaning
+        //a new tournament is added.
+
+        var queryParamNew = this.HttpContext.Request.Query.First(e=>e.Key == "new");
+
+        if ( queryParamNew.Value == "1" && _sessionProxy is not null)
+        {
+            //New tournament, specified by id equaling
+            //zero.
+            _sessionProxy.TournamentId = 0;
+
+        }
+
         var scope = _serviceProvider.CreateScope();
 
         var dbconn = scope.ServiceProvider.GetService<DbConnection>();

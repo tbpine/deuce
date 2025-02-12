@@ -44,6 +44,7 @@ public class DbRepoTournament : DbRepoBase<Tournament>
             bool useRanking = reader.Parse<int>("seedings") == 1;
             int sportId = reader.Parse<int>("sport");
             int entryType = reader.Parse<int>("entry_type");
+            int status  = reader.Parse<int>("status");
 
             list.Add(new Tournament
             {
@@ -60,7 +61,9 @@ public class DbRepoTournament : DbRepoBase<Tournament>
                 UseRanking = useRanking,
                 Sport = sportId,
                 Organization = _organization,
-                EntryType = entryType
+                EntryType = entryType,
+                Status = (TournamentStatus)status
+
             });
 
         });
@@ -76,8 +79,8 @@ public class DbRepoTournament : DbRepoBase<Tournament>
         object primaryKeyId = obj.Id < 1 ? DBNull.Value : obj.Id;
 
         DbCommand cmd = _dbconn.CreateCommandStoreProc("sp_set_tournament",
-        ["p_id", "p_label", "p_start", "p_end", "p_interval", "p_steps", "p_type", "p_max", "p_fee", "p_prize", "p_seedings", "p_sport", "p_organization", "p_entry_type"],
-        [primaryKeyId, obj.Label ?? "", obj.Start, obj.End, obj.Interval, obj.Steps, obj.Type, obj.Max, obj.Fee, obj.Prize, obj.UseRanking, obj.Sport, obj.Organization?.Id ?? 1, obj.EntryType < 1 ? 1 : obj.EntryType], localTran);
+        ["p_id", "p_label", "p_start", "p_end", "p_interval", "p_steps", "p_type", "p_max", "p_fee", "p_prize", "p_seedings", "p_sport", "p_organization", "p_entry_type", "p_status"],
+        [primaryKeyId, obj.Label ?? "", obj.Start, obj.End, obj.Interval, obj.Steps, obj.Type, obj.Max, obj.Fee, obj.Prize, obj.UseRanking, obj.Sport, obj.Organization?.Id ?? 1, obj.EntryType < 1 ? 1 : obj.EntryType, obj.Status], localTran);
 
         try
         {

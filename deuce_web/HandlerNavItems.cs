@@ -18,6 +18,7 @@ public class HandlerNavItems : IHandlerNavItems
         _navItems.Add(new NavItem("Players", "/TournamentPlayers", false, true));
         _navItems.Add(new NavItem("Venue", "/TournamentVenue", false, true));
         _navItems.Add(new NavItem("Fee", "/TournamentFee", false, true));
+        _navItems.Add(new NavItem("Posting", "/TournamentPosting", false, true));
     }
 
     /// <summary>
