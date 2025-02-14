@@ -743,6 +743,17 @@ UPDATE `tournament` SET `fee` = p_fee WHERE `id` = p_tournament;
 END//
 
 
+DROP PROCEDURE IF EXISTS `sp_get_settings`//
+
+CREATE PROCEDURE `sp_get_settings`(
+)
+
+BEGIN
+
+SELECT `id`, `key`, `value` FROM `settings` ORDER BY id;
+
+END//
+
 DELIMITER ;
 
 

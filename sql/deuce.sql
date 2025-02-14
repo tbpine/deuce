@@ -13,6 +13,15 @@
 -- drop table if exists  `match`;
 -- drop table if exists  `match_player`;
 -- drop table if exists  `sport`;
+-- drop table if exists  `settings`;
+
+-- settings for the while application
+
+CREATE TABLE IF NOT EXISTS `settings` (
+    `id` INT PRIMARY KEY,
+    `key` VARCHAR(50),
+    `value` VARCHAR(300)
+);
 
 CREATE TABLE IF NOT EXISTS `tournament_type` (
     `id` INT,

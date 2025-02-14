@@ -1,3 +1,5 @@
+using System.Data.Common;
+using System.Runtime.CompilerServices;
 using Microsoft.AspNetCore.Mvc;
 
 /// <summary>
@@ -20,7 +22,18 @@ public class TournamentPostingPageModel : BasePageModelWizard
 
    public async Task<IActionResult> OnGet()
    {
-      //Have to query for posting fee
+      //Get a list of settings for the tournament d
+      //fee.
+      using var scopee =  _serviceProvider.CreateScope();
+      using var dbconn = scopee.ServiceProvider.GetRequiredService<DbConnection>();
+      dbconn.ConnectionString = _config.GetConnectionString("deuce_local");
+      //open connection to the database
+      await dbconn.OpenAsync();
+
+      //Load settings
+      var dbRepoSettings = new DbRepoSettings(dbconn);
+      var listOfSettings = await dbRepoSettings.GetList();
+
       Fee = $"10.00";
       return Page();
    }
