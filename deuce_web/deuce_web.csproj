@@ -9,6 +9,7 @@
   <ItemGroup>
     <PackageReference Include="itext" Version="9.0.0" />
     <PackageReference Include="itext.bouncy-castle-adapter" Version="9.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="9.0.2" />
     <PackageReference Include="mysql.data" Version="9.1.0" />
   </ItemGroup>
 

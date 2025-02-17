@@ -13,18 +13,22 @@
   <div class="vstack gap-4">
     <!-- Settings form -->
     @{
-
+      string attrHasError = String.IsNullOrEmpty(Model.Error) ? "invisible" :  "visible";
     }
 
     <form class="needs-validation" novalidate id="page_form" action="~/TournamentPosting" method="POST">
       <div class="position-relative mb-4">
-        <div class="form-check" >
-          <input type="radio" class="form-check-input" id="post" name="posting" checked>
+        <div class="form-check">
+          <input type="radio" class="form-check-input" id="post" name="posting" checked value="post">
           <label for="post" class="form-check-label">Post Tournament !</label>
         </div>
-        <div class="form-chec>
-          <input type="radio" class="form-check-input" id="wait" name="posting">
+        <div class="form-check">
+          <input type="radio" class="form-check-input" id="wait" name="posting" value="wait">
           <label for="wait" class="form-check-label">Wait</label>
+        </div>
+        <!-- Primary alert -->
+        <div class="alert alert-primary @attrHasError" role="alert">
+          @Model.Error
         </div>
       </div>
     </form>

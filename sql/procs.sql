@@ -742,6 +742,18 @@ UPDATE `tournament` SET `fee` = p_fee WHERE `id` = p_tournament;
 
 END//
 
+DROP PROCEDURE IF EXISTS `sp_set_tournament_status`//
+
+-- Tournament costings
+CREATE PROCEDURE `sp_set_tournament_status`(
+IN p_tournament INT,
+IN p_status INT)
+
+BEGIN
+
+UPDATE `tournament` SET `status` = p_status WHERE `id` = p_tournament;
+
+END//
 
 DROP PROCEDURE IF EXISTS `sp_get_settings`//
 

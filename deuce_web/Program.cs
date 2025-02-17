@@ -2,6 +2,7 @@ using MySql.Data.MySqlClient;
 using Microsoft.AspNetCore.HttpOverrides;
 using System.Data.Common;
 using deuce_web;
+using Microsoft.Extensions.Caching.Memory;
 
 var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
@@ -11,6 +12,7 @@ builder.Services.AddRazorPages();
 //Store the client's session in memory: server side.
 //
 builder.Services.AddDistributedMemoryCache();
+builder.Services.AddMemoryCache();
 
 builder.Services.AddSession(options => {
     //After 10 mins, if there's no the session 
@@ -30,6 +32,8 @@ builder.Services.AddScoped<ISideMenuHandler, AccSideMenuHandler>();
 builder.Services.AddSingleton<IFormValidator, FormValidator>();
 builder.Services.AddSingleton<SessionProxy>();
 builder.Services.AddSingleton<ITournamentGateway, DBTournamentGateway>();
+builder.Services.AddSingleton<IMemoryCache, MemoryCache>();
+builder.Services.AddSingleton<ICacheMaster, CacheMasterDefault>();
 
 
 

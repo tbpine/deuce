@@ -1,7 +1,11 @@
 namespace deuce;
 
+using System.Data.Common;
 using System.Data.SqlTypes;
+using System.Net.Http.Headers;
+using System.Threading.Tasks;
 using deuce;
+using Org.BouncyCastle.Crypto.Parameters;
 
 /// <summary>
 /// Responsible for the correct create of a 
@@ -9,42 +13,77 @@ using deuce;
 /// </summary>
 public class TournamentOrganizer
 {
+    private readonly Tournament _tournament;
+    private readonly DbConnection _dbConnection;
+    private readonly Organization _organization;
+
+    /// <summary>
+    /// Construct with dependencies
+    /// </summary>
+    /// <param name="tournament">Tourament to organize</param>
+    /// <param name="db">Db Connection</param>
+    public TournamentOrganizer(Tournament tournament, DbConnection db, Organization organization)
+    {
+        _tournament = tournament;
+        _dbConnection = db;
+        _organization = organization;
+    }
     /// <summary>
     /// Given the parameters of a touranment, ensure
     /// that the correct tournament is created i.e
     /// Add the required players  and teams ( get database id 
     /// and create names). For round robin create rounds.
     /// </summary>
-    /// <param name="tournament"></param>
-    /// <param name="teams"></param>
-    
-    public void Run(Tournament tournament)
+    public async Task<ResultSchedule> Run()
     {
-        //Make sure that there's enough teams
-        //Check the number of teams
+        //Validate teams
+        //Whos's involved in the tournament
+        //Load teams for tournament
+        DbRepoRecordTeamPlayer dbRepoRecordTeamPlayer = new(_dbConnection);
+        Filter filter = new() { TournamentId = _tournament.Id };
+        var recordsOfTeamPlayers = await dbRepoRecordTeamPlayer.GetList(filter);
 
-        //keep track of created teams and players
-        List<Team> teamHolders = new();
-        List<Player> playerHolders = new();
+        //Validation
+        if (!Validate(recordsOfTeamPlayers))  return new ResultSchedule(RetCodeScheduling.Error, "Not enough players");
 
-        for(int i = 0; i <  tournament.TeamSize; i++)
+        //Create team structure.
+        TeamRepo teamRepo = new(recordsOfTeamPlayers);
+        var listOfTeams = teamRepo.ExtractFromRecordTeamPlayer();
+
+
+        //Get the game maker associated with this sport
+        FactoryGameMaker factoryGameMaker = new();
+        //DTO sport
+        Sport sport = new(_tournament.Sport, "", "", "", "");
+        IGameMaker gameMaker = factoryGameMaker.Create(sport);
+
+        //Get the scheduler 
+        FactorySchedulers factorySchedulers = new();
+        var scheduler = factorySchedulers.Create(_tournament, gameMaker);
+        scheduler.Run(listOfTeams);
+
+        //Save to db
+        TournamentRepo tournamentRepo = new(_dbConnection, _tournament, _organization);
+        bool isOK = await tournamentRepo.Save();
+        //Update status
+        if (isOK)
         {
-            //Make sure there's enough players
-            if (tournament.Teams is not null && i >= tournament.Teams.Count)
-            {
-                //Add a new team
-                Team newTeam = new Team() { Id = 0, Label = $"team {teamHolders.Count+1}"};
-                //Add the required players
 
-                for(int j = 0; j < tournament.TeamSize; j++)
-                {
-                    
-                }
-
-            }
+            _tournament.Status = TournamentStatus.Scheduled ;
+            DbRepoTournamentStatus depoStatus = new(_dbConnection);
+            depoStatus.Set(_tournament);
+        }
+        else
+        {
+            return new ResultSchedule(RetCodeScheduling.Error, "Could not save schedule.");
         }
 
-        //Has the tournament been scheduled ?
+        return new ResultSchedule(RetCodeScheduling.Success, null);
 
+    }
+
+    private bool Validate(List<RecordTeamPlayer> players)
+    {
+        return players.Count > 1;
     }
 }

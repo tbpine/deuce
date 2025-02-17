@@ -58,6 +58,9 @@ public class TournamentVenuePageModel : BasePageModelWizard
 
    public async  Task<IActionResult> OnPost()
    {
+      //Load Page values
+      await LoadPage();
+      
       //Page validation
       Validated = true;
       if (!ValidatePage()) return Page();

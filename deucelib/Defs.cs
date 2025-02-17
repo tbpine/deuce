@@ -12,3 +12,16 @@ public enum TournamentStatus : uint
     Scheduled,
 
 };
+
+
+
+/// <summary>
+/// State of a tournament
+/// </summary>
+public enum RetCodeScheduling : uint
+{
+    Unknown = 0,
+    Success,
+    Error,
+
+};
