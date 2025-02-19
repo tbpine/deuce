@@ -69,7 +69,7 @@ public class TournamentOrganizer
         if (isOK)
         {
 
-            _tournament.Status = TournamentStatus.Scheduled ;
+            _tournament.Status = TournamentStatus.Start ;
             DbRepoTournamentStatus depoStatus = new(_dbConnection);
             depoStatus.Set(_tournament);
         }

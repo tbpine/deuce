@@ -27,13 +27,13 @@
 
     
                     <tr>
-                        <td>@iterTour.Label</td>
+                        <td><a class="hover-effect-underline fw-medium text-dark-emphasis text-decoration-none ms-2" onclick="func(@iterTour.Id,'Summary')">@iterTour.Label</a></td>
                         <td>@iterTour.Start.ToString("dd/MM/yyyy")</td>
                         <td>@intervalLabel</td>
                         <td>@tourTypeLabel</td>
                         <td><a class="btn" onclick="func(@iterTour.Id,'Edit')">Edit</a>
                         <td>
-                            @if (iterTour.Status == TournamentStatus.Scheduled)
+                            @if (iterTour.Status == TournamentStatus.Start)
                             {
                                 <a class="btn" onclick="func(@iterTour.Id,'Scores')">Scores</a>
                             }

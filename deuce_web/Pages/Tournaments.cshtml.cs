@@ -46,6 +46,9 @@ public class TournamentsPageModel : BasePageModelAcc
 
     public  IActionResult OnPostAsync()
     {
+        //Edit the tourament, Enter scores
+        //or goto a summary page ( to start the tournament).
+        //Controlled by action.
         string? strTourId = this.Request.Form["TournamentId"];
         string? action = this.Request.Form["Action"];
         
@@ -59,6 +62,8 @@ public class TournamentsPageModel : BasePageModelAcc
             return Redirect( this.Request.PathBase + "/TournamentDetail");
         else if (action == "Scores")
             return Redirect( this.Request.PathBase + "/Scoring"); 
+        else if (action == "Summary")
+            return Redirect( this.Request.PathBase + "/Summary"); 
 
         return Page();
     }

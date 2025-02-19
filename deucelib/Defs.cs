@@ -9,7 +9,7 @@ public enum TournamentStatus : uint
 {
     Unknown = 0,
     New,
-    Scheduled,
+    Start,
 
 };
 

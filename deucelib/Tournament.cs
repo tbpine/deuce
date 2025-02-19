@@ -29,10 +29,17 @@ public class Tournament
 
     public int Id { get { return _id; } set { _id = value; } }
 
+    [Display("Label", null)]
     public string? Label { get { return _label; } set { _label = value; } }
+
+    [Display("Start Date", "dd/MM/yyyy")]
     public DateTime Start { get { return _start; } set { _start = value; } }
+    
+    [Display("Finish Date", "dd/MM/yyyy")]
     public DateTime End { get { return _end; } set { _end = value; } }
     public int Interval { get { return _interval; } set { _interval = value; } }
+
+    [Display("Team Size", null)]
     public int TeamSize { get { return _TeamSize; } set { _TeamSize = value; } }
     public int Steps { get { return _steps; } set { _steps = value; } }
     public int Sport { get { return _sport; } set { _sport = value; } }
@@ -40,7 +47,11 @@ public class Tournament
     public Format? Format { get { return _format; } set { _format = value; } }
     public int Type { get { return _type; } set { _type = value; } }
     public int EntryType { get { return _entryType; } set { _entryType = value; } }
+
+    [Display("Entry Fee", "c2")]
     public double Fee { get { return _fee; } set { _fee = value; } }
+
+    [Display("Prize", "c2")]
     public double Prize { get { return _prize; } set { _prize = value; } }
     public bool UseRanking { get { return _useRankings; } set { _useRankings = value; } }
 

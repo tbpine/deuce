@@ -1,0 +1,89 @@
+@page
+@model SummaryPageModel
+@{
+  Layout = "_LayoutAccount";
+}
+@using deuce;
+@using System.Reflection;
+
+<!-- Page content -->
+<div class="col-lg-9">
+  <h1 class="h2 pb-2 pb-lg-3">@Model.Tournament?.Label??""</h1>
+  <div class="table-responsive">
+    <table class="table">
+      <thead>
+        <tr>
+          <th></th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        
+    @{
+      //Get a list of properties to display
+      var arrayOfProps = Model.Tournament?.GetType().GetProperties();
+
+      for (int i = 0; i < (arrayOfProps?.Length ?? 0); i++)
+      {
+        //Only display those attributes marked with "Display"
+
+        var propInfo = arrayOfProps?[i];
+
+        var attrDisplay = propInfo?.GetCustomAttribute(typeof(DisplayAttribute));
+
+        if (attrDisplay is null) continue;
+
+        
+        //Grab label and format if needed
+        var format = (attrDisplay as DisplayAttribute)?.Format;
+        var label = (attrDisplay as DisplayAttribute)?.Label;
+        string textDisplay = "";
+        //Find the property type
+        if (propInfo?.PropertyType == typeof(int))
+        {
+           int? iVal = (int?) propInfo?.GetValue(Model.Tournament);
+           textDisplay = iVal.HasValue ? iVal.Value.ToString(format) :"";
+        }
+        else if (propInfo?.PropertyType == typeof(DateTime))
+        {
+           DateTime? iVal = (DateTime?) propInfo?.GetValue(Model.Tournament);
+           textDisplay = iVal.HasValue ? iVal.Value.ToString(format): "";
+
+        }
+        else
+          textDisplay = propInfo?.GetValue(Model.Tournament)?.ToString()??"";
+        
+
+        <tr>
+          <td>@label</td>
+          <td>@textDisplay</td>
+
+        </tr>
+
+      }
+
+    }
+      </tbody>
+    </table>
+
+    <form class="needs-validation" novalidate id="page_form" action="~/Summmary" method="POST">
+      <a class="btn btn-primary">Start</a>
+      <a class="btn btn-primary">Edit</a>
+      <input id="action" name="action" type="hidden" value="start" />
+    </form>
+  </div>
+
+</div>
+
+<script>
+  function submitWithAction(action)
+  {
+    //Set the hidden input 
+    const eAction = document.getElementById("action");
+    eAction.setAttribute("value",action);
+    //Submit form
+     document.getElementById("page_form").submit();
+    
+
+  }
+</script>
