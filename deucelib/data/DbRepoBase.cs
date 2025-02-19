@@ -1,14 +1,14 @@
 namespace deuce;
 public class DbRepoBase<T> : IDbRepo<T>
 {
-    public virtual Task<List<T>> GetList()
+    public virtual async Task<List<T>> GetList()
     {
-        return Task.FromResult(new List<T>());
+        return await Task.FromResult(new List<T>());
     }
 
-    public virtual Task<List<T>> GetList(Filter filter)
+    public virtual async  Task<List<T>> GetList(Filter filter)
     {
-        return Task.FromResult(new List<T>());
+        return await  Task.FromResult(new List<T>());
     }
 
     public virtual Task SetAsync(T obj)

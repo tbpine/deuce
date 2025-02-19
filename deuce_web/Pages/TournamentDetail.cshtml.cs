@@ -2,6 +2,7 @@ using System.Data.Common;
 using deuce;
 using deuce_web.ext;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Primitives;
 
 /// <summary>
 /// 
@@ -109,9 +110,10 @@ public class TournamentDetailPageModel : BasePageModelWizard
         //key "new" equaling 1 meaning
         //a new tournament is added.
 
-        var queryParamNew = this.HttpContext.Request.Query.First(e=>e.Key == "new");
+        var queryParamNew = this.HttpContext.Request.Query.ContainsKey("new") ? this.HttpContext.Request.Query["new"] : StringValues.Empty;
+        
 
-        if ( queryParamNew.Value == "1" && _sessionProxy is not null)
+        if ( !StringValues.Empty.Equals(queryParamNew) && queryParamNew.First() == "1" && _sessionProxy is not null)
         {
             //New tournament, specified by id equaling
             //zero.

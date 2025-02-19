@@ -29,7 +29,6 @@ public class Tournament
 
     public int Id { get { return _id; } set { _id = value; } }
 
-    [Display("Label", null)]
     public string? Label { get { return _label; } set { _label = value; } }
 
     [Display("Start Date", "dd/MM/yyyy")]
@@ -37,6 +36,8 @@ public class Tournament
     
     [Display("Finish Date", "dd/MM/yyyy")]
     public DateTime End { get { return _end; } set { _end = value; } }
+
+    [Display("Repeats every", null, typeof(Interval) )]
     public int Interval { get { return _interval; } set { _interval = value; } }
 
     [Display("Team Size", null)]

@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 public class SummaryPageModel : BasePageModelAcc
 {
    private readonly ILogger<SummaryPageModel> _log;
+   public readonly ILookup  _lookup;
    // For page values
    private Tournament? _tournament;
    private TournamentDetail? _tournamentDetail;
@@ -19,14 +20,17 @@ public class SummaryPageModel : BasePageModelAcc
    public Tournament? Tournament  { get => _tournament;}
    public TournamentDetail? TournamentDetail  { get => _tournamentDetail;}
 
+   
+
 
    //Page values
 
    public SummaryPageModel(ILogger<SummaryPageModel> log, ISideMenuHandler handlerNavItems, IServiceProvider sp, IConfiguration config,
-    ITournamentGateway tgateway, SessionProxy sessionProxy) : base(handlerNavItems, sp, config, tgateway,sessionProxy)
+    ITournamentGateway tgateway, SessionProxy sessionProxy, ILookup lookup) : base(handlerNavItems, sp, config, tgateway,sessionProxy)
    
    {
       _log = log;
+      _lookup = lookup;
    }
 
    public async Task<IActionResult> OnGet()

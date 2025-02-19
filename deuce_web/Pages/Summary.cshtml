@@ -8,7 +8,7 @@
 
 <!-- Page content -->
 <div class="col-lg-9">
-  <h1 class="h2 pb-2 pb-lg-3">@Model.Tournament?.Label??""</h1>
+  <h1 class="h2 pb-2 pb-lg-3">@Model.Tournament?.Label</h1>
   <div class="table-responsive">
     <table class="table">
       <thead>
@@ -18,51 +18,71 @@
         </tr>
       </thead>
       <tbody>
-        
-    @{
-      //Get a list of properties to display
-      var arrayOfProps = Model.Tournament?.GetType().GetProperties();
 
-      for (int i = 0; i < (arrayOfProps?.Length ?? 0); i++)
-      {
-        //Only display those attributes marked with "Display"
+        @{
+          //Get a list of properties to display
+          var arrayOfProps = Model.Tournament?.GetType().GetProperties();
 
-        var propInfo = arrayOfProps?[i];
+          for (int i = 0; i < (arrayOfProps?.Length ?? 0); i++)
+          {
+            //Only display those attributes marked with "Display"
 
-        var attrDisplay = propInfo?.GetCustomAttribute(typeof(DisplayAttribute));
+            var propInfo = arrayOfProps?[i];
 
-        if (attrDisplay is null) continue;
+            var attrDisplay = propInfo?.GetCustomAttribute(typeof(DisplayAttribute));
 
-        
-        //Grab label and format if needed
-        var format = (attrDisplay as DisplayAttribute)?.Format;
-        var label = (attrDisplay as DisplayAttribute)?.Label;
-        string textDisplay = "";
-        //Find the property type
-        if (propInfo?.PropertyType == typeof(int))
-        {
-           int? iVal = (int?) propInfo?.GetValue(Model.Tournament);
-           textDisplay = iVal.HasValue ? iVal.Value.ToString(format) :"";
+            if (attrDisplay is null) continue;
+
+
+            //Grab label and format if needed
+            var format = (attrDisplay as DisplayAttribute)?.Format;
+            var label = (attrDisplay as DisplayAttribute)?.Label;
+            var lookupType = (attrDisplay as DisplayAttribute)?.LookupType;
+
+            string textDisplay = "";
+
+            //If the property is id and requires looking up , 
+            //then ask the lookup manager
+            if (lookupType is not null)
+            {
+              int? iId = (int?)propInfo?.GetValue(Model.Tournament);
+              if (iId.HasValue)
+                textDisplay = await Model._lookup.GetLabel(iId.HasValue ? iId.Value : 0, lookupType) ?? "";
+            }
+            else
+            {
+              //Find the property type
+              if (propInfo?.PropertyType == typeof(int))
+              {
+                int? iVal = (int?)propInfo?.GetValue(Model.Tournament);
+                textDisplay = iVal.HasValue ? iVal.Value.ToString(format) : "";
+              }
+              else if (propInfo?.PropertyType == typeof(DateTime))
+              {
+                DateTime? iVal = (DateTime?)propInfo?.GetValue(Model.Tournament);
+                textDisplay = iVal.HasValue ? iVal.Value.ToString(format) : "";
+
+              }
+              else if (propInfo?.PropertyType == typeof(double))
+              {
+                double? dVal = (double?)propInfo?.GetValue(Model.Tournament);
+                textDisplay = dVal.HasValue ? dVal.Value.ToString(format) : "";
+
+              }
+              else
+                textDisplay = propInfo?.GetValue(Model.Tournament)?.ToString() ?? "";
+            }
+
+
+            <tr>
+              <td>@label</td>
+              <td>@textDisplay</td>
+
+            </tr>
+
+          }
+
         }
-        else if (propInfo?.PropertyType == typeof(DateTime))
-        {
-           DateTime? iVal = (DateTime?) propInfo?.GetValue(Model.Tournament);
-           textDisplay = iVal.HasValue ? iVal.Value.ToString(format): "";
-
-        }
-        else
-          textDisplay = propInfo?.GetValue(Model.Tournament)?.ToString()??"";
-        
-
-        <tr>
-          <td>@label</td>
-          <td>@textDisplay</td>
-
-        </tr>
-
-      }
-
-    }
       </tbody>
     </table>
 
@@ -76,14 +96,13 @@
 </div>
 
 <script>
-  function submitWithAction(action)
-  {
+  function submitWithAction(action) {
     //Set the hidden input 
     const eAction = document.getElementById("action");
-    eAction.setAttribute("value",action);
+    eAction.setAttribute("value", action);
     //Submit form
-     document.getElementById("page_form").submit();
-    
+    document.getElementById("page_form").submit();
+
 
   }
 </script>

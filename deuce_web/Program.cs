@@ -34,6 +34,7 @@ builder.Services.AddSingleton<SessionProxy>();
 builder.Services.AddSingleton<ITournamentGateway, DBTournamentGateway>();
 builder.Services.AddSingleton<IMemoryCache, MemoryCache>();
 builder.Services.AddSingleton<ICacheMaster, CacheMasterDefault>();
+builder.Services.AddSingleton<ILookup, LookupCache>();
 
 
 
