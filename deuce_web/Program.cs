@@ -35,6 +35,7 @@ builder.Services.AddSingleton<ITournamentGateway, DBTournamentGateway>();
 builder.Services.AddSingleton<IMemoryCache, MemoryCache>();
 builder.Services.AddSingleton<ICacheMaster, CacheMasterDefault>();
 builder.Services.AddSingleton<ILookup, LookupCache>();
+builder.Services.AddSingleton<DisplayToHTML>();
 
 
 

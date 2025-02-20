@@ -1,10 +1,9 @@
-using System.Collections.Frozen;
 using System.Data.Common;
-using System.Diagnostics;
-using System.Runtime.CompilerServices;
+using System.Reflection;
+using System.Text;
 using deuce;
+using deuce.ext;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.RazorPages;
 
 /// <summary>
 /// Entry costs
@@ -12,25 +11,27 @@ using Microsoft.AspNetCore.Mvc.RazorPages;
 public class SummaryPageModel : BasePageModelAcc
 {
    private readonly ILogger<SummaryPageModel> _log;
-   public readonly ILookup  _lookup;
+   public readonly ILookup _lookup;
+   public readonly DisplayToHTML _displayToHTML;
    // For page values
    private Tournament? _tournament;
    private TournamentDetail? _tournamentDetail;
 
-   public Tournament? Tournament  { get => _tournament;}
-   public TournamentDetail? TournamentDetail  { get => _tournamentDetail;}
+   public Tournament? Tournament { get => _tournament; }
+   public TournamentDetail? TournamentDetail { get => _tournamentDetail; }
 
-   
+
 
 
    //Page values
 
    public SummaryPageModel(ILogger<SummaryPageModel> log, ISideMenuHandler handlerNavItems, IServiceProvider sp, IConfiguration config,
-    ITournamentGateway tgateway, SessionProxy sessionProxy, ILookup lookup) : base(handlerNavItems, sp, config, tgateway,sessionProxy)
-   
+    ITournamentGateway tgateway, SessionProxy sessionProxy, ILookup lookup, DisplayToHTML displayToHTML) : base(handlerNavItems, sp, config, tgateway, sessionProxy)
+
    {
       _log = log;
       _lookup = lookup;
+      _displayToHTML = displayToHTML;
    }
 
    public async Task<IActionResult> OnGet()
@@ -50,7 +51,7 @@ public class SummaryPageModel : BasePageModelAcc
    private async Task LoadPage()
    {
       //Temp organization for now,
-      Organization myOrg = new() { Id = 1, Name="myOrg"};
+      Organization myOrg = new() { Id = 1, Name = "myOrg" };
       //Load the current tourament
 
       using var scope = _serviceProvider.CreateScope();
@@ -62,15 +63,18 @@ public class SummaryPageModel : BasePageModelAcc
       await dbconn.OpenAsync();
 
       //Create repo to load tournament details
-      DbRepoTournament dbRepoTournament= new (dbconn , myOrg);
+      DbRepoTournament dbRepoTournament = new(dbconn, myOrg);
       //Filter to this tournament
-      Filter filter = new Filter() { TournamentId = _sessionProxy?.TournamentId??0,
-      ClubId = myOrg.Id};
+      Filter filter = new Filter()
+      {
+         TournamentId = _sessionProxy?.TournamentId ?? 0,
+         ClubId = myOrg.Id
+      };
 
       var listOfTournament = await dbRepoTournament.GetList(filter);
 
       //Load tournament details
-      DbRepoTournamentDetail dbRepoTournamentDetail = new(dbconn , myOrg);
+      DbRepoTournamentDetail dbRepoTournamentDetail = new(dbconn, myOrg);
       var listOfTournamentDetails = await dbRepoTournamentDetail.GetList(filter);
 
       //Set page values
@@ -78,9 +82,7 @@ public class SummaryPageModel : BasePageModelAcc
       _tournament = listOfTournament.FirstOrDefault();
       _tournamentDetail = listOfTournamentDetails.FirstOrDefault();
 
-      
-
-
    }
 
+   
 }

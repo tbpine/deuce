@@ -16,8 +16,12 @@ public class TournamentDetail
     public int Sets { get { return _sets; } set { _sets = value; } }
     public int Games { get { return _games; } set { _games = value; } }
     public int CustomGames { get { return _customGames; } set { _customGames = value; } }
+    [Display("Number of singles", null)]
     public int NoSingles { get { return _noSingles; } set { _noSingles = value; } }
+    [Display("Number of doubles", null)]
     public int NoDoubles { get { return _noDoubles; } set { _noDoubles = value; } }
+
+    [Display("Team size", null)]
     public int TeamSize { get { return _teamSize; } set { _teamSize = value; } }
 
 
