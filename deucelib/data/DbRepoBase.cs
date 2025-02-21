@@ -1,6 +1,14 @@
+using System.Data.Common;
+
 namespace deuce;
-public class DbRepoBase<T> : IDbRepo<T>
+public class DbRepoBase<T> : IDbRepo<T>, IDisposable
 {
+    protected readonly DbConnection _dbconn;
+
+    public DbRepoBase(DbConnection dbconn)
+    {
+        _dbconn = dbconn;
+    }
     public virtual async Task<List<T>> GetList()
     {
         return await Task.FromResult(new List<T>());
@@ -33,4 +41,8 @@ public class DbRepoBase<T> : IDbRepo<T>
         return Task.FromResult(obj);
     }
 
+    public void Dispose()
+    {
+        _dbconn?.Close();       
+    }
 }

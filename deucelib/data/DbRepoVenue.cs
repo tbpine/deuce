@@ -4,17 +4,14 @@ using deuce.ext;
 namespace deuce;
 public class DbRepoVenue : DbRepoBase<TournamentVenue>
 {
-    private readonly DbConnection _dbconn;
-
 
     /// <summary>
     /// Constructure with db connectopon and venue
     /// </summary>
     /// <param name="dbconn"></param>
     /// 
-    public DbRepoVenue(DbConnection dbconn)
+    public DbRepoVenue(DbConnection dbconn) : base(dbconn)
     {
-        _dbconn = dbconn;
     }
 
     /// <summary>
@@ -24,6 +21,8 @@ public class DbRepoVenue : DbRepoBase<TournamentVenue>
     /// <returns></returns>
     public override async Task<List<TournamentVenue>> GetList(Filter filter)
     {
+        _dbconn.Open();
+
         List<TournamentVenue> venues = new();
         await _dbconn.CreateReaderStoreProcAsync("sp_get_tournament_venue", ["p_tour_id"], [filter.TournamentId],
         r =>
@@ -42,12 +41,17 @@ public class DbRepoVenue : DbRepoBase<TournamentVenue>
 
         });
 
+        _dbconn.Close();
+
         return venues;
 
     }
 
     public override void Set(TournamentVenue obj)
     {
+
+        _dbconn.Open();
+
         //Explicitly insert new rows if id < 1
         object primaryKeyId = obj.Id < 1 ? DBNull.Value : obj.Id;
         //Start transaction
@@ -66,6 +70,10 @@ public class DbRepoVenue : DbRepoBase<TournamentVenue>
         {
             //Something went wrong
             dbTrans.Rollback();
+        }
+        finally
+        {
+            _dbconn.Close();
         }
 
     }

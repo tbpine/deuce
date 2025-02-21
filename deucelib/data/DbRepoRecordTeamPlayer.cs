@@ -6,10 +6,8 @@ using iText.StyledXmlParser.Jsoup.Nodes;
 namespace deuce;
 public class DbRepoRecordTeamPlayer : DbRepoBase<RecordTeamPlayer>
 {
-    private readonly DbConnection _dbconn;
-    public DbRepoRecordTeamPlayer(DbConnection dbconn)
+    public DbRepoRecordTeamPlayer(DbConnection dbconn) : base(dbconn)
     {
-        _dbconn = dbconn;
     }
 
     /// <summary>
@@ -19,6 +17,8 @@ public class DbRepoRecordTeamPlayer : DbRepoBase<RecordTeamPlayer>
     /// <returns></returns>
     public override async Task<List<RecordTeamPlayer>> GetList(Filter filter)
     {
+        _dbconn.Open();
+
         List<RecordTeamPlayer> list = new();
         await _dbconn.CreateReaderStoreProcAsync("sp_get_team_player", ["p_tournament"],
          [filter.TournamentId], reader=>{
@@ -40,6 +40,9 @@ public class DbRepoRecordTeamPlayer : DbRepoBase<RecordTeamPlayer>
                 list.Add(recordTeamPlayer);
 
          });
+
+         _dbconn.Close();
+         
         return list;
         
     }

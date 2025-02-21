@@ -10,20 +10,19 @@ public class DbRepoTournamentDetail : DbRepoBase<TournamentDetail>
     //------------------------------------
     //| Internals                         |
     //------------------------------------
-    private readonly DbConnection _dbconn;
     
 
     /// <summary>
     /// Construct with a db connection to the target db.
     /// </summary>
     /// <param name="dbconn">Database connection</param>
-    public DbRepoTournamentDetail(DbConnection dbconn, Organization organization)
-    {
-        _dbconn = dbconn;
+    public DbRepoTournamentDetail(DbConnection dbconn, Organization organization) : base(dbconn)
+    { 
     }
 
     public override async Task<List<TournamentDetail>> GetList(Filter filter)
     {
+        _dbconn.Open();
         //return collection
         List<TournamentDetail> list = new();
 
@@ -53,13 +52,14 @@ public class DbRepoTournamentDetail : DbRepoBase<TournamentDetail>
 
         });
 
-     
+        _dbconn.Close();
         return list;
     }
 
     public override async Task SetAsync(TournamentDetail obj)
     {
 
+        _dbconn.Open();
 
         var localTran = _dbconn.BeginTransaction();
         DbCommand cmd = _dbconn.CreateCommandStoreProc("sp_set_tournament_detail",
@@ -78,7 +78,10 @@ public class DbRepoTournamentDetail : DbRepoBase<TournamentDetail>
             localTran.Rollback();
             Debug.WriteLine(ex.Message);
         }
-
+        finally
+        {
+            _dbconn.Close();
+        }
 
 
 

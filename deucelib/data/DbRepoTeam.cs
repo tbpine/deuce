@@ -16,7 +16,6 @@ public class DbRepoTeam : DbRepoBase<Team>
     /// from a team.
     /// </summary>
     private record TeamPlayer(Player Player, int TeamId);
-    private readonly DbConnection _dbconn;
 
     public Organization? Organization { get; set; }
     public Tournament? Tournament { get; set; }
@@ -28,9 +27,8 @@ public class DbRepoTeam : DbRepoBase<Team>
     /// Construct with a db connection
     /// </summary>
     /// <param name="dbconn">Db connection</param>
-    public DbRepoTeam(DbConnection dbconn)
+    public DbRepoTeam(DbConnection dbconn) : base(dbconn)
     {
-        _dbconn = dbconn;
     }
 
     /// <summary>
@@ -39,15 +37,16 @@ public class DbRepoTeam : DbRepoBase<Team>
     /// <param name="dbconn">Db connection</param>
     /// <param name="organization">Organization</param>
     /// <param name="tournamentId">Tournament id</param>
-    public DbRepoTeam(DbConnection dbconn, Organization organization, int tournamentId)
+    public DbRepoTeam(DbConnection dbconn, Organization organization, int tournamentId) : base(dbconn)
     {
-        _dbconn = dbconn;
         Organization = organization;
         _tournamentId = tournamentId;
     }
 
     public override async Task<List<Team>> GetList(Filter filter)
     {
+        _dbconn.Open();
+
         List<Team> result = new();
 
         using (DbCommand cmd = _dbconn.CreateCommand())
@@ -71,6 +70,8 @@ public class DbRepoTeam : DbRepoBase<Team>
             }
         }
 
+        _dbconn.Close();
+
         return result;
 
     }
@@ -82,6 +83,8 @@ public class DbRepoTeam : DbRepoBase<Team>
     /// <returns></returns>
     public override async Task SetAsync(Team obj)
     {
+        _dbconn.Open();
+
         var localtran = _dbconn.BeginTransaction();
 
         try
@@ -122,6 +125,11 @@ public class DbRepoTeam : DbRepoBase<Team>
             localtran.Rollback();
             Debug.WriteLine(ex.Message);
         }
+        finally
+        {
+            _dbconn.Close();
+        }
+
 
     }
 
@@ -177,6 +185,8 @@ public class DbRepoTeam : DbRepoBase<Team>
 
     public override async Task Sync(List<Team> src)
     {
+        _dbconn.Open();
+
         //Get a list of destination records
         DbRepoRecordTeamPlayer dbRepoTeamPlayer = new(_dbconn);
         Filter filterTeams = new Filter() { ClubId = Organization?.Id ?? 1, TournamentId = _tournamentId };
@@ -281,8 +291,10 @@ public class DbRepoTeam : DbRepoBase<Team>
             localtran.Rollback();
             Debug.WriteLine(ex.ToString());
         }
-
-
+        finally
+        {
+            _dbconn.Close();
+        }
 
         //Deletes
     }

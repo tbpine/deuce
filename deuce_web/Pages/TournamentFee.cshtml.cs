@@ -10,7 +10,8 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 public class TournamentPricePageModel : BasePageModelWizard
 {
    private readonly ILogger<TournamentPricePageModel> _log;
-
+   private readonly DbRepoTournament _dbRepoTournament;
+   private readonly DbRepoTournamentFee _dbRepoTourFee;
    //Page values
 
    [BindProperty]
@@ -19,10 +20,12 @@ public class TournamentPricePageModel : BasePageModelWizard
    public bool Validated { get; set; }
 
    public TournamentPricePageModel(ILogger<TournamentPricePageModel> log, IHandlerNavItems handlerNavItems,
-   IConfiguration cfg, IServiceProvider sp)
+   IConfiguration cfg, IServiceProvider sp, DbRepoTournament dbRepoTournament, DbRepoTournamentFee dbRepoTourFee)
    : base(handlerNavItems, sp, cfg)
    {
       _log = log;
+      _dbRepoTournament = dbRepoTournament;
+      _dbRepoTourFee = dbRepoTourFee;
    }
 
    public async Task<IActionResult> OnGet()
@@ -32,22 +35,13 @@ public class TournamentPricePageModel : BasePageModelWizard
 
       //Select the current tourament
       //to get the fee charged.
-            var scope = _serviceProvider.CreateScope();
-      var dbconn = scope.ServiceProvider.GetRequiredService<DbConnection>();
-      if (dbconn is not null)
+
+      var currentTournament = (await _dbRepoTournament.GetList(new Filter() { TournamentId = _sessionProxy?.TournamentId ?? 0 })).FirstOrDefault();
+
+      if (currentTournament is not null)
       {
-         dbconn.ConnectionString = _config.GetConnectionString("deuce_local");
-         await dbconn.OpenAsync();
-
-         var currentTournament = await GetCurrentTournament(dbconn);
-
-         if (currentTournament is not null)
-         {
-            //Set the fee.
-            Fee = currentTournament.Fee.ToString("F2");
-         }
-
-         await dbconn.CloseAsync();
+         //Set the fee.
+         Fee = currentTournament.Fee.ToString("F2");
       }
 
       return Page();
@@ -60,7 +54,7 @@ public class TournamentPricePageModel : BasePageModelWizard
       if (!Validate()) return Page();
 
       //DTO (Data transfer object)
-      //Tournamenty
+      //Tournament
       decimal dFee = decimal.TryParse(Fee, out dFee) ? dFee : 0;
       Tournament tempTour = new()
       {
@@ -68,20 +62,8 @@ public class TournamentPricePageModel : BasePageModelWizard
          Fee = (double)dFee
       };
 
-      //Save to the database
-      //Make scope connection
-      var scope = _serviceProvider.CreateScope();
-      var dbconn = scope.ServiceProvider.GetRequiredService<DbConnection>();
 
-      if (dbconn is not null)
-      {
-         dbconn.ConnectionString = _config.GetConnectionString("deuce_local");
-         await dbconn.OpenAsync();
-
-         DbRepoTournamentFee repoFee = new(dbconn);
-         await repoFee.SetAsync(tempTour);
-         dbconn.Close();
-      }
+      await _dbRepoTourFee.SetAsync(tempTour);
 
 
       return NextPage("");

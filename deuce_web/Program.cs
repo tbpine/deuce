@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.HttpOverrides;
 using System.Data.Common;
 using deuce_web;
 using Microsoft.Extensions.Caching.Memory;
+using deuce;
 
 var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
@@ -25,9 +26,16 @@ builder.Services.AddSession(options => {
 
 });
 
-builder.Services.AddScoped<DbConnection, MySqlConnection>();
+builder.Services.AddScoped<DbConnection, DbConnectionLocal>();
 builder.Services.AddScoped<IHandlerNavItems, HandlerNavItems>();
 builder.Services.AddScoped<ISideMenuHandler, AccSideMenuHandler>();
+builder.Services.AddScoped<DbRepoTournament>();
+builder.Services.AddScoped<DbRepoTournamentFee>();
+builder.Services.AddScoped<DbRepoTournamentDetail>();
+
+//Repos
+
+
 //Singletons
 builder.Services.AddSingleton<IFormValidator, FormValidator>();
 builder.Services.AddSingleton<SessionProxy>();

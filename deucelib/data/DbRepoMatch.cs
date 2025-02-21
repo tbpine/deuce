@@ -10,15 +10,13 @@ namespace deuce;
 /// </summary>
 public class DbRepoMatch : DbRepoBase<Match>
 {
-    private DbConnection _dbconn;
 
     /// <summary>
     /// Construct to the target database.
     /// </summary>
     /// <param name="conn">Database connection</param>
-    public DbRepoMatch(DbConnection conn)
+    public DbRepoMatch(DbConnection conn) : base(conn)
     {
-        _dbconn = conn;
     }
 
     /// <summary>
@@ -28,6 +26,7 @@ public class DbRepoMatch : DbRepoBase<Match>
     /// <returns></returns>
     public override async Task SetAsync(Match obj)
     {
+         _dbconn.Open();
 
         //Explicitly insert new rows if id < 1
         object primaryKeyId = obj.Id < 1 ? DBNull.Value : obj.Id;
@@ -52,5 +51,7 @@ public class DbRepoMatch : DbRepoBase<Match>
             [DBNull.Value, obj.Id,  DBNull.Value,  player.Id ], null);
             await cmd2.ExecuteNonQueryAsync();
         }
+
+        _dbconn.Close();
     }
 }

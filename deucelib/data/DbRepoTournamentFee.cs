@@ -8,19 +8,17 @@ namespace deuce;
 /// </summary>
 public class DbRepoTournamentFee : DbRepoBase<Tournament>
 {
-    private readonly DbConnection _dbconn;
-
     /// <summary>
     /// Construct with dependency
     /// </summary>
     /// <param name="dbconn"></param>
-    public DbRepoTournamentFee(DbConnection dbconn)
+    public DbRepoTournamentFee(DbConnection dbconn) : base(dbconn)
     {
-        _dbconn = dbconn;
     }
 
     public override async Task SetAsync(Tournament obj)
     {
+        _dbconn.Open();
 
         //Insert into the team table
         var localtran = _dbconn.BeginTransaction();
@@ -37,7 +35,10 @@ public class DbRepoTournamentFee : DbRepoBase<Tournament>
             localtran.Rollback();
 
         }
-
+        finally
+        {
+            _dbconn.Close();
+        }
 
     }
 

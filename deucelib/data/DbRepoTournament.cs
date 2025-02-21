@@ -9,21 +9,29 @@ public class DbRepoTournament : DbRepoBase<Tournament>
     //------------------------------------
     //| Internals                         |
     //------------------------------------
-    private readonly DbConnection _dbconn;
     private readonly Organization? _organization;
 
     /// <summary>
     /// Construct with a db connection to the target db.
     /// </summary>
     /// <param name="dbconn">Database connection</param>
-    public DbRepoTournament(DbConnection dbconn, Organization organization)
+    public DbRepoTournament(DbConnection dbconn) : base(dbconn)
     {
-        _dbconn = dbconn;
+    }
+
+    /// <summary>
+    /// Construct with a db connection to the target db.
+    /// </summary>
+    /// <param name="dbconn">Database connection</param>
+    public DbRepoTournament(DbConnection dbconn, Organization organization) : base(dbconn)
+    {
         _organization = organization;
     }
 
     public override async Task<List<Tournament>> GetList(Filter filter)
     {
+        _dbconn.Open();
+
         List<Tournament> list = new();
 
         await _dbconn.CreateReaderStoreProcAsync("sp_get_tournament", ["p_id"], [filter.TournamentId],
@@ -68,11 +76,15 @@ public class DbRepoTournament : DbRepoBase<Tournament>
 
         });
 
+        _dbconn.Close();
+
         return list;
     }
 
     public override async Task SetAsync(Tournament obj)
     {
+        _dbconn.Open();
+
         var localTran = _dbconn.BeginTransaction();
         
         //Explicitly insert new rows if id < 1
@@ -93,6 +105,10 @@ public class DbRepoTournament : DbRepoBase<Tournament>
         {
             localTran.Rollback();
             Debug.WriteLine(ex.Message);
+        }
+        finally
+        {
+            _dbconn.Close();
         }
 
 

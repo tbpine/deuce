@@ -15,6 +15,10 @@ public class TournamentFormatPlayerPageModel : BasePageModelWizard
 {
     private readonly ILogger<TournamentFormatPlayerPageModel> _log;
     private readonly IFormValidator _formValidator;
+    private readonly ICacheMaster _cache;
+    private readonly DbRepoTournamentDetail _dbRepoTournamentDetail;
+    private readonly DbRepoTournament _dbRepoTournament;
+
     public string? Title { get; set; }
     
     [BindProperty]
@@ -53,11 +57,15 @@ public class TournamentFormatPlayerPageModel : BasePageModelWizard
     };
 
     public TournamentFormatPlayerPageModel(ILogger<TournamentFormatPlayerPageModel> log, IServiceProvider sp,
-    IConfiguration cfg, IFormValidator formValidator, IHandlerNavItems hNavItems) : base(hNavItems, sp, cfg)
+    IConfiguration cfg, IFormValidator formValidator, IHandlerNavItems hNavItems, ICacheMaster cache,
+    DbRepoTournamentDetail dbRepoTournamentDetail,DbRepoTournament dbRepoTournament) : base(hNavItems, sp, cfg)
     {
         _log = log;
         _formValidator = formValidator;
         _formValidator.Page = this;
+        _cache = cache;
+        _dbRepoTournamentDetail= dbRepoTournamentDetail;
+        _dbRepoTournament = dbRepoTournament;
     }
 
     public async Task<IActionResult> OnGet()
@@ -113,18 +121,8 @@ public class TournamentFormatPlayerPageModel : BasePageModelWizard
                 };
                 Organization thisOrg = new Organization(){Id=1, Name="testing"};
                 //Save to DB
-                var scope = _serviceProvider.CreateScope();
-                var dbconn = scope.ServiceProvider.GetService<DbConnection>();
-                
-                if (dbconn is not null)
-                {
-                    dbconn.ConnectionString = _config.GetConnectionString("deuce_local");
-                    await dbconn.OpenAsync();
-                    DbRepoTournamentDetail dbRepoTourDetail = new (dbconn, thisOrg);
-                    await dbRepoTourDetail.SetAsync(tourDetails);
-                    await dbconn.CloseAsync();
+                await _dbRepoTournamentDetail.SetAsync(tourDetails);
 
-                }
 
             }
 
@@ -189,15 +187,9 @@ public class TournamentFormatPlayerPageModel : BasePageModelWizard
 
         Organization thisOrg = new() { Id = 1, Name = "testing" };
 
-        var scope = _serviceProvider.CreateScope();
-        var dbconn = scope.ServiceProvider.GetService<DbConnection>();
-        dbconn!.ConnectionString = _config.GetConnectionString("deuce_local");
-        await dbconn.OpenAsync();
-
         //Set the title for this page 
         //to the selected sport
-        DbRepoSport dbRepoSport = new(dbconn);
-        var sports = await dbRepoSport.GetList();
+        var sports = await _cache.GetList<Sport>(CacheMasterDefault.KEY_SPORTS);
 
         int currentTourId = _sessionProxy?.TournamentId ?? 0;
 
@@ -205,9 +197,8 @@ public class TournamentFormatPlayerPageModel : BasePageModelWizard
         {
             //Load the tournament details 
             //from the database
-            DbRepoTournamentDetail repoTourDetail = new(dbconn, organization: thisOrg);
             Filter filter = new() { TournamentId = currentTourId };
-            var tourDetail = (await repoTourDetail.GetList(filter))?.FirstOrDefault();
+            var tourDetail = (await _dbRepoTournamentDetail.GetList(filter))?.FirstOrDefault();
 
             //Set page values
             if (tourDetail is not null)
@@ -220,18 +211,17 @@ public class TournamentFormatPlayerPageModel : BasePageModelWizard
 
             }
 
-            var tour = await GetCurrentTournament(dbconn);
+            var tour = (await _dbRepoTournament.GetList(new Filter(){TournamentId = _sessionProxy?.TournamentId??0})).FirstOrDefault();
 
             int sportId = tour?.Sport ?? 1;
 
-            var sport = sports.Find(e => e.Id == sportId);
+            var sport = sports?.Find(e => e.Id == sportId);
 
             Title = sport?.Label ?? "";
 
 
         }
 
-        await dbconn.CloseAsync();
         return Page();
     }
 }

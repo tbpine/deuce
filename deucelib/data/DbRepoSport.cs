@@ -5,15 +5,12 @@ using deuce.ext;
 namespace deuce;
 public class DbRepoSport : DbRepoBase<Sport>
 {
-    private readonly DbConnection _dbconn;
-
     /// <summary>
     /// Construct with dependency
     /// </summary>
     /// <param name="dbconn"></param>
-    public DbRepoSport(DbConnection dbconn)
+    public DbRepoSport(DbConnection dbconn) : base(dbconn)
     {
-        _dbconn = dbconn;
     }
 
     /// <summary>
@@ -22,6 +19,8 @@ public class DbRepoSport : DbRepoBase<Sport>
     /// <returns></returns>
     public async override Task<List<Sport>> GetList()
     {
+        _dbconn.Open();
+
         List<Sport> sports = new();
         await _dbconn.CreateReaderStoreProcAsync("sp_get_sports", [], [], reader=>{
             sports.Add(new Sport(reader.Parse<int>("id"), reader.Parse<string>("label"),
@@ -30,6 +29,8 @@ public class DbRepoSport : DbRepoBase<Sport>
                 reader.Parse<string>("icon")));
 
         });
+
+        _dbconn.Close();
 
         return sports;
     }

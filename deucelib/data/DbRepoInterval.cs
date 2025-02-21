@@ -10,19 +10,18 @@ public class DbRepoInterval : DbRepoBase<Interval>
     //------------------------------------
     //| Internals                         |
     //------------------------------------
-    private readonly DbConnection _dbconn;
-
     /// <summary>
     /// Construct with dependencies
     /// </summary>
     /// <param name="dbconn">Db Connection</param>
-    public DbRepoInterval(DbConnection dbconn)
+    public DbRepoInterval(DbConnection dbconn) : base(dbconn)
     {
-        _dbconn = dbconn;
+        
     }
 
     public override async Task<List<Interval>> GetList()
     {
+        _dbconn.Open();
         //Return
         List<Interval> list = new();
         //Select rows asynchronisly
@@ -35,6 +34,8 @@ public class DbRepoInterval : DbRepoBase<Interval>
 
             list.Add(new Interval(id, label));
         });
+
+        _dbconn.Close();
 
         return list;
     }

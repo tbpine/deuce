@@ -8,21 +8,20 @@ namespace deuce;
 /// </summary>
 public class DbRepoRecordSchedule : DbRepoBase<RecordSchedule>
 {
-    private readonly DbConnection _dbconn;
-
+    
     /// <summary>
     /// Construct with a db connnection
     /// </summary>
     /// <param name="dbconn">The db connection</param>
     /// <param name="references">References</param>
-    public DbRepoRecordSchedule(DbConnection dbconn)
+    public DbRepoRecordSchedule(DbConnection dbconn) : base(dbconn)
     {
-        _dbconn = dbconn;
-
     }
 
     public async override Task<List<RecordSchedule>> GetList(Filter filter)
     {
+        _dbconn.Open();
+
         List<RecordSchedule> result = new();
         await _dbconn.CreateReaderStoreProcAsync("sp_get_tournament_schedule", ["p_tournament" ], [ filter.TournamentId ],
         r =>
@@ -37,7 +36,8 @@ public class DbRepoRecordSchedule : DbRepoBase<RecordSchedule>
                                                           ));
         });
 
-
+        _dbconn.Close();
+        
         return result;
     }
 

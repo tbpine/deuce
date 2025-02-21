@@ -4,19 +4,18 @@ using deuce.ext;
 namespace deuce;
 public class DbRepoTournamentProps : DbRepoBase<Tournament>
 {
-    private readonly DbConnection _dbconn;
 
     /// <summary>
     /// Construct with dependency
     /// </summary>
     /// <param name="dbconn"></param>
-    public DbRepoTournamentProps(DbConnection dbconn)
+    public DbRepoTournamentProps(DbConnection dbconn) : base(dbconn)
     {
-        _dbconn = dbconn;
     }
 
     public override async Task SetAsync(Tournament obj)
     {
+        _dbconn.Open();
 
         //Insert into the team table
         var localtran = _dbconn.BeginTransaction();
@@ -32,6 +31,10 @@ public class DbRepoTournamentProps : DbRepoBase<Tournament>
         {
             localtran.Rollback();
 
+        }
+        finally
+        {
+            _dbconn.Close();
         }
 
 

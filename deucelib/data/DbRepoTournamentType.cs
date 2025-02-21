@@ -10,19 +10,19 @@ public class DbRepoTournamentType : DbRepoBase<TournamentType>
     //------------------------------------
     //| Internals                         |
     //------------------------------------
-    private readonly DbConnection _dbconn;
 
     /// <summary>
     /// Construct with dependencies
     /// </summary>
     /// <param name="dbconn">Db Connection</param>
-    public DbRepoTournamentType(DbConnection dbconn)
+    public DbRepoTournamentType(DbConnection dbconn) : base(dbconn)
     {
-        _dbconn = dbconn;
     }
 
     public override async Task<List<TournamentType>> GetList()
     {
+        _dbconn.Open();
+
         List<TournamentType> list=new();
         
         await _dbconn.CreateReaderStoreProcAsync("sp_get_tournament_type", [],[], reader=>{
@@ -35,6 +35,9 @@ public class DbRepoTournamentType : DbRepoBase<TournamentType>
             list.Add(new TournamentType(id, label, name, key, icon));
 
         });
+
+        _dbconn.Close();
+        
         return list;
     }
 }

@@ -11,8 +11,7 @@ using Microsoft.Extensions.Caching.Memory;
 public class CacheMasterDefault : ICacheMaster
 {
     private readonly IMemoryCache _memoryCache;
-    private readonly IServiceProvider _serviceProvider;
-    private readonly IConfiguration _configuration;
+    private readonly DbConnection _dbconn;
 
     public const String KEY_INTERVALS = "intervals";
     public const String KEY_SPORTS = "sports";
@@ -23,11 +22,10 @@ public class CacheMasterDefault : ICacheMaster
     /// Add the memory cache singleton
     /// </summary>
     /// <param name="memoryCache"></param>
-    public CacheMasterDefault(IMemoryCache memoryCache, IServiceProvider serviceProvider, IConfiguration configuration)
+    public CacheMasterDefault(IMemoryCache memoryCache, IConfiguration configuration)
     {
         _memoryCache = memoryCache;
-        _serviceProvider = serviceProvider;
-        _configuration = configuration;
+        _dbconn = new DbConnectionLocal(configuration);
     }
 
     /// <summary>
@@ -50,15 +48,10 @@ public class CacheMasterDefault : ICacheMaster
     /// </summary>
     private async Task SelectValuesFromDB()
     {
-        using var scope = _serviceProvider.CreateScope();
-        using var dbconn = scope.ServiceProvider.GetService<DbConnection>();
-        //Couldn't create db handle.
-        if (dbconn == null) return;
+        _dbconn.Open();
+        (_dbconn as DbConnectionLocal)?.KeepAlive(true);
 
-        dbconn.ConnectionString = _configuration.GetConnectionString("deuce_local");
-        dbconn.Open();
-
-        DbRepoSettings dbRepoSettings = new(dbconn);
+        DbRepoSettings dbRepoSettings = new(_dbconn);
         var listOfSettings = await dbRepoSettings.GetList();
 
         //Insert all settings into the cache
@@ -74,9 +67,12 @@ public class CacheMasterDefault : ICacheMaster
         //Get static data like intreval, sport, entry type , type
         //TODO: method to do this async needed.
 
-        await CacheConstants<Interval>(new DbRepoInterval(dbconn), KEY_INTERVALS);
-        await CacheConstants<Sport>(new DbRepoSport(dbconn), KEY_SPORTS);
-        await CacheConstants<TournamentType>(new DbRepoTournamentType(dbconn), KEY_TOURNAMENT_TYPES);
+        await CacheConstants<Interval>(new DbRepoInterval(_dbconn), KEY_INTERVALS);
+        await CacheConstants<Sport>(new DbRepoSport(_dbconn), KEY_SPORTS);
+        await CacheConstants<TournamentType>(new DbRepoTournamentType(_dbconn), KEY_TOURNAMENT_TYPES);
+        
+        (_dbconn as DbConnectionLocal)?.KeepAlive(false);
+        _dbconn.Close();
 
     }
 

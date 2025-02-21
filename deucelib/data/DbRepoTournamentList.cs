@@ -8,21 +8,21 @@ public class DbRepoTournamentList : DbRepoBase<Tournament>
     //------------------------------------
     //| Internals                         |
     //------------------------------------
-    private readonly DbConnection _dbconn;
     private readonly Organization? _organization;
 
     /// <summary>
     /// Construct with a db connection to the target db.
     /// </summary>
     /// <param name="dbconn">Database connection</param>
-    public DbRepoTournamentList(DbConnection dbconn,Organization organization)
+    public DbRepoTournamentList(DbConnection dbconn,Organization organization) : base(dbconn)
     {
-        _dbconn = dbconn;
         _organization = organization;
     }
 
     public override async Task<List<Tournament>> GetList(Filter filter)
     {
+        _dbconn.Open();
+
         List<Tournament> list = new();
         await _dbconn.CreateReaderStoreProcAsync("sp_get_tournament_list", ["p_organization"], [filter.ClubId],
         reader=>{
@@ -60,6 +60,8 @@ public class DbRepoTournamentList : DbRepoBase<Tournament>
             });
 
         });
+        
+        _dbconn.Close();
         
         return list;
     }

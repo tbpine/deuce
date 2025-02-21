@@ -10,9 +10,12 @@ using Microsoft.Extensions.Primitives;
 public class TournamentDetailPageModel : BasePageModelWizard
 {
     private readonly ILogger<TournamentDetailPageModel> _log;
+    private readonly ICacheMaster _cache;
+    private readonly DbRepoTournament _dbRepoTournament;
 
     public IEnumerable<Sport>? Sports { get; set; }
     public IEnumerable<TournamentType>? TournamentTypes { get; set; }
+
 
     [BindProperty]
     public int SelectedSportId { get; set; }
@@ -28,9 +31,11 @@ public class TournamentDetailPageModel : BasePageModelWizard
 
 
     public TournamentDetailPageModel(ILogger<TournamentDetailPageModel> log, IServiceProvider sp,
-    IConfiguration config, IHandlerNavItems hNavItems) : base(hNavItems, sp, config)
+    IConfiguration config, IHandlerNavItems hNavItems, ICacheMaster cacheMaster, DbRepoTournament dbrepoTour) : base(hNavItems, sp, config)
     {
         _log = log;
+        _cache = cacheMaster;
+        _dbRepoTournament = dbrepoTour;
     }
 
     public async Task<IActionResult> OnGet()
@@ -54,47 +59,37 @@ public class TournamentDetailPageModel : BasePageModelWizard
         //Save page properties to session
         //Todo: Move manual form values
 
-        using (var scope = _serviceProvider.CreateScope())
+        //Load the current tournament
+        //.Set the status for new tournament
+        Tournament? tournament = (_sessionProxy?.TournamentId ?? 0) > 0 ?
+            (await _dbRepoTournament.GetList(new Filter(){TournamentId = _sessionProxy?.TournamentId??0})).FirstOrDefault() : null;
+        if (tournament is null) tournament = new();
+
+        //Load the current tournament id
+        int currentTournamentId = _sessionProxy?.TournamentId ?? 0;
+        Organization org = new Organization() { Id = 1, Name = "testing" };
+
+        tournament.Id = currentTournamentId;
+        tournament.Label = EventLabel;
+        tournament.Sport = SelectedSportId;
+        tournament.Type = SelectedTourType;
+        tournament.Organization = org;
+        tournament.EntryType = EntryType;
+        //Load or not, if the id is zero , set it's status to new.
+        tournament.Status = currentTournamentId == 0 ? TournamentStatus.New : tournament.Status;
+
+        
+        //Save the tournament to db
+        await _dbRepoTournament.SetAsync(tournament);
+        //Save tournament id
+
+        if (_sessionProxy is not null) 
         {
-            DbConnection? dbconn = scope.ServiceProvider.GetService<DbConnection>();
-            if (dbconn is not null)
-            {
-                dbconn.ConnectionString = _config.GetConnectionString("deuce_local");
-                await dbconn?.OpenAsync()!;
-
-                //Load the current tournament
-                //.Set the status for new tournament
-                Tournament? tournament = (_sessionProxy?.TournamentId ?? 0) > 0 ?
-                 await GetCurrentTournament(dbconn) : null;
-                if (tournament is null) tournament = new();
-                
-                //Load the current tournament id
-                int currentTournamentId = _sessionProxy?.TournamentId??0;
-                Organization org = new Organization() { Id = 1, Name = "testing" };
-
-                tournament.Id = currentTournamentId;
-                tournament.Label = EventLabel;
-                tournament.Sport = SelectedSportId;
-                tournament.Type = SelectedTourType;
-                tournament.Organization = org;
-                tournament.EntryType = EntryType;
-                //Load or not, if the id is zero , set it's status to new.
-                tournament.Status  = currentTournamentId == 0 ? TournamentStatus.New : tournament.Status;
-
-                DbRepoTournament dbrepoTour = new DbRepoTournament(dbconn, org);
-                //Save the tournament to db
-                await dbrepoTour.SetAsync(tournament);
-                //Save tournament id
-
-                if (_sessionProxy is not null)  _sessionProxy.TournamentId =  tournament.Id;
-
-            }
-            await dbconn?.CloseAsync()!;
-
+            _sessionProxy.TournamentId = tournament.Id;
+            //Teams or Individuals
+            _sessionProxy.EntryType = EntryType;
         }
 
-        //Save to session
-        if (_sessionProxy is not null) _sessionProxy.EntryType = EntryType;
 
         if (EntryType == 1)
             return NextPage("/TournamentFormatTeams");
@@ -106,42 +101,40 @@ public class TournamentDetailPageModel : BasePageModelWizard
 
     private async Task LoadPage()
     {
+        //Load page options from the from the database
+        Sports = await _cache.GetList<Sport>(CacheMasterDefault.KEY_SPORTS);
+        TournamentTypes = await _cache.GetList<TournamentType>(CacheMasterDefault.KEY_TOURNAMENT_TYPES);
+
         //uri query parameters could contain
         //key "new" equaling 1 meaning
         //a new tournament is added.
 
         var queryParamNew = this.HttpContext.Request.Query.ContainsKey("new") ? this.HttpContext.Request.Query["new"] : StringValues.Empty;
-        
 
-        if ( !StringValues.Empty.Equals(queryParamNew) && queryParamNew.First() == "1" && _sessionProxy is not null)
+
+        if (!StringValues.Empty.Equals(queryParamNew) && queryParamNew.First() == "1" && _sessionProxy is not null)
         {
             //New tournament, specified by id equaling
             //zero.
             _sessionProxy.TournamentId = 0;
+            //Default values
+
+            SelectedSportId = 1;
+            SelectedTourType = 1;
+            EventLabel = "";
+            EntryType = 1;
+
+            return;
 
         }
-
-        var scope = _serviceProvider.CreateScope();
-
-        var dbconn = scope.ServiceProvider.GetService<DbConnection>();
-        dbconn!.ConnectionString = _config.GetConnectionString("deuce_local");
-        await dbconn!.OpenAsync();
-
-        //Load page options from the from the database
-        DbRepoSport dbRepoSport = new DbRepoSport(dbconn);
-        Sports = await dbRepoSport.GetList();
-
-        DbRepoTournamentType dbRepoTourType = new DbRepoTournamentType(dbconn);
-
-        TournamentTypes = await dbRepoTourType.GetList();
 
         // this.LoadFromSession();
         //Load from database
         //Set default vales;
 
-        Organization organization = new Organization() { Id = 1, Name = "testing" };
+        var listOfTours = await _dbRepoTournament.GetList(new Filter() { TournamentId = _sessionProxy?.TournamentId ?? 0 });
 
-        Tournament? currentTour = await this.GetCurrentTournament(dbconn);
+        Tournament? currentTour = listOfTours.FirstOrDefault();
         if (currentTour is not null)
         {
             SelectedSportId = currentTour.Sport;
@@ -149,15 +142,6 @@ public class TournamentDetailPageModel : BasePageModelWizard
             EventLabel = currentTour.Label ?? EventLabel;
             EntryType = currentTour.EntryType;
         }
-        else
-        {
-            SelectedSportId = 1;
-            SelectedTourType = 1;
-            EventLabel = "";
-            EntryType = 1;
-            //Default values
-        }
-        await dbconn!.CloseAsync();
 
 
     }
