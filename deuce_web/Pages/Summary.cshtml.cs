@@ -13,6 +13,8 @@ public class SummaryPageModel : BasePageModelAcc
    private readonly ILogger<SummaryPageModel> _log;
    public readonly ILookup _lookup;
    public readonly DisplayToHTML _displayToHTML;
+   public readonly DbRepoTournament _dbrepoTournament;
+   public readonly DbRepoTournamentDetail _dbrepoTournamentDetail;
    // For page values
    private Tournament? _tournament;
    private TournamentDetail? _tournamentDetail;
@@ -26,19 +28,35 @@ public class SummaryPageModel : BasePageModelAcc
    //Page values
 
    public SummaryPageModel(ILogger<SummaryPageModel> log, ISideMenuHandler handlerNavItems, IServiceProvider sp, IConfiguration config,
-    ITournamentGateway tgateway, SessionProxy sessionProxy, ILookup lookup, DisplayToHTML displayToHTML) : base(handlerNavItems, sp, config, tgateway, sessionProxy)
+    ITournamentGateway tgateway, SessionProxy sessionProxy, ILookup lookup, DisplayToHTML displayToHTML,
+    DbRepoTournament dbRepoTournament, DbRepoTournamentDetail dbRepoTournamentDetail) 
+    : base(handlerNavItems, sp, config, tgateway, sessionProxy)
 
    {
       _log = log;
       _lookup = lookup;
       _displayToHTML = displayToHTML;
+      _dbrepoTournament = dbRepoTournament;
+      _dbrepoTournamentDetail = dbRepoTournamentDetail;
    }
 
    public async Task<IActionResult> OnGet()
    {
-      await LoadPage();
+      try
+      {
+         await LoadPage();
+      }
+      catch(Exception)
+      {
+         
+      }
+      finally
+      {
+         
+      }
 
       return Page();
+
    }
 
    public IActionResult OnPost()
@@ -54,16 +72,6 @@ public class SummaryPageModel : BasePageModelAcc
       Organization myOrg = new() { Id = 1, Name = "myOrg" };
       //Load the current tourament
 
-      using var scope = _serviceProvider.CreateScope();
-      using var dbconn = scope.ServiceProvider.GetService<DbConnection>();
-      //Bad connection object
-      if (dbconn is null) return;
-      //Open connection
-      dbconn.ConnectionString = _config.GetConnectionString("deuce_local");
-      await dbconn.OpenAsync();
-
-      //Create repo to load tournament details
-      DbRepoTournament dbRepoTournament = new(dbconn, myOrg);
       //Filter to this tournament
       Filter filter = new Filter()
       {
@@ -71,14 +79,12 @@ public class SummaryPageModel : BasePageModelAcc
          ClubId = myOrg.Id
       };
 
-      var listOfTournament = await dbRepoTournament.GetList(filter);
+      var listOfTournament = await _dbrepoTournament.GetList(filter);
 
       //Load tournament details
-      DbRepoTournamentDetail dbRepoTournamentDetail = new(dbconn, myOrg);
-      var listOfTournamentDetails = await dbRepoTournamentDetail.GetList(filter);
+      var listOfTournamentDetails = await _dbrepoTournamentDetail.GetList(filter);
 
       //Set page values
-
       _tournament = listOfTournament.FirstOrDefault();
       _tournamentDetail = listOfTournamentDetails.FirstOrDefault();
 

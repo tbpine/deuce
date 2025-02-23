@@ -34,6 +34,11 @@ public class DbRepoTournament : DbRepoBase<Tournament>
 
         List<Tournament> list = new();
 
+        //Don't bother loading tournament is 
+        //no id
+
+        if (filter.TournamentId < 1) return list;
+
         await _dbconn.CreateReaderStoreProcAsync("sp_get_tournament", ["p_id"], [filter.TournamentId],
         reader =>
         {

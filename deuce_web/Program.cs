@@ -32,6 +32,10 @@ builder.Services.AddScoped<ISideMenuHandler, AccSideMenuHandler>();
 builder.Services.AddScoped<DbRepoTournament>();
 builder.Services.AddScoped<DbRepoTournamentFee>();
 builder.Services.AddScoped<DbRepoTournamentDetail>();
+builder.Services.AddScoped<DbRepoPlayer>();
+builder.Services.AddScoped<DbRepoRecordTeamPlayer>();
+builder.Services.AddScoped<DbRepoTeam>();
+builder.Services.AddScoped<DbRepoTournamentList>();
 
 //Repos
 

@@ -5,7 +5,9 @@ namespace deuce;
 public class DbRepoPlayer : DbRepoBase<Player>
 {
     
-    private readonly Organization? _organization;
+    private  Organization? _organization;
+
+    public Organization? Organization { get=>_organization; set=>_organization = value; }
 
     public DbRepoPlayer(DbConnection dbconn, params object[] references) : base(dbconn)
     {

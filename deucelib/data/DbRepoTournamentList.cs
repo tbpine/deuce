@@ -8,7 +8,9 @@ public class DbRepoTournamentList : DbRepoBase<Tournament>
     //------------------------------------
     //| Internals                         |
     //------------------------------------
-    private readonly Organization? _organization;
+    private  Organization? _organization;
+
+    public Organization Organization { set=>_organization = value; }
 
     /// <summary>
     /// Construct with a db connection to the target db.
@@ -17,6 +19,14 @@ public class DbRepoTournamentList : DbRepoBase<Tournament>
     public DbRepoTournamentList(DbConnection dbconn,Organization organization) : base(dbconn)
     {
         _organization = organization;
+    }
+
+    /// <summary>
+    /// Construct with a db connection to the target db.
+    /// </summary>
+    public DbRepoTournamentList(DbConnection dbconn) : base(dbconn)
+    {
+        _organization = null;
     }
 
     public override async Task<List<Tournament>> GetList(Filter filter)

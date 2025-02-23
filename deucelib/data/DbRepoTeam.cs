@@ -18,8 +18,7 @@ public class DbRepoTeam : DbRepoBase<Team>
     private record TeamPlayer(Player Player, int TeamId);
 
     public Organization? Organization { get; set; }
-    public Tournament? Tournament { get; set; }
-
+    public int TournamentId { get=>_tournamentId; set=>_tournamentId = value; }
 
     private int _tournamentId;
 

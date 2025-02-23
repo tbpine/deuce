@@ -9,6 +9,7 @@ using System.Data.Common;
 public class ScoringPageModel : BasePageModelAcc
 {
     private readonly ILogger<ScoringPageModel> _log;
+    private readonly DbRepoRecordTeamPlayer _deRepoRecordTeamPlayer;
 
     public string Title { get; set; } = "";
 
@@ -25,10 +26,11 @@ public class ScoringPageModel : BasePageModelAcc
 
 
     public ScoringPageModel(ILogger<ScoringPageModel> log, ISideMenuHandler handlerNavItems, IServiceProvider sp, IConfiguration config,
-    ITournamentGateway tgateway, SessionProxy sessionProxy)
+    ITournamentGateway tgateway, SessionProxy sessionProxy, DbRepoRecordTeamPlayer dbRepoRecordTeamPlayer)
     : base(handlerNavItems, sp, config, tgateway,sessionProxy)
     {
         _log = log;
+        _deRepoRecordTeamPlayer = dbRepoRecordTeamPlayer;
     }
 
     public async Task<IActionResult> OnGetAsync()
@@ -59,16 +61,8 @@ public class ScoringPageModel : BasePageModelAcc
 
         IGameMaker gm = new GameMakerTennis();
 
-        //Get teams for this tournament
-        using var scope = _serviceProvider.CreateScope();
-        await using var dbconn = scope.ServiceProvider.GetRequiredService<DbConnection>();
         
-        if (dbconn is  null)  return;
-        
-        dbconn.ConnectionString = _config.GetConnectionString("deuce_local");
-        await dbconn.OpenAsync();
-        DbRepoRecordTeamPlayer dbRepoTeamPlayer = new(dbconn);
-        var recordsTeamPlayers = await dbRepoTeamPlayer.GetList();
+        var recordsTeamPlayers = await _deRepoRecordTeamPlayer.GetList();
         //Extract teams and players
         TeamRepo teamRepo = new TeamRepo(recordsTeamPlayers);
         List<Team> listOfTeams = teamRepo.ExtractFromRecordTeamPlayer();

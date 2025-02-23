@@ -12,6 +12,7 @@ using Microsoft.VisualBasic;
 public class TournamentSchedulePageModel : BasePageModelWizard
 {
    private readonly ILogger<TournamentSchedulePageModel> _log;
+   private readonly DbRepoTournament _dbrepoTournament;
    private const string DateFormat = "dd/MM/yyyy";
 
    private List<SelectListItem> _selectInterval = new List<SelectListItem>()
@@ -34,28 +35,24 @@ public class TournamentSchedulePageModel : BasePageModelWizard
    public bool Validated { get; set; }
 
    public TournamentSchedulePageModel(ILogger<TournamentSchedulePageModel> log, IHandlerNavItems handlerNavItems,
-   IConfiguration cfg, IServiceProvider sp)
+   IConfiguration cfg, IServiceProvider sp, DbRepoTournament dbrepoTournament)
    : base(handlerNavItems, sp, cfg)
    {
       _log = log;
+      _dbrepoTournament = dbrepoTournament;
    }
 
    public async Task<ActionResult> OnGet()
    {
       Validated = false;
-      //Load tournament schedule here
-      var currentTour = await GetCurrentTournament(null);
-      if (currentTour is not null)
+
+      try
       {
-         Interval = currentTour.Interval.ToString();
-         StartDate = currentTour.Start.ToString(DateFormat);
+         await LoadPage();
       }
-
-      //Defaults
-
-
-      if (StartDate == DateTime.MinValue.ToString(DateFormat)) StartDate = DateTime.Now.ToString(DateFormat);
-      if (Interval == "0") Interval = "4";
+      catch (Exception)
+      { }
+      finally { }
 
       //Set page values
       return Page();
@@ -66,10 +63,11 @@ public class TournamentSchedulePageModel : BasePageModelWizard
       try
       {
          Validated = true;
-         
+
          //Check entries.
-         if (!ValidatePage()) {
-            return Page(); 
+         if (!ValidatePage())
+         {
+            return Page();
          }
 
          //Load the current tournament from the database
@@ -116,6 +114,28 @@ public class TournamentSchedulePageModel : BasePageModelWizard
    }
 
    /// <summary>
+   /// Load page values
+   /// </summary>
+   /// <returns>Nothing</returns>
+   private async Task LoadPage()
+   {
+      //Load tournament schedule here
+      var currentTour = (await _dbrepoTournament.GetList(new Filter(){ TournamentId = _sessionProxy?.TournamentId ??0 })).FirstOrDefault();
+      if (currentTour is not null)
+      {
+         Interval = currentTour.Interval.ToString();
+         StartDate = currentTour.Start.ToString(DateFormat);
+      }
+
+      //Defaults
+
+
+      if (StartDate == DateTime.MinValue.ToString(DateFormat)) StartDate = DateTime.Now.ToString(DateFormat);
+      if (Interval == "0") Interval = "4";
+
+   }
+
+   /// <summary>
    /// Check page values
    /// </summary>
    /// <returns>true if all values on the page are correct</returns>
@@ -127,7 +147,7 @@ public class TournamentSchedulePageModel : BasePageModelWizard
       {
          Interval = "";
          return false;
-      } 
+      }
 
       return true;
    }

@@ -8,6 +8,12 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 public class TournamentPlayersPageModel : BasePageModelWizard
 {
     private readonly ILogger<TournamentPlayersPageModel> _log;
+    private readonly DbRepoPlayer _dbRepoPlayer;
+    private readonly DbRepoTournamentDetail _dbRepoTournamentDetail;
+    private readonly DbRepoRecordTeamPlayer _dbRepoRecordTeamPlayer;
+    private readonly DbRepoTeam _dbRepoTeam;
+    private readonly DbRepoTournament _dbRepoTournament;
+
     private List<Team>? _teams;
     public string? JSONPlayers { get; set; }
 
@@ -22,10 +28,17 @@ public class TournamentPlayersPageModel : BasePageModelWizard
     public List<Team>? Teams { get => _teams; }
 
     public TournamentPlayersPageModel(ILogger<TournamentPlayersPageModel> log, IServiceProvider sp,
-    IConfiguration config, IHandlerNavItems handlerNavItems) : base(handlerNavItems, sp, config)
+    IConfiguration config, IHandlerNavItems handlerNavItems, DbRepoPlayer dbRepoPlayer,
+    DbRepoTournamentDetail dbRepoTournamentDetail, DbRepoRecordTeamPlayer dbRepoRecordTeamPlayer, DbRepoTeam dbRepoTeam,
+    DbRepoTournament dbRepoTournament) : base(handlerNavItems, sp, config)
     {
         _log = log;
         _teams = null;
+        _dbRepoPlayer = dbRepoPlayer;
+        _dbRepoTournamentDetail = dbRepoTournamentDetail;
+        _dbRepoRecordTeamPlayer = dbRepoRecordTeamPlayer;
+        _dbRepoTeam = dbRepoTeam;
+        _dbRepoTournament = dbRepoTournament;
     }
 
     public async Task<IActionResult> OnGet()
@@ -86,8 +99,8 @@ public class TournamentPlayersPageModel : BasePageModelWizard
                     //Check if they selected a registered player
                     int playerId = this.GetFormInt(kp.Key);
                     int idxPlayer = int.TryParse(playerIdx, out idxPlayer) ? idxPlayer : 0;
-                    int playerTeamId =  int.TryParse(strPlayerTeamId, out playerTeamId) ? playerTeamId : 0;
-                    
+                    int playerTeamId = int.TryParse(strPlayerTeamId, out playerTeamId) ? playerTeamId : 0;
+
                     if (playerId > 0)
                     {
                         Player player = new Player() { Id = playerId, Index = idxPlayer, TeamPlayerId = playerTeamId };
@@ -119,31 +132,29 @@ public class TournamentPlayersPageModel : BasePageModelWizard
             if (team.Players.Count() == 0) removeTeamList.Add(team);
 
         //Remove empty teams
-        foreach(Team rmTeam in removeTeamList) teams.Remove(rmTeam);
+        foreach (Team rmTeam in removeTeamList) teams.Remove(rmTeam);
 
         //Save teams to the database
-        var scope = _serviceProvider.CreateScope();
-        var dbconn = scope.ServiceProvider.GetRequiredService<DbConnection>();
-        if (dbconn is not null)
+        Organization thisOrg = new() { Id = _sessionProxy?.OrganizationId ?? 1 };
+
+        //Assign to repos
+
+        int currentTourId = _sessionProxy?.TournamentId ?? 0;
+
+        if (currentTourId > 0)
         {
-            dbconn.ConnectionString = _config.GetConnectionString("deuce_local");
-            await dbconn.OpenAsync();
-            Organization thisOrg = new() { Id = _sessionProxy?.OrganizationId ?? 1 };
-            int currentTourId = _sessionProxy?.TournamentId ?? 0;
+            //Assign references to the team dbrepo
+            _dbRepoTeam.Organization = thisOrg;
+            _dbRepoTeam.TournamentId = currentTourId;
 
-            if (currentTourId > 0)
+            foreach (Team iterTeam in teams)
             {
-
-                foreach (Team iterTeam in teams)
-                {
-                    //Saves player as well
-                    DbRepoTeam dbRepoTeam = new DbRepoTeam(dbconn, thisOrg, currentTourId);
-                    await dbRepoTeam.SetAsync(iterTeam);
-                }
+                //Save players as well
+                await _dbRepoTeam.SetAsync(iterTeam);
             }
-
-
         }
+
+
 
         return NextPage("");
     }
@@ -153,32 +164,25 @@ public class TournamentPlayersPageModel : BasePageModelWizard
         //Tournament format parameters
         int orgId = _sessionProxy?.OrganizationId ?? 1;
         EntryType = _sessionProxy?.EntryType ?? 1;
-
-        var scope = _serviceProvider.CreateScope();
-        var dbconn = scope.ServiceProvider.GetRequiredService<DbConnection>();
-        dbconn.ConnectionString = _config.GetConnectionString("deuce_local");
-
-
-
+        int currentTourId = _sessionProxy?.TournamentId ?? 0;
         try
         {
-            await dbconn.OpenAsync();
 
             //Select all players in a club
             Organization organization = new Organization() { Id = orgId };
             //Use a DB repo
-            DbRepoPlayer dbrpoPlayer = new DbRepoPlayer(dbconn, organization);
-            var orgPlayers = await dbrpoPlayer.GetList(new Filter() { ClubId = orgId });
+            _dbRepoPlayer.Organization = organization;
+            var orgPlayers = await _dbRepoPlayer.GetList(new Filter() { ClubId = orgId });
+            var currentTour = (await _dbRepoTournament.GetList(new Filter() { TournamentId =currentTourId })).FirstOrDefault();
 
             //Deflat saved teams
-            var currentTour = await GetCurrentTournament(dbconn);
             if (currentTour is not null)
             {
 
+
                 //Load tournament details
-                DbRepoTournamentDetail dbRepoTourDetail = new(dbconn, organization);
                 Filter filter = new() { ClubId = organization.Id, TournamentId = currentTour.Id };
-                var listTourDetail = await dbRepoTourDetail.GetList(filter);
+                var listTourDetail = await _dbRepoTournamentDetail.GetList(filter);
                 var tourDetail = listTourDetail.FirstOrDefault();
 
                 EntryType = currentTour.EntryType;
@@ -186,10 +190,9 @@ public class TournamentPlayersPageModel : BasePageModelWizard
                 TeamSize = tourDetail?.TeamSize ?? 1;
 
                 //Load teams
-                DbRepoRecordTeamPlayer dbRepoRecordTP = new DbRepoRecordTeamPlayer(dbconn);
                 Filter filterTeamPlayer = new Filter() { ClubId = organization.Id, TournamentId = currentTour.Id };
                 //Get the listing of players for the tournament.
-                List<RecordTeamPlayer> tourTeamPlayersRec = await dbRepoRecordTP.GetList(filterTeamPlayer);
+                List<RecordTeamPlayer> tourTeamPlayersRec = await _dbRepoRecordTeamPlayer.GetList(filterTeamPlayer);
                 //Create the team /player graph
                 TeamRepo teamRepo = new TeamRepo(tourTeamPlayersRec);
                 _teams = teamRepo.ExtractFromRecordTeamPlayer();
@@ -243,7 +246,7 @@ public class TournamentPlayersPageModel : BasePageModelWizard
                         if (j >= _teams?[i].Players.Count())
                             _teams?[i].AddPlayer(new Player() { Index = j });
                     }
-                        
+
                 }
             }
 
