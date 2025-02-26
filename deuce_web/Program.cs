@@ -36,6 +36,8 @@ builder.Services.AddScoped<DbRepoPlayer>();
 builder.Services.AddScoped<DbRepoRecordTeamPlayer>();
 builder.Services.AddScoped<DbRepoTeam>();
 builder.Services.AddScoped<DbRepoTournamentList>();
+builder.Services.AddScoped<DbRepoTournamentProps>();
+builder.Services.AddScoped<DbRepoVenue>();
 
 //Repos
 

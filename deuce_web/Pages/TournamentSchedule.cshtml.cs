@@ -13,6 +13,7 @@ public class TournamentSchedulePageModel : BasePageModelWizard
 {
    private readonly ILogger<TournamentSchedulePageModel> _log;
    private readonly DbRepoTournament _dbrepoTournament;
+   private readonly DbRepoTournamentProps _dbrepoTournamentProps;
    private const string DateFormat = "dd/MM/yyyy";
 
    private List<SelectListItem> _selectInterval = new List<SelectListItem>()
@@ -35,11 +36,12 @@ public class TournamentSchedulePageModel : BasePageModelWizard
    public bool Validated { get; set; }
 
    public TournamentSchedulePageModel(ILogger<TournamentSchedulePageModel> log, IHandlerNavItems handlerNavItems,
-   IConfiguration cfg, IServiceProvider sp, DbRepoTournament dbrepoTournament)
+   IConfiguration cfg, IServiceProvider sp, DbRepoTournament dbrepoTournament, DbRepoTournamentProps dbRepoTournamentProps)
    : base(handlerNavItems, sp, cfg)
    {
       _log = log;
       _dbrepoTournament = dbrepoTournament;
+      _dbrepoTournamentProps = dbRepoTournamentProps;
    }
 
    public async Task<ActionResult> OnGet()
@@ -88,17 +90,9 @@ public class TournamentSchedulePageModel : BasePageModelWizard
                Interval = int.Parse(Interval ?? "")
             };
 
-            var scope = _serviceProvider.CreateScope();
-            var dbconn = scope.ServiceProvider.GetService<DbConnection>();
-            if (dbconn is not null)
-            {
-               dbconn.ConnectionString = _config.GetConnectionString("deuce_local");
-               await dbconn.OpenAsync();
 
-               DbRepoTournamentProps dbRepo = new(dbconn);
-               //Save to the database.
-               await dbRepo.SetAsync(tmp);
-            }
+            //Save to the database.
+            await _dbrepoTournamentProps.SetAsync(tmp);
 
          }
 
@@ -126,9 +120,8 @@ public class TournamentSchedulePageModel : BasePageModelWizard
          Interval = currentTour.Interval.ToString();
          StartDate = currentTour.Start.ToString(DateFormat);
       }
-
+      
       //Defaults
-
 
       if (StartDate == DateTime.MinValue.ToString(DateFormat)) StartDate = DateTime.Now.ToString(DateFormat);
       if (Interval == "0") Interval = "4";

@@ -16,7 +16,7 @@ public class DbRepoTournamentDetail : DbRepoBase<TournamentDetail>
     /// Construct with a db connection to the target db.
     /// </summary>
     /// <param name="dbconn">Database connection</param>
-    public DbRepoTournamentDetail(DbConnection dbconn, Organization organization) : base(dbconn)
+    public DbRepoTournamentDetail(DbConnection dbconn) : base(dbconn)
     { 
     }
 

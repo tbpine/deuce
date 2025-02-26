@@ -25,7 +25,11 @@ class DbConnectionLocal : DbConnection
 
     public override string ConnectionString
     {
-        get => _connection.ConnectionString; set => _connection.ConnectionString = value ?? "";
+        get => _connection.ConnectionString;
+        set
+        {
+            _connection.ConnectionString = value ?? "";
+        }
     }
 
     public override string Database => _connection.Database;

@@ -9,8 +9,6 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 public class TournamentVenuePageModel : BasePageModelWizard
 {
    private readonly ILogger<TournamentVenuePageModel> _log;
-   private readonly DbRepoTournament _dbrepoTournament;
-   private readonly DbRepoTournamentDetail _dbrepoTournamentDetail;
    private readonly DbRepoVenue _dbRepoVenue;
 
 
@@ -39,13 +37,11 @@ public class TournamentVenuePageModel : BasePageModelWizard
    public List<SelectListItem> Countries { get => _countries; }
 
    public TournamentVenuePageModel(ILogger<TournamentVenuePageModel> log, IHandlerNavItems handlerNavItems,
-   IConfiguration cfg, IServiceProvider sp, DbRepoTournament dbrepoTournament, DbRepoTournamentDetail dbrepoTournamentDetail, DbRepoVenue dbrepoVenue)
+   IConfiguration cfg, IServiceProvider sp, DbRepoVenue dbrepoVenue)
    : base(handlerNavItems, sp, cfg)
    {
       _log = log;
-      _dbrepoTournament = dbrepoTournament;
-      _dbrepoTournamentDetail = dbrepoTournamentDetail;
-      _dbRepoVenue = dbrepoVenue;      
+      _dbRepoVenue = dbrepoVenue;
    }
 
    public async Task<IActionResult> OnGet()
@@ -53,7 +49,7 @@ public class TournamentVenuePageModel : BasePageModelWizard
       try
       {
          Validated = false;
-            
+
          return await LoadPage();
       }
       catch (Exception ex)
@@ -63,11 +59,11 @@ public class TournamentVenuePageModel : BasePageModelWizard
       return Page();
    }
 
-   public async  Task<IActionResult> OnPost()
+   public async Task<IActionResult> OnPost()
    {
       //Load Page values
       await LoadPage();
-      
+
       //Page validation
       Validated = true;
       if (!ValidatePage()) return Page();
@@ -94,17 +90,8 @@ public class TournamentVenuePageModel : BasePageModelWizard
       //Save venue details using 
       // a db repo
       //Save teams to the database
-      var scope = _serviceProvider.CreateScope();
-      var dbconn = scope.ServiceProvider.GetRequiredService<DbConnection>();
-      if (dbconn is not null)
-      {
-         dbconn.ConnectionString = _config.GetConnectionString("deuce_local");
-         await dbconn.OpenAsync();
 
-         DbRepoVenue repoVenue = new DbRepoVenue(dbconn);
-         repoVenue.Set(venue);
-         dbconn.Close();
-      }
+      _dbRepoVenue.Set(venue);
 
       return NextPage("");
 
@@ -118,7 +105,7 @@ public class TournamentVenuePageModel : BasePageModelWizard
    {
       var firstOption = new SelectListItem("", "");
       firstOption.Selected = true;
-      
+
       _countries.Add(firstOption);
       _countries.Add(new SelectListItem("Australia", "aus"));
       _countries.Add(new SelectListItem("US", "us"));
@@ -127,36 +114,28 @@ public class TournamentVenuePageModel : BasePageModelWizard
 
       //Load the venue where this tournament is
       //to be held.
-      var scope = _serviceProvider.CreateScope();
-      var dbconn = scope.ServiceProvider.GetRequiredService<DbConnection>();
-      if (dbconn is not null)
+
+      Filter filter = new Filter()
       {
- 
-         Filter filter = new Filter()
-         {
-            TournamentId = _sessionProxy?.TournamentId ?? 0,
-            ClubId = 1
-         };
+         TournamentId = _sessionProxy?.TournamentId ?? 0,
+         ClubId = 1
+      };
 
-         var listOfVenues = await _dbRepoVenue.GetList(filter);
-         dbconn.Close();
-         
-         //Set values
-         if (listOfVenues.Count >0)
-         {
-            TournamentVenue loadedVenue = listOfVenues[0];
-            //Set binded properties that will
-            //be displayed on the page.
-            Street = loadedVenue.Street;
-            Suburb = loadedVenue.Suburb;
-            State = loadedVenue.State;
-            PostCode = loadedVenue.PostCode.ToString();
-            Country = loadedVenue.Country;
+      var listOfVenues = await _dbRepoVenue.GetList(filter);
 
-         }
+      //Set values
+      if (listOfVenues.Count > 0)
+      {
+         TournamentVenue loadedVenue = listOfVenues[0];
+         //Set binded properties that will
+         //be displayed on the page.
+         Street = loadedVenue.Street;
+         Suburb = loadedVenue.Suburb;
+         State = loadedVenue.State;
+         PostCode = loadedVenue.PostCode.ToString();
+         Country = loadedVenue.Country;
+
       }
-
-
 
       return Page();
    }
@@ -169,7 +148,7 @@ public class TournamentVenuePageModel : BasePageModelWizard
    private bool ValidatePage()
    {
       //Check that the  post code is is valid
-      int iPostCode = int.TryParse(PostCode?.Trim()??"", out iPostCode) ? iPostCode : 0;
+      int iPostCode = int.TryParse(PostCode?.Trim() ?? "", out iPostCode) ? iPostCode : 0;
       if (iPostCode == 0)
       {
          PostCode = "";

@@ -36,7 +36,7 @@ public class TournamentRepo
         tourDetail.NoSingles = _tournament.Format?.NoSingles??1;
         tourDetail.NoEntries = (_tournament.Teams?.Count??2) * _tournament.TeamSize;
 
-        DbRepoTournamentDetail dbRepoTourDetail = new(_dbconn, _organization);
+        DbRepoTournamentDetail dbRepoTourDetail = new(_dbconn);
         await dbRepoTourDetail.SetAsync(tourDetail);
 
         //players , permutation and round, and tournament
