@@ -67,8 +67,11 @@ public class ScoringPageModel : BasePageModelAcc
         TeamRepo teamRepo = new TeamRepo(recordsTeamPlayers);
         List<Team> listOfTeams = teamRepo.ExtractFromRecordTeamPlayer();
 
-        //Action
-        //Assert
+        //TODO: This is incorrect.
+        //The schedule should be built from
+        //rows of the match and match_player tables
+        //respectively.
+
         FactorySchedulers fac = new();
         IScheduler matchMaker = fac.Create(_tournament, gm);
         _schedule = matchMaker.Run(listOfTeams);
