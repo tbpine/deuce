@@ -1,6 +1,7 @@
 using System.Data.Common;
 using System.Reflection;
 using System.Text;
+using System.Threading.Tasks;
 using deuce;
 using deuce.ext;
 using Microsoft.AspNetCore.Mvc;
@@ -22,7 +23,7 @@ public class SummaryPageModel : BasePageModelAcc
    public Tournament? Tournament { get => _tournament; }
    public TournamentDetail? TournamentDetail { get => _tournamentDetail; }
 
-
+   public string? Error { get; set; }
 
 
    //Page values
@@ -59,9 +60,36 @@ public class SummaryPageModel : BasePageModelAcc
 
    }
 
-   public IActionResult OnPost()
+   public async Task<IActionResult> OnPost()
    {
+      //Check which action was posted.
+      string? strAction = Request.Form["action"];
 
+      //Case insensitive check for action taken
+      if (String.Compare(strAction??"", "start", true)== 0)
+      {
+         //Create matches, permuations and rounds.
+         if (_tourGatway is not null) 
+         {
+            //Make the schedule for the tournament.
+            //It's saved to the database
+            var actionResult = await _tourGatway.StartTournament();
+            //Go back to the tournaments listing
+            if (actionResult.Status == ResultStatus.Ok)
+               return Redirect(this.HttpContext.Request.PathBase + "/Tournaments");
+            else
+            {
+               //Could not create shedule.
+               //Display error.
+               Error = actionResult.Message;
+            }
+         }
+          
+      }
+      else if (String.Compare(strAction??"", "score", true)== 0)
+      {
+         //Goto the scores screen
+      }
       return Page();
 
    }

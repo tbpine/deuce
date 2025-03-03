@@ -24,6 +24,12 @@
           string htmlTour = (Model.Tournament is not null) ? await Model._displayToHTML.ExtractDisplayProperty(Model.Tournament) : "";
           string htmlTourDetails = (Model.TournamentDetail is not null) ? await Model._displayToHTML.ExtractDisplayProperty(Model.TournamentDetail) : "";
 
+          //Show hide actions for this tournament
+          //depending on it's state.
+          string classStartVis = (Model.Tournament?.Status??TournamentStatus.New) == TournamentStatus.New ? "visible"  : "invisible";
+          string classErrorVis = String.IsNullOrEmpty(Model.Error) ? "invisible"  : "visible";
+
+
         }
 
         @Html.Raw(htmlTour)
@@ -32,11 +38,13 @@
       </tbody>
     </table>
 
-    <form class="needs-validation" novalidate id="page_form" action="~/Summmary" method="POST">
-      <a class="btn btn-primary">Start</a>
-      <a class="btn btn-primary">Edit</a>
+    <form class="needs-validation" novalidate id="page_form" action="~/Summary" method="POST">
+      <a class="btn btn-primary @classStartVis" onclick="submitWithAction('start')">Start</a>
+      <a class="btn btn-primary" onclick="submitWithAction('scores')">Edit</a>
       <input id="action" name="action" type="hidden" value="start" />
     </form>
+    <div class="alert alert-primary @classErrorVis" role="alert">@Model.Error</div>
+
   </div>
 
 </div>

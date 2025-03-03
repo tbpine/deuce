@@ -30,11 +30,11 @@ public class TournamentRepo
         //Save details ?
         TournamentDetail tourDetail = new();
         tourDetail.TournamentId = _tournament.Id;
-        tourDetail.Sets = _tournament.Format?.NoSets??1;
+        tourDetail.Sets = _tournament.Format?.NoSets ?? 1;
         tourDetail.TeamSize = _tournament.TeamSize;
-        tourDetail.NoDoubles = _tournament.Format?.NoDoubles??1;
-        tourDetail.NoSingles = _tournament.Format?.NoSingles??1;
-        tourDetail.NoEntries = (_tournament.Teams?.Count??2) * _tournament.TeamSize;
+        tourDetail.NoDoubles = _tournament.Format?.NoDoubles ?? 1;
+        tourDetail.NoSingles = _tournament.Format?.NoSingles ?? 1;
+        tourDetail.NoEntries = (_tournament.Teams?.Count ?? 2) * _tournament.TeamSize;
 
         DbRepoTournamentDetail dbRepoTourDetail = new(_dbconn);
         await dbRepoTourDetail.SetAsync(tourDetail);
@@ -45,6 +45,32 @@ public class TournamentRepo
         //Sync Teams
         var dbRepoTeam = new DbRepoTeam(_dbconn, _organization, _tournament.Id);
         await dbRepoTeam.Sync(_tournament.Teams ?? new List<Team>());
+
+        //Save matches
+        var dbrepo = new DbRepoMatch(_dbconn);
+
+        for (int i = 0; i < _tournament.Schedule!.NoRounds; i++)
+        {
+            Round round = _tournament.Schedule.GetRoundAtIndex(i);
+            foreach (Permutation p in round.Permutations)
+            {
+                foreach (Match match in p.Matches)
+                {
+                    if (dbrepo is not null)
+                        await dbrepo.SetAsync(match);
+                }
+            }
+        }
+
+        return true;
+    }
+
+    /// <summary>
+    /// Only save the schedule for a tournament
+    /// </summary>
+    /// <returns></returns>
+    public async Task<bool> SaveSchedule()
+    {
 
         //Save matches
         var dbrepo = new DbRepoMatch(_dbconn);

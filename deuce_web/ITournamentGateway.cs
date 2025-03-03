@@ -7,4 +7,5 @@ using deuce;
 public interface ITournamentGateway
 {
      Task<Tournament?> GetCurrentTournament();
+     Task<ResultTournamentAction> StartTournament();
 }

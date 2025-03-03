@@ -38,6 +38,8 @@ builder.Services.AddScoped<DbRepoTeam>();
 builder.Services.AddScoped<DbRepoTournamentList>();
 builder.Services.AddScoped<DbRepoTournamentProps>();
 builder.Services.AddScoped<DbRepoVenue>();
+builder.Services.AddScoped<DbRepoTournamentStatus>();
+builder.Services.AddScoped<ITournamentGateway, DBTournamentGateway>();
 
 //Repos
 
@@ -45,7 +47,6 @@ builder.Services.AddScoped<DbRepoVenue>();
 //Singletons
 builder.Services.AddSingleton<IFormValidator, FormValidator>();
 builder.Services.AddSingleton<SessionProxy>();
-builder.Services.AddSingleton<ITournamentGateway, DBTournamentGateway>();
 builder.Services.AddSingleton<IMemoryCache, MemoryCache>();
 builder.Services.AddSingleton<ICacheMaster, CacheMasterDefault>();
 builder.Services.AddSingleton<ILookup, LookupCache>();
