@@ -37,9 +37,6 @@ public class TournamentFormatTeamsPageModel : BasePageModelWizard
     public int NoDoubles { get; set; }
 
     [BindProperty]
-    public int NoEntries { get; set; }
-
-    [BindProperty]
     public int CustomGames { get; set; }
 
     [BindProperty]
@@ -130,7 +127,6 @@ public class TournamentFormatTeamsPageModel : BasePageModelWizard
             if (tourDetail is not null)
             {
                 //Set page values
-                NoEntries = tourDetail.NoEntries;
                 Games = tourDetail.Games;
                 CustomGames = tourDetail.CustomGames;
                 Sets = tourDetail.Sets;
@@ -174,7 +170,6 @@ public class TournamentFormatTeamsPageModel : BasePageModelWizard
             TournamentDetail tourDetail = new()
             {
                 TournamentId = currentTournamentId,
-                NoEntries = NoEntries,
                 Sets = Sets,
                 Games = Games,
                 CustomGames = CustomGames,
@@ -194,11 +189,6 @@ public class TournamentFormatTeamsPageModel : BasePageModelWizard
 
     private bool ValidateForm(ref string err)
     {
-        if (NoEntries < 2)
-        {
-            err = "Total players for this tournament must be greater than 2 (and a valid number) !";
-            return false;
-        }
 
         if (TeamSize < 1)
         {

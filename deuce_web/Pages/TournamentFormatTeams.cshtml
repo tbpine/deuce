@@ -1,82 +1,78 @@
 @page
 @model TournamentFormatTeamsPageModel
 @{
-    Layout="_LayoutWizard";
+  Layout = "_LayoutWizard";
 }
-<style> 
- .zero-height { height: 0; overflow: hidden; }
+<style>
+  .zero-height {
+    height: 0;
+    overflow: hidden;
+  }
 </style>
-   <!-- Page content -->
+<!-- Page content -->
 
 <form id="page_form" class="col-lg-9 col-xl-8" asp-action="~/TournamentFormatTeams" method="post">
-    <!-- Property location inputs -->
-      <h1 class="h2 pb-1 pb-lg-2">@Model.Title</h1>
-      <div class="row row-cols-2 row-cols-sm-2 g-3 g-sm-4 pb-3 pb-sm-4 mb-xl-2">
-        <div class="col">
-          <label class="form-label" asp-for="NoEntries">Number of teams *</label>
-          <input class="form-control form-control-lg" asp-for="NoEntries" placeholder="2" required/>
-        </div>
-        <div class="col">
-          <label class="form-label" asp-for="Games">Games per set *</label>
-          <select class="form-select form-select-lg" asp-for="Games" asp-items="Model.SelectGamesPerSet"  onchange="showHideElement('Games','fixed_game_2','99')">
-          </select>
-        </div>
-        <div class="col invisible zero-height" id="">
-        </div>
-        <div class="col invisible zero-height" id="fixed_game_2">
-          <label class="form-label" asp-for="CustomGames">Specify number of games *</label>
-          <input class="form-control form-control-lg" asp-for="CustomGames" placeholder="2" />
-        </div>
-      </div>
+  <!-- Property location inputs -->
+  <h1 class="h2 pb-1 pb-lg-2">@Model.Title</h1>
+  <div class="row row-cols-2 row-cols-sm-2 g-3 g-sm-2 pb-3 pb-sm-4 mb-xl-2">
+    <div class="col">
+      <label class="form-label" asp-for="TeamSize">Team Size *</label>
+      <select class="form-select form-select-lg" onchange="showHideElement('TeamSize','team_size_cont','99')"
+        asp-for="TeamSize" asp-items="Model.SelectTeamSize">
+      </select>
+    </div>
+    <div class="col">
+      <label class="form-label" asp-for="Games">Games per set *</label>
+      <select class="form-select form-select-lg" asp-for="Games" asp-items="Model.SelectGamesPerSet"
+        onchange="showHideElement('Games','fixed_game_2','99')" >
+      </select>
+    </div>
+    <div class="col invisible zero-height" id="team_size_cont">
+      <label class="form-label" asp-for="CustomTeamSize">Specify team Size *</label>
+      <input class="form-control form-control-lg" asp-for="CustomTeamSize" placeholder="2" />
+    </div>
+    <div class="col invisible zero-height" id="fixed_game_2">
+      <label class="form-label" asp-for="CustomGames">Specify number of games *</label>
+      <input class="form-control form-control-lg" asp-for="CustomGames" placeholder="2" />
+    </div>
+  </div>
 
-      <div class="row row-cols-2 row-cols-sm-2 g-3 g-sm-4 pb-3 pb-sm-4 mb-xl-2">
-        <div class="col">
-          <label class="form-label" asp-for="TeamSize">Team Size *</label>
-            <select class="form-select form-select-lg"   onchange="showHideElement('TeamSize','team_size_cont','99')"
-            asp-for="TeamSize" asp-items="Model.SelectTeamSize">
-          </select>
-        </div>
-        <div class="col">
-          <label class="form-label" asp-for="Sets">Sets *</label>
-          <select class="form-select form-select-lg"  id="Sets" asp-for="Sets"  asp-items="Model.SelectSets">
-          </select>
-        </div>
-        <div>
-          <div class="col invisible zero-height" id="team_size_cont">
-            <label class="form-label" asp-for="CustomTeamSize">Specify team Size *</label>
-            <input class="form-control form-control-lg" asp-for="CustomTeamSize" placeholder="2" />
-          </div>
-          <div class="col invisible zero-height">
-          </div>
-        </div>
-      </div>
-      <div class="row row-cols-1 row-cols-sm-2 g-3 g-sm-4 pb-3 pb-sm-4 mb-xl-2">
-        <div class="col">
-          <label class="form-label" asp-for="NoSingles">No Singles *</label>
-          <select class="form-select form-select-lg" asp-for="NoSingles" onchange="showHideElement('NoSingles','no_singles_cont','99')"
-          asp-for="NoSingles" asp-items="Model.SelectNoGames">
-          </select>
-        </div>
-        <div class="col">
-          <label for="NoDoubles" class="form-label">No Doubles *</label>
-          <select class="form-select form-select-lg"  onchange="showHideElement('NoDoubles','no_doubles_cont','99')"
-          asp-for="NoDoubles" asp-items="Model.SelectNoGames">
-          </select>
-        </div>
-        <div class="col invisible zero-height" id="no_singles_cont">
-            <label class="form-label" asp-for="CustomSingles">Specify number of singles *</label>
-            <input class="form-control form-control-lg" asp-for="CustomSingles"  placeholder="2" />
-        </div>
+  <div class="row row-cols-2 row-cols-sm-2 g-3 g-sm-2 pb-3 pb-sm-4 mb-xl-2">
+    <div class="col">
+      <label class="form-label" asp-for="Sets">Sets *</label>
+      <select class="form-select form-select-lg" id="Sets" asp-for="Sets" asp-items="Model.SelectSets">
+      </select>
+    </div>
 
-        <div class="col invisible zero-height" id="no_doubles_cont">
-            <label class="form-label" asp-for="CustomDoubles">Specify number of doubles *</label>
-            <input class="form-control form-control-lg" asp-for="CustomDoubles"  placeholder="2" />
-        </div>
-      </div>
-      @{
-        string showError = String.IsNullOrEmpty(Model.Error)? "invisible" : "visible";
-      }
-      <div><span class="text-bg-danger p-3 @showError">**&nbsp;@Model.Error</span></div>
+  </div>
+  <div class="row row-cols-1 row-cols-sm-2 g-3 g-sm-4 pb-3 pb-sm-4 mb-xl-2">
+    <div class="col">
+      <label class="form-label" asp-for="NoSingles">No Singles *</label>
+      <select class="form-select form-select-lg" asp-for="NoSingles"
+        onchange="showHideElement('NoSingles','no_singles_cont','99')" asp-for="NoSingles"
+        asp-items="Model.SelectNoGames">
+      </select>
+    </div>
+    <div class="col">
+      <label for="NoDoubles" class="form-label">No Doubles *</label>
+      <select class="form-select form-select-lg" onchange="showHideElement('NoDoubles','no_doubles_cont','99')"
+        asp-for="NoDoubles" asp-items="Model.SelectNoGames">
+      </select>
+    </div>
+    <div class="col invisible zero-height" id="no_singles_cont">
+      <label class="form-label" asp-for="CustomSingles">Specify number of singles *</label>
+      <input class="form-control form-control-lg" asp-for="CustomSingles" placeholder="2" />
+    </div>
+
+    <div class="col invisible zero-height" id="no_doubles_cont">
+      <label class="form-label" asp-for="CustomDoubles">Specify number of doubles *</label>
+      <input class="form-control form-control-lg" asp-for="CustomDoubles" placeholder="2" />
+    </div>
+  </div>
+  @{
+    string showError = String.IsNullOrEmpty(Model.Error) ? "invisible" : "visible";
+  }
+  <div><span class="text-bg-danger p-3 @showError">**&nbsp;@Model.Error</span></div>
 </form>
 
 <script src="~/js/TournamentFormatTeam.js"> </script>

@@ -26,7 +26,8 @@
 
           //Show hide actions for this tournament
           //depending on it's state.
-          string classStartVis = (Model.Tournament?.Status??TournamentStatus.New) == TournamentStatus.New ? "visible"  : "invisible";
+          string classStartVis = (Model.Tournament?.Status??TournamentStatus.New) == TournamentStatus.New
+           && String.IsNullOrEmpty(Model.Error) ? "visible"  : "invisible";
           string classErrorVis = String.IsNullOrEmpty(Model.Error) ? "invisible"  : "visible";
 
 
@@ -39,11 +40,12 @@
     </table>
 
     <form class="needs-validation" novalidate id="page_form" action="~/Summary" method="POST">
-      <a class="btn btn-primary @classStartVis" onclick="submitWithAction('start')">Start</a>
-      <a class="btn btn-primary" onclick="submitWithAction('scores')">Edit</a>
       <input id="action" name="action" type="hidden" value="start" />
+      <div class="alert alert-primary @classErrorVis mt-2" role="alert">@Model.Error</div>
     </form>
-    <div class="alert alert-primary @classErrorVis" role="alert">@Model.Error</div>
+      <a class="btn btn-primary @classStartVis mt-2" onclick="submitWithAction('start')">Start</a>
+      <a class="btn btn-primary mt-2" onclick="submitWithAction('edit')">Edit</a>
+      <a class="btn btn-primary mt-2" onclick="submitWithAction('scores')">Scores</a>
 
   </div>
 

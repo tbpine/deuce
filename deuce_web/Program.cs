@@ -39,6 +39,7 @@ builder.Services.AddScoped<DbRepoTournamentList>();
 builder.Services.AddScoped<DbRepoTournamentProps>();
 builder.Services.AddScoped<DbRepoVenue>();
 builder.Services.AddScoped<DbRepoTournamentStatus>();
+builder.Services.AddScoped<DbRepoTournamentValidation>();
 builder.Services.AddScoped<ITournamentGateway, DBTournamentGateway>();
 
 //Repos

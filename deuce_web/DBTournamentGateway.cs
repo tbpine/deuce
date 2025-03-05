@@ -1,6 +1,8 @@
 using deuce;
 using System.Data.Common;
 using System.Diagnostics;
+using System.Formats.Tar;
+using System.Threading.Tasks;
 /// <summary>
 /// Load tournament objects from the database
 /// </summary>
@@ -11,6 +13,7 @@ public class DBTournamentGateway : ITournamentGateway
     private readonly DbRepoTournament _dbRepoTournament;
     private readonly DbRepoTournamentDetail _dbRepoTournamentDetail;
     private readonly DbRepoTournamentStatus _dbRepoTournamentStatus;
+    private readonly DbRepoRecordTeamPlayer _dbRepoRecordTeamPlayer;
     private readonly ICacheMaster _cache;
     private readonly DbConnection _dbconn;
 
@@ -18,7 +21,7 @@ public class DBTournamentGateway : ITournamentGateway
 
     public DBTournamentGateway(SessionProxy sessionProxy, DbRepoTournament dbRepoTournament,
     DbRepoTournamentDetail dbRepoTournamentDetail, ICacheMaster cache, DbConnection dbconn,
-    DbRepoTournamentStatus dbRepoTournamentStatus)
+    DbRepoTournamentStatus dbRepoTournamentStatus, DbRepoRecordTeamPlayer dbRepoRecordTeamPlayer)
     {
         _sessionProxy = sessionProxy;
         _dbRepoTournament = dbRepoTournament;
@@ -26,6 +29,7 @@ public class DBTournamentGateway : ITournamentGateway
         _cache = cache;
         _dbconn = dbconn;
         _dbRepoTournamentStatus = dbRepoTournamentStatus;
+        _dbRepoRecordTeamPlayer = dbRepoRecordTeamPlayer;
     }
 
     /// <summary>
@@ -109,8 +113,8 @@ public class DBTournamentGateway : ITournamentGateway
         Team bye = new Team(-1, "BYE");
         for (int i = 0; i < currentTour.TeamSize; i++) bye.AddPlayer(new Player() { Id = -1, First = "BYE", Last = "", Index = i, Ranking = 0d });
 
-        
-        if ((listOfTeams?.Count??0 % 2) > 0) {  listOfTeams?.Add(bye); }
+
+        if ((listOfTeams?.Count ?? 0 % 2) > 0) { listOfTeams?.Add(bye); }
 
         //------------------------------
         //| Create schedule.
@@ -144,5 +148,50 @@ public class DBTournamentGateway : ITournamentGateway
         //Expected error occured
 
         return new(ResultStatus.Error, "Unknown error.");
+    }
+
+    /// <summary>
+    /// Check if the current tournament is valid i.e
+    /// has enough players and format is defined correctly
+    /// </summary>
+    /// <returns>ResultTournamentAction instance of the result</returns>
+    public async Task<ResultTournamentAction> ValidateCurrentTournament()
+    {
+        //Get the current tournament
+        Filter filter = new() { TournamentId = _sessionProxy?.TournamentId??0};
+
+        var theCurrentTour = (await _dbRepoTournament.GetList(filter)).FirstOrDefault();
+
+        if (theCurrentTour is null) return new (ResultStatus.Error, "There was an error retrieving your tournament.");
+        //Use the dbrepo to get the rows of players 
+        var listOfPayers= await _dbRepoRecordTeamPlayer.GetList(filter);
+
+        //Check how many players there are
+        if (listOfPayers.Count < 2) return new (ResultStatus.Error, "Not enough players for this tournament!");
+                
+        //For the sport, validate that the format
+        //is correct
+
+        var listOfSports = await _cache.GetList<Sport>(CacheMasterDefault.KEY_SPORTS);
+        if (listOfSports is null)  return new (ResultStatus.Error, "Unknown error.");
+
+        var selectedSport = listOfSports.Find(e=>e.Id == theCurrentTour.Sport);
+
+        if (String.Compare(selectedSport?.Key??"", "tennis") == 0)
+        {
+            //Tennis format check 
+            //Load details
+            var tourDetails = (await _dbRepoTournamentDetail.GetList(filter)).FirstOrDefault();
+            if ( (tourDetails?.NoSingles??0) == 0 && (tourDetails?.NoDoubles??0) == 0  ) 
+                return new(ResultStatus.Error, "You must specify how many single or double matches are played.");
+            if ( theCurrentTour.EntryType == (int)EntryType.Team && (tourDetails?.TeamSize??0) == 0)
+                return new(ResultStatus.Error, "Team size not specified");
+
+        }
+
+        
+
+        return new(ResultStatus.Ok, "");
+
     }
 }

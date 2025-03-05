@@ -62,8 +62,8 @@ public class BasePageModelWizard : PageModel
             if (_backPage.Contains("TournamentFormat"))
             {
                 //case
-                int entryType = _sessionProxy?.EntryType??1;
-                _backPage = HttpContext.Request.PathBase + (entryType == 1 ? "/TournamentFormatTeams" : "/TournamentFormatPlayer");
+                int entryType = _sessionProxy?.EntryType??(int)EntryType.Team;
+                _backPage = HttpContext.Request.PathBase + (entryType == (int)EntryType.Team ? "/TournamentFormatTeams" : "/TournamentFormatPlayer");
             }
         }
 

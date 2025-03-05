@@ -8,4 +8,5 @@ public interface ITournamentGateway
 {
      Task<Tournament?> GetCurrentTournament();
      Task<ResultTournamentAction> StartTournament();
+     Task<ResultTournamentAction> ValidateCurrentTournament();
 }

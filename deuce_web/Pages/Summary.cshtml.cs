@@ -30,7 +30,7 @@ public class SummaryPageModel : BasePageModelAcc
 
    public SummaryPageModel(ILogger<SummaryPageModel> log, ISideMenuHandler handlerNavItems, IServiceProvider sp, IConfiguration config,
     ITournamentGateway tgateway, SessionProxy sessionProxy, ILookup lookup, DisplayToHTML displayToHTML,
-    DbRepoTournament dbRepoTournament, DbRepoTournamentDetail dbRepoTournamentDetail) 
+    DbRepoTournament dbRepoTournament, DbRepoTournamentDetail dbRepoTournamentDetail)
     : base(handlerNavItems, sp, config, tgateway, sessionProxy)
 
    {
@@ -46,14 +46,24 @@ public class SummaryPageModel : BasePageModelAcc
       try
       {
          await LoadPage();
+
+         //Validate tournament
+         //Show /Hide the start button 
+         ResultTournamentAction resultVal = new();
+         if (_tourGatway is not null) resultVal = await _tourGatway.ValidateCurrentTournament();
+
+         if ((resultVal?.Status ?? ResultStatus.Error) == ResultStatus.Error)
+            Error = resultVal?.Message ?? "";
+
+
       }
-      catch(Exception)
+      catch (Exception)
       {
-         
+
       }
       finally
       {
-         
+
       }
 
       return Page();
@@ -62,14 +72,16 @@ public class SummaryPageModel : BasePageModelAcc
 
    public async Task<IActionResult> OnPost()
    {
+      //Load page values
+      await LoadPage();
       //Check which action was posted.
       string? strAction = Request.Form["action"];
 
       //Case insensitive check for action taken
-      if (String.Compare(strAction??"", "start", true)== 0)
+      if (String.Compare(strAction ?? "", "start", true) == 0)
       {
          //Create matches, permuations and rounds.
-         if (_tourGatway is not null) 
+         if (_tourGatway is not null)
          {
             //Make the schedule for the tournament.
             //It's saved to the database
@@ -84,11 +96,18 @@ public class SummaryPageModel : BasePageModelAcc
                Error = actionResult.Message;
             }
          }
-          
+
       }
-      else if (String.Compare(strAction??"", "score", true)== 0)
+      else if (String.Compare(strAction ?? "", "edit", true) == 0)
       {
-         //Goto the scores screen
+         //Goto the edit screen screen
+         return Redirect(this.HttpContext.Request.PathBase + "/TournamentDetail");
+
+      }
+      else if (String.Compare(strAction ?? "", "scores", true) == 0)
+      {
+         //Goto the edit screen screen
+         return Redirect(this.HttpContext.Request.PathBase + "/Scoring");
       }
       return Page();
 
@@ -118,5 +137,5 @@ public class SummaryPageModel : BasePageModelAcc
 
    }
 
-   
+
 }

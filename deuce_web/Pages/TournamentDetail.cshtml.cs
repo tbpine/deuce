@@ -1,6 +1,9 @@
 using System.Data.Common;
 using deuce;
 using deuce_web.ext;
+using iText.Bouncycastle.Crypto;
+using iText.StyledXmlParser.Jsoup.Parser;
+using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Primitives;
 
@@ -12,6 +15,7 @@ public class TournamentDetailPageModel : BasePageModelWizard
     private readonly ILogger<TournamentDetailPageModel> _log;
     private readonly ICacheMaster _cache;
     private readonly DbRepoTournament _dbRepoTournament;
+    private readonly DbRepoTournamentValidation _dbRepoTournamentValidation;
 
     public IEnumerable<Sport>? Sports { get; set; }
     public IEnumerable<TournamentType>? TournamentTypes { get; set; }
@@ -27,20 +31,25 @@ public class TournamentDetailPageModel : BasePageModelWizard
     public int EntryType { get; set; }
 
     [BindProperty]
-    public string EventLabel { get; set; } = "";
+    public string TournamentLabel { get; set; } = "";
+    //Form validation
+    public bool Validated { get; set; }
 
+    public string NameValidation { get; set; } = "";
 
     public TournamentDetailPageModel(ILogger<TournamentDetailPageModel> log, IServiceProvider sp,
-    IConfiguration config, IHandlerNavItems hNavItems, ICacheMaster cacheMaster, DbRepoTournament dbrepoTour) : base(hNavItems, sp, config)
+    IConfiguration config, IHandlerNavItems hNavItems, ICacheMaster cacheMaster, DbRepoTournament dbrepoTour,
+    DbRepoTournamentValidation dbRepoTournamentValidation) : base(hNavItems, sp, config)
     {
         _log = log;
         _cache = cacheMaster;
         _dbRepoTournament = dbrepoTour;
+        _dbRepoTournamentValidation = dbRepoTournamentValidation;
     }
 
     public async Task<IActionResult> OnGet()
     {
-
+        Validated = false;
         try
         {
             await LoadPage();
@@ -56,6 +65,19 @@ public class TournamentDetailPageModel : BasePageModelWizard
 
     public async Task<IActionResult> OnPost()
     {
+        bool pageIsValid = await ValidatePage();
+        
+        Validated = true;
+
+        if (!pageIsValid)
+        {
+            //Load values
+            await LoadPage();
+            //Set errors
+            TournamentLabel = "";
+            return Page();
+        }
+
         //Save page properties to session
         //Todo: Move manual form values
 
@@ -70,7 +92,7 @@ public class TournamentDetailPageModel : BasePageModelWizard
         Organization org = new Organization() { Id = 1, Name = "testing" };
 
         tournament.Id = currentTournamentId;
-        tournament.Label = EventLabel;
+        tournament.Label = TournamentLabel;
         tournament.Sport = SelectedSportId;
         tournament.Type = SelectedTourType;
         tournament.Organization = org;
@@ -91,9 +113,9 @@ public class TournamentDetailPageModel : BasePageModelWizard
         }
 
 
-        if (EntryType == 1)
+        if (EntryType == (int)deuce.EntryType.Team)
             return NextPage("/TournamentFormatTeams");
-        else if (EntryType == 2)
+        else if (EntryType == (int)deuce.EntryType.Individual)
             return NextPage("/TournamentFormatPlayer");
 
         return Page();
@@ -117,11 +139,15 @@ public class TournamentDetailPageModel : BasePageModelWizard
             //New tournament, specified by id equaling
             //zero.
             _sessionProxy.TournamentId = 0;
+        }
+
+        if ((_sessionProxy?.TournamentId??0) == 0)
+        {
             //Default values
 
             SelectedSportId = 1;
             SelectedTourType = 1;
-            EventLabel = "";
+            TournamentLabel = "";
             EntryType = 1;
 
             return;
@@ -139,11 +165,33 @@ public class TournamentDetailPageModel : BasePageModelWizard
         {
             SelectedSportId = currentTour.Sport;
             SelectedTourType = currentTour.Type;
-            EventLabel = currentTour.Label ?? EventLabel;
+            TournamentLabel = currentTour.Label ?? TournamentLabel;
             EntryType = currentTour.EntryType;
         }
 
 
     }
 
+    private async Task<bool> ValidatePage()
+    {
+        //Reset validation
+        NameValidation = "";
+
+        //Check that the label is valid
+        //in the database
+        Filter filter = new () { TournamentLabel = TournamentLabel};
+        //Validation is done in the first record.
+        var valResult = (await _dbRepoTournamentValidation.GetList(filter)).FirstOrDefault();
+
+        if (!(valResult?.IsValid??false))
+        {
+            //There's a tournament with the same name
+            NameValidation = "required";
+            TournamentLabel = "";
+            return false;
+        }
+
+        return true;
+
+    }
 }

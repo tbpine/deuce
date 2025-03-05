@@ -6,13 +6,19 @@
 @using deuce
 
 <!-- Page content -->
-
-<form id="page_form" class="col-lg-9 col-xl-8" asp-action="~/TournamentDetail" method="post">
+@{
+  string clsValidate = Model.Validated ? "was-validated" : "";
+}
+<form id="page_form" class="col-lg-9 col-xl-8 needs-validation @clsValidate" asp-action="~/TournamentDetail" method="post"
+novalidate>
   <h1 class="h2 mb-n2 mb-lg-3">Tournament Details</h1>
   <!-- Type -->
   <div class="pt-3 mt-3">
     <h2 class="h6 pb-1 mb-2">Label *</h2>
-    <input id="EventLabel" name="EventLabel" class="form-control mb-2" placeholder="Give it a name ?" value="@Model.EventLabel">
+    <div>
+      <input asp-for="TournamentLabel" class="form-control mb-2" placeholder="Give it a name ?" value="@Model.TournamentLabel" required>
+      <div class="invalid-feedback">Name exists. Choose another name.</div>
+    </div>
     <h2 class="h6 pb-1 mb-2">Sport *</h2>
     <div class="nav nav-pills row row-cols-2 row-cols-sm-3 row-cols-md-5 gap-0 g-3">
       @foreach(Sport sport in Model.Sports??Array.Empty<Sport>())
@@ -51,8 +57,8 @@
     <div class="nav nav-pills row row-cols-2 row-cols-sm-3 row-cols-md-5 gap-0 g-3">
 
       @{
-        string checkedOption1 = Model.EntryType == 1 ? "checked" :"";
-        string checkedOption2 = Model.EntryType == 2 ? "checked" :"";
+        string checkedOption1 = Model.EntryType == (int)EntryType.Team ? "checked" :"";
+        string checkedOption2 = Model.EntryType == (int)EntryType.Individual ? "checked" :"";
       }
         <div class="col">
           <input type="radio" class="btn-check" id="EntryTypeTeam" name="EntryType" value="1" @checkedOption1 >

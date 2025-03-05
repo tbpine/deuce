@@ -4,6 +4,8 @@ using deuce;
 using deuce_web.ext;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.VisualBasic;
+using ZstdSharp.Unsafe;
 
 public class TournamentPlayersPageModel : BasePageModelWizard
 {
@@ -26,6 +28,8 @@ public class TournamentPlayersPageModel : BasePageModelWizard
     public List<List<SelectListItem>>? SelectPlayer { get; set; } = new();
 
     public List<Team>? Teams { get => _teams; }
+
+    private TournamentDetail? _tournamentDetail;
 
     public TournamentPlayersPageModel(ILogger<TournamentPlayersPageModel> log, IServiceProvider sp,
     IConfiguration config, IHandlerNavItems handlerNavItems, DbRepoPlayer dbRepoPlayer,
@@ -63,11 +67,15 @@ public class TournamentPlayersPageModel : BasePageModelWizard
         //State
         Team? currentTeam = null;
 
+        ///Transforms form values to teams
         foreach (var kp in HttpContext.Request.Form)
         {
             Console.WriteLine($"{kp.Key}={kp.Value}");
             //Path format 
             //team_(Index)_(Id)_player_(Index)_(Id)_new
+
+            //Ignore the action value
+            if (kp.Key == "action") continue;
 
             var matches = Regex.Match(kp.Key, @"team_(\d+)_(\d+)*(_player_)*(\d+)*_*(\d+)*(_new)*");
 
@@ -134,6 +142,32 @@ public class TournamentPlayersPageModel : BasePageModelWizard
         //Remove empty teams
         foreach (Team rmTeam in removeTeamList) teams.Remove(rmTeam);
 
+        //If the action is to add a team
+        //, then add it to _teams
+        //and then show the same page.
+        string? action = this.HttpContext.Request.Form["action"];
+        if (string.Compare(action ?? "", "add_team", StringComparison.OrdinalIgnoreCase) == 0)
+        {
+
+            //Load tournament details
+            if (_tournamentDetail is null)
+            {
+                Filter filter = new() { ClubId = _sessionProxy?.OrganizationId??0, TournamentId = _sessionProxy?.TournamentId??0 };
+                var listTourDetail = await _dbRepoTournamentDetail.GetList(filter);
+                _tournamentDetail = listTourDetail.FirstOrDefault();
+            }
+
+            //Add new team
+            Team newTeam = new Team() { Index = teams.Count() - 1 };
+
+            for (int i = 0; i < (_tournamentDetail?.TeamSize??0); i++)
+                newTeam.AddPlayer(new Player() { Index = i });
+
+            teams.Add(newTeam);
+
+
+        }
+
         //Save teams to the database
         Organization thisOrg = new() { Id = _sessionProxy?.OrganizationId ?? 1 };
 
@@ -155,6 +189,14 @@ public class TournamentPlayersPageModel : BasePageModelWizard
         }
 
 
+        if (string.Compare(action ?? "", "add_team", StringComparison.OrdinalIgnoreCase) == 0)
+        {
+
+            await LoadPage();
+
+            return Page();
+        }
+
 
         return NextPage("");
     }
@@ -163,7 +205,7 @@ public class TournamentPlayersPageModel : BasePageModelWizard
     {
         //Tournament format parameters
         int orgId = _sessionProxy?.OrganizationId ?? 1;
-        EntryType = _sessionProxy?.EntryType ?? 1;
+        EntryType = _sessionProxy?.EntryType ?? (int)deuce.EntryType.Team;
         int currentTourId = _sessionProxy?.TournamentId ?? 0;
         try
         {
@@ -173,7 +215,7 @@ public class TournamentPlayersPageModel : BasePageModelWizard
             //Use a DB repo
             _dbRepoPlayer.Organization = organization;
             var orgPlayers = await _dbRepoPlayer.GetList(new Filter() { ClubId = orgId });
-            var currentTour = (await _dbRepoTournament.GetList(new Filter() { TournamentId =currentTourId })).FirstOrDefault();
+            var currentTour = (await _dbRepoTournament.GetList(new Filter() { TournamentId = currentTourId })).FirstOrDefault();
 
             //Deflat saved teams
             if (currentTour is not null)
@@ -181,13 +223,16 @@ public class TournamentPlayersPageModel : BasePageModelWizard
 
 
                 //Load tournament details
-                Filter filter = new() { ClubId = organization.Id, TournamentId = currentTour.Id };
-                var listTourDetail = await _dbRepoTournamentDetail.GetList(filter);
-                var tourDetail = listTourDetail.FirstOrDefault();
+                if (_tournamentDetail is null)
+                {
+                    Filter filter = new() { ClubId = organization.Id, TournamentId = currentTour.Id };
+                    var listTourDetail = await _dbRepoTournamentDetail.GetList(filter);
+                    _tournamentDetail = listTourDetail.FirstOrDefault();
+                }
 
                 EntryType = currentTour.EntryType;
-                NoTeams = tourDetail?.NoEntries ?? 2;
-                TeamSize = tourDetail?.TeamSize ?? 1;
+                NoTeams = _tournamentDetail?.NoEntries ?? 2;
+                TeamSize = _tournamentDetail?.TeamSize ?? 1;
 
                 //Load teams
                 Filter filterTeamPlayer = new Filter() { ClubId = organization.Id, TournamentId = currentTour.Id };
@@ -200,7 +245,7 @@ public class TournamentPlayersPageModel : BasePageModelWizard
             else
             {
                 //Defauls;
-                EntryType = 1;
+                EntryType = (int)deuce.EntryType.Team;
                 NoTeams = 2;
                 TeamSize = 1;
             }

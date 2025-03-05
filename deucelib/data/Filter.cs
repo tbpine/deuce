@@ -8,6 +8,7 @@ public class Filter
 
     public int ClubId { get; set; }
     public int TournamentId { get; set; }
+    public string? TournamentLabel { get; set; }
     public Filter()
     {
 

@@ -95,3 +95,12 @@ function showHideNewPlayer(selectid, inputid)
   }
   
 }
+
+//------------------------------------
+//Add a team by posting
+//------------------------------------
+function addTeamPost()
+{
+  document.getElementById("action").value = "add_team";
+  document.getElementById("page_form").submit();
+}

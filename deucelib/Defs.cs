@@ -25,3 +25,14 @@ public enum RetCodeScheduling : uint
     Error,
 
 };
+
+
+/// <summary>
+/// Entry types
+/// </summary>
+public enum EntryType : uint
+{
+    Unknown = 0,
+    Team,
+    Individual
+};

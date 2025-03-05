@@ -39,8 +39,6 @@ public class Tournament
 
     [Display("Repeats every", null, typeof(Interval) )]
     public int Interval { get { return _interval; } set { _interval = value; } }
-
-    [Display("Team Size", null)]
     public int TeamSize { get { return _TeamSize; } set { _TeamSize = value; } }
     public int Steps { get { return _steps; } set { _steps = value; } }
     public int Sport { get { return _sport; } set { _sport = value; } }

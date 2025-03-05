@@ -766,6 +766,21 @@ SELECT `id`, `key`, `value` FROM `settings` ORDER BY id;
 
 END//
 
+DROP PROCEDURE IF EXISTS `sp_validate_tournament`//
+
+CREATE PROCEDURE `sp_validate_tournament`(
+in p_label varchar(300)
+)
+
+BEGIN
+
+
+select count(`id`) 'labels' from `tournament` where `label` = p_label;
+
+END//
+
+
+
 DELIMITER ;
 
 

@@ -106,6 +106,14 @@ public class DbRepoTournament : DbRepoBase<Tournament>
             localTran.Commit();
 
         }
+        catch (DbException dex)
+        {
+            localTran.Rollback();
+            //If it's a unique constriant then
+            //throw an application exception
+            
+            Debug.WriteLine(dex.Message);
+        }
         catch (Exception ex)
         {
             localTran.Rollback();
