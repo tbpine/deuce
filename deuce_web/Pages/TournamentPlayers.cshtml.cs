@@ -118,14 +118,21 @@ public class TournamentPlayersPageModel : BasePageModelWizard
                 else if (!string.IsNullOrEmpty(teamIdx) && !string.IsNullOrEmpty(playerIdx) && isNew &&
                 !string.IsNullOrEmpty(kp.Value))
                 {
+                    
                     string? strval = kp.Value;
+                    int playerTeamId = int.TryParse(strPlayerTeamId, out playerTeamId) ? playerTeamId : 0;
                     //Split first and last names
                     string[] names = (strval ?? "").Split(" ");
                     string firstname = names.Length > 0 ? names[0].Trim() : "";
                     string lastname = names.Length > 1 ? names[1].Trim() : "";
                     int idxPlayer = int.TryParse(playerIdx, out idxPlayer) ? idxPlayer : 0;
 
-                    Player player = new Player() { Id = -1, First = firstname, Last = lastname, Index = idxPlayer };
+                    Player player = new Player() { Id = -1, First = firstname, Last = lastname, Index = idxPlayer ,
+                    TeamPlayerId = playerTeamId};
+                    //!---------------------------------
+                    //| Override registered player
+                    //!---------------------------------
+                    currentTeam?.RemoveTeamPlayer(playerTeamId);
                     currentTeam?.AddPlayer(player);
                 }
             }

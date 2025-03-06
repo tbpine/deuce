@@ -59,4 +59,14 @@ public class Team
         _players.RemoveAll(e => e.Id == player.Id);
     }
 
+    /// Remove player by team player id
+    /// </summary>
+    /// <param name="player">Player object to remove ( by team player id)</param>
+    public void RemoveTeamPlayer(int teamPlayerId)
+    {
+        var playerToRemove = _players.Find(e=>e.TeamPlayerId == teamPlayerId);
+        if (playerToRemove is not null) _players.Remove(playerToRemove);
+    }
+
+
 }

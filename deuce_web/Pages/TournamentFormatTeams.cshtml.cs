@@ -106,38 +106,13 @@ public class TournamentFormatTeamsPageModel : BasePageModelWizard
 
     public async Task<IActionResult> OnGet()
     {
-
-        var sports = await _cache.GetList<Sport>(CacheMasterDefault.KEY_SPORTS);
-        //Load tournament
-        var currentTour = (await _dbRepoTournament.GetList(new Filter(){ TournamentId = _sessionProxy?.TournamentId??0})).FirstOrDefault();
-
-        if (currentTour is not null)
+        try
         {
-
-            var sport = sports?.Find(e => e.Id == (currentTour?.Sport ?? 0));
-
-            Title = sport?.Label ?? "";
-
-            //Load Tournament detais
-            Organization thisOrg = new() { Id = 1, Name = "testing" };
-
-            Filter filter = new() { TournamentId = currentTour.Id };
-            var tourDetail = (await _dbRepoTournamentDetail.GetList(filter))?.FirstOrDefault();
-
-            if (tourDetail is not null)
-            {
-                //Set page values
-                Games = tourDetail.Games;
-                CustomGames = tourDetail.CustomGames;
-                Sets = tourDetail.Sets;
-                CustomGames = tourDetail.CustomGames;
-                TeamSize = tourDetail.TeamSize;
-                NoSingles = tourDetail.NoSingles  < 6 ? tourDetail.NoSingles : 99 ;
-                NoDoubles = tourDetail.NoDoubles < 6 ? tourDetail.NoDoubles : 99;
-                CustomSingles = tourDetail.NoSingles  < 6 ? 0 : tourDetail.NoSingles ;
-                CustomDoubles = tourDetail.NoDoubles < 6 ? 0 :  tourDetail.NoDoubles ;
-
-            }
+            await LoadPage();
+        }
+        catch(Exception ex)
+        {
+            _log.Log(LogLevel.Error, ex.Message);
         }
 
         return Page();
@@ -214,5 +189,52 @@ public class TournamentFormatTeamsPageModel : BasePageModelWizard
 
     }
 
+    /// <summary>
+    /// Get page values
+    /// </summary>
+    private async Task LoadPage()
+    {
+        var sports = await _cache.GetList<Sport>(CacheMasterDefault.KEY_SPORTS);
+        //Load tournament
+        var currentTour = (await _dbRepoTournament.GetList(new Filter() { TournamentId = _sessionProxy?.TournamentId ?? 0 })).FirstOrDefault();
+
+        if (currentTour is not null)
+        {
+
+            var sport = sports?.Find(e => e.Id == (currentTour?.Sport ?? 0));
+
+            Title = sport?.Label ?? "";
+
+            //Load Tournament detais
+            Organization thisOrg = new() { Id = 1, Name = "testing" };
+
+            Filter filter = new() { TournamentId = currentTour.Id };
+            var tourDetail = (await _dbRepoTournamentDetail.GetList(filter))?.FirstOrDefault();
+
+            if (tourDetail is not null)
+            {
+                //Set page values
+                Games = tourDetail.Games;
+                CustomGames = tourDetail.CustomGames;
+                Sets = tourDetail.Sets;
+                TeamSize = tourDetail.TeamSize;
+                NoSingles = tourDetail.NoSingles < 6 ? tourDetail.NoSingles : 99;
+                NoDoubles = tourDetail.NoDoubles < 6 ? tourDetail.NoDoubles : 99;
+                CustomSingles = tourDetail.NoSingles < 6 ? 0 : tourDetail.NoSingles;
+                CustomDoubles = tourDetail.NoDoubles < 6 ? 0 : tourDetail.NoDoubles;
+
+            }
+            else
+            {
+                //Default values
+                Games = 1;
+                Sets = 1;
+                TeamSize = 2;
+                NoSingles = 2;
+                NoDoubles = 2;
+            }
+        }
+
+    }
 
 }
