@@ -72,7 +72,9 @@ public class TournamentPlayersPageModel : BasePageModelWizard
         {
             Console.WriteLine($"{kp.Key}={kp.Value}");
             //Path format 
-            //team_(Index)_(Id)_player_(Index)_(Id)_new
+            //team_(Index)_(Id)_player_(Index)_(TeamPlayerID)_new
+            //Form value is id for existing players
+            //and name for new players
 
             //Ignore the action value
             if (kp.Key == "action") continue;
@@ -109,12 +111,9 @@ public class TournamentPlayersPageModel : BasePageModelWizard
                     int idxPlayer = int.TryParse(playerIdx, out idxPlayer) ? idxPlayer : 0;
                     int playerTeamId = int.TryParse(strPlayerTeamId, out playerTeamId) ? playerTeamId : 0;
 
-                    if (playerId > 0)
-                    {
-                        Player player = new Player() { Id = playerId, Index = idxPlayer, TeamPlayerId = playerTeamId };
+                    Player player = new Player() { Id = playerId, Index = idxPlayer, TeamPlayerId = playerTeamId };
 
-                        currentTeam?.AddPlayer(player);
-                    }
+                    currentTeam?.AddPlayer(player);
                 }
                 else if (!string.IsNullOrEmpty(teamIdx) && !string.IsNullOrEmpty(playerIdx) && isNew &&
                 !string.IsNullOrEmpty(kp.Value))
@@ -158,7 +157,7 @@ public class TournamentPlayersPageModel : BasePageModelWizard
             }
 
             //Add new team
-            Team newTeam = new Team() { Index = teams.Count() - 1 };
+            Team newTeam = new Team() { Index = teams.Count() };
 
             for (int i = 0; i < (_tournamentDetail?.TeamSize??0); i++)
                 newTeam.AddPlayer(new Player() { Index = i });
@@ -230,10 +229,6 @@ public class TournamentPlayersPageModel : BasePageModelWizard
                     _tournamentDetail = listTourDetail.FirstOrDefault();
                 }
 
-                EntryType = currentTour.EntryType;
-                NoTeams = _tournamentDetail?.NoEntries ?? 2;
-                TeamSize = _tournamentDetail?.TeamSize ?? 1;
-
                 //Load teams
                 Filter filterTeamPlayer = new Filter() { ClubId = organization.Id, TournamentId = currentTour.Id };
                 //Get the listing of players for the tournament.
@@ -241,6 +236,13 @@ public class TournamentPlayersPageModel : BasePageModelWizard
                 //Create the team /player graph
                 TeamRepo teamRepo = new TeamRepo(tourTeamPlayersRec);
                 _teams = teamRepo.ExtractFromRecordTeamPlayer();
+                
+                //Don't use no of entries
+                //Count the number of teams
+                EntryType = currentTour.EntryType;
+                NoTeams = _teams.Count();
+                TeamSize = _tournamentDetail?.TeamSize ?? 1;
+
             }
             else
             {
@@ -269,31 +271,31 @@ public class TournamentPlayersPageModel : BasePageModelWizard
 
             //Reconcile teams
 
-            for (int i = 0; i < NoTeams; i++)
-            {
-                if (i >= _teams?.Count)
-                {
-                    //Add a team
-                    Team newTeam = new Team();
-                    newTeam.Index = i;
-                    newTeam.Label = $"team_{i}";
-                    //Add players
-                    for (int j = 0; j < TeamSize; j++)
-                        newTeam.AddPlayer(new Player() { Index = j });
-                    _teams.Add(newTeam);
-                }
-                else
-                {
-                    //Check if the stored teams have enough
-                    //players
-                    for (int j = 0; j < TeamSize; j++)
-                    {
-                        if (j >= _teams?[i].Players.Count())
-                            _teams?[i].AddPlayer(new Player() { Index = j });
-                    }
+            // for (int i = 0; i < NoTeams; i++)
+            // {
+            //     if (i >= _teams?.Count)
+            //     {
+            //         //Add a team
+            //         Team newTeam = new Team();
+            //         newTeam.Index = i;
+            //         newTeam.Label = $"team_{i}";
+            //         //Add players
+            //         for (int j = 0; j < TeamSize; j++)
+            //             newTeam.AddPlayer(new Player() { Index = j });
+            //         _teams.Add(newTeam);
+            //     }
+            //     else
+            //     {
+            //         //Check if the stored teams have enough
+            //         //players
+            //         for (int j = 0; j < TeamSize; j++)
+            //         {
+            //             if (j >= _teams?[i].Players.Count())
+            //                 _teams?[i].AddPlayer(new Player() { Index = j });
+            //         }
 
-                }
-            }
+            //     }
+            // }
 
         }
         catch (Exception ex)

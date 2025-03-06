@@ -107,7 +107,7 @@ public class DbRepoTeam : DbRepoBase<Team>
 
                 DbCommand cmdSetTeamPlayer = _dbconn.CreateCommandStoreProc("sp_set_team_player",
                 ["p_id", "p_team", "p_player", "p_player_first", "p_player_last", "p_tournament", "p_organization", "p_index"],
-                [ primaryKeyId , obj.Id, player.Id, string.IsNullOrEmpty(player.First) ? DBNull.Value : player.First,
+                [ primaryKeyId , obj.Id, player.Id > 0 ? player.Id : DBNull.Value, string.IsNullOrEmpty(player.First) ? DBNull.Value : player.First,
                 string.IsNullOrEmpty(player.Last) ? DBNull.Value : player.Last,  _tournamentId, Organization?.Id ?? 1,player.Index],
                 localtran);
 

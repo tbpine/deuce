@@ -98,10 +98,10 @@
               @for(int j = 0; j < Model.TeamSize ; j++)
               {
                 Player? iterPlayer = iterTeam?.Players.ElementAt(j);
-                int playerId = iterPlayer?.Id??0;
+                int teamPlayerId = iterPlayer?.TeamPlayerId??0;
                 
-                string attrPlayerName = $"team_{i}_{teamId}_player_{j}_{playerId}";
-                string attrPlayerNameNew = $"team_{i}_{teamId}_player_{j}_{playerId}_new";
+                string attrPlayerName = $"team_{i}_{teamId}_player_{j}_{teamPlayerId}";
+                string attrPlayerNameNew = $"team_{i}_{teamId}_player_{j}_{teamPlayerId}_new";
 
                 int selectionIdx = i*Model.TeamSize + j;
                 List<SelectListItem>? playerList = Model.SelectPlayer?.ElementAt(selectionIdx);

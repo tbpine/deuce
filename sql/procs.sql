@@ -367,11 +367,11 @@ BEGIN
 -- add new players 
 SET @p_newPlayerId = p_player;
 
-IF @p_newPlayerId < 1  THEN
+-- IF @p_newPlayerId < 1  THEN
 
-	INSERT INTO `player` VALUES ( NULL, p_player_first,p_player_last, p_organization, 1.0, now(), now());
-    SELECT last_insert_id() INTO @p_newPlayerId;
-END IF;
+-- 	INSERT INTO `player` VALUES ( NULL, p_player_first,p_player_last, p_organization, 1.0, now(), now());
+--     SELECT last_insert_id() INTO @p_newPlayerId;
+-- END IF;
 
 
 INSERT INTO `team_player`(`id`,`team`,`player`,`tournament`, `index`, `updated_datetime`, `created_datetime`) 
@@ -391,8 +391,8 @@ BEGIN
 
 SELECT tp.`id`, t.organization 'organization', t.tournament, t.label 'team',  t.id 'team_id', t.`index` 'team_index',
 p.id `player_id`, tp.`index` 'player_index', p.first_name , p.last_name, p.utr, tp.id 'team_player_id'
-FROM `team_player` tp JOIN `team` t ON t.id = tp.team
-JOIN `player` p ON p.id = tp.`player`
+FROM `team_player` tp LEFT JOIN `team` t ON t.id = tp.team
+LEFT JOIN `player` p ON p.id = tp.`player`
 WHERE tp.`tournament` = p_tournament
 ORDER BY `team_index`, `player_index`;
 
