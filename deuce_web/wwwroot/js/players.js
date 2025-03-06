@@ -68,7 +68,7 @@ function addTeam()
 //Hide the new player text box
 //------------------------------------
 
-function showHideNewPlayer(selectid, inputid)
+function showHideNewPlayer(selectid, inputid, newPlayerLabel)
 {
   //Get the selected value
   const nodeSelect = document.getElementById(selectid);
@@ -85,11 +85,14 @@ function showHideNewPlayer(selectid, inputid)
     {
       node.classList.remove("invisible");
       node.classList.remove("zero_height");
+      document.getElementById(newPlayerLabel).classList.remove("invisible");
     }
     else
     {
+      //Hide the new player label
       node.classList.add("invisible");
-      node.classList.add("zero height");
+      node.classList.add("zero_height");
+      document.getElementById(newPlayerLabel).classList.add("invisible");
     }
 
   }

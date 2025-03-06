@@ -31,8 +31,9 @@ public class UnitTestsTournament
             var dbRepoTeam = new DbRepoTeam(conn)
             {
                 Organization = club,
-                Tournament = tour
+                TournamentId = tour.Id
             };
+            
             foreach (Team team in tour.Teams!)
                 await dbRepoTeam.SetAsync(team);
             //Save matches

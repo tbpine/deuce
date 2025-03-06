@@ -97,7 +97,7 @@ public class TournamentPlayersPageModel : BasePageModelWizard
                     int teamId = int.TryParse(strTeamId, out teamId) ? teamId : 0;
                     Team? team = new();
                     team.Id = teamId;
-                    team.Label = string.IsNullOrEmpty(strVal) ? ("team_" + matches.Groups[1].Value) : strVal;
+                    team.Label = string.IsNullOrEmpty(strVal) ? "" :  strVal;
                     team.Index = idxTeam;
 
                     currentTeam = team;

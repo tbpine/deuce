@@ -12,14 +12,14 @@ public class UnitTestsPlayer
 {
 
     [TestMethod]
-    [DataRow(1)]
+    [DataRow(10)]
     public void set_n_players_returns_nothing(int noPlayers)
     {
         //Assign
         //Action
         //Assert
         
-        MySqlConnection conn = new("Server=localhost;Database=deuce;User Id=deuce;Password=deuce;");
+        DbConnectionLocal conn = new("Server=localhost;Database=deuce;User Id=deuce;Password=deuce;");
         conn.Open();
         Organization org = new Organization() { Id = 1, Name = "testing" };
         //For UTR

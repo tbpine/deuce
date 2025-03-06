@@ -32,7 +32,7 @@
 
       <!-- Master checkbox + Action buttons -->
       <div class="nav align-items-center mb-4">
-        <div class="nav-link fs-lg ps-0 pe-2 py-2 mt-n1 me-4" data-master-checkbox='{"container": "#publishedSelection", "label": "Select all the items to apply the same action to them", "labelChecked": "Unselect all", "showOnCheck": "#published-action-buttons"}'>
+        <div class="nav-link fs-lg ps-0 pe-2 py-2 mt-n1 me-4" data-master-checkbox='{"container": "#page_form", "label": "Select all the items to apply the same action to them", "labelChecked": "Unselect all", "showOnCheck": "#published-action-buttons"}'>
           <input type="checkbox" class="form-check-input" id="published-master">
           <label for="published-master" class="form-check-label fw-normal mt-1 ms-2">Unselect all</label>
         </div>
@@ -106,24 +106,33 @@
                 int selectionIdx = i*Model.TeamSize + j;
                 List<SelectListItem>? playerList = Model.SelectPlayer?.ElementAt(selectionIdx);
                 playerList?.All(e=>{e.Selected = false; return true;});
+                
+                string newPlayerLabel = "new_player_label_" + selectionIdx.ToString();
+                string clsShowHideNewPlayer ="";
 
                 var selectedPlayer = playerList?.Find(e=>e.Value == iterPlayer?.Id.ToString());
-                if (selectedPlayer is not null)selectedPlayer.Selected = true;
+                if (selectedPlayer is not null) 
+                {
+                  selectedPlayer.Selected = true;
+                  //Set the initial visibility of new players entry
+                  clsShowHideNewPlayer = "invisible zero_height";
+                }
+
                 else if (playerList is not null && playerList.Count > 0) playerList[0].Selected = true;
 
                 <div class="row row-cols-*-3 g-0 mb-2">
                   <div class="col-5 me-2"><span>Registered</span></div>
-                  <div class="col-5 me-2"><span>New Player</span></div>
+                  <div class="col-5 me-2 @clsShowHideNewPlayer" id="@newPlayerLabel" ><span>New Player</span></div>
                   <div class="col-1"></div>
                   <div class="col-5 me-2">
                     <select id="@attrPlayerName" name="@attrPlayerName" class="form-select-lg" aria-label="Select Player"
                     asp-items="@playerList" data-select='{"searchEnabled" : true , "classNames": {"containerInner": ["form-select", "form-select-lg"]}}'
-                    onchange="showHideNewPlayer('@attrPlayerName','@attrPlayerNameNew')">
+                    onchange="showHideNewPlayer('@attrPlayerName','@attrPlayerNameNew', '@newPlayerLabel')">
                       
                       </select>
                   </div>
                   <div class="col-5 me-2">
-                    <input class="form-control" placeholder="New Player" aria-placeholder="New Player" name="@attrPlayerNameNew" id="@attrPlayerNameNew"/>
+                    <input class="form-control @clsShowHideNewPlayer" placeholder="New Player" aria-placeholder="New Player" name="@attrPlayerNameNew" id="@attrPlayerNameNew"/>
                   </div>
                   <div class="col-1">
                     <a class="nav-link position-relative px-0 pe-sm-2 py-2 me-4 ms-2 @attrCanDeletePlayer">
