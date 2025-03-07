@@ -28,6 +28,19 @@ public enum RetCodeScheduling : uint
 
 
 /// <summary>
+/// State of a tournament
+/// </summary>
+public enum RetCodeTeamAction : uint
+{
+    Unknown = 0,
+    Success,
+    Error,
+    Warning
+
+};
+
+
+/// <summary>
 /// Entry types
 /// </summary>
 public enum EntryType : uint

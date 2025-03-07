@@ -85,7 +85,7 @@
                   <label for="@attrTeamName" class="form-label p-2">Team Name:</label>
                 </div>
                 <div class="col-2">
-                  <input id="TeamName" class="form-control p-2 w-75" name="@attrTeamName" value="@attrTeamLable"/>
+                  <input id="@attrTeamName" class="form-control p-2 w-75" name="@attrTeamName" value="@attrTeamLable"/>
                 </div>
                 
               </div>
@@ -111,11 +111,19 @@
                 string clsShowHideNewPlayer ="";
 
                 var selectedPlayer = playerList?.Find(e=>e.Value == iterPlayer?.Id.ToString());
+                string newPlayerName = "";
                 if (selectedPlayer is not null) 
                 {
                   selectedPlayer.Selected = true;
                   //Set the initial visibility of new players entry
                   clsShowHideNewPlayer = "invisible zero_height";
+                  newPlayerName = "";
+                }
+                else if ( (iterPlayer?.Id??0) < 1)
+                {
+                  //Set new player name
+                    newPlayerName = iterPlayer?.First??"" + " " + iterPlayer?.Last??"";
+                    newPlayerName = newPlayerName.Trim();
                 }
 
                 else if (playerList is not null && playerList.Count > 0) playerList[0].Selected = true;
@@ -132,7 +140,8 @@
                       </select>
                   </div>
                   <div class="col-5 me-2">
-                    <input class="form-control @clsShowHideNewPlayer" placeholder="New Player" aria-placeholder="New Player" name="@attrPlayerNameNew" id="@attrPlayerNameNew"/>
+                    <input class="form-control @clsShowHideNewPlayer" placeholder="New Player" aria-placeholder="New Player" name="@attrPlayerNameNew" id="@attrPlayerNameNew"
+                    value="@newPlayerName"/>
                   </div>
                   <div class="col-1">
                     <a class="nav-link position-relative px-0 pe-sm-2 py-2 me-4 ms-2 @attrCanDeletePlayer">
@@ -146,7 +155,10 @@
         }
         
       </form>
-      <div><span class="text-danger">@Model.Error</span></div>
+      @{
+        string clsShowHideError = String.IsNullOrEmpty(Model.Error) ? "invisible" : "visible";
+      }
+      <div class="alert alert-primary @clsShowHideError" role="alert">@Model.Error</div>
     </div>
 
   </div>

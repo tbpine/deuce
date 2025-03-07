@@ -224,7 +224,7 @@ IN p_utr DECIMAL(6,2))
 BEGIN
 
 INSERT INTO `player`(`id`,`organization`,`first_name`,`last_name`,`utr`,`updated_datetime`,`created_datetime`) VALUES (p_id, p_organization,p_first_name, p_last_name, p_utr, NOW(), NOW())
-ON DUPLICATE KEY UPDATE `first_name` = p_first_name,`last_name` = p_last_name,`utr` = p_utr,`organization` = p_organization, `updated_datetime` = NOW();
+ON DUPLICATE KEY UPDATE `utr` = p_utr, `updated_datetime` = NOW();
 
 SELECT LAST_INSERT_ID() 'id';
 
@@ -357,28 +357,18 @@ CREATE PROCEDURE `sp_set_team_player`(
 IN p_id	  INT,
 IN p_team INT,
 IN p_player INT,
-IN p_player_first VARCHAR(100),
-IN p_player_last VARCHAR(100),
 IN p_tournament INT,
 IN p_organization INT,
 IN p_index INT)
 
 BEGIN
--- add new players 
-SET @p_newPlayerId = p_player;
-
--- IF @p_newPlayerId < 1  THEN
-
--- 	INSERT INTO `player` VALUES ( NULL, p_player_first,p_player_last, p_organization, 1.0, now(), now());
---     SELECT last_insert_id() INTO @p_newPlayerId;
--- END IF;
 
 
 INSERT INTO `team_player`(`id`,`team`,`player`,`tournament`, `index`, `updated_datetime`, `created_datetime`) 
-VALUES (p_id ,p_team, @p_newPlayerId, p_tournament, p_index, now(), now())
-ON DUPLICATE KEY UPDATE `team` = p_team,`player` = @p_newPlayerId, `tournament` = p_tournament, `index` = p_index, `updated_datetime` = now();
+VALUES (p_id ,p_team, p_player, p_tournament, p_index, now(), now())
+ON DUPLICATE KEY UPDATE `team` = p_team,`player` = p_player, `tournament` = p_tournament, `index` = p_index, `updated_datetime` = now();
 
-SELECT LAST_INSERT_ID() 'id', @p_newPlayerId 'player_id';
+SELECT LAST_INSERT_ID() 'id';
 
 END//
 

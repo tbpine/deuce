@@ -4,6 +4,7 @@ using System.Data.Common;
 using deuce_web;
 using Microsoft.Extensions.Caching.Memory;
 using deuce;
+using System.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
@@ -40,6 +41,7 @@ builder.Services.AddScoped<DbRepoTournamentProps>();
 builder.Services.AddScoped<DbRepoVenue>();
 builder.Services.AddScoped<DbRepoTournamentStatus>();
 builder.Services.AddScoped<DbRepoTournamentValidation>();
+builder.Services.AddScoped<IAdaptorTeams, AdaptorFormTeams>();
 builder.Services.AddScoped<ITournamentGateway, DBTournamentGateway>();
 
 //Repos

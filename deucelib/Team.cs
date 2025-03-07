@@ -64,9 +64,17 @@ public class Team
     /// <param name="player">Player object to remove ( by team player id)</param>
     public void RemoveTeamPlayer(int teamPlayerId)
     {
-        var playerToRemove = _players.Find(e=>e.TeamPlayerId == teamPlayerId);
+        var playerToRemove = _players.Find(e => e.TeamPlayerId == teamPlayerId);
         if (playerToRemove is not null) _players.Remove(playerToRemove);
     }
 
-
+    /// <summary>
+    /// Find a player
+    /// </summary>
+    /// <param name="pred">Search criterion</param>
+    /// <returns>Null if the search criterion failed</returns>
+    public Player? Find(Predicate<Player> pred)
+    {
+        return _players.Find(pred);
+    }
 }

@@ -1,4 +1,5 @@
 using System.Data.Common;
+using System.Security.Policy;
 using System.Text.RegularExpressions;
 using deuce;
 using deuce_web.ext;
@@ -15,6 +16,7 @@ public class TournamentPlayersPageModel : BasePageModelWizard
     private readonly DbRepoRecordTeamPlayer _dbRepoRecordTeamPlayer;
     private readonly DbRepoTeam _dbRepoTeam;
     private readonly DbRepoTournament _dbRepoTournament;
+    private readonly IAdaptorTeams _adaptorTeams;
 
     private List<Team>? _teams;
     public string? JSONPlayers { get; set; }
@@ -34,7 +36,7 @@ public class TournamentPlayersPageModel : BasePageModelWizard
     public TournamentPlayersPageModel(ILogger<TournamentPlayersPageModel> log, IServiceProvider sp,
     IConfiguration config, IHandlerNavItems handlerNavItems, DbRepoPlayer dbRepoPlayer,
     DbRepoTournamentDetail dbRepoTournamentDetail, DbRepoRecordTeamPlayer dbRepoRecordTeamPlayer, DbRepoTeam dbRepoTeam,
-    DbRepoTournament dbRepoTournament) : base(handlerNavItems, sp, config)
+    DbRepoTournament dbRepoTournament, IAdaptorTeams adaptorTeams) : base(handlerNavItems, sp, config)
     {
         _log = log;
         _teams = null;
@@ -43,6 +45,7 @@ public class TournamentPlayersPageModel : BasePageModelWizard
         _dbRepoRecordTeamPlayer = dbRepoRecordTeamPlayer;
         _dbRepoTeam = dbRepoTeam;
         _dbRepoTournament = dbRepoTournament;
+        _adaptorTeams = adaptorTeams;
     }
 
     public async Task<IActionResult> OnGet()
@@ -62,95 +65,15 @@ public class TournamentPlayersPageModel : BasePageModelWizard
 
     public async Task<IActionResult> OnPost()
     {
+        //Convert form values into a teams collection
 
-        List<Team> teams = new();
+        Organization thisOrg = new() { Id = _sessionProxy?.OrganizationId ?? 1 };
+
+        List<Team> teams = _adaptorTeams.Convert(HttpContext.Request.Form, thisOrg);
+
         //State
-        Team? currentTeam = null;
-
-        ///Transforms form values to teams
-        foreach (var kp in HttpContext.Request.Form)
-        {
-            Console.WriteLine($"{kp.Key}={kp.Value}");
-            //Path format 
-            //team_(Index)_(Id)_player_(Index)_(TeamPlayerID)_new
-            //Form value is id for existing players
-            //and name for new players
-
-            //Ignore the action value
-            if (kp.Key == "action") continue;
-
-            var matches = Regex.Match(kp.Key, @"team_(\d+)_(\d+)*(_player_)*(\d+)*_*(\d+)*(_new)*");
-
-            if (matches.Success)
-            {
-                string teamIdx = matches.Groups[1].Value;
-                string strTeamId = matches.Groups[2].Value;
-                string playerIdx = matches.Groups[4].Value;
-                string strPlayerTeamId = matches.Groups[5].Value;
-                bool isNew = !string.IsNullOrEmpty(matches.Groups[6].Value);
-
-                if (!string.IsNullOrEmpty(teamIdx) && string.IsNullOrEmpty(playerIdx) && !isNew)
-                {
-                    //Team form variable
-                    string? strVal = kp.Value;
-                    int idxTeam = int.TryParse(teamIdx, out idxTeam) ? idxTeam : 0;
-                    int teamId = int.TryParse(strTeamId, out teamId) ? teamId : 0;
-                    Team? team = new();
-                    team.Id = teamId;
-                    team.Label = string.IsNullOrEmpty(strVal) ? "" :  strVal;
-                    team.Index = idxTeam;
-
-                    currentTeam = team;
-                    teams.Add(currentTeam);
-
-                }
-                else if (!string.IsNullOrEmpty(teamIdx) && !string.IsNullOrEmpty(playerIdx) && !isNew)
-                {
-                    //Check if they selected a registered player
-                    int playerId = this.GetFormInt(kp.Key);
-                    int idxPlayer = int.TryParse(playerIdx, out idxPlayer) ? idxPlayer : 0;
-                    int playerTeamId = int.TryParse(strPlayerTeamId, out playerTeamId) ? playerTeamId : 0;
-
-                    Player player = new Player() { Id = playerId, Index = idxPlayer, TeamPlayerId = playerTeamId };
-
-                    currentTeam?.AddPlayer(player);
-                }
-                else if (!string.IsNullOrEmpty(teamIdx) && !string.IsNullOrEmpty(playerIdx) && isNew &&
-                !string.IsNullOrEmpty(kp.Value))
-                {
-                    
-                    string? strval = kp.Value;
-                    int playerTeamId = int.TryParse(strPlayerTeamId, out playerTeamId) ? playerTeamId : 0;
-                    //Split first and last names
-                    string[] names = (strval ?? "").Split(" ");
-                    string firstname = names.Length > 0 ? names[0].Trim() : "";
-                    string lastname = names.Length > 1 ? names[1].Trim() : "";
-                    int idxPlayer = int.TryParse(playerIdx, out idxPlayer) ? idxPlayer : 0;
-
-                    Player player = new Player() { Id = -1, First = firstname, Last = lastname, Index = idxPlayer ,
-                    TeamPlayerId = playerTeamId};
-                    //!---------------------------------
-                    //| Override registered player
-                    //!---------------------------------
-                    currentTeam?.RemoveTeamPlayer(playerTeamId);
-                    currentTeam?.AddPlayer(player);
-                }
-            }
-        }
-        //Validations
-
-        //Check for teams with zero players
-        List<Team> removeTeamList = new();
-        foreach (Team team in teams)
-            //Don't add teams with no players
-            if (team.Players.Count() == 0) removeTeamList.Add(team);
-
-        //Remove empty teams
-        foreach (Team rmTeam in removeTeamList) teams.Remove(rmTeam);
-
-        //If the action is to add a team
-        //, then add it to _teams
-        //and then show the same page.
+        //If the action is to add a team, then add it to _teams
+        //and then show the same page ( Don't validate and save).
         string? action = this.HttpContext.Request.Form["action"];
         if (string.Compare(action ?? "", "add_team", StringComparison.OrdinalIgnoreCase) == 0)
         {
@@ -158,7 +81,7 @@ public class TournamentPlayersPageModel : BasePageModelWizard
             //Load tournament details
             if (_tournamentDetail is null)
             {
-                Filter filter = new() { ClubId = _sessionProxy?.OrganizationId??0, TournamentId = _sessionProxy?.TournamentId??0 };
+                Filter filter = new() { ClubId = _sessionProxy?.OrganizationId ?? 0, TournamentId = _sessionProxy?.TournamentId ?? 0 };
                 var listTourDetail = await _dbRepoTournamentDetail.GetList(filter);
                 _tournamentDetail = listTourDetail.FirstOrDefault();
             }
@@ -166,16 +89,32 @@ public class TournamentPlayersPageModel : BasePageModelWizard
             //Add new team
             Team newTeam = new Team() { Index = teams.Count() };
 
-            for (int i = 0; i < (_tournamentDetail?.TeamSize??0); i++)
+            for (int i = 0; i < (_tournamentDetail?.TeamSize ?? 0); i++)
                 newTeam.AddPlayer(new Player() { Index = i });
 
             teams.Add(newTeam);
-
+            //Add new team , don't need to validate and save to
+            //db yet. Return;
+            _teams = teams;
+            await LoadPage(false);
+            return Page();
 
         }
 
-        //Save teams to the database
-        Organization thisOrg = new() { Id = _sessionProxy?.OrganizationId ?? 1 };
+        //Validate teams before saving:
+        //Team must have players
+        //A player cannot appear more than once.
+        TeamValidator teamValidator = new();
+        var isvalidTeams = teamValidator.Check(teams);
+        //Warning or error
+        if (isvalidTeams.Result != RetCodeTeamAction.Success)
+        {
+            Error = isvalidTeams.Result == RetCodeTeamAction.Error ? isvalidTeams?.Message??"" : "";
+            _teams = teams;
+            await LoadPage(false);
+            return Page();
+        }
+
 
         //Assign to repos
 
@@ -187,27 +126,20 @@ public class TournamentPlayersPageModel : BasePageModelWizard
             _dbRepoTeam.Organization = thisOrg;
             _dbRepoTeam.TournamentId = currentTourId;
 
+            //Save teams to the database
             foreach (Team iterTeam in teams)
             {
+
                 //Save players as well
                 await _dbRepoTeam.SetAsync(iterTeam);
             }
         }
 
 
-        if (string.Compare(action ?? "", "add_team", StringComparison.OrdinalIgnoreCase) == 0)
-        {
-
-            await LoadPage();
-
-            return Page();
-        }
-
-
         return NextPage("");
     }
 
-    private async Task LoadPage()
+    private async Task LoadPage(bool loadDB = true)
     {
         //Tournament format parameters
         int orgId = _sessionProxy?.OrganizationId ?? 1;
@@ -236,18 +168,21 @@ public class TournamentPlayersPageModel : BasePageModelWizard
                     _tournamentDetail = listTourDetail.FirstOrDefault();
                 }
 
-                //Load teams
-                Filter filterTeamPlayer = new Filter() { ClubId = organization.Id, TournamentId = currentTour.Id };
-                //Get the listing of players for the tournament.
-                List<RecordTeamPlayer> tourTeamPlayersRec = await _dbRepoRecordTeamPlayer.GetList(filterTeamPlayer);
-                //Create the team /player graph
-                TeamRepo teamRepo = new TeamRepo(tourTeamPlayersRec);
-                _teams = teamRepo.ExtractFromRecordTeamPlayer();
-                
+                if (loadDB)
+                {
+                    //Load teams
+                    Filter filterTeamPlayer = new Filter() { ClubId = organization.Id, TournamentId = currentTour.Id };
+                    //Get the listing of players for the tournament.
+                    List<RecordTeamPlayer> tourTeamPlayersRec = await _dbRepoRecordTeamPlayer.GetList(filterTeamPlayer);
+                    //Create the team /player graph
+                    TeamRepo teamRepo = new TeamRepo(tourTeamPlayersRec);
+                    _teams = teamRepo.ExtractFromRecordTeamPlayer();
+                }
+
                 //Don't use no of entries
                 //Count the number of teams
                 EntryType = currentTour.EntryType;
-                NoTeams = _teams.Count();
+                NoTeams = _teams?.Count()??0;
                 TeamSize = _tournamentDetail?.TeamSize ?? 1;
 
             }
