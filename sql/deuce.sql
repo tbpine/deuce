@@ -3,7 +3,7 @@
 * Version 1.0 Tong Pine (1)
 * Dec 2024
 *******************************************************/
---  drop table if exists  `tournament`;
+-- drop table if exists  `tournament`;
 -- drop table if exists  `tournament_detail`;
 -- drop table if exists  `tournament_type`;
 -- drop table if exists  `tournament_venue`;
@@ -203,4 +203,11 @@ CREATE TABLE IF NOT EXISTS `match_player` (
 );
 
 
+-- for tournament registrations
+create table `registration` (
+`id` int primary key auto_increment,
+`player` int,
+`tournament` int,
+`updated_datetime` timestamp,
+`created_datetime` timestamp);
 
