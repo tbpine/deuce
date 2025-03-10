@@ -15,7 +15,7 @@ public class UnitTestsBuilderSchedule
         Organization orgainization = new Organization() { Id = 1 };
         //Make a random tournament
         AssignTournament assignTour = new();
-        Tournament tournament = await assignTour.MakeRandom(1, "testing_tournament", 8, 1, 2, 2, 1, 2);
+        Tournament tournament =  assignTour.MakeRandom(1, "testing_tournament", 8, 1, 2, 2, 1, 2);
         //Open db connection
         MySqlConnection conn = new("Server=localhost;Database=deuce;User Id=deuce;Password=deuce;");
         await conn.OpenAsync();

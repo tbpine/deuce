@@ -21,7 +21,7 @@ public class UnitTestsTournament
             conn.Open();
             //Create tournament
             AssignTournament tourRepo = new();
-            Tournament tour = await tourRepo.MakeRandom(1, "test_tournament", 8, 1, 2, 2, 1, 2);
+            Tournament tour =  tourRepo.MakeRandom(1, "test_tournament", 8, 1, 2, 2, 1, 2);
             tour.Id = tournamentId;
             Schedule? schedule = tour.Schedule;
 

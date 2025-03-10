@@ -199,14 +199,14 @@ END//
 DROP PROCEDURE IF EXISTS `sp_get_player`//
 
 CREATE PROCEDURE `sp_get_player`(
-IN p_organization INT
+IN p_tournament INT
 )
 BEGIN
 
-	SELECT `id`,`organization`,`first_name`,`last_name`,`utr`,`updated_datetime`,`created_datetime`
+	SELECT `id`,`first_name`,`last_name`,`middle_name`,`utr`,`updated_datetime`,`created_datetime`
 	FROM `player`
-    WHERE `organization` = p_organization OR ISNULL(p_organization)
-	ORDER BY `first_name`,`last_name`;
+    WHERE `tournament` = p_tournament OR ISNULL(p_tournament)
+	ORDER BY `first_name`,`last_name`, `middle_name`;
 
 
  END//
@@ -216,15 +216,17 @@ DROP PROCEDURE IF EXISTS `sp_set_player`//
 
 CREATE PROCEDURE `sp_set_player`(
 IN p_id INT,
-IN p_organization INT,
 IN p_first_name VARCHAR(100),
+IN p_middle_name VARCHAR(100),
 IN p_last_name VARCHAR(100),
+IN p_tournament INT,
 IN p_utr DECIMAL(6,2))
 
 BEGIN
 
-INSERT INTO `player`(`id`,`organization`,`first_name`,`last_name`,`utr`,`updated_datetime`,`created_datetime`) VALUES (p_id, p_organization,p_first_name, p_last_name, p_utr, NOW(), NOW())
-ON DUPLICATE KEY UPDATE `utr` = p_utr, `updated_datetime` = NOW();
+INSERT INTO `player`(`id`,`organization`,`first_name`,`middle_name`,`last_name`,`tournament`, `utr`,`updated_datetime`,`created_datetime`) VALUES (p_id, p_organization,p_first_name, p_last_name, p_utr, NOW(), NOW())
+ON DUPLICATE KEY UPDATE `utr` = p_utr, first_name = p_first_name, middle_name = p_middle_name,
+last_name = p_last_name,  `updated_datetime` = NOW(), `tournament` = p_tournament;
 
 SELECT LAST_INSERT_ID() 'id';
 

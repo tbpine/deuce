@@ -15,6 +15,7 @@
 -- drop table if exists  `sport`;
 -- drop table if exists  `settings`;
 
+
 -- settings for the while application
 
 CREATE TABLE IF NOT EXISTS `settings` (
@@ -97,8 +98,9 @@ CREATE TABLE IF NOT EXISTS `tournament_venue` (
 CREATE TABLE IF NOT EXISTS `player` (
     `id` 						INT PRIMARY KEY AUTO_INCREMENT,
     `first_name` 				VARCHAR(100),
+    `middle_name` 				VARCHAR(100),
     `last_name` 				VARCHAR(100),
-    `organization`				INT,
+	`tournament`				INT,
     `utr` 						DECIMAL(6,2),
     `updated_datetime` 			TIMESTAMP,
     `created_datetime` 			TIMESTAMP
@@ -203,11 +205,4 @@ CREATE TABLE IF NOT EXISTS `match_player` (
 );
 
 
--- for tournament registrations
-create table `registration` (
-`id` int primary key auto_increment,
-`player` int,
-`tournament` int,
-`updated_datetime` timestamp,
-`created_datetime` timestamp);
 

@@ -18,7 +18,13 @@ public static class DbCommandExt
     {
         var parameter = command.CreateParameter();
         parameter.ParameterName = parameterName;
-        parameter.Value = value;
+
+        //Change empty strings to null
+        if (value is string && string.IsNullOrEmpty(value?.ToString()??""))
+            parameter.Value = DBNull.Value;
+        else
+            parameter.Value = value;
+
         return parameter;
     }
 

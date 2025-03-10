@@ -12,8 +12,8 @@ public class UnitTestsPlayer
 {
 
     [TestMethod]
-    [DataRow(10)]
-    public void set_n_players_returns_nothing(int noPlayers)
+    [DataRow(10,1)]
+    public void set_n_players_returns_nothing(int noPlayers, int tourId)
     {
         //Assign
         //Action
@@ -31,6 +31,7 @@ public class UnitTestsPlayer
         {
             //create the new player
             DbRepoPlayer depoPlayer = new(conn, org);
+            depoPlayer.Tournament = tourId;
             string[] rname = RandomUtil.GetPlayer().Split(new char[] { ' ' });
             Player newPlayer = new()
             {

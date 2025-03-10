@@ -1,4 +1,5 @@
 using System.Data.Common;
+using System.Net;
 using deuce.ext;
 
 namespace deuce;
@@ -6,8 +7,10 @@ public class DbRepoPlayer : DbRepoBase<Player>
 {
     
     private  Organization? _organization;
+    private int _tournament;
 
     public Organization? Organization { get=>_organization; set=>_organization = value; }
+    public int Tournament { get=>_tournament; set=>_tournament = value; }
 
     public DbRepoPlayer(DbConnection dbconn, params object[] references) : base(dbconn)
     {
@@ -34,15 +37,15 @@ public class DbRepoPlayer : DbRepoBase<Player>
         _dbconn.Open();
 
         List<Player> players = new();
-        await _dbconn.CreateReaderStoreProcAsync("sp_get_player", ["p_organization" ], [ filter.ClubId ],
+        await _dbconn.CreateReaderStoreProcAsync("sp_get_player", ["p_tournament" ], [ filter.TournamentId ],
         r =>
         {
             Player p = new()
             {
                 Id = r.Parse<int>("id"),
-                Club = _organization,
                 First = r.Parse<string>("first_name"),
                 Last = r.Parse<string>("last_name"),
+                Middle = r.Parse<string>("middle_name"),
                 Ranking = r.Parse<double>("utr")
             };
 
@@ -63,7 +66,8 @@ public class DbRepoPlayer : DbRepoBase<Player>
         object primaryKeyId = obj.Id < 1 ? DBNull.Value : obj.Id;
 
         var command = _dbconn.CreateCommandStoreProc("sp_set_player", ["p_id", "p_organization", "p_first_name", "p_last_name",
-        "p_utr"], [primaryKeyId, _organization?.Id ?? 1, obj.First ?? "", obj.Last ?? "", obj.Ranking ]);
+        "p_middle_name", "p_tournament", "p_utr"], [primaryKeyId, _organization?.Id ?? 1, obj.First ??"", obj.Last ?? "",
+        obj.Middle??"", _tournament,  obj.Ranking ]);
         obj.Id = command.GetIntegerFromScaler(command.ExecuteScalar());
 
         _dbconn.Close();

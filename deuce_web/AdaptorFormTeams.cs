@@ -8,14 +8,13 @@ using deuce;
 class AdaptorFormTeams : AdaptorTeamsBase
 {
     //to save new players
-    private readonly DbRepoPlayer _dbRepoPlayer;
 
     /// <summary>
     /// Construct with player dbrepos
     /// </summary>
-    public AdaptorFormTeams(DbRepoPlayer dbRepoPlayer)
+    public AdaptorFormTeams()
     {
-        _dbRepoPlayer = dbRepoPlayer;
+        
     }
 
     /// <summary>
