@@ -14,13 +14,15 @@ public static class DbCommandExt
     /// <param name="parameterName">Name of parameter</param>
     /// <param name="value">Parameter value</param>
     /// <returns>A DbPrameter object</returns>
-    public static DbParameter CreateWithValue(this DbCommand command, string parameterName, object value)
+    public static DbParameter CreateWithValue(this DbCommand command, string parameterName, object? value)
     {
         var parameter = command.CreateParameter();
         parameter.ParameterName = parameterName;
 
         //Change empty strings to null
-        if (value is string && string.IsNullOrEmpty(value?.ToString()??""))
+        if (value is null)
+            parameter.Value = DBNull.Value;
+        else if (value is string && string.IsNullOrEmpty(value?.ToString()??""))
             parameter.Value = DBNull.Value;
         else
             parameter.Value = value;

@@ -1,6 +1,7 @@
 using System.Data;
 using System.Data.Common;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using MySql.Data.MySqlClient;
 
 /// <summary>
@@ -23,6 +24,7 @@ class DbConnectionLocal : DbConnection
         _connection.ConnectionString = _config.GetConnectionString("deuce_local");
     }
 
+    [AllowNull]
     public override string ConnectionString
     {
         get => _connection.ConnectionString??"";

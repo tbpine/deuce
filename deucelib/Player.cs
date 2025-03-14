@@ -17,8 +17,8 @@ public class Player
     private int _index;
     private int _teamPlayerId;
     private Organization? _club;
-
     private Team? _team;
+    private Tournament? _tournament;
 
     public int Id { get { return _id; } set { _id = value; } }
     public string? First { get { return _first; } set { _first = value; } }
@@ -29,9 +29,13 @@ public class Player
     public int TeamPlayerId { get { return _teamPlayerId; } set { _teamPlayerId = value; } }
     public Organization? Club { get { return _club; } set { _club = value; }}
     public Team? Team { get { return _team; } set { _team = value; }}
-
-
     
+    /// <summary>
+    /// Usually a Tournament DTO (Data transfer object)
+    /// containing only the ID
+    /// </summary>
+    public Tournament? Tournament { get=>_tournament;set=>_tournament = value; }    
+
     public IEnumerable<Match> History { get => _history; }
     /// <summary>
     /// The empty constructor

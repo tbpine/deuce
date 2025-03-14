@@ -10,6 +10,7 @@ public class TournamentVenuePageModel : BasePageModelWizard
 {
    private readonly ILogger<TournamentVenuePageModel> _log;
    private readonly DbRepoVenue _dbRepoVenue;
+   private readonly ICacheMaster  _cache;
 
 
    [BindProperty]
@@ -17,17 +18,10 @@ public class TournamentVenuePageModel : BasePageModelWizard
 
 
    [BindProperty]
-   public string? Suburb { get; set; }
-
-   [BindProperty]
-   public string? PostCode { get; set; }
-
-   [BindProperty]
    public string? State { get; set; }
 
-
    [BindProperty]
-   public string? Country { get; set; }
+   public int CountryCode { get; set; }
 
    public bool Validated { get; set; }
    public string? ErrElement { get; set; }
@@ -37,11 +31,12 @@ public class TournamentVenuePageModel : BasePageModelWizard
    public List<SelectListItem> Countries { get => _countries; }
 
    public TournamentVenuePageModel(ILogger<TournamentVenuePageModel> log, IHandlerNavItems handlerNavItems,
-   IConfiguration cfg, IServiceProvider sp, DbRepoVenue dbrepoVenue)
+   IConfiguration cfg, IServiceProvider sp, DbRepoVenue dbrepoVenue, ICacheMaster cache)
    : base(handlerNavItems, sp, cfg)
    {
       _log = log;
       _dbRepoVenue = dbrepoVenue;
+      _cache = cache;
    }
 
    public async Task<IActionResult> OnGet()
@@ -71,8 +66,6 @@ public class TournamentVenuePageModel : BasePageModelWizard
       //Tournament DTO
       Tournament tourDTO = new Tournament() { Id = _sessionProxy?.TournamentId ?? 0 };
 
-      //Convert postcode
-      int postCode = int.TryParse(this.PostCode, out postCode) ? postCode : 0;
 
       //Make the model class
       TournamentVenue venue = new TournamentVenue()
@@ -80,10 +73,10 @@ public class TournamentVenuePageModel : BasePageModelWizard
          Id = -1,
          Tournament = tourDTO,
          Street = this.Street ?? "",
-         Suburb = this.Suburb ?? "",
-         PostCode = postCode,
+         Suburb = "",
+         PostCode = 0,
          State = this.State ?? "",
-         Country = this.Country ?? ""
+         CountryCode = this.CountryCode
       };
 
 
@@ -92,6 +85,14 @@ public class TournamentVenuePageModel : BasePageModelWizard
       //Save teams to the database
 
       _dbRepoVenue.Set(venue);
+
+      
+      int entryType = _sessionProxy?.EntryType??(int)deuce.EntryType.Team;
+
+        if (entryType == (int)deuce.EntryType.Team)
+            return NextPage("/TournamentFormatTeams");
+        else if (entryType == (int)deuce.EntryType.Individual)
+            return NextPage("/TournamentFormatPlayer");
 
       return NextPage("");
 
@@ -106,12 +107,11 @@ public class TournamentVenuePageModel : BasePageModelWizard
       var firstOption = new SelectListItem("", "");
       firstOption.Selected = true;
 
-      _countries.Add(firstOption);
-      _countries.Add(new SelectListItem("Australia", "aus"));
-      _countries.Add(new SelectListItem("US", "us"));
-      _countries.Add(new SelectListItem("UK", "uk"));
-      _countries.Add(new SelectListItem("New Zealand", "nz"));
-
+      //Load countries from the cache.
+      var listOfCountries =  await _cache.GetList<Country>(CacheMasterDefault.KEY_ENTRY_COUNTRIES);
+      foreach(Country country in listOfCountries??new())
+         _countries.Add(new SelectListItem(country.Name, country.Code.ToString()));
+         
       //Load the venue where this tournament is
       //to be held.
 
@@ -130,10 +130,8 @@ public class TournamentVenuePageModel : BasePageModelWizard
          //Set binded properties that will
          //be displayed on the page.
          Street = loadedVenue.Street;
-         Suburb = loadedVenue.Suburb;
          State = loadedVenue.State;
-         PostCode = loadedVenue.PostCode.ToString();
-         Country = loadedVenue.Country;
+         CountryCode = loadedVenue.CountryCode;
 
       }
 
@@ -147,16 +145,9 @@ public class TournamentVenuePageModel : BasePageModelWizard
    /// <returns></returns>
    private bool ValidatePage()
    {
-      //Check that the  post code is is valid
-      int iPostCode = int.TryParse(PostCode?.Trim() ?? "", out iPostCode) ? iPostCode : 0;
-      if (iPostCode == 0)
-      {
-         PostCode = "";
-         return false;
-      }
 
       //Check country selection
-      if (String.IsNullOrEmpty(Country))
+      if (CountryCode < 0)
       {
          return false;
       }

@@ -150,10 +150,10 @@ public class TournamentPlayersPageModel : BasePageModelWizard
 
             //Select all players in a club
             Organization organization = new Organization() { Id = orgId };
+            Filter filter = new() { TournamentId = currentTourId , ClubId = organization.Id};
             //Use a DB repo
-            _dbRepoPlayer.Organization = organization;
-            var orgPlayers = await _dbRepoPlayer.GetList(new Filter() { ClubId = orgId });
-            var currentTour = (await _dbRepoTournament.GetList(new Filter() { TournamentId = currentTourId })).FirstOrDefault();
+            var orgPlayers = await _dbRepoPlayer.GetList(filter);
+            var currentTour = (await _dbRepoTournament.GetList(filter)).FirstOrDefault();
 
             //Deflat saved teams
             if (currentTour is not null)
@@ -163,7 +163,6 @@ public class TournamentPlayersPageModel : BasePageModelWizard
                 //Load tournament details
                 if (_tournamentDetail is null)
                 {
-                    Filter filter = new() { ClubId = organization.Id, TournamentId = currentTour.Id };
                     var listTourDetail = await _dbRepoTournamentDetail.GetList(filter);
                     _tournamentDetail = listTourDetail.FirstOrDefault();
                 }

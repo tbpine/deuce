@@ -14,9 +14,31 @@
 -- drop table if exists  `match_player`;
 -- drop table if exists  `sport`;
 -- drop table if exists  `settings`;
-
+-- drop table if exists  `member`;
 
 -- settings for the while application
+
+CREATE TABLE IF NOT EXISTS `iso_3166` (
+    `name` VARCHAR(100),
+    `alpha-2` CHAR(2),
+    `alpha-3` CHAR(3),
+    `country-code` INT,
+    `iso_3166-2` VARCHAR(100),
+    `region` VARCHAR(50),
+    `sub-region` VARCHAR(50),
+    `intermediate-region` VARCHAR(50),
+    `region-code` INT,
+    `sub-region-code` INT,
+	`intermediate-region-code` INT
+);
+
+CREATE TABLE IF NOT EXISTS `state` (
+    `id` 			INT PRIMARY KEY,
+    `country` 		INT,
+    `key` 			VARCHAR(50),
+    `value` 		VARCHAR(300)
+);
+
 
 CREATE TABLE IF NOT EXISTS `settings` (
     `id` INT PRIMARY KEY,
@@ -88,12 +110,26 @@ CREATE TABLE IF NOT EXISTS `tournament_venue` (
     `suburb`			VARCHAR(100),
 	`state`				VARCHAR(100),
     `post_code`			INT,
-    `country`			VARCHAR(100),
+    `country-code`		INT,
     `updated_datetime`	TIMESTAMP,
     `created_datetime`	TIMESTAMP
 );
 
 
+-- members
+
+CREATE TABLE IF NOT EXISTS `member` (
+    `id` 						INT PRIMARY KEY AUTO_INCREMENT,
+    `first_name` 				VARCHAR(100),
+    `middle_name` 				VARCHAR(100),
+    `last_name` 				VARCHAR(100),
+    `utr` 						DECIMAL(6,2),
+    `country-code`				INT,
+    `updated_datetime` 			TIMESTAMP,
+    `created_datetime` 			TIMESTAMP
+);
+
+-- players involved in a tournament
 
 CREATE TABLE IF NOT EXISTS `player` (
     `id` 						INT PRIMARY KEY AUTO_INCREMENT,

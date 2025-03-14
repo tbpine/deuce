@@ -1,3 +1,4 @@
+using System.Net;
 using deuce;
 using MySql.Data.MySqlClient;
 
@@ -89,15 +90,15 @@ class AssignTournament
     }
 
 
-    private async Task<List<Player>> GetPlayers(int cludId)
+    private async Task<List<Player>> GetPlayers(int cludId, int tournamentId)
     {
         MySqlConnection dbconn = new("Server=localhost;Database=deuce;User Id=deuce;Password=deuce;");
         dbconn.Open();
-        Organization club = new Organization() { Id = cludId, Name = "test_club" };
-        Filter filter = new() { ClubId = club.Id };
+        Filter filter = new() { TournamentId = tournamentId};
 
 
-        DbRepoPlayer dbRepoPlayer = new DbRepoPlayer(dbconn, club);
+        DbRepoPlayer dbRepoPlayer = new DbRepoPlayer(dbconn);
+        
 
         var players = await dbRepoPlayer.GetList(filter);
 

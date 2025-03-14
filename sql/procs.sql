@@ -692,7 +692,7 @@ IN p_tour_id INT
 )
 BEGIN
 
-	SELECT `id`,`tournament`,`street`,`suburb`,`state`,`post_code`,`country`,`updated_datetime`,`created_datetime`
+	SELECT `id`,`tournament`,`street`,`suburb`,`state`,`post_code`,`country-code`,`updated_datetime`,`created_datetime`
 	FROM `tournament_venue`
     WHERE `tournament` = p_tour_id;
 	
@@ -704,18 +704,18 @@ BEGIN
 DROP PROCEDURE IF EXISTS `sp_set_tournament_venue`//
 
 CREATE PROCEDURE `sp_set_tournament_venue`(
-IN p_id INT,
-IN p_tournament INT,
-IN p_street VARCHAR(300),
-IN p_suburb VARCHAR(100),
-IN p_state VARCHAR(100),
-IN p_post_code INT,
-IN p_country VARCHAR(100))
+IN p_id 				INT,
+IN p_tournament 		INT,
+IN p_street 			VARCHAR(300),
+IN p_suburb 			VARCHAR(100),
+IN p_state 				VARCHAR(100),
+IN p_post_code 			INT,
+IN p_country_code 		INT)
 
 BEGIN
 
-INSERT INTO `tournament_venue`(`id`,`tournament`,`street`,`suburb`,`state`,`post_code`,`country`,`updated_datetime`,`created_datetime`) VALUES (p_id, p_tournament, p_street, p_suburb, p_state, p_post_code, p_country, NOW(), NOW())
-ON DUPLICATE KEY UPDATE `tournament` = p_tournament,`street` = p_street,`suburb` = p_suburb,`state` = p_state,`post_code` = p_post_code,`country` = p_country,`updated_datetime` = NOW();
+INSERT INTO `tournament_venue`(`id`,`tournament`,`street`,`suburb`,`state`,`post_code`,`country-code`,`updated_datetime`,`created_datetime`) VALUES (p_id, p_tournament, p_street, p_suburb, p_state, p_post_code, p_country, NOW(), NOW())
+ON DUPLICATE KEY UPDATE `tournament` = p_tournament,`street` = p_street,`suburb` = p_suburb,`state` = p_state,`post_code` = p_post_code,`country-code` = p_country,`updated_datetime` = NOW();
 
 SELECT LAST_INSERT_ID() 'id';
 
@@ -771,6 +771,19 @@ select count(`id`) 'labels' from `tournament` where `label` = p_label;
 
 END//
 
+
+DROP PROCEDURE IF EXISTS `sp_get_country_list`//
+
+CREATE PROCEDURE `sp_get_country_list`(
+
+)
+
+BEGIN
+
+SELECT `name`, `country-code` FROM `iso_3166` 
+ORDER BY `name`;
+
+END//
 
 
 DELIMITER ;

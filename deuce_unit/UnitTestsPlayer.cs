@@ -26,12 +26,14 @@ public class UnitTestsPlayer
         Random random = new Random();
         //Keep for assertions
         List<Player> newPlayers = new();
+        //Tournament DTO
+        Tournament dtoTournament = new Tournament() { Id =  tourId};
 
         for (int i = 0; i < noPlayers && i < RandomUtil.GetNameCount(); i++)
         {
             //create the new player
-            DbRepoPlayer depoPlayer = new(conn, org);
-            depoPlayer.Tournament = tourId;
+            DbRepoPlayer depoPlayer = new(conn);
+            
             string[] rname = RandomUtil.GetPlayer().Split(new char[] { ' ' });
             Player newPlayer = new()
             {
@@ -39,6 +41,7 @@ public class UnitTestsPlayer
                 First = rname[0],
                 Last = rname[1],
                 Ranking = random.NextDouble() * 10d,
+                Tournament = dtoTournament
             };
             newPlayers.Add(newPlayer);
             //Save to db
@@ -52,18 +55,17 @@ public class UnitTestsPlayer
 
     [TestMethod]
     [DataRow(1)]
-    public async Task get_players_for_club_returns_list(int clubId)
+    public async Task get_players_for_tournament_returns_list(int tournamentId)
     {
         MySqlConnection conn = new("Server=localhost;Database=deuce;User Id=deuce;Password=deuce;");
 
-        Organization c = new Organization() { Id = clubId };
         List<Player>? list = null;
         try
         {
             conn.Open();
 
-            var fac = new DbRepoPlayer(conn, c);
-            Filter filter = new() { ClubId = c.Id };
+            var fac = new DbRepoPlayer(conn);
+            Filter filter = new() {  TournamentId = tournamentId};
             list = await fac!.GetList(filter) ?? new List<Player>();
 
             foreach (Player p in list) Debug.Write($"{p.Id}|{p.First}|{p.Last}\n");

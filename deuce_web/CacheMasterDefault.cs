@@ -17,6 +17,7 @@ public class CacheMasterDefault : ICacheMaster
     public const String KEY_SPORTS = "sports";
     public const String KEY_TOURNAMENT_TYPES = "tournament_types";
     public const String KEY_ENTRY_TYPES = "entry_types";
+    public const String KEY_ENTRY_COUNTRIES= "countries";
 
     /// <summary>
     /// Add the memory cache singleton
@@ -70,6 +71,7 @@ public class CacheMasterDefault : ICacheMaster
         await CacheConstants<Interval>(new DbRepoInterval(_dbconn), KEY_INTERVALS);
         await CacheConstants<Sport>(new DbRepoSport(_dbconn), KEY_SPORTS);
         await CacheConstants<TournamentType>(new DbRepoTournamentType(_dbconn), KEY_TOURNAMENT_TYPES);
+        await CacheConstants<Country>(new DbRepoCountry(_dbconn), KEY_ENTRY_COUNTRIES);
         
         (_dbconn as DbConnectionLocal)?.KeepAlive(false);
         _dbconn.Close();

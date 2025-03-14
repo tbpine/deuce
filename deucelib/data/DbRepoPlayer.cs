@@ -6,25 +6,9 @@ namespace deuce;
 public class DbRepoPlayer : DbRepoBase<Player>
 {
     
-    private  Organization? _organization;
-    private int _tournament;
-
-    public Organization? Organization { get=>_organization; set=>_organization = value; }
-    public int Tournament { get=>_tournament; set=>_tournament = value; }
-
-    public DbRepoPlayer(DbConnection dbconn, params object[] references) : base(dbconn)
-    {
-        _organization = references[0] as Organization;
-    }
-
-    public DbRepoPlayer(DbConnection dbconn, Organization organization) : base(dbconn)
-    {
-        _organization = organization;
-    }
 
     public DbRepoPlayer(DbConnection dbconn) : base(dbconn)
     {
-        _organization = null;
     }
     
     /// <summary>
@@ -46,7 +30,8 @@ public class DbRepoPlayer : DbRepoBase<Player>
                 First = r.Parse<string>("first_name"),
                 Last = r.Parse<string>("last_name"),
                 Middle = r.Parse<string>("middle_name"),
-                Ranking = r.Parse<double>("utr")
+                Ranking = r.Parse<double>("utr"),
+                Tournament  = new () { Id = filter.TournamentId}
             };
 
             players.Add(p);
@@ -65,9 +50,8 @@ public class DbRepoPlayer : DbRepoBase<Player>
          //Explicitly insert new rows if id < 1
         object primaryKeyId = obj.Id < 1 ? DBNull.Value : obj.Id;
 
-        var command = _dbconn.CreateCommandStoreProc("sp_set_player", ["p_id", "p_organization", "p_first_name", "p_last_name",
-        "p_middle_name", "p_tournament", "p_utr"], [primaryKeyId, _organization?.Id ?? 1, obj.First ??"", obj.Last ?? "",
-        obj.Middle??"", _tournament,  obj.Ranking ]);
+        var command = _dbconn.CreateCommandStoreProc("sp_set_player", ["p_id",  "p_first_name", "p_last_name",
+        "p_middle_name", "p_tournament", "p_utr"], [primaryKeyId, obj.First, obj.Last , obj.Middle, obj.Tournament?.Id,  obj.Ranking ]);
         obj.Id = command.GetIntegerFromScaler(command.ExecuteScalar());
 
         _dbconn.Close();

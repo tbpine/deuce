@@ -8,13 +8,13 @@ public class TournamentVenue
     private string _suburb = "";
     private string _state = "";
     private int _postCode;
-    private string _country = "";
+    private int _countryCode;
     public int Id { get => _id; set => _id = value; }
     public string Street { get => _street; set => _street = value; }
     public string Suburb { get => _suburb; set => _suburb = value; }
     public string State { get => _state; set => _state = value; }
     public int PostCode { get => _postCode; set => _postCode = value; }
-    public string Country { get => _country; set => _country = value; }
+    public int CountryCode { get => _countryCode; set => _countryCode = value; }
     public Tournament? Tournament { get=>_tournament; set =>_tournament = value; }  
 
     /// <summary>
@@ -24,14 +24,14 @@ public class TournamentVenue
     /// <param name="suburb">Suburb</param>
     /// <param name="state">State</param>
     /// <param name="postCode">Post code</param>
-    /// <param name="country">Country</param>
-    public TournamentVenue(string street, string suburb, string state, int postCode, string country)
+    /// <param name="countryCode">Country code</param>
+    public TournamentVenue(string street, string suburb, string state, int postCode, int countryCode)
     {
         _street = street;
         _suburb = suburb;
         _state = state;
         _postCode = postCode;
-        _country = country;
+        _countryCode = countryCode;
     }
 
     /// <summary>

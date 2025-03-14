@@ -113,12 +113,7 @@ public class TournamentDetailPageModel : BasePageModelWizard
         }
 
 
-        if (EntryType == (int)deuce.EntryType.Team)
-            return NextPage("/TournamentFormatTeams");
-        else if (EntryType == (int)deuce.EntryType.Individual)
-            return NextPage("/TournamentFormatPlayer");
-
-        return Page();
+        return NextPage("");
     }
 
     private async Task LoadPage()

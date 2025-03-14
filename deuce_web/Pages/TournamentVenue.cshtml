@@ -15,14 +15,10 @@
      }
     <form class="needs-validation @attrValidated" novalidate id="page_form" action="~/TournamentVenue" method="POST">
       <div class="position-relative mb-4">
-        <label asp-for="Street" class="form-label fs-base">Street Address*</label>
-        <input type="text" class="form-control form-control-lg" asp-for="Street" required autocomplete="address-level1" value="@Model.Street">
-        <div class="invalid-feedback">Enter venue street address!</div>
-      </div>
-      <div class="position-relative mb-4">
-        <label asp-for="Suburb" class="form-label fs-base">Suburb *</label>
-        <input type="text" class="form-control form-control-lg" asp-for="Suburb" required autocomplete="address-level2" value="@Model.Suburb">
-        <div class="invalid-tooltip bg-transparent p-0">Enter venue suburb!</div>
+        <label asp-for="CountryCode" class="form-label fs-base">Country *</label>
+        <select asp-items="Model.Countries" class="form-select" asp-for="CountryCode" required>
+        </select>
+        <div class="invalid-tooltip bg-transparent p-0">Select Country</div>
       </div>
       <div class="position-relative mb-4">
         <label asp-for="State" class="form-label fs-base">State *</label>
@@ -31,15 +27,9 @@
       </div>
 
       <div class="position-relative mb-4">
-        <label asp-for="PostCode" class="form-label fs-base">Post Code *</label>
-        <input type="text" class="form-control form-control-lg" asp-for="PostCode" required autocomplete="address-level3" value="@Model.PostCode">
-        <div class="invalid-tooltip bg-transparent p-0">Invalid post code! (Numbers only)</div>
-      </div>
-      <div class="position-relative mb-4">
-        <label asp-for="Country" class="form-label fs-base">Country *</label>
-        <select asp-items="Model.Countries" class="form-select" asp-for="Country" required>
-        </select>
-        <div class="invalid-tooltip bg-transparent p-0">Select Country</div>
+        <label asp-for="Street" class="form-label fs-base">Street Address*</label>
+        <input type="text" class="form-control form-control-lg" asp-for="Street" required autocomplete="address-level1" value="@Model.Street">
+        <div class="invalid-feedback">Enter venue street address!</div>
       </div>
     </form>
   </div>

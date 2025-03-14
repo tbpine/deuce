@@ -21,7 +21,7 @@ public static class DbDataConnectionExt
         /// <returns>DbCommand object</returns>
         /// <exception cref="ArgumentException"></exception>
         public static DbCommand CreateCommandStoreProc(this DbConnection conn, string procName,
-        string[] paramNames, object[] paramValues, DbTransaction? transaction = null)
+        string[] paramNames, object?[] paramValues, DbTransaction? transaction = null)
         {
                 //Create a store procedure command
                 //set type and commmand text,
