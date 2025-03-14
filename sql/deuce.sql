@@ -138,6 +138,7 @@ CREATE TABLE IF NOT EXISTS `player` (
     `last_name` 				VARCHAR(100),
 	`tournament`				INT,
     `utr` 						DECIMAL(6,2),
+    `member`					INT,
     `updated_datetime` 			TIMESTAMP,
     `created_datetime` 			TIMESTAMP
 );

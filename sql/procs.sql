@@ -203,7 +203,7 @@ IN p_tournament INT
 )
 BEGIN
 
-	SELECT `id`,`first_name`,`last_name`,`middle_name`,`utr`,`updated_datetime`,`created_datetime`
+	SELECT `id`,`first_name`,`last_name`,`middle_name`,`utr`,`member`, `updated_datetime`,`created_datetime`
 	FROM `player`
     WHERE `tournament` = p_tournament OR ISNULL(p_tournament)
 	ORDER BY `first_name`,`last_name`, `middle_name`;
@@ -215,18 +215,22 @@ BEGIN
 DROP PROCEDURE IF EXISTS `sp_set_player`//
 
 CREATE PROCEDURE `sp_set_player`(
-IN p_id INT,
-IN p_first_name VARCHAR(100),
-IN p_middle_name VARCHAR(100),
-IN p_last_name VARCHAR(100),
-IN p_tournament INT,
-IN p_utr DECIMAL(6,2))
+IN p_id 				INT,
+IN p_first_name 		VARCHAR(100),
+IN p_middle_name 		VARCHAR(100),
+IN p_last_name 			VARCHAR(100),
+IN p_tournament 		INT,
+IN p_utr 				DECIMAL(6,2),
+IN p_member 			INT
+
+)
 
 BEGIN
 
-INSERT INTO `player`(`id`,`organization`,`first_name`,`middle_name`,`last_name`,`tournament`, `utr`,`updated_datetime`,`created_datetime`) VALUES (p_id, p_organization,p_first_name, p_last_name, p_utr, NOW(), NOW())
+INSERT INTO `player`(`id`,`organization`,`first_name`,`middle_name`,`last_name`,`tournament`, `utr`,`member`,`updated_datetime`,`created_datetime`) 
+VALUES (p_id, p_organization,p_first_name, p_last_name, p_utr, p_member, NOW(), NOW())
 ON DUPLICATE KEY UPDATE `utr` = p_utr, first_name = p_first_name, middle_name = p_middle_name,
-last_name = p_last_name,  `updated_datetime` = NOW(), `tournament` = p_tournament;
+last_name = p_last_name,  `updated_datetime` = NOW(), `tournament` = p_tournament, `member` = p_member;
 
 SELECT LAST_INSERT_ID() 'id';
 
@@ -675,6 +679,7 @@ truncate `match`;
 truncate `match_player`;
 truncate `tournament`;
 truncate `tournament_detail`;
+truncate `player`;
 
 alter table `team_player` auto_increment = 1;
 alter table `team` auto_increment = 1;
@@ -682,6 +687,7 @@ alter table `match` auto_increment = 1;
 alter table `match_player` auto_increment = 1;
 alter table `tournament` auto_increment = 1;
 alter table `tournament_detail` auto_increment = 1;
+alter table `player` auto_increment = 1;
 
 END//
 
@@ -714,8 +720,8 @@ IN p_country_code 		INT)
 
 BEGIN
 
-INSERT INTO `tournament_venue`(`id`,`tournament`,`street`,`suburb`,`state`,`post_code`,`country-code`,`updated_datetime`,`created_datetime`) VALUES (p_id, p_tournament, p_street, p_suburb, p_state, p_post_code, p_country, NOW(), NOW())
-ON DUPLICATE KEY UPDATE `tournament` = p_tournament,`street` = p_street,`suburb` = p_suburb,`state` = p_state,`post_code` = p_post_code,`country-code` = p_country,`updated_datetime` = NOW();
+INSERT INTO `tournament_venue`(`id`,`tournament`,`street`,`suburb`,`state`,`post_code`,`country-code`,`updated_datetime`,`created_datetime`) VALUES (p_id, p_tournament, p_street, p_suburb, p_state, p_post_code, p_country_code, NOW(), NOW())
+ON DUPLICATE KEY UPDATE `tournament` = p_tournament,`street` = p_street,`suburb` = p_suburb,`state` = p_state,`post_code` = p_post_code,`country-code` = p_country_code,`updated_datetime` = NOW();
 
 SELECT LAST_INSERT_ID() 'id';
 
@@ -785,6 +791,46 @@ ORDER BY `name`;
 
 END//
 
+
+DROP PROCEDURE IF EXISTS `sp_get_member_list`//
+
+CREATE PROCEDURE `sp_get_member_list`(
+in p_country_code int
+)
+
+BEGIN
+
+SELECT `id`, `first_name`, `last_name`, `middle_name`, `utr`,  `country-code`,
+`updated_datetime` ,`created_datetime`
+FROM `member` 
+WHERE `country-code` = p_country_code
+ORDER BY `first_name`, `last_name`;
+
+END//
+
+
+DROP PROCEDURE IF EXISTS `sp_set_member`//
+
+CREATE PROCEDURE `sp_set_member`(
+in p_id int,
+in p_first_name varchar(100),
+in p_last_name varchar(100),
+in p_middle_name varchar(100),
+in p_utr decimal(6,2),
+in p_country_code int
+
+)
+
+BEGIN
+
+INSERT INTO `member` (`id`, `first_name`, `last_name`, `middle_name`, `utr`,  `country-code`, `updated_datetime` ,`created_datetime`)
+VALUES (p_id, p_first_name, p_last_name, p_middle_name, p_utr, p_country_code, NOW(), NOW())
+ON DUPLICATE KEY UPDATE`first_name` = p_first_name, `last_name` = p_last_name, 
+`middle_name` = p_middle_name, `utr` = p_utr,  `country-code` = p_country_code , `updated_datetime` = NOW();
+
+SELECT last_insert_id() 'id';
+
+END//
 
 DELIMITER ;
 

@@ -16,6 +16,9 @@ public class TournamentPlayersPageModel : BasePageModelWizard
     private readonly DbRepoRecordTeamPlayer _dbRepoRecordTeamPlayer;
     private readonly DbRepoTeam _dbRepoTeam;
     private readonly DbRepoTournament _dbRepoTournament;
+    private readonly DbRepoMember _dbRepoMember;
+    private readonly DbRepoVenue _dbRepoVenue;
+
     private readonly IAdaptorTeams _adaptorTeams;
 
     private List<Team>? _teams;
@@ -27,7 +30,7 @@ public class TournamentPlayersPageModel : BasePageModelWizard
     public string Error { get; set; } = "";
 
     public string JSON { get; set; } = "";
-    public List<List<SelectListItem>>? SelectPlayer { get; set; } = new();
+    public List<List<SelectListItem>>? SelectMember { get; set; } = new();
 
     public List<Team>? Teams { get => _teams; }
 
@@ -36,7 +39,7 @@ public class TournamentPlayersPageModel : BasePageModelWizard
     public TournamentPlayersPageModel(ILogger<TournamentPlayersPageModel> log, IServiceProvider sp,
     IConfiguration config, IHandlerNavItems handlerNavItems, DbRepoPlayer dbRepoPlayer,
     DbRepoTournamentDetail dbRepoTournamentDetail, DbRepoRecordTeamPlayer dbRepoRecordTeamPlayer, DbRepoTeam dbRepoTeam,
-    DbRepoTournament dbRepoTournament, IAdaptorTeams adaptorTeams) : base(handlerNavItems, sp, config)
+    DbRepoTournament dbRepoTournament, IAdaptorTeams adaptorTeams, DbRepoMember dbRepoMember, DbRepoVenue dbRepoVenue) : base(handlerNavItems, sp, config)
     {
         _log = log;
         _teams = null;
@@ -46,6 +49,8 @@ public class TournamentPlayersPageModel : BasePageModelWizard
         _dbRepoTeam = dbRepoTeam;
         _dbRepoTournament = dbRepoTournament;
         _adaptorTeams = adaptorTeams;
+        _dbRepoMember = dbRepoMember;
+        _dbRepoVenue = dbRepoVenue;
     }
 
     public async Task<IActionResult> OnGet()
@@ -145,14 +150,22 @@ public class TournamentPlayersPageModel : BasePageModelWizard
         int orgId = _sessionProxy?.OrganizationId ?? 1;
         EntryType = _sessionProxy?.EntryType ?? (int)deuce.EntryType.Team;
         int currentTourId = _sessionProxy?.TournamentId ?? 0;
+
+        
         try
         {
-
-            //Select all players in a club
             Organization organization = new Organization() { Id = orgId };
             Filter filter = new() { TournamentId = currentTourId , ClubId = organization.Id};
+            //Need to know where the tournament is held, so members
+            //can be listed
+            var venue = (await _dbRepoVenue.GetList(filter)).FirstOrDefault();
+
+            //Set country code
+            filter.CountryCode = venue?.CountryCode??36;
+
+            //Select all players in a country
             //Use a DB repo
-            var orgPlayers = await _dbRepoPlayer.GetList(filter);
+            var countryMembers = await _dbRepoMember.GetList(filter);
             var currentTour = (await _dbRepoTournament.GetList(filter)).FirstOrDefault();
 
             //Deflat saved teams
@@ -195,19 +208,19 @@ public class TournamentPlayersPageModel : BasePageModelWizard
 
             //Create select of  players
 
-            List<SelectListItem> playerList = new();
+            List<SelectListItem> memberList = new();
             //The empty player 
-            playerList.Add(new SelectListItem("-- New Player --", ""));
-            foreach (Player player in orgPlayers)
+            memberList.Add(new SelectListItem("-- New Player --", ""));
+            foreach (Member member in countryMembers)
             {
-                playerList.Add(new SelectListItem(player.ToString(), player.Id.ToString()));
+                memberList.Add(new SelectListItem(member.ToString(), member.Id.ToString()));
             }
             //Default to a new player
-            playerList[0].Selected = true;
+            memberList[0].Selected = true;
             for (int i = 0; i < NoTeams * TeamSize; i++)
             {
-                List<SelectListItem> copiedPlayerList = new(playerList);
-                SelectPlayer?.Add(copiedPlayerList);
+                List<SelectListItem> copiedMemberList = new(memberList);
+                SelectMember?.Add(copiedMemberList);
             }
 
             //Reconcile teams

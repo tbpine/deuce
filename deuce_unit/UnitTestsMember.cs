@@ -8,12 +8,12 @@ using MySql.Data.MySqlClient;
 
 
 [TestClass]
-public class UnitTestsPlayer
+public class UnitTestsMember
 {
 
     [TestMethod]
-    [DataRow(10,1)]
-    public void set_n_non_member_players_returns_nothing(int noPlayers, int tourId)
+    [DataRow(10,36)]
+    public void set_n_members_returns_nothing(int noPlayers, int countryCode)
     {
         //Assign
         //Action
@@ -21,54 +21,54 @@ public class UnitTestsPlayer
         
         DbConnectionLocal conn = new("Server=localhost;Database=deuce;User Id=deuce;Password=deuce;");
         conn.Open();
-        Organization org = new Organization() { Id = 1, Name = "testing" };
         //For UTR
         Random random = new Random();
         //Keep for assertions
-        List<Player> newPlayers = new();
+        List<Member> newMembers = new();
         //Tournament DTO
-        Tournament dtoTournament = new Tournament() { Id =  tourId};
 
         for (int i = 0; i < noPlayers && i < RandomUtil.GetNameCount(); i++)
         {
             //create the new player
-            DbRepoPlayer depoPlayer = new(conn);
+            DbRepoMember depoMember = new(conn);
             
             string[] rname = RandomUtil.GetPlayer().Split(new char[] { ' ' });
-            Player newPlayer = new()
+            Member newMember = new()
             {
                 Id = 0,
                 First = rname[0],
                 Last = rname[1],
-                Ranking = random.NextDouble() * 10d,
-                Tournament = dtoTournament
+                Middle = rname[1],
+                Utr = random.NextDouble() * 10d,
+                CountryCode = countryCode
+                
             };
-            newPlayers.Add(newPlayer);
+            newMembers.Add(newMember);
             //Save to db
-            depoPlayer.Set(newPlayer);
+            depoMember.Set(newMember);
 
         }
 
-        foreach(Player player in newPlayers) Assert.IsTrue(player.Id>0, "Player did not save");
+        foreach(Member member in newMembers) Assert.IsTrue(member.Id>0, "Member did not save");
 
     }
 
     [TestMethod]
-    [DataRow(1)]
-    public async Task get_players_for_tournament_returns_list(int tournamentId)
+    [DataRow(36)]
+    public async Task get_players_for_country_returns_list(int countryCode)
     {
-        MySqlConnection conn = new("Server=localhost;Database=deuce;User Id=deuce;Password=deuce;");
+        DbConnectionLocal conn = new("Server=localhost;Database=deuce;User Id=deuce;Password=deuce;");
 
-        List<Player>? list = null;
+        List<Member>? list = null;
         try
         {
             conn.Open();
 
-            var fac = new DbRepoPlayer(conn);
-            Filter filter = new() {  TournamentId = tournamentId};
-            list = await fac!.GetList(filter) ?? new List<Player>();
+            var fac = new DbRepoMember(conn);
+            Filter filter = new(){ CountryCode = countryCode };
+            list = await fac!.GetList(filter) ?? new List<Member>();
 
-            foreach (Player p in list) Debug.Write($"{p.Id}|{p.First}|{p.Last}\n");
+            foreach (Member m in list) Debug.Write($"{m.Id}|{m.First}|{m.Last}\n");
 
 
         }

@@ -86,7 +86,7 @@ public class TournamentVenuePageModel : BasePageModelWizard
 
       _dbRepoVenue.Set(venue);
 
-      
+      //Different pages for teams and individual tournaments
       int entryType = _sessionProxy?.EntryType??(int)deuce.EntryType.Team;
 
         if (entryType == (int)deuce.EntryType.Team)
@@ -108,9 +108,15 @@ public class TournamentVenuePageModel : BasePageModelWizard
       firstOption.Selected = true;
 
       //Load countries from the cache.
+      
       var listOfCountries =  await _cache.GetList<Country>(CacheMasterDefault.KEY_ENTRY_COUNTRIES);
       foreach(Country country in listOfCountries??new())
-         _countries.Add(new SelectListItem(country.Name, country.Code.ToString()));
+      {
+         var selectItem = new SelectListItem(country.Name, country.Code.ToString());
+         _countries.Add(selectItem);
+      }
+      //For now, default to Australia
+      CountryCode = 36;
          
       //Load the venue where this tournament is
       //to be held.

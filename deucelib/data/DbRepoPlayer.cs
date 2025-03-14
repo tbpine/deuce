@@ -19,7 +19,7 @@ public class DbRepoPlayer : DbRepoBase<Player>
     public override async Task<List<Player>> GetList(Filter filter)
     {
         _dbconn.Open();
-
+        //Note, player contains a member DTO.
         List<Player> players = new();
         await _dbconn.CreateReaderStoreProcAsync("sp_get_player", ["p_tournament" ], [ filter.TournamentId ],
         r =>
@@ -31,7 +31,8 @@ public class DbRepoPlayer : DbRepoBase<Player>
                 Last = r.Parse<string>("last_name"),
                 Middle = r.Parse<string>("middle_name"),
                 Ranking = r.Parse<double>("utr"),
-                Tournament  = new () { Id = filter.TournamentId}
+                Tournament  = new () { Id = filter.TournamentId},
+                Member  = new () { Id = r.Parse<int>("member") }
             };
 
             players.Add(p);
@@ -51,7 +52,9 @@ public class DbRepoPlayer : DbRepoBase<Player>
         object primaryKeyId = obj.Id < 1 ? DBNull.Value : obj.Id;
 
         var command = _dbconn.CreateCommandStoreProc("sp_set_player", ["p_id",  "p_first_name", "p_last_name",
-        "p_middle_name", "p_tournament", "p_utr"], [primaryKeyId, obj.First, obj.Last , obj.Middle, obj.Tournament?.Id,  obj.Ranking ]);
+        "p_middle_name", "p_tournament", "p_utr", "p_member"], [primaryKeyId, obj.First, obj.Last , obj.Middle, obj.Tournament?.Id,  obj.Ranking ,
+        obj.Member?.Id]);
+        
         obj.Id = command.GetIntegerFromScaler(command.ExecuteScalar());
 
         _dbconn.Close();

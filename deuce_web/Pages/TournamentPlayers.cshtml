@@ -104,37 +104,37 @@
                 string attrPlayerNameNew = $"team_{i}_{teamId}_player_{j}_{teamPlayerId}_new";
 
                 int selectionIdx = i*Model.TeamSize + j;
-                List<SelectListItem>? playerList = Model.SelectPlayer?.ElementAt(selectionIdx);
-                playerList?.All(e=>{e.Selected = false; return true;});
+                List<SelectListItem>? memberList = Model.SelectMember?.ElementAt(selectionIdx);
+                memberList?.All(e=>{e.Selected = false; return true;});
                 
                 string newPlayerLabel = "new_player_label_" + selectionIdx.ToString();
                 string clsShowHideNewPlayer ="";
 
-                var selectedPlayer = playerList?.Find(e=>e.Value == iterPlayer?.Id.ToString());
+                var selectedMember = memberList?.Find(e=>e.Value == iterPlayer?.Member?.Id.ToString());
                 string newPlayerName = "";
-                if (selectedPlayer is not null) 
+                if (selectedMember is not null) 
                 {
-                  selectedPlayer.Selected = true;
+                  selectedMember.Selected = true;
                   //Set the initial visibility of new players entry
                   clsShowHideNewPlayer = "invisible zero_height";
                   newPlayerName = "";
                 }
-                else if ( (iterPlayer?.Id??0) < 1)
+                else if ( (iterPlayer?.Member?.Id??0) < 1)
                 {
                   //Set new player name
-                    newPlayerName = iterPlayer?.First??"" + " " + iterPlayer?.Last??"";
+                    newPlayerName = iterPlayer?.ToString()??"";
                     newPlayerName = newPlayerName.Trim();
                 }
 
-                else if (playerList is not null && playerList.Count > 0) playerList[0].Selected = true;
+                else if (memberList is not null && memberList.Count > 0) memberList[0].Selected = true;
 
                 <div class="row row-cols-*-3 g-0 mb-2">
-                  <div class="col-5 me-2"><span>Registered</span></div>
+                  <div class="col-5 me-2"><span>Members</span></div>
                   <div class="col-5 me-2 @clsShowHideNewPlayer" id="@newPlayerLabel" ><span>New Player</span></div>
                   <div class="col-1"></div>
                   <div class="col-5 me-2">
                     <select id="@attrPlayerName" name="@attrPlayerName" class="form-select-lg" aria-label="Select Player"
-                    asp-items="@playerList" data-select='{"searchEnabled" : true , "classNames": {"containerInner": ["form-select", "form-select-lg"]}}'
+                    asp-items="@memberList" data-select='{"searchEnabled" : true , "classNames": {"containerInner": ["form-select", "form-select-lg"]}}'
                     onchange="showHideNewPlayer('@attrPlayerName','@attrPlayerNameNew', '@newPlayerLabel')">
                       
                       </select>
