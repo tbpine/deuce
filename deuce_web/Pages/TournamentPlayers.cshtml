@@ -74,7 +74,7 @@
           string attrCanAddPlayer = "invisible zero_height";
           string attrCanDeletePlayer = "invisible";
 
-          <div class="d-sm-flex align-items-center" >
+          <div class="d-sm-flex align-items-center">
             <div class="d-inline-flex position-relative z-2 pt-1 pb-2 ps-2 p-sm-0 ms-2 ms-sm-0 me-sm-2">
               <div class="form-check position-relative z-1 fs-lg m-0">
                 <input type="checkbox" class="form-check-input">
@@ -116,8 +116,6 @@
 
                 var selectedMember = memberList?.Find(e => e.Value == iterPlayer?.Member?.Id.ToString());
                 string newPlayerName = "";
-
-                bool disableMemberList = false;
                 string attrInputNonMember = "";
 
                 if (selectedMember is not null)
@@ -134,7 +132,6 @@
                   newPlayerName = iterPlayer?.ToString() ?? "";
                   newPlayerName = newPlayerName.Trim();
                   attrInputNonMember = "";
-                  disableMemberList = true;
                 }
 
                 else if (memberList is not null && memberList.Count > 0) memberList[0].Selected = true;
@@ -144,28 +141,17 @@
                   <div class="col-5 me-2 @clsShowHideNewPlayer" id="@newPlayerLabel"><span></span></div>
                   <div class="col-1"></div>
                   <div class="col-5 me-2">
-                    @if (!disableMemberList)
-                    {
-                      <select id="@attrPlayerName" name="@attrPlayerName" class="form-select-lg" aria-label="Select Player" asp-items="@memberList"
-                        data-select='{"searchEnabled" : true , "classNames": {"containerInner": ["form-select", "form-select-lg"]}}'
-                        onchange="showHideNewPlayer('@attrPlayerName','@attrPlayerNameNew', '@newPlayerLabel')">
+                    <select id="@attrPlayerName" name="@attrPlayerName" class="form-select-lg" aria-label="Select Player"
+                      asp-items="@memberList"
+                      data-select='{"searchEnabled" : true , "classNames": {"containerInner": ["form-select", "form-select-lg"]}}'
+                      onchange="showHideNewPlayer('@attrPlayerName','@attrPlayerNameNew', '@newPlayerLabel')">
 
-                      </select>
-                    }
-                    else
-                    {
-                      <select id="@attrPlayerName" name="@attrPlayerName" class="form-select-lg" aria-label="Select Player" asp-items="@memberList"
-                        data-select='{"searchEnabled" : true , "classNames": {"containerInner": ["form-select", "form-select-lg"]}}'
-                        onchange="showHideNewPlayer('@attrPlayerName','@attrPlayerNameNew', '@newPlayerLabel')" >
-
-                      </select>
-
-                    }
+                    </select>
                   </div>
                   <div class="col-5 me-2">
                     <input class="form-control @clsShowHideNewPlayer @attrInputNonMember"
                       placeholder="first middle last names" aria-placeholder="New Player" name="@attrPlayerNameNew"
-                      id="@attrPlayerNameNew" value="@newPlayerName" @attrInputNonMember/>
+                      id="@attrPlayerNameNew" value="@newPlayerName" @attrInputNonMember />
                   </div>
                   <div class="col-1">
                     <a class="nav-link position-relative px-0 pe-sm-2 py-2 me-4 ms-2 @attrCanDeletePlayer">

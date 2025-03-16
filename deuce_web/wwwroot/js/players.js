@@ -1,18 +1,23 @@
 
+//------------------------------------
+//When the page is rendered
+//------------------------------------
+
 document.addEventListener("DOMContentLoaded", function () {
-  const myForm = document.getElementById("page_form"); // Replace 'myForm' with your form's ID
+  //------------------------------------
+  // Add the disabled attribute to 
+  // non member selections.
+  //------------------------------------
 
-  myForm.addEventListener("submit", function (event) {
-    event.preventDefault(); // Prevent the default form submission behavior
-    document.getElementById("action").value = "add_team";
-
-    let selects = document.getElementById("page_form").querySelector("select");
-    foreach(s => {
-      if (s.value == "") s.setAttribute("disabled", "");
+  const page_form = document.getElementById("page_form"); 
+  let membersLists = document.getElementById("page_form").querySelectorAll("select");
+  if (membersLists.length > 0 )
+  {
+    membersLists.forEach(function(e){
+      if (e.value == "") e.setAttribute("disabled", "");
     });
+  }
 
-    myForm.submit();
-  });
 });
 
 //------------------------------------
