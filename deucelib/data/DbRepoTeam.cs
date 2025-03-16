@@ -18,7 +18,7 @@ public class DbRepoTeam : DbRepoBase<Team>
     private record TeamPlayer(Player Player, int TeamId);
 
     public Organization? Organization { get; set; }
-    public int TournamentId { get=>_tournamentId; set=>_tournamentId = value; }
+    public int TournamentId { get => _tournamentId; set => _tournamentId = value; }
 
     private int _tournamentId;
 
@@ -103,11 +103,22 @@ public class DbRepoTeam : DbRepoBase<Team>
             //Save team players
             foreach (Player player in obj.Players)
             {
+                //insert into the player table
+                //Explicitly insert new rows if id < 1
+                object playerId = obj.Id < 1 ? DBNull.Value : obj.Id;
+
+                var command = _dbconn.CreateCommandStoreProc("sp_set_player", ["p_id",  "p_first_name", "p_last_name",
+        "p_middle_name", "p_tournament", "p_utr", "p_member"], [primaryKeyId, player.First, player.Last , player.Middle, _tournamentId,  player.Ranking ,
+        player.Member?.Id]);
+
+                player.Id = command.GetIntegerFromScaler(command.ExecuteScalar());
+
+                //Inserts into the team_player table
                 primaryKeyId = player.TeamPlayerId < 1 ? DBNull.Value : player.TeamPlayerId;
 
                 DbCommand cmdSetTeamPlayer = _dbconn.CreateCommandStoreProc("sp_set_team_player",
-                ["p_id", "p_team", "p_player",  "p_tournament", "p_organization", "p_index"],
-                [ primaryKeyId , obj.Id, player.Id > 0 ? player.Id : DBNull.Value, _tournamentId, Organization?.Id ?? 1,player.Index],
+                ["p_id", "p_team", "p_player", "p_tournament", "p_organization", "p_index"],
+                [primaryKeyId, obj.Id, player.Id > 0 ? player.Id : DBNull.Value, _tournamentId, Organization?.Id ?? 1, player.Index],
                 localtran);
 
                 await cmdSetTeamPlayer.ExecuteNonQueryAsync();
@@ -271,7 +282,7 @@ public class DbRepoTeam : DbRepoBase<Team>
             foreach (TeamPlayer teamPlayer in addTeamPlayer)
             {
                 InsertTeamPlayer(teamPlayer.TeamId, teamPlayer.Player.Id, teamPlayer.Player.First ?? "",
-                teamPlayer.Player.Last ?? "", _tournamentId, Organization?.Id??1, teamPlayer.Player.Index, localtran);
+                teamPlayer.Player.Last ?? "", _tournamentId, Organization?.Id ?? 1, teamPlayer.Player.Index, localtran);
             }
 
             //Remove players from a team

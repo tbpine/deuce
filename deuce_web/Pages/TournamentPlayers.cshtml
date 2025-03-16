@@ -1,12 +1,14 @@
 @page
 @model TournamentPlayersPageModel
 @{
-    Layout="_LayoutWizard";
+  Layout = "_LayoutWizard";
 }
 @using deuce
 
 <style>
-  .zero_height {height: 0px;}
+  .zero_height {
+    height: 0px;
+  }
 </style>
 
 <!-- Account listings content -->
@@ -32,7 +34,8 @@
 
       <!-- Master checkbox + Action buttons -->
       <div class="nav align-items-center mb-4">
-        <div class="nav-link fs-lg ps-0 pe-2 py-2 mt-n1 me-4" data-master-checkbox='{"container": "#page_form", "label": "Select all the items to apply the same action to them", "labelChecked": "Unselect all", "showOnCheck": "#published-action-buttons"}'>
+        <div class="nav-link fs-lg ps-0 pe-2 py-2 mt-n1 me-4"
+          data-master-checkbox='{"container": "#page_form", "label": "Select all the items to apply the same action to them", "labelChecked": "Unselect all", "showOnCheck": "#published-action-buttons"}'>
           <input type="checkbox" class="form-check-input" id="published-master">
           <label for="published-master" class="form-check-label fw-normal mt-1 ms-2">Unselect all</label>
         </div>
@@ -57,21 +60,21 @@
       </div>
 
       <!-- Published listings -->
-      <form class="vstack gap-4 mb-4" id="page_form"  asp-action="~/TournamentPlayers">
+      <form class="vstack gap-4 mb-4" id="page_form" asp-action="~/TournamentPlayers">
         <input name="action" id="action" type="hidden" />
         <!-- An Item  -->
-        @for(int i = 0 ; i < Model.Teams?.Count; i++)
+        @for (int i = 0; i < Model.Teams?.Count; i++)
         {
           Team? iterTeam = Model.Teams[i];
-          int teamId = iterTeam?.Id??0;
+          int teamId = iterTeam?.Id ?? 0;
           //Pathing
-          string attrTeamName =$"team_{iterTeam?.Index??i}_{teamId}";
-          string attrTeamLable =iterTeam?.Label??"";
-          string attrTeamCtlVisible= Model.EntryType == (int)EntryType.Team ? "visible" : "invisible zero_height";
+          string attrTeamName = $"team_{iterTeam?.Index ?? i}_{teamId}";
+          string attrTeamLable = iterTeam?.Label ?? "";
+          string attrTeamCtlVisible = Model.EntryType == (int)EntryType.Team ? "visible" : "invisible zero_height";
           string attrCanAddPlayer = "invisible zero_height";
           string attrCanDeletePlayer = "invisible";
 
-          <div class="d-sm-flex align-items-center">
+          <div class="d-sm-flex align-items-center" >
             <div class="d-inline-flex position-relative z-2 pt-1 pb-2 ps-2 p-sm-0 ms-2 ms-sm-0 me-sm-2">
               <div class="form-check position-relative z-1 fs-lg m-0">
                 <input type="checkbox" class="form-check-input">
@@ -85,9 +88,9 @@
                   <label for="@attrTeamName" class="form-label p-2">Team Name:</label>
                 </div>
                 <div class="col-2">
-                  <input id="@attrTeamName" class="form-control p-2 w-75" name="@attrTeamName" value="@attrTeamLable"/>
+                  <input id="@attrTeamName" class="form-control p-2 w-75" name="@attrTeamName" value="@attrTeamLable" />
                 </div>
-                
+
               </div>
               <div class="row g-0 mb-2 @attrCanAddPlayer">
                 <a class="nav-link position-relative px-0 pe-sm-2 py-2 me-4 ms-2" href="#!">
@@ -95,53 +98,74 @@
                   <span class="hover-effect-underline stretched-link d-none d-md-inline">Add Player</span>
                 </a>
               </div>
-              @for(int j = 0; j < Model.TeamSize ; j++)
+              @for (int j = 0; j < Model.TeamSize; j++)
               {
                 Player? iterPlayer = iterTeam?.Players.ElementAt(j);
-                int teamPlayerId = iterPlayer?.TeamPlayerId??0;
-                
-                string attrPlayerName = $"team_{i}_{teamId}_player_{j}_{teamPlayerId}";
-                string attrPlayerNameNew = $"team_{i}_{teamId}_player_{j}_{teamPlayerId}_new";
-
-                int selectionIdx = i*Model.TeamSize + j;
+                int teamPlayerId = iterPlayer?.TeamPlayerId ?? 0;
+                int playerId = iterPlayer?.Id ?? 0;
+                //Add form values for this player
+                string attrPlayerName = $"team_{i}_{teamId}_player_{j}_{playerId}_{teamPlayerId}";
+                string attrPlayerNameNew = $"team_{i}_{teamId}_player_{j}_{playerId}_{teamPlayerId}_new";
+                //Get member's list
+                int selectionIdx = i * Model.TeamSize + j;
                 List<SelectListItem>? memberList = Model.SelectMember?.ElementAt(selectionIdx);
-                memberList?.All(e=>{e.Selected = false; return true;});
-                
+                memberList?.All(e => { e.Selected = false; return true; });
+                //This is show or hide non members entry
                 string newPlayerLabel = "new_player_label_" + selectionIdx.ToString();
-                string clsShowHideNewPlayer ="";
+                string clsShowHideNewPlayer = "";
 
-                var selectedMember = memberList?.Find(e=>e.Value == iterPlayer?.Member?.Id.ToString());
+                var selectedMember = memberList?.Find(e => e.Value == iterPlayer?.Member?.Id.ToString());
                 string newPlayerName = "";
-                if (selectedMember is not null) 
+
+                bool disableMemberList = false;
+                string attrInputNonMember = "";
+
+                if (selectedMember is not null)
                 {
                   selectedMember.Selected = true;
                   //Set the initial visibility of new players entry
                   clsShowHideNewPlayer = "invisible zero_height";
                   newPlayerName = "";
+                  attrInputNonMember = "disabled";
                 }
-                else if ( (iterPlayer?.Member?.Id??0) < 1)
+                else if ((iterPlayer?.Member?.Id ?? 0) < 1)
                 {
-                  //Set new player name
-                    newPlayerName = iterPlayer?.ToString()??"";
-                    newPlayerName = newPlayerName.Trim();
+                  //It's a non player. Show name in the entry
+                  newPlayerName = iterPlayer?.ToString() ?? "";
+                  newPlayerName = newPlayerName.Trim();
+                  attrInputNonMember = "";
+                  disableMemberList = true;
                 }
 
                 else if (memberList is not null && memberList.Count > 0) memberList[0].Selected = true;
 
                 <div class="row row-cols-*-3 g-0 mb-2">
                   <div class="col-5 me-2"><span>Members</span></div>
-                  <div class="col-5 me-2 @clsShowHideNewPlayer" id="@newPlayerLabel" ><span>New Player</span></div>
+                  <div class="col-5 me-2 @clsShowHideNewPlayer" id="@newPlayerLabel"><span></span></div>
                   <div class="col-1"></div>
                   <div class="col-5 me-2">
-                    <select id="@attrPlayerName" name="@attrPlayerName" class="form-select-lg" aria-label="Select Player"
-                    asp-items="@memberList" data-select='{"searchEnabled" : true , "classNames": {"containerInner": ["form-select", "form-select-lg"]}}'
-                    onchange="showHideNewPlayer('@attrPlayerName','@attrPlayerNameNew', '@newPlayerLabel')">
-                      
+                    @if (!disableMemberList)
+                    {
+                      <select id="@attrPlayerName" name="@attrPlayerName" class="form-select-lg" aria-label="Select Player" asp-items="@memberList"
+                        data-select='{"searchEnabled" : true , "classNames": {"containerInner": ["form-select", "form-select-lg"]}}'
+                        onchange="showHideNewPlayer('@attrPlayerName','@attrPlayerNameNew', '@newPlayerLabel')">
+
                       </select>
+                    }
+                    else
+                    {
+                      <select id="@attrPlayerName" name="@attrPlayerName" class="form-select-lg" aria-label="Select Player" asp-items="@memberList"
+                        data-select='{"searchEnabled" : true , "classNames": {"containerInner": ["form-select", "form-select-lg"]}}'
+                        onchange="showHideNewPlayer('@attrPlayerName','@attrPlayerNameNew', '@newPlayerLabel')" >
+
+                      </select>
+
+                    }
                   </div>
                   <div class="col-5 me-2">
-                    <input class="form-control @clsShowHideNewPlayer" placeholder="New Player" aria-placeholder="New Player" name="@attrPlayerNameNew" id="@attrPlayerNameNew"
-                    value="@newPlayerName"/>
+                    <input class="form-control @clsShowHideNewPlayer @attrInputNonMember"
+                      placeholder="first middle last names" aria-placeholder="New Player" name="@attrPlayerNameNew"
+                      id="@attrPlayerNameNew" value="@newPlayerName" @attrInputNonMember/>
                   </div>
                   <div class="col-1">
                     <a class="nav-link position-relative px-0 pe-sm-2 py-2 me-4 ms-2 @attrCanDeletePlayer">
@@ -153,7 +177,7 @@
             </article>
           </div>
         }
-        
+
       </form>
       @{
         string clsShowHideError = String.IsNullOrEmpty(Model.Error) ? "invisible" : "visible";
@@ -164,4 +188,3 @@
   </div>
 </div>
 <script src="~/js/players.js"></script>
-

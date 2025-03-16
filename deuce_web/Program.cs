@@ -42,6 +42,7 @@ builder.Services.AddScoped<DbRepoVenue>();
 builder.Services.AddScoped<DbRepoTournamentStatus>();
 builder.Services.AddScoped<DbRepoTournamentValidation>();
 builder.Services.AddScoped<DbRepoCountry>();
+builder.Services.AddScoped<DbRepoMember>();
 builder.Services.AddScoped<IAdaptorTeams, AdaptorFormTeams>();
 builder.Services.AddScoped<ITournamentGateway, DBTournamentGateway>();
 
@@ -81,3 +82,4 @@ app.UseSession();
 app.MapRazorPages();
 
 app.Run();
+

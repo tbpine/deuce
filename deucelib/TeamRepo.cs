@@ -61,7 +61,7 @@ public class TeamRepo
             player.TeamPlayerId = rteamPlayer.TeamPlayerId;
             player.First = rteamPlayer.FirstName;
             player.Last = rteamPlayer.LastName;
-
+            player.Member = new Member { Id = (rteamPlayer.Member?.Id??0)};
             team.AddPlayer(player);
 
 

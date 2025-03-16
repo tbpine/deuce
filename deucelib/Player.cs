@@ -28,15 +28,15 @@ public class Player
     public double Ranking { get { return _ranking; } set { _ranking = value; } }
     public int Index { get { return _index; } set { _index = value; } }
     public int TeamPlayerId { get { return _teamPlayerId; } set { _teamPlayerId = value; } }
-    public Organization? Club { get { return _club; } set { _club = value; }}
-    public Team? Team { get { return _team; } set { _team = value; }}
-    public Member? Member { get=>_member ;set=>_member = value; }
-    
+    public Organization? Club { get { return _club; } set { _club = value; } }
+    public Team? Team { get { return _team; } set { _team = value; } }
+    public Member? Member { get => _member; set => _member = value; }
+
     /// <summary>
     /// Usually a Tournament DTO (Data transfer object)
     /// containing only the ID
     /// </summary>
-    public Tournament? Tournament { get=>_tournament;set=>_tournament = value; }    
+    public Tournament? Tournament { get => _tournament; set => _tournament = value; }
 
     public IEnumerable<Match> History { get => _history; }
     /// <summary>
@@ -53,5 +53,11 @@ public class Player
     {
         return _first + " " + _last;
     }
+
+    /// <summary>
+    /// Check if a player is a member of the site
+    /// </summary>
+    /// <returns>True if the player is a member </returns>
+    public bool IsMember() => (_member?.Id ?? 0) > 0;
 
 }

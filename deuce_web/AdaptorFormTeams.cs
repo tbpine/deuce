@@ -1,6 +1,8 @@
 using System.Diagnostics;
+using System.Runtime.InteropServices.Marshalling;
 using System.Text.RegularExpressions;
 using deuce;
+using K4os.Compression.LZ4.Internal;
 
 /// <summary>
 /// Converts form values into teams
@@ -14,7 +16,7 @@ class AdaptorFormTeams : AdaptorTeamsBase
     /// </summary>
     public AdaptorFormTeams()
     {
-        
+
     }
 
     /// <summary>
@@ -34,7 +36,7 @@ class AdaptorFormTeams : AdaptorTeamsBase
         ///Transforms form values to teams
         foreach (var kp in form)
         {
-            
+
             //Path format 
             //team_(Index)_(Id)_player_(Index)_(TeamPlayerID)_new
             //Form value is id for existing players
@@ -43,7 +45,7 @@ class AdaptorFormTeams : AdaptorTeamsBase
             //Ignore the action value
             if (kp.Key == "action") continue;
 
-            var matches = Regex.Match(kp.Key, @"team_(\d+)_(\d+)(_d)*(_player_)*(\d+)*_*(\d+)*(_new)*(_d)*");
+            var matches = Regex.Match(kp.Key, @"team_(\d+)_(\d+)(_d)*(_player_)*(\d+)*_*(\d+)*_*(\d+)*(_new)*(_d)*");
 
             if (matches.Success)
             {
@@ -51,9 +53,12 @@ class AdaptorFormTeams : AdaptorTeamsBase
                 string strTeamId = matches.Groups[2].Value;
                 string strDelete = matches.Groups[3].Value;
                 string playerIdx = matches.Groups[5].Value;
-                string strPlayerTeamId = matches.Groups[6].Value;
-                bool isNew = !string.IsNullOrEmpty(matches.Groups[7].Value);
-                bool deletPlayer = !string.IsNullOrEmpty(matches.Groups[8].Value);
+                string strPlayerId = matches.Groups[6].Value;
+                string strPlayerTeamId = matches.Groups[7].Value;
+
+                bool isNew = !string.IsNullOrEmpty(matches.Groups[8].Value);
+                bool deletPlayer = !string.IsNullOrEmpty(matches.Groups[9].Value);
+                int playerId = int.TryParse(strPlayerId, out playerId) ? playerId : 0;
 
                 if (!string.IsNullOrEmpty(teamIdx) && string.IsNullOrEmpty(playerIdx) && !isNew)
                 {
@@ -71,31 +76,41 @@ class AdaptorFormTeams : AdaptorTeamsBase
                     Debug.Print($"AdaptorFormTeams: {kp.Key}={kp.Value}. Team|name:{strVal}|idx:{idxTeam}|id:{teamId}");
 
                 }
-                else if (!string.IsNullOrEmpty(teamIdx) && !string.IsNullOrEmpty(playerIdx) && !isNew)
+                else if (!string.IsNullOrEmpty(teamIdx) && !string.IsNullOrEmpty(playerIdx) && !isNew )
                 {
                     //Check if they selected a registered player
-                    int playerId = this.GetFormInt(form, kp.Key);
+                    int memberId = this.GetFormInt(form, kp.Key);
                     int idxPlayer = int.TryParse(playerIdx, out idxPlayer) ? idxPlayer : 0;
                     int playerTeamId = int.TryParse(strPlayerTeamId, out playerTeamId) ? playerTeamId : 0;
-                    //Is there a player at this index
+                    //Is there a player at this DISPLAYED index
                     var existingPlayer = currentTeam?.Find(p => p.Index == idxPlayer && playerTeamId == p.TeamPlayerId);
-                    if (existingPlayer is not null && playerId > 0)
+                    if (existingPlayer is not null && memberId > 0)
                     {
-                        //Update it's id
                         existingPlayer.Id = playerId;
-                        Debug.Print($@"AdaptorFormTeams: {kp.Key}={kp.Value}. { (existingPlayer is null?"New":"")} Player|id:{playerId}|idx:{idxPlayer}|tpid:{playerTeamId}");
+                        //Update it's id
+                        if (existingPlayer.Member is not null) existingPlayer.Member.Id = memberId;
+                        Debug.Print($@"AdaptorFormTeams: {kp.Key}={kp.Value}. {(existingPlayer is null ? "New" : "")} Player|id:{memberId}|idx:{idxPlayer}|tpid:{playerTeamId}");
                     }
-                    else if (playerId > 0)
+                    else if (memberId > 0)
                     {
-                        Player player = new Player() { Id = playerId, Index = idxPlayer, TeamPlayerId = playerTeamId };
+                        Player player = new Player()
+                        {
+                            Id = playerId,
+                            Index = idxPlayer,
+                            TeamPlayerId = playerTeamId,
+                            Member = new() { Id = memberId }
+                        };
 
                         currentTeam?.AddPlayer(player);
-                        Debug.Print($@"AdaptorFormTeams: {kp.Key}={kp.Value}. { (existingPlayer is null?"New":"")} Player|id:{playerId}|idx:{idxPlayer}|tpid:{playerTeamId}");
+                        Debug.Print($@"AdaptorFormTeams: {kp.Key}={kp.Value}. {(existingPlayer is null ? "New" : "")} Player|id:{memberId}|idx:{idxPlayer}|tpid:{playerTeamId}");
                     }
                 }
-                else if (!string.IsNullOrEmpty(teamIdx) && !string.IsNullOrEmpty(playerIdx) && isNew &&
-                !string.IsNullOrEmpty(kp.Value))
+                else if (!string.IsNullOrEmpty(teamIdx) && !string.IsNullOrEmpty(playerIdx) && isNew) //..&&
+                //!string.IsNullOrEmpty(kp.Value))
                 {
+                    //Unspecified players are handled as 
+                    //non members
+
 
                     string? strval = kp.Value;
                     int playerTeamId = int.TryParse(strPlayerTeamId, out playerTeamId) ? playerTeamId : 0;
@@ -106,19 +121,28 @@ class AdaptorFormTeams : AdaptorTeamsBase
                     int idxPlayer = int.TryParse(playerIdx, out idxPlayer) ? idxPlayer : 0;
 
                     var existingPlayer = currentTeam?.Find(p => p.Index == idxPlayer && playerTeamId == p.TeamPlayerId);
+                    //Player exists at this index. 
+                    //It could be a member or non member.
+                    
                     if (existingPlayer is not null)
                     {
-                        //Update it's id
-                        existingPlayer.First = firstname;
-                        existingPlayer.Last = lastname;
-                        existingPlayer.Id = -1;
-                        Debug.Print($@"AdaptorFormTeams: {kp.Key}={kp.Value}. { (existingPlayer is null?"New":"")} Player|{firstname}|{lastname}|Idx:{idxPlayer}");
+                        if (!string.IsNullOrEmpty(strval))
+                        {
+                            //Update it's id
+                            existingPlayer.First = firstname;
+                            existingPlayer.Last = lastname;
+                            existingPlayer.Member = null;
+                            existingPlayer.Id = playerId;
+
+                            Debug.Print($@"AdaptorFormTeams: {kp.Key}={kp.Value}. {(existingPlayer is null ? "New" : "")} Player|{firstname}|{lastname}|Idx:{idxPlayer}");
+                        }
                     }
                     else
                     {
+                        //New non member player specified
                         Player player = new Player()
                         {
-                            Id = -1,
+                            Id = playerId,
                             First = firstname,
                             Last = lastname,
                             Index = idxPlayer,
@@ -126,7 +150,7 @@ class AdaptorFormTeams : AdaptorTeamsBase
                         };
 
                         currentTeam?.AddPlayer(player);
-                        Debug.Print($@"AdaptorFormTeams: {kp.Key}={kp.Value}. { (existingPlayer is null?"New":"")} Player|{firstname}|{lastname}|Idx:{idxPlayer}");
+                        Debug.Print($@"AdaptorFormTeams: {kp.Key}={kp.Value}. {(existingPlayer is null ? "New" : "")} Player|{firstname}|{lastname}|Idx:{idxPlayer}");
 
                     }
 

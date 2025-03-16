@@ -20,6 +20,7 @@ public class DbRepoRecordTeamPlayer : DbRepoBase<RecordTeamPlayer>
         _dbconn.Open();
 
         List<RecordTeamPlayer> list = new();
+        //Note the member dto.
         await _dbconn.CreateReaderStoreProcAsync("sp_get_team_player", ["p_tournament"],
          [filter.TournamentId], reader=>{
                 RecordTeamPlayer recordTeamPlayer = new(
@@ -34,7 +35,9 @@ public class DbRepoRecordTeamPlayer : DbRepoBase<RecordTeamPlayer>
                     reader.Parse<string>("first_name"),
                     reader.Parse<string>("last_name"),
                     reader.Parse<double>("utr"),
-                    reader.Parse<int>("team_player_id")
+                    reader.Parse<int>("team_player_id"),
+                    new Member() { Id = reader.Parse<int>("member")}
+                    
                 );
 
                 list.Add(recordTeamPlayer);

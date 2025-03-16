@@ -110,7 +110,7 @@ public class TournamentFormatTeamsPageModel : BasePageModelWizard
         {
             await LoadPage();
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             _log.Log(LogLevel.Error, ex.Message);
         }
@@ -223,18 +223,17 @@ public class TournamentFormatTeamsPageModel : BasePageModelWizard
                 CustomSingles = tourDetail.NoSingles < 6 ? 0 : tourDetail.NoSingles;
                 CustomDoubles = tourDetail.NoDoubles < 6 ? 0 : tourDetail.NoDoubles;
 
-            }
-            else
-            {
-                //Default values
-                Games = 1;
-                Sets = 1;
-                TeamSize = 2;
-                NoSingles = 2;
-                NoDoubles = 2;
-            }
-        }
+                return;
 
+            }
+
+        }
+        //Default values
+        Games = 1;
+        Sets = 1;
+        TeamSize = 2;
+        NoSingles = 2;
+        NoDoubles = 2;
     }
 
 }

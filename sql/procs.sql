@@ -386,9 +386,10 @@ IN p_tournament INT)
 BEGIN
 
 SELECT tp.`id`, t.organization 'organization', t.tournament, t.label 'team',  t.id 'team_id', t.`index` 'team_index',
-p.id `player_id`, tp.`index` 'player_index', p.first_name , p.last_name, p.utr, tp.id 'team_player_id'
+p.id `player_id`, tp.`index` 'player_index', p.first_name , p.last_name, p.utr, tp.id 'team_player_id',p.`member`
 FROM `team_player` tp LEFT JOIN `team` t ON t.id = tp.team
 LEFT JOIN `player` p ON p.id = tp.`player`
+
 WHERE tp.`tournament` = p_tournament
 ORDER BY `team_index`, `player_index`;
 
@@ -679,6 +680,7 @@ truncate `match`;
 truncate `match_player`;
 truncate `tournament`;
 truncate `tournament_detail`;
+truncate `tournament_venue`;
 truncate `player`;
 
 alter table `team_player` auto_increment = 1;

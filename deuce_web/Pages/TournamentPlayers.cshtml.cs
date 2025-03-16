@@ -2,6 +2,7 @@ using System.Data.Common;
 using System.Security.Policy;
 using System.Text.RegularExpressions;
 using deuce;
+using deuce_web;
 using deuce_web.ext;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -70,6 +71,8 @@ public class TournamentPlayersPageModel : BasePageModelWizard
 
     public async Task<IActionResult> OnPost()
     {
+        FormUtils.DebugOut(this.HttpContext.Request.Form);
+        
         //Convert form values into a teams collection
 
         Organization thisOrg = new() { Id = _sessionProxy?.OrganizationId ?? 1 };
@@ -210,7 +213,7 @@ public class TournamentPlayersPageModel : BasePageModelWizard
 
             List<SelectListItem> memberList = new();
             //The empty player 
-            memberList.Add(new SelectListItem("-- New Player --", ""));
+            memberList.Add(new SelectListItem("-- Non Member --", ""));
             foreach (Member member in countryMembers)
             {
                 memberList.Add(new SelectListItem(member.ToString(), member.Id.ToString()));
@@ -257,4 +260,6 @@ public class TournamentPlayersPageModel : BasePageModelWizard
             _log.LogError(ex.Message);
         }
     }
+
+ 
 }

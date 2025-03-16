@@ -1,19 +1,35 @@
+
+document.addEventListener("DOMContentLoaded", function () {
+  const myForm = document.getElementById("page_form"); // Replace 'myForm' with your form's ID
+
+  myForm.addEventListener("submit", function (event) {
+    event.preventDefault(); // Prevent the default form submission behavior
+    document.getElementById("action").value = "add_team";
+
+    let selects = document.getElementById("page_form").querySelector("select");
+    foreach(s => {
+      if (s.value == "") s.setAttribute("disabled", "");
+    });
+
+    myForm.submit();
+  });
+});
+
 //------------------------------------
 //Add a team
 //------------------------------------
-function addTeam()
-{
-    //Make options for the players
+function addTeam() {
+  //Make options for the players
 
-    const jsonPlayers =  document.getElementById("listOfPlayers").textContent;
-    var players = JSON.parse(jsonPlayers);
-    var strPlayers = "<option value=''></option>";
-    players.Players.forEach(e => {
-        strPlayers += `<option value='${e.Id}'>${e.Name}</option>`;
-    });
+  const jsonPlayers = document.getElementById("listOfPlayers").textContent;
+  var players = JSON.parse(jsonPlayers);
+  var strPlayers = "<option value=''></option>";
+  players.Players.forEach(e => {
+    strPlayers += `<option value='${e.Id}'>${e.Name}</option>`;
+  });
 
-    const div = document.createElement("div");
-    div.innerHTML = `<div class="d-sm-flex align-items-center">
+  const div = document.createElement("div");
+  div.innerHTML = `<div class="d-sm-flex align-items-center">
                     <div class="d-inline-flex position-relative z-2 pt-1 pb-2 ps-2 p-sm-0 ms-2 ms-sm-0 me-sm-2">
                       <div class="form-check position-relative z-1 fs-lg m-0">
                         <input type="checkbox" class="form-check-input" checked>
@@ -60,35 +76,44 @@ function addTeam()
                   </div>
     `;
 
-    document.getElementById("publishedSelection").appendChild(div);
-    const psel = new Choices(document.getElementById("player_select1"));
+  document.getElementById("publishedSelection").appendChild(div);
+  const psel = new Choices(document.getElementById("player_select1"));
 }
 
 //------------------------------------
 //Hide the new player text box
+//@param selectid id of the member's selection box
+//@param inputid id of the non member's name 
+//@param newPlayerLabel id of the label for a non member's name 
 //------------------------------------
 
-function showHideNewPlayer(selectid, inputid, newPlayerLabel)
-{
+function showHideNewPlayer(selectid, inputid, newPlayerLabel) {
   //Get the selected value
   const nodeSelect = document.getElementById(selectid);
   if (nodeSelect == null) return;
 
   var selectedValue = nodeSelect.value;
 
-  let isNewPlayer =  selectedValue == "";
+  let isNewPlayer = selectedValue == "";
 
   const node = document.getElementById(inputid);
-  if (node != null)
-  {
-    if (isNewPlayer)
-    {
+  if (node != null) {
+    if (isNewPlayer) {
+
+      //Add disable attribute to stop value
+      //submissions
+      nodeSelect.setAttribute("disabled", "");
+      node.removeAttribute("disabled");
+
       node.classList.remove("invisible");
       node.classList.remove("zero_height");
+
       document.getElementById(newPlayerLabel).classList.remove("invisible");
     }
-    else
-    {
+    else {
+      nodeSelect.removeAttribute("disabled");
+      node.setAttribute("disabled", "");
+
       //Hide the new player label
       node.classList.add("invisible");
       node.classList.add("zero_height");
@@ -96,14 +121,18 @@ function showHideNewPlayer(selectid, inputid, newPlayerLabel)
     }
 
   }
-  
+
 }
 
 //------------------------------------
 //Add a team by posting
 //------------------------------------
-function addTeamPost()
-{
+function addTeamPost() {
   document.getElementById("action").value = "add_team";
   document.getElementById("page_form").submit();
+}
+
+function postFormWithValidation() {
+
+
 }
