@@ -14,7 +14,7 @@
 <!-- Account listings content -->
 <div class="col-lg-9 col-xl-8">
   <h1 class="h2 pb-2 pb-lg-3">Players / Teams</h1>
-
+  <div class="pb-2 pb-lg-3">Select players in team, then press "Add Team". Repeat until all players are in a team</div>
   <!-- Nav pills -->
   <div class="nav overflow-x-auto mb-2">
     @* <ul class="nav nav-pills flex-nowrap gap-2 pb-2 mb-1" role="tablist">
@@ -34,11 +34,7 @@
 
       <!-- Master checkbox + Action buttons -->
       <div class="nav align-items-center mb-4">
-        <div class="nav-link fs-lg ps-0 pe-2 py-2 mt-n1 me-4"
-          data-master-checkbox='{"container": "#page_form", "label": "Select all the items to apply the same action to them", "labelChecked": "Unselect all", "showOnCheck": "#published-action-buttons"}'>
-          <input type="checkbox" class="form-check-input" id="published-master">
-          <label for="published-master" class="form-check-label fw-normal mt-1 ms-2">Unselect all</label>
-        </div>
+
         <div class="d-flex flex-wrap" id="published-action-buttons">
           <a class="nav-link position-relative px-0 pe-sm-2 py-2 me-4" href="#!" onclick="addTeamPost()">
             <i class="fi-plus-square fs-base me-2"></i>
@@ -52,7 +48,7 @@
             <i class="fi-share fs-base me-2"></i>
             <span class="hover-effect-underline stretched-link d-none d-md-inline">Export</span>
           </a>
-          <a class="nav-link position-relative text-danger px-0 py-2" href="#!">
+          <a class="nav-link position-relative text-danger px-0 py-2" href="#!" onclick="deleteTeams('page_form')">
             <i class="fi-trash fs-base me-1"></i>
             <span class="hover-effect-underline stretched-link d-none d-md-inline">Delete</span>
           </a>
@@ -62,6 +58,25 @@
       <!-- Published listings -->
       <form class="vstack gap-4 mb-4" id="page_form" asp-action="~/TournamentPlayers">
         <input name="action" id="action" type="hidden" />
+        <div id="players_container" class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-4">
+          @foreach (var player in Model.Players ?? new())
+          {
+            string inputName = $"player_{player.Id}_selection";
+            <div class="col">
+              <div class="card overflow-hidden">
+                <div class="row g-0">
+                  <div class="col-sm-1 d-flex align-items-center justify-content-center">
+                    <input type="checkbox" class="form-check-input" id="@inputName" name="@inputName" />
+                  </div>
+                  <div class="card-body col-sm-8">
+                    <h5 class="card-title">@player.ToString()</h5>
+                    <p class="card-text">Ranking: @player.Ranking</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
         <!-- An Item  -->
         @for (int i = 0; i < Model.Teams?.Count; i++)
         {
@@ -71,8 +86,7 @@
           string attrTeamName = $"team_{iterTeam?.Index ?? i}_{teamId}";
           string attrTeamLable = iterTeam?.Label ?? "";
           string attrTeamCtlVisible = Model.EntryType == (int)EntryType.Team ? "visible" : "invisible zero_height";
-          string attrCanAddPlayer = "invisible zero_height";
-          string attrCanDeletePlayer = "invisible";
+          @* string attrCanDeletePlayer = "invisible"; *@
 
           <div class="d-sm-flex align-items-center">
             <div class="d-inline-flex position-relative z-2 pt-1 pb-2 ps-2 p-sm-0 ms-2 ms-sm-0 me-sm-2">
@@ -83,21 +97,16 @@
             </div>
             <article class="card w-100 p-2">
               <div class="d-sm-none" style="margin-top: -44px"></div>
-              <div class="row row-cols-2 row-cols-sm-2 g-0 @attrTeamCtlVisible">
-                <div class="col-1">
-                  <label for="@attrTeamName" class="form-label p-2">Team Name:</label>
+              <div class="row row-cols-2 row-cols-*-2 g-0 @attrTeamCtlVisible">
+                <div class="col-3">
+                  <label for="@attrTeamName" class="form-label p-2">@(i + 1).Team Name:</label>
                 </div>
-                <div class="col-2">
-                  <input id="@attrTeamName" class="form-control p-2 w-75" name="@attrTeamName" value="@attrTeamLable" />
+                <div class="col-6">
+                  <input id="@attrTeamName" class="form-control p-2 " name="@attrTeamName" value="@attrTeamLable" />
                 </div>
 
               </div>
-              <div class="row g-0 mb-2 @attrCanAddPlayer">
-                <a class="nav-link position-relative px-0 pe-sm-2 py-2 me-4 ms-2" href="#!">
-                  <i class="fi-user-plus fs-base me-2"></i>
-                  <span class="hover-effect-underline stretched-link d-none d-md-inline">Add Player</span>
-                </a>
-              </div>
+    
               @for (int j = 0; j < Model.TeamSize; j++)
               {
                 Player? iterPlayer = iterTeam?.Players.ElementAt(j);
@@ -105,59 +114,31 @@
                 int playerId = iterPlayer?.Id ?? 0;
                 //Add form values for this player
                 string attrPlayerName = $"team_{i}_{teamId}_player_{j}_{playerId}_{teamPlayerId}";
-                string attrPlayerNameNew = $"team_{i}_{teamId}_player_{j}_{playerId}_{teamPlayerId}_new";
                 //Get member's list
                 int selectionIdx = i * Model.TeamSize + j;
-                List<SelectListItem>? memberList = Model.SelectMember?.ElementAt(selectionIdx);
-                memberList?.All(e => { e.Selected = false; return true; });
-                //This is show or hide non members entry
-                string newPlayerLabel = "new_player_label_" + selectionIdx.ToString();
-                string clsShowHideNewPlayer = "";
+                //List<SelectListItem>? memberList = Model.SelectMember?.ElementAt(selectionIdx);
+               // memberList?.All(e => { e.Selected = false; return true; });
 
-                var selectedMember = memberList?.Find(e => e.Value == iterPlayer?.Member?.Id.ToString());
-                string newPlayerName = "";
-                string attrInputNonMember = "";
+               // var selectedMember = memberList?.Find(e => e.Value == iterPlayer?.Member?.Id.ToString());
 
-                if (selectedMember is not null)
-                {
-                  selectedMember.Selected = true;
-                  //Set the initial visibility of new players entry
-                  clsShowHideNewPlayer = "invisible zero_height";
-                  newPlayerName = "";
-                  attrInputNonMember = "disabled";
-                }
-                else if ((iterPlayer?.Member?.Id ?? 0) < 1)
-                {
-                  //It's a non player. Show name in the entry
-                  newPlayerName = iterPlayer?.ToString() ?? "";
-                  newPlayerName = newPlayerName.Trim();
-                  attrInputNonMember = "";
-                }
+               // if (selectedMember is not null)
+               //   selectedMember.Selected = true;
+               // else if (memberList is not null && memberList.Count > 0) memberList[0].Selected = true;
 
-                else if (memberList is not null && memberList.Count > 0) memberList[0].Selected = true;
-
-                <div class="row row-cols-*-3 g-0 mb-2">
-                  <div class="col-5 me-2"><span>Members</span></div>
-                  <div class="col-5 me-2 @clsShowHideNewPlayer" id="@newPlayerLabel"><span></span></div>
-                  <div class="col-1"></div>
-                  <div class="col-5 me-2">
-                    <select id="@attrPlayerName" name="@attrPlayerName" class="form-select-lg" aria-label="Select Player"
+                string playerLabel = $"Player {j + 1}";
+                <div class="row row-cols-*-2 g-0 mb-2">
+                  <div class="col-2 me-2"><span>@playerLabel</span></div>
+                  <div class="col-6 me-2">
+                    
+                    @* <select id="@attrPlayerName" name="@attrPlayerName" class="form-select-lg" aria-label="Select Player"
                       asp-items="@memberList"
-                      data-select='{"searchEnabled" : true , "classNames": {"containerInner": ["form-select", "form-select-lg"]}}'
-                      onchange="showHideNewPlayer('@attrPlayerName','@attrPlayerNameNew', '@newPlayerLabel')">
+                      data-select='{"searchEnabled" : true , "classNames": {"containerInner": ["form-select", "form-select-lg"]}}'> 
 
                     </select>
+                    *@
+                    <input class="readonly" id="@attrPlayerName" name="@attrPlayerName" value="@iterPlayer?.ToString()??"""/> 
                   </div>
-                  <div class="col-5 me-2">
-                    <input class="form-control @clsShowHideNewPlayer @attrInputNonMember"
-                      placeholder="first middle last names" aria-placeholder="New Player" name="@attrPlayerNameNew"
-                      id="@attrPlayerNameNew" value="@newPlayerName" @attrInputNonMember />
-                  </div>
-                  <div class="col-1">
-                    <a class="nav-link position-relative px-0 pe-sm-2 py-2 me-4 ms-2 @attrCanDeletePlayer">
-                      <i class="fi-close-circle fs-base me-2"></i>
-                    </a>
-                  </div>
+                
                 </div>
               }
             </article>

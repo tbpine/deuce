@@ -19,7 +19,7 @@ public class UnitTestsPlayer
         //Action
         //Assert
         
-        DbConnectionLocal conn = new("Server=localhost;Database=deuce;User Id=deuce;Password=deuce;");
+        using DbConnectionLocal conn = new("Server=localhost;Database=deuce;User Id=deuce;Password=deuce;");
         conn.Open();
         Organization org = new Organization() { Id = 1, Name = "testing" };
         //For UTR

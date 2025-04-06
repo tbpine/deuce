@@ -1,50 +1,45 @@
-using System.Data.Common;
-using System.Security.Policy;
-using System.Text.RegularExpressions;
 using deuce;
 using deuce_web;
-using deuce_web.ext;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using Microsoft.VisualBasic;
-using ZstdSharp.Unsafe;
 
 public class TournamentPlayersPageModel : BasePageModelWizard
 {
     private readonly ILogger<TournamentPlayersPageModel> _log;
-    private readonly DbRepoPlayer _dbRepoPlayer;
     private readonly DbRepoTournamentDetail _dbRepoTournamentDetail;
     private readonly DbRepoRecordTeamPlayer _dbRepoRecordTeamPlayer;
     private readonly DbRepoTeam _dbRepoTeam;
     private readonly DbRepoTournament _dbRepoTournament;
     private readonly DbRepoMember _dbRepoMember;
     private readonly DbRepoVenue _dbRepoVenue;
+    private readonly DbRepoPlayer _dbRepoPlayer;
+    private readonly TeamRepo _teamRepo;
 
     private readonly IAdaptorTeams _adaptorTeams;
 
     private List<Team>? _teams;
-    public string? JSONPlayers { get; set; }
 
     public int NoTeams { get; set; }
     public int TeamSize { get; set; }
     public int EntryType { get; set; }
     public string Error { get; set; } = "";
-
-    public string JSON { get; set; } = "";
     public List<List<SelectListItem>>? SelectMember { get; set; } = new();
 
     public List<Team>? Teams { get => _teams; }
 
+    private List<Player>? _players;
+    public List<Player>? Players { get=>_players;}
+
     private TournamentDetail? _tournamentDetail;
 
     public TournamentPlayersPageModel(ILogger<TournamentPlayersPageModel> log, IServiceProvider sp,
-    IConfiguration config, IHandlerNavItems handlerNavItems, DbRepoPlayer dbRepoPlayer,
+    IConfiguration config, IHandlerNavItems handlerNavItems,
     DbRepoTournamentDetail dbRepoTournamentDetail, DbRepoRecordTeamPlayer dbRepoRecordTeamPlayer, DbRepoTeam dbRepoTeam,
-    DbRepoTournament dbRepoTournament, IAdaptorTeams adaptorTeams, DbRepoMember dbRepoMember, DbRepoVenue dbRepoVenue) : base(handlerNavItems, sp, config)
+    DbRepoTournament dbRepoTournament, IAdaptorTeams adaptorTeams, DbRepoMember dbRepoMember, DbRepoVenue dbRepoVenue,
+    TeamRepo teamRepo, DbRepoPlayer dbRepoPlayer) : base(handlerNavItems, sp, config)
     {
         _log = log;
         _teams = null;
-        _dbRepoPlayer = dbRepoPlayer;
         _dbRepoTournamentDetail = dbRepoTournamentDetail;
         _dbRepoRecordTeamPlayer = dbRepoRecordTeamPlayer;
         _dbRepoTeam = dbRepoTeam;
@@ -52,7 +47,11 @@ public class TournamentPlayersPageModel : BasePageModelWizard
         _adaptorTeams = adaptorTeams;
         _dbRepoMember = dbRepoMember;
         _dbRepoVenue = dbRepoVenue;
+        _teamRepo = teamRepo;
+        _dbRepoPlayer = dbRepoPlayer;
     }
+
+    
 
     public async Task<IActionResult> OnGet()
     {
@@ -77,7 +76,7 @@ public class TournamentPlayersPageModel : BasePageModelWizard
 
         Organization thisOrg = new() { Id = _sessionProxy?.OrganizationId ?? 1 };
 
-        List<Team> teams = _adaptorTeams.Convert(HttpContext.Request.Form, thisOrg);
+        //List<Team> teams = _adaptorTeams.Convert(HttpContext.Request.Form, thisOrg);
 
         //State
         //If the action is to add a team, then add it to _teams
@@ -134,13 +133,16 @@ public class TournamentPlayersPageModel : BasePageModelWizard
             _dbRepoTeam.Organization = thisOrg;
             _dbRepoTeam.TournamentId = currentTourId;
 
-            //Save teams to the database
-            foreach (Team iterTeam in teams)
-            {
+            //----------------------------------------
+            //Sync between form and db
+            //----------------------------------------
 
-                //Save players as well
-                await _dbRepoTeam.SetAsync(iterTeam);
-            }
+            //Get teams from db
+            List<Team> teamSrc = await _teamRepo.GetListAsync(currentTourId);
+            
+            SyncMaster<Team> syncMaster = new(teamSrc, teams);
+            syncMaster.Run();
+
         }
 
 
@@ -166,9 +168,11 @@ public class TournamentPlayersPageModel : BasePageModelWizard
             //Set country code
             filter.CountryCode = venue?.CountryCode??36;
 
-            //Select all players in a country
-            //Use a DB repo
-            var countryMembers = await _dbRepoMember.GetList(filter);
+            //Select all players registered for the tournament
+            //Get all players now ToournamentId = 0
+
+            Filter filterPlayer = new() { TournamentId = 0};
+            _players = await _dbRepoPlayer.GetList(filterPlayer);
             var currentTour = (await _dbRepoTournament.GetList(filter)).FirstOrDefault();
 
             //Deflat saved teams
@@ -209,50 +213,8 @@ public class TournamentPlayersPageModel : BasePageModelWizard
                 TeamSize = 1;
             }
 
-            //Create select of  players
 
-            List<SelectListItem> memberList = new();
-            //The empty player 
-            memberList.Add(new SelectListItem("-- Non Member --", ""));
-            foreach (Member member in countryMembers)
-            {
-                memberList.Add(new SelectListItem(member.ToString(), member.Id.ToString()));
-            }
-            //Default to a new player
-            memberList[0].Selected = true;
-            for (int i = 0; i < NoTeams * TeamSize; i++)
-            {
-                List<SelectListItem> copiedMemberList = new(memberList);
-                SelectMember?.Add(copiedMemberList);
-            }
-
-            //Reconcile teams
-
-            // for (int i = 0; i < NoTeams; i++)
-            // {
-            //     if (i >= _teams?.Count)
-            //     {
-            //         //Add a team
-            //         Team newTeam = new Team();
-            //         newTeam.Index = i;
-            //         newTeam.Label = $"team_{i}";
-            //         //Add players
-            //         for (int j = 0; j < TeamSize; j++)
-            //             newTeam.AddPlayer(new Player() { Index = j });
-            //         _teams.Add(newTeam);
-            //     }
-            //     else
-            //     {
-            //         //Check if the stored teams have enough
-            //         //players
-            //         for (int j = 0; j < TeamSize; j++)
-            //         {
-            //             if (j >= _teams?[i].Players.Count())
-            //                 _teams?[i].AddPlayer(new Player() { Index = j });
-            //         }
-
-            //     }
-            // }
+          
 
         }
         catch (Exception ex)
@@ -261,5 +223,56 @@ public class TournamentPlayersPageModel : BasePageModelWizard
         }
     }
 
- 
+    /// <summary>
+    /// Reads an Excel file from the request and returns its content as a string.
+    /// </summary>
+    /// <returns>The content of the Excel file as a string, or an empty string if an error occurs.</returns>
+    private async Task<string> ReadFileFromRequest()
+    {
+        // Check if a file was uploaded
+        if (HttpContext.Request.Form.Files.Count > 0)
+        {
+            var file = HttpContext.Request.Form.Files[0];
+
+            // Check if the file is valid
+            if (file != null && file.Length > 0)
+            {
+                // Get the file name and content type
+                string fileName = file.FileName;
+                string contentType = file.ContentType;
+
+                // Check if the file is an Excel file based on content type or file extension
+                if (contentType == "application/vnd.ms-excel" || 
+                contentType == "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                 || fileName.ToLower().EndsWith(".xls") 
+                 || fileName.ToLower().EndsWith(".xlsx")
+                 || contentType == "text/csv"
+                 || fileName.ToLower().EndsWith(".csv"))
+                {
+                    try
+                    {
+                        // Read the contents of the Excel file
+                        using (var stream = file.OpenReadStream())
+                        {
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Error = $"Error reading Excel file: {ex.Message}";
+                        await LoadPage(false);
+                        return "";
+                    }
+                }
+                else
+                {
+                    Error = "Invalid file format. Please upload an Excel file.";
+                    await LoadPage(false);
+                    return "";
+                }
+            }
+        }
+
+        return "";
+    }
+   
 }

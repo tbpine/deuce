@@ -21,7 +21,7 @@ public class DbRepoPlayer : DbRepoBase<Player>
         _dbconn.Open();
         //Note, player contains a member DTO.
         List<Player> players = new();
-        await _dbconn.CreateReaderStoreProcAsync("sp_get_player", ["p_tournament" ], [ filter.TournamentId ],
+        await _dbconn.CreateReaderStoreProcAsync("sp_get_player", ["p_tournament" ], [ filter.TournamentId <= 0 ? DBNull.Value : filter.TournamentId],  
         r =>
         {
             Player p = new()

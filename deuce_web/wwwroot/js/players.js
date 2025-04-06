@@ -141,3 +141,26 @@ function postFormWithValidation() {
 
 
 }
+
+//------------------------------------
+// Function to search for all check boxes
+//------------------------------------
+function deleteTeams(containerName) {
+  //Get the container for the teams
+  let container = document.getElementById(containerName);
+  //Get all the checkboxes in the container
+  const checkboxes = container.querySelectorAll('input[type="checkbox"]');
+  let parents = [];
+  checkboxes.forEach(checkbox => {
+    //If the checkbox is checked, add a _d to the name of the input field
+    //(for deletion)
+    if (checkbox.checked && checkbox?.parentNode?.parentNode?.parentNode) {
+      parent = checkbox.parentNode.parentNode.parentNode;
+      parents.push(parent);
+    }
+  });
+
+  parents.forEach(parent => {
+    parent.remove();
+  });
+}

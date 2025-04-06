@@ -227,8 +227,8 @@ IN p_member 			INT
 
 BEGIN
 
-INSERT INTO `player`(`id`,`organization`,`first_name`,`middle_name`,`last_name`,`tournament`, `utr`,`member`,`updated_datetime`,`created_datetime`) 
-VALUES (p_id, p_organization,p_first_name, p_last_name, p_utr, p_member, NOW(), NOW())
+INSERT INTO `player`(`id`,`first_name`,`middle_name`,`last_name`,`tournament`, `utr`,`member`,`updated_datetime`,`created_datetime`) 
+VALUES (p_id, p_first_name, p_middle_name, p_last_name, p_tournament,  p_utr, p_member, NOW(), NOW())
 ON DUPLICATE KEY UPDATE `utr` = p_utr, first_name = p_first_name, middle_name = p_middle_name,
 last_name = p_last_name,  `updated_datetime` = NOW(), `tournament` = p_tournament, `member` = p_member;
 
@@ -681,7 +681,7 @@ truncate `match_player`;
 truncate `tournament`;
 truncate `tournament_detail`;
 truncate `tournament_venue`;
-truncate `player`;
+-- truncate `player`;
 
 alter table `team_player` auto_increment = 1;
 alter table `team` auto_increment = 1;
@@ -689,7 +689,7 @@ alter table `match` auto_increment = 1;
 alter table `match_player` auto_increment = 1;
 alter table `tournament` auto_increment = 1;
 alter table `tournament_detail` auto_increment = 1;
-alter table `player` auto_increment = 1;
+-- alter table `player` auto_increment = 1;
 
 END//
 

@@ -29,6 +29,35 @@ public class TeamRepo
     }
 
     /// <summary>
+    /// For DI purposes.
+    /// </summary>
+    /// <param name="dbconn">Database connection</param>
+    public TeamRepo( DbConnection? dbconn)
+    {
+        _source = new();
+        _dbconn = dbconn;
+    }
+
+    /// <summary>
+    /// Get the unnormalized list of teams for the tournament
+    /// and then extract teams (asynchronously).
+    /// </summary>
+    /// <returns>List of teams for the tournament</returns>
+    public async Task<List<Team>> GetListAsync(int tournamentId)
+    {
+        if (_dbconn is null ) return new List<Team>();
+        
+        //Get the unnormalizes list of players fot the tournament
+        DbRepoRecordTeamPlayer dbRepoRecordTeamPlayer = new(_dbconn);
+        Filter filter = new() { TournamentId = tournamentId};
+
+        _source =  await dbRepoRecordTeamPlayer.GetList(filter);
+
+        //Create the team player structure
+        return ExtractFromRecordTeamPlayer();
+    }
+    
+    /// <summary>
     /// 
     /// </summary>
     /// <param name="source"></param>
