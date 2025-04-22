@@ -23,15 +23,9 @@ public class TeamValidator
     /// <returns>false if invalid teams</returns>
     public ResultTeamAction Check(List<Team> teams)
     {
+        
         if (teams.Count == 0) return new (RetCodeTeamAction.Warning, "No teams");
 
-        //Check that all players in the teams has names
-        //or are members
-        bool isBlankName = teams.Any(e=> e.Players.Any(p=> (string.IsNullOrEmpty(p.First) || string.IsNullOrEmpty(p.Last)) 
-        && !p.IsMember())); 
-
-        //Missing names
-        if (isBlankName) return new (RetCodeTeamAction.Error, "All players must have names.");
 
         //Get the list of all players
         //and check for duplicates
@@ -42,20 +36,13 @@ public class TeamValidator
         //LINQ
         //Non members
         var qGroupByName = from Player player in allPlayersInTeams
-                            where !player.IsMember()
-                            group player by (player.First , player.Last) into grp
+                            group player by (player.Id ) into grp
                             select grp;
 
-        bool hasDuplicatesNonMembers= qGroupByName.Any(e=>e.Count() > 1);
+        bool hasDuplicates= qGroupByName.Any(e=>e.Count() > 1);
 
-         var qGroupByNameMembers = from Player player in allPlayersInTeams
-                            where player.IsMember()
-                            group player by (player.Member?.Id) into grp
-                            select grp;
 
-        bool hasDuplicatesMembers= qGroupByNameMembers.Any(e=>e.Count() > 1);
-
-        if (hasDuplicatesNonMembers || hasDuplicatesMembers ) return new (RetCodeTeamAction.Error, "A player is in multiple teams");
+        if (hasDuplicates) return new (RetCodeTeamAction.Error, "A player is in multiple teams");
 
 
         //No errors found;

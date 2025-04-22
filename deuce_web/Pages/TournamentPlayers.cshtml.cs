@@ -15,7 +15,7 @@ public class TournamentPlayersPageModel : BasePageModelWizard
     private readonly DbRepoPlayer _dbRepoPlayer;
     private readonly TeamRepo _teamRepo;
 
-    private readonly IAdaptorTeams _adaptorTeams;
+    private readonly IFormReaderPlayers _adaptorTeams;
 
     private List<Team>? _teams;
 
@@ -35,7 +35,7 @@ public class TournamentPlayersPageModel : BasePageModelWizard
     public TournamentPlayersPageModel(ILogger<TournamentPlayersPageModel> log, IServiceProvider sp,
     IConfiguration config, IHandlerNavItems handlerNavItems,
     DbRepoTournamentDetail dbRepoTournamentDetail, DbRepoRecordTeamPlayer dbRepoRecordTeamPlayer, DbRepoTeam dbRepoTeam,
-    DbRepoTournament dbRepoTournament, IAdaptorTeams adaptorTeams, DbRepoMember dbRepoMember, DbRepoVenue dbRepoVenue,
+    DbRepoTournament dbRepoTournament, IFormReaderPlayers adaptorTeams, DbRepoMember dbRepoMember, DbRepoVenue dbRepoVenue,
     TeamRepo teamRepo, DbRepoPlayer dbRepoPlayer) : base(handlerNavItems, sp, config)
     {
         _log = log;
@@ -74,32 +74,29 @@ public class TournamentPlayersPageModel : BasePageModelWizard
         
         //Convert form values into a teams collection
 
-        Organization thisOrg = new() { Id = _sessionProxy?.OrganizationId ?? 1 };
-
-        //List<Team> teams = _adaptorTeams.Convert(HttpContext.Request.Form, thisOrg);
+        Tournament tournament = new() { Id = _sessionProxy?.TournamentId ?? 1 };
+        //Read teams from the displayed form
+        List<Team> teams = _adaptorTeams.Parse(HttpContext.Request.Form, tournament);
 
         //State
         //If the action is to add a team, then add it to _teams
         //and then show the same page ( Don't validate and save).
         string? action = this.HttpContext.Request.Form["action"];
+
+        
         if (string.Compare(action ?? "", "add_team", StringComparison.OrdinalIgnoreCase) == 0)
         {
-
-            //Load tournament details
-            if (_tournamentDetail is null)
+            var formAdaptor = new FormReaderPlayersList();
+            var listForNewTeam = formAdaptor.Parse(HttpContext.Request.Form, tournament);
+          
+            var newTeam = listForNewTeam.FirstOrDefault();
+            if (newTeam is not null)
             {
-                Filter filter = new() { ClubId = _sessionProxy?.OrganizationId ?? 0, TournamentId = _sessionProxy?.TournamentId ?? 0 };
-                var listTourDetail = await _dbRepoTournamentDetail.GetList(filter);
-                _tournamentDetail = listTourDetail.FirstOrDefault();
+                newTeam.Index = teams.Count;    
+                //Add new team
+                teams.Add(newTeam);
             }
 
-            //Add new team
-            Team newTeam = new Team() { Index = teams.Count() };
-
-            for (int i = 0; i < (_tournamentDetail?.TeamSize ?? 0); i++)
-                newTeam.AddPlayer(new Player() { Index = i });
-
-            teams.Add(newTeam);
             //Add new team , don't need to validate and save to
             //db yet. Return;
             _teams = teams;
@@ -130,7 +127,7 @@ public class TournamentPlayersPageModel : BasePageModelWizard
         if (currentTourId > 0)
         {
             //Assign references to the team dbrepo
-            _dbRepoTeam.Organization = thisOrg;
+            _dbRepoTeam.Organization = new Organization() { Id = _sessionProxy?.OrganizationId ?? 1 };
             _dbRepoTeam.TournamentId = currentTourId;
 
             //----------------------------------------
@@ -138,9 +135,31 @@ public class TournamentPlayersPageModel : BasePageModelWizard
             //----------------------------------------
 
             //Get teams from db
-            List<Team> teamSrc = await _teamRepo.GetListAsync(currentTourId);
+            List<Team> teamsInDB = await _teamRepo.GetListAsync(currentTourId);
             
-            SyncMaster<Team> syncMaster = new(teamSrc, teams);
+            SyncMaster<Team> syncMaster = new(teams, teamsInDB);
+            //Add handlers to insert, update and delete teams
+            syncMaster.Add += (sender, team) =>
+            {
+                //Add team to db
+                if(team is not null) _dbRepoTeam.Set(team);;
+                 
+            };
+
+
+            syncMaster.Update +=  (sender, team) =>
+            {
+                //Add team to db
+                  if (team is not null && team?.Dest is not null)
+                        _dbRepoTeam.Set(team.Dest);
+            };
+
+            syncMaster.Remove +=  (sender, team) =>
+            {
+                //Add team to db
+                if (team is not null) _dbRepoTeam.Delete(team);
+            };
+
             syncMaster.Run();
 
         }
@@ -161,24 +180,27 @@ public class TournamentPlayersPageModel : BasePageModelWizard
         {
             Organization organization = new Organization() { Id = orgId };
             Filter filter = new() { TournamentId = currentTourId , ClubId = organization.Id};
-            //Need to know where the tournament is held, so members
-            //can be listed
-            var venue = (await _dbRepoVenue.GetList(filter)).FirstOrDefault();
-
-            //Set country code
-            filter.CountryCode = venue?.CountryCode??36;
 
             //Select all players registered for the tournament
-            //Get all players now ToournamentId = 0
+            //Get all players tournament id = 0
 
             Filter filterPlayer = new() { TournamentId = 0};
             _players = await _dbRepoPlayer.GetList(filterPlayer);
             var currentTour = (await _dbRepoTournament.GetList(filter)).FirstOrDefault();
 
+            //Remove players from the list that are already in a team
+            foreach(Team team in _teams ?? new List<Team>())
+            {
+                foreach (Player player in team.Players)
+                {
+                    var foundPlayer = _players.Find(e=> e.Id == player.Id);  
+                    if (foundPlayer is not null) foundPlayer.Visible = false;
+                }
+            }
+
             //Deflat saved teams
             if (currentTour is not null)
             {
-
 
                 //Load tournament details
                 if (_tournamentDetail is null)

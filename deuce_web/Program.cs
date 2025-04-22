@@ -43,7 +43,7 @@ builder.Services.AddScoped<DbRepoTournamentStatus>();
 builder.Services.AddScoped<DbRepoTournamentValidation>();
 builder.Services.AddScoped<DbRepoCountry>();
 builder.Services.AddScoped<DbRepoMember>();
-builder.Services.AddScoped<IAdaptorTeams, AdaptorFormTeams>();
+builder.Services.AddScoped<IFormReaderPlayers, FormReaderPlayersTeams>();
 builder.Services.AddScoped<ITournamentGateway, DBTournamentGateway>();
 builder.Services.AddScoped<TeamRepo>();
 

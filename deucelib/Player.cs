@@ -21,6 +21,8 @@ public class Player
     private Tournament? _tournament;
     private Member? _member;
 
+    private bool _visible = true;
+
     public int Id { get { return _id; } set { _id = value; } }
     public string? First { get { return _first; } set { _first = value; } }
     public string? Last { get { return _last; } set { _last = value; } }
@@ -31,6 +33,7 @@ public class Player
     public Organization? Club { get { return _club; } set { _club = value; } }
     public Team? Team { get { return _team; } set { _team = value; } }
     public Member? Member { get => _member; set => _member = value; }
+    public bool Visible { get => _visible; set => _visible = value; }
 
     /// <summary>
     /// Usually a Tournament DTO (Data transfer object)

@@ -31,9 +31,14 @@ public class DbRepoBase<T> : IDbRepo<T>, IDisposable
     }
 
 
-    public virtual Task Delete(T obj)
+    public virtual Task DeleteAsync(T obj)
     {
         return Task.FromResult(obj);
+    }
+
+    public virtual void Delete(T obj)
+    {
+        
     }
 
     public virtual Task Sync(List<T> obj)

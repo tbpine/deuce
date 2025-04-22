@@ -2,6 +2,7 @@ using System.Data.Common;
 using System.Diagnostics;
 using System.Net;
 using System.Runtime.ExceptionServices;
+using System.Runtime.Serialization;
 using System.Runtime.Versioning;
 using deuce.ext;
 
@@ -80,8 +81,10 @@ public class DbRepoTeam : DbRepoBase<Team>
     /// </summary>
     /// <param name="obj"></param>
     /// <returns></returns>
-    public override async Task SetAsync(Team obj)
+    public override async Task SetAsync(Team? obj)
     {
+        if (obj is null) return;
+
         _dbconn.Open();
 
         var localtran = _dbconn.BeginTransaction();
@@ -149,6 +152,8 @@ public class DbRepoTeam : DbRepoBase<Team>
     /// <returns></returns>
     public override void Set(Team obj)
     {
+        _dbconn.Open();
+        
         var localtran = _dbconn.BeginTransaction();
 
         try
@@ -368,6 +373,38 @@ public class DbRepoTeam : DbRepoBase<Team>
         , [team.Id], dbTransaction);
         //Update team details.
         cmdDeleteTeam.ExecuteNonQuery();
+    }
+
+    public override void Delete(Team obj)
+    {
+
+        //Delete a team
+        Team team = obj as Team;
+        if (team is null) throw new InvalidCastException("obj is not a Team object"); 
+        _dbconn.Open();
+
+        var localtran= _dbconn.BeginTransaction();
+
+        var cmdDeleteTeam = _dbconn.CreateCommandStoreProc("sp_delete_team", ["p_id"]
+        , [team.Id], localtran);
+
+
+        //Delete team .
+        try{
+             cmdDeleteTeam.ExecuteNonQueryAsync();
+        }
+        catch (DbException ex)
+        {
+            localtran.Rollback();
+            Debug.WriteLine(ex.Message);
+        }
+        finally
+        {
+            localtran.Commit();
+            _dbconn.Close();
+        }
+
+        
     }
 
 

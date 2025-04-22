@@ -6,14 +6,14 @@ using System.Text.RegularExpressions;
 /// <summary>
 /// Converts form values into teams
 /// </summary>
-class AdaptorFormTeams : AdaptorTeamsBase
+class FormReaderPlayersTeams : FormReaderPlayersBase
 {
     //to save new players
 
     /// <summary>
     /// Construct with player dbrepos
     /// </summary>
-    public AdaptorFormTeams()
+    public FormReaderPlayersTeams()
     {
 
     }
@@ -24,8 +24,9 @@ class AdaptorFormTeams : AdaptorTeamsBase
     /// </summary>
     /// <param name="form">Form reference</param>
     /// <param name="organization">Form reference</param>
+    /// <param name="tournament">Tournament where player is registered</param>
     /// <returns>List of teams</returns>
-    public override List<Team> Convert(IFormCollection form, Organization organization)
+    public override List<Team> Parse(IFormCollection form,  Tournament tournament)
     {
         //Result
         List<Team> teams = new();
@@ -44,7 +45,7 @@ class AdaptorFormTeams : AdaptorTeamsBase
             //Ignore the action value
             if (kp.Key == "action") continue;
 
-            var matches = Regex.Match(kp.Key, @"team_(\d+)_(\d+)(_d)*(_player_)*(\d+)*_*(\d+)*_*(\d+)*(_d)*");
+            var matches = Regex.Match(kp.Key, @"^team_(\d+)_(\d+)(_d)*(_player_)*(\d+)*_*(\d+)*_*(\d+)*(_d)*");
 
             if (matches.Success)
             {
@@ -74,34 +75,23 @@ class AdaptorFormTeams : AdaptorTeamsBase
                     Debug.Print($"AdaptorFormTeams: {kp.Key}={kp.Value}. Team|name:{strVal}|idx:{idxTeam}|id:{teamId}");
 
                 }
-                else if (!string.IsNullOrEmpty(teamIdx) && !string.IsNullOrEmpty(playerIdx) )
+                else if (!string.IsNullOrEmpty(teamIdx) && !string.IsNullOrEmpty(playerIdx))
                 {
                     //Check if they selected a registered player
-                    int memberId = this.GetFormInt(form, kp.Key);
                     int idxPlayer = int.TryParse(playerIdx, out idxPlayer) ? idxPlayer : 0;
                     int playerTeamId = int.TryParse(strPlayerTeamId, out playerTeamId) ? playerTeamId : 0;
-                    //Is there a player at this DISPLAYED index
-                    var existingPlayer = currentTeam?.Find(p => p.Index == idxPlayer && playerTeamId == p.TeamPlayerId);
-                    if (existingPlayer is not null && memberId > 0)
+                    
+                    Player player = new Player()
                     {
-                        existingPlayer.Id = playerId;
-                        //Update it's id
-                        if (existingPlayer.Member is not null) existingPlayer.Member.Id = memberId;
-                        Debug.Print($@"AdaptorFormTeams: {kp.Key}={kp.Value}. {(existingPlayer is null ? "New" : "")} Player|id:{memberId}|idx:{idxPlayer}|tpid:{playerTeamId}");
-                    }
-                    else if (memberId > 0)
-                    {
-                        Player player = new Player()
-                        {
-                            Id = playerId,
-                            Index = idxPlayer,
-                            TeamPlayerId = playerTeamId,
-                            Member = new() { Id = memberId }
-                        };
+                        Id = playerId,
+                        Index = idxPlayer,
+                        TeamPlayerId = playerTeamId,
+                        Tournament = null
 
-                        currentTeam?.AddPlayer(player);
-                        Debug.Print($@"AdaptorFormTeams: {kp.Key}={kp.Value}. {(existingPlayer is null ? "New" : "")} Player|id:{memberId}|idx:{idxPlayer}|tpid:{playerTeamId}");
-                    }
+                    };
+
+                    currentTeam?.AddPlayer(player);
+                    Debug.Print($@"AdaptorFormTeams: {kp.Key}={kp.Value}|idx:{idxPlayer}|tpid:{playerTeamId}");
                 }
             }
         }

@@ -1,3 +1,10 @@
+@* 
+ Players registered for the tournament are as cards.
+ To make a team, drag and drop players on top of each other.
+ When a team is created, a parent card is created for the team.
+
+*@
+
 @page
 @model TournamentPlayersPageModel
 @{
@@ -14,7 +21,7 @@
 <!-- Account listings content -->
 <div class="col-lg-9 col-xl-8">
   <h1 class="h2 pb-2 pb-lg-3">Players / Teams</h1>
-  <div class="pb-2 pb-lg-3">Select players in team, then press "Add Team". Repeat until all players are in a team</div>
+  <div class="pb-2 pb-lg-3">Select players that are in a team using checkboxes , add then press "Add Team" . Repeat until all players are in a team</div>
   <!-- Nav pills -->
   <div class="nav overflow-x-auto mb-2">
     @* <ul class="nav nav-pills flex-nowrap gap-2 pb-2 mb-1" role="tablist">
@@ -58,25 +65,29 @@
       <!-- Published listings -->
       <form class="vstack gap-4 mb-4" id="page_form" asp-action="~/TournamentPlayers">
         <input name="action" id="action" type="hidden" />
-        <div id="players_container" class="row row-cols-1 row-cols-sm-2 row-cols-md-3 g-4">
-          @foreach (var player in Model.Players ?? new())
-          {
-            string inputName = $"player_{player.Id}_selection";
-            <div class="col">
-              <div class="card overflow-hidden">
-                <div class="row g-0">
-                  <div class="col-sm-1 d-flex align-items-center justify-content-center">
-                    <input type="checkbox" class="form-check-input" id="@inputName" name="@inputName" />
-                  </div>
-                  <div class="card-body col-sm-8">
-                    <h5 class="card-title">@player.ToString()</h5>
-                    <p class="card-text">Ranking: @player.Ranking</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          }
-        </div>
+        <table id="players_table" class="table">
+          <thead>
+            <tr >
+              <th scope="col" class="text-center"></th>
+              <th scope="col" class="text-center">Player</th>
+              <th scope="col" class="text-center">Rank</th>
+            </tr>
+          </thead>
+          <tbody>
+            @foreach (var player in Model.Players ?? new())
+            {
+              //hide invisible players
+              if (!player.Visible) continue;
+
+              string playerAttrName = $"player_{player?.Id}_{player?.First}_{player?.Last}_{player?.Middle}";
+              <tr>
+                <td class="text-center"><input type="checkbox" class="form-check-input" name="@playerAttrName"></td>
+                <td class="text-center">@player?.ToString()</td>
+                <td class="text-center">@player?.Ranking</td>
+              </tr>
+            }
+          </tbody>
+        </table>
         <!-- An Item  -->
         @for (int i = 0; i < Model.Teams?.Count; i++)
         {
@@ -109,9 +120,14 @@
     
               @for (int j = 0; j < Model.TeamSize; j++)
               {
-                Player? iterPlayer = iterTeam?.Players.ElementAt(j);
-                int teamPlayerId = iterPlayer?.TeamPlayerId ?? 0;
-                int playerId = iterPlayer?.Id ?? 0;
+                
+                int teamPlayerId = iterTeam?.Players.ElementAt(j)?.TeamPlayerId ?? 0;
+                int playerId = iterTeam?.Players.ElementAt(j)?.Id ?? 0;
+
+                //Look up player info
+                Player? player = Model.Players?.FirstOrDefault(e => e.Id == playerId);
+
+
                 //Add form values for this player
                 string attrPlayerName = $"team_{i}_{teamId}_player_{j}_{playerId}_{teamPlayerId}";
                 //Get member's list
@@ -136,7 +152,8 @@
 
                     </select>
                     *@
-                    <input class="readonly" id="@attrPlayerName" name="@attrPlayerName" value="@iterPlayer?.ToString()??"""/> 
+                    
+                    <input readonly id="@attrPlayerName" name="@attrPlayerName" value="@player?.ToString()"/> 
                   </div>
                 
                 </div>
