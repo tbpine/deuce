@@ -70,6 +70,28 @@ class FormReaderPlayersList : FormReaderPlayersBase
                 }
             }
         }
+
+        //Add subs
+
+        for (int i = 0; i < tournament.TeamSize; i++)
+        {
+            //Add subs if the team size
+            //is more than the specified team
+            if (i >= newTeam.Players.Count())
+            {
+                //Add a new player with empty name
+                newTeam.AddPlayer(new Player()
+                {
+                    Id = 0,
+                    First = string.Empty,
+                    Last = string.Empty,
+                    Index = i,
+                    Tournament = tournament
+                });
+
+                
+            }
+        }
         List<Team> teams = [newTeam];
         return teams;
     }

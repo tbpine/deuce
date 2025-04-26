@@ -2,6 +2,7 @@ using deuce;
 using deuce_web;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using ZstdSharp.Unsafe;
 
 public class TournamentPlayersPageModel : BasePageModelWizard
 {
@@ -71,10 +72,25 @@ public class TournamentPlayersPageModel : BasePageModelWizard
     public async Task<IActionResult> OnPost()
     {
         FormUtils.DebugOut(this.HttpContext.Request.Form);
-        
-        //Convert form values into a teams collection
 
-        Tournament tournament = new() { Id = _sessionProxy?.TournamentId ?? 1 };
+        //Convert form values into a teams.
+        Filter tourFilter = new() { TournamentId = _sessionProxy?.TournamentId ?? 0 } ;
+        _tournamentDetail = (await _dbRepoTournamentDetail.GetList(tourFilter)).FirstOrDefault();
+
+        if (_tournamentDetail is null)
+        {
+            Error = "Tournament detail not found";
+            await LoadPage(false);
+            return Page();
+        }
+
+        //Tournament DTO.
+        Tournament tournament = new()
+        {
+            Id = _sessionProxy?.TournamentId ?? 0,  
+            TeamSize = _tournamentDetail.TeamSize
+        };
+
         //Read teams from the displayed form
         List<Team> teams = _adaptorTeams.Parse(HttpContext.Request.Form, tournament);
 
@@ -87,9 +103,9 @@ public class TournamentPlayersPageModel : BasePageModelWizard
         if (string.Compare(action ?? "", "add_team", StringComparison.OrdinalIgnoreCase) == 0)
         {
             var formAdaptor = new FormReaderPlayersList();
-            var listForNewTeam = formAdaptor.Parse(HttpContext.Request.Form, tournament);
+            var formTeams = formAdaptor.Parse(HttpContext.Request.Form, tournament);
           
-            var newTeam = listForNewTeam.FirstOrDefault();
+            var newTeam = formTeams.FirstOrDefault();
             if (newTeam is not null)
             {
                 newTeam.Index = teams.Count;    
@@ -109,7 +125,7 @@ public class TournamentPlayersPageModel : BasePageModelWizard
         //Team must have players
         //A player cannot appear more than once.
         TeamValidator teamValidator = new();
-        var isvalidTeams = teamValidator.Check(teams);
+        var isvalidTeams = teamValidator.Check(teams, tournament);
         //Warning or error
         if (isvalidTeams.Result != RetCodeTeamAction.Success)
         {
@@ -188,16 +204,6 @@ public class TournamentPlayersPageModel : BasePageModelWizard
             _players = await _dbRepoPlayer.GetList(filterPlayer);
             var currentTour = (await _dbRepoTournament.GetList(filter)).FirstOrDefault();
 
-            //Remove players from the list that are already in a team
-            foreach(Team team in _teams ?? new List<Team>())
-            {
-                foreach (Player player in team.Players)
-                {
-                    var foundPlayer = _players.Find(e=> e.Id == player.Id);  
-                    if (foundPlayer is not null) foundPlayer.Visible = false;
-                }
-            }
-
             //Deflat saved teams
             if (currentTour is not null)
             {
@@ -208,7 +214,7 @@ public class TournamentPlayersPageModel : BasePageModelWizard
                     var listTourDetail = await _dbRepoTournamentDetail.GetList(filter);
                     _tournamentDetail = listTourDetail.FirstOrDefault();
                 }
-
+                //For GETS
                 if (loadDB)
                 {
                     //Load teams
@@ -218,6 +224,8 @@ public class TournamentPlayersPageModel : BasePageModelWizard
                     //Create the team /player graph
                     TeamRepo teamRepo = new TeamRepo(tourTeamPlayersRec);
                     _teams = teamRepo.ExtractFromRecordTeamPlayer();
+
+                    //Set player visibility
                 }
 
                 //Don't use no of entries
@@ -235,6 +243,16 @@ public class TournamentPlayersPageModel : BasePageModelWizard
                 TeamSize = 1;
             }
 
+
+            //Remove players from the list that are already in a team
+            foreach(Team team in _teams ?? new List<Team>())
+            {
+                foreach (Player player in team.Players)
+                {
+                    var foundPlayer = _players.Find(e=> e.Id == player.Id);  
+                    if (foundPlayer is not null) foundPlayer.Team = team;
+                }
+            }
 
           
 

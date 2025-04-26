@@ -178,7 +178,7 @@ public class TournamentDetailPageModel : BasePageModelWizard
         //Validation is done in the first record.
         var valResult = (await _dbRepoTournamentValidation.GetList(filter)).FirstOrDefault();
 
-        if (!(valResult?.IsValid??false))
+        if (!(valResult?.IsValid??false) && _sessionProxy?.TournamentId <= 0 )
         {
             //There's a tournament with the same name
             NameValidation = "required";

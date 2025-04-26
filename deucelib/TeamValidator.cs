@@ -21,7 +21,7 @@ public class TeamValidator
     /// </summary>
     /// <param name="teams">List of teams</param>
     /// <returns>false if invalid teams</returns>
-    public ResultTeamAction Check(List<Team> teams)
+    public ResultTeamAction Check(List<Team> teams, Tournament tournament)
     {
         
         if (teams.Count == 0) return new (RetCodeTeamAction.Warning, "No teams");
@@ -29,22 +29,17 @@ public class TeamValidator
 
         //Get the list of all players
         //and check for duplicates
-        List<Player> allPlayersInTeams = new();
+        List<Player> allPlayers = new();
 
-        teams.All(e => {allPlayersInTeams.AddRange(e.Players); return true;});
+        teams.All(e => {allPlayers.AddRange(e.Players); return true;});
+
+        //Check that teams have the specified number of players
+        foreach (var team in teams)
+        {
+            if (team.Players.Count() != tournament.TeamSize)
+                return new(RetCodeTeamAction.Error, $"Invalid number of players in team {team.Label}");
+        }
         
-        //LINQ
-        //Non members
-        var qGroupByName = from Player player in allPlayersInTeams
-                            group player by (player.Id ) into grp
-                            select grp;
-
-        bool hasDuplicates= qGroupByName.Any(e=>e.Count() > 1);
-
-
-        if (hasDuplicates) return new (RetCodeTeamAction.Error, "A player is in multiple teams");
-
-
         //No errors found;
         return new(RetCodeTeamAction.Success, "");
     }

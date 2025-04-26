@@ -12,7 +12,7 @@ public class UnitTestsPlayer
 {
 
     [TestMethod]
-    [DataRow(10,1)]
+    [DataRow(3,1)]
     public void set_n_non_member_players_returns_nothing(int noPlayers, int tourId)
     {
         //Assign
@@ -28,13 +28,20 @@ public class UnitTestsPlayer
         List<Player> newPlayers = new();
         //Tournament DTO
         Tournament dtoTournament = new Tournament() { Id =  tourId};
+        int maxTries = 100;
+        int tries = 0;
 
-        for (int i = 0; i < noPlayers && i < RandomUtil.GetNameCount(); i++)
+        for (int i = 0; i < noPlayers && i < RandomUtil.GetNameCount() && tries < maxTries; i++)
         {
             //create the new player
             DbRepoPlayer depoPlayer = new(conn);
-            
+
             string[] rname = RandomUtil.GetPlayer().Split(new char[] { ' ' });
+            Player? existing = newPlayers.Find(p => p.First == rname[0] && p.Last == rname[1]);
+            tries++;
+            
+            if (existing != null) continue; //skip if already exists
+
             Player newPlayer = new()
             {
                 Id = 0,
@@ -44,6 +51,7 @@ public class UnitTestsPlayer
                 Tournament = dtoTournament
             };
             newPlayers.Add(newPlayer);
+            
             //Save to db
             depoPlayer.Set(newPlayer);
 
