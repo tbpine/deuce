@@ -5,5 +5,5 @@
     - [X] Team definition page
 - [X] Fix the scoring sheet
 - [X] Load teams
-- [] Disband team
-    - [] Show disbanded players in the list
+- [X] Disband team
+    - [X] Show disbanded players in the list

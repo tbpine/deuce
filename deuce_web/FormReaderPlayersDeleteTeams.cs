@@ -6,14 +6,14 @@ using System.Text.RegularExpressions;
 /// <summary>
 /// Converts form values into teams
 /// </summary>
-class FormReaderPlayersTeams : FormReaderPlayersBase
+class FormReaderPlayersDeleteTeams : FormReaderPlayersBase
 {
     //to save new players
 
     /// <summary>
     /// Construct with player dbrepos
     /// </summary>
-    public FormReaderPlayersTeams()
+    public FormReaderPlayersDeleteTeams()
     {
 
     }
@@ -28,10 +28,10 @@ class FormReaderPlayersTeams : FormReaderPlayersBase
     /// <returns>List of teams</returns>
     public override List<Team> Parse(IFormCollection form,  Tournament tournament)
     {
-        //Result
-        List<Team> teams = new();
         //State
         Team? currentTeam = null;
+        //Teams marked for deletion
+        List<Team> delList = new();
 
         ///Transforms form values to teams
         foreach (var kp in form)
@@ -60,23 +60,31 @@ class FormReaderPlayersTeams : FormReaderPlayersBase
                 int playerId = int.TryParse(strPlayerId, out playerId) ? playerId : 0;
 
                 if (!string.IsNullOrEmpty(teamIdx) && string.IsNullOrEmpty(playerIdx) &&
-                string.IsNullOrEmpty(strDelete))
+                !string.IsNullOrEmpty(strDelete) && kp.Value == "on")
                 {
-                    //Team form variable
-                    string? strVal = kp.Value;
+
+                    //Delete team
                     int idxTeam = int.TryParse(teamIdx, out idxTeam) ? idxTeam : 0;
                     int teamId = int.TryParse(strTeamId, out teamId) ? teamId : 0;
-                    Team? team = new();
-                    team.Id = teamId;
-                    team.Label = string.IsNullOrEmpty(strVal) ? "" : strVal;
-                    team.Index = idxTeam;
+                    //Team DTO for deletion
+                    Team? delTeam = new();
+                    delTeam.Id = teamId;
+                    delTeam.Index = idxTeam;
+                    currentTeam = delTeam;
+                    //Add to the list of teams to delete 
+                    delList.Add(delTeam);   
 
-                    currentTeam = team;
-                    teams.Add(currentTeam);
-                    Debug.Print($"AdaptorFormTeams: {kp.Key}={kp.Value}. Team|name:{strVal}|idx:{idxTeam}|id:{teamId}");
 
                 }
-                else if (!string.IsNullOrEmpty(teamIdx) && !string.IsNullOrEmpty(playerIdx))
+                
+                else if (!string.IsNullOrEmpty(teamIdx) && string.IsNullOrEmpty(playerIdx) &&
+                !string.IsNullOrEmpty(strDelete) && string.IsNullOrEmpty(kp.Value))
+                {
+                    //Non deletion
+                    currentTeam = null;
+                }
+                else if (!string.IsNullOrEmpty(teamIdx) && !string.IsNullOrEmpty(playerIdx)
+                && (currentTeam is not null))
                 {
                     //Check if they selected a registered player
                     int idxPlayer = int.TryParse(playerIdx, out idxPlayer) ? idxPlayer : 0;
@@ -96,33 +104,10 @@ class FormReaderPlayersTeams : FormReaderPlayersBase
                 }
             }
         }
-        //Validations
 
-        //Check for teams with zero players
-        List<Team> removeTeamList = new();
-        foreach (Team team in teams)
-            //Don't add teams with no players
-            if (team.Players.Count() == 0) removeTeamList.Add(team);
-
-        //Remove empty teams
-        foreach (Team rmTeam in removeTeamList) teams.Remove(rmTeam);
-
-        return teams;
+        return delList;
     }
 
 
-    /// <summary>
-    /// Get the integer value of a form variable.
-    /// </summary>
-    /// <param name="form">Reference to the form</param>
-    /// <param name="key">Variable key</param>
-    /// <returns>0 if the value is not an integer</returns>
-    private int GetFormInt(IFormCollection form, string key)
-    {
-        string? str = form[key];
-        int ival = int.TryParse(str ?? "", out ival) ? ival : 0;
-
-        return ival;
-    }
 
 }

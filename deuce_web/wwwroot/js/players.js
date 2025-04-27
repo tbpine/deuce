@@ -130,12 +130,13 @@ function showHideNewPlayer(selectid, inputid, newPlayerLabel) {
 }
 
 //------------------------------------
-//Add a team by posting
+//Post with action
 //------------------------------------
-function addTeamPost() {
-  document.getElementById("action").value = "add_team";
+function teamPost(action) {
+  document.getElementById("action").value = action;
   document.getElementById("page_form").submit();
 }
+
 
 function postFormWithValidation() {
 

@@ -99,8 +99,7 @@ public class TournamentPlayersPageModel : BasePageModelWizard
         //and then show the same page ( Don't validate and save).
         string? action = this.HttpContext.Request.Form["action"];
 
-        
-        if (string.Compare(action ?? "", "add_team", StringComparison.OrdinalIgnoreCase) == 0)
+        if (string.Compare(action ?? "", "add_team", StringComparison.OrdinalIgnoreCase) == 0 )
         {
             var formAdaptor = new FormReaderPlayersList();
             var formTeams = formAdaptor.Parse(HttpContext.Request.Form, tournament);
@@ -119,6 +118,20 @@ public class TournamentPlayersPageModel : BasePageModelWizard
             await LoadPage(false);
             return Page();
 
+        }
+        else if (string.Compare(action ?? "", "delete_team", StringComparison.OrdinalIgnoreCase) == 0)
+        {
+            var formReader = new FormReaderPlayersDeleteTeams();
+            var deletedTeams = formReader.Parse(HttpContext.Request.Form, tournament);
+
+            //Put players back in the list
+            foreach(Team team in deletedTeams)
+                teams.RemoveAll(e=>e.Id == team.Id && e.Index == team.Index);
+
+            _teams = teams;
+
+            await LoadPage(false);
+            return Page();
         }
 
         //Validate teams before saving:

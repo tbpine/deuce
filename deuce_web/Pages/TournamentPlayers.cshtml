@@ -44,7 +44,7 @@
       <div class="nav align-items-center mb-4">
 
         <div class="d-flex flex-wrap" id="published-action-buttons">
-          <a class="nav-link position-relative px-0 pe-sm-2 py-2 me-4" href="#!" onclick="addTeamPost()">
+          <a class="nav-link position-relative px-0 pe-sm-2 py-2 me-4" href="#!" onclick="teamPost('add_team')">
             <i class="fi-plus-square fs-base me-2"></i>
             <span class="hover-effect-underline stretched-link d-none d-md-inline">Add Team</span>
           </a>
@@ -56,7 +56,7 @@
             <i class="fi-share fs-base me-2"></i>
             <span class="hover-effect-underline stretched-link d-none d-md-inline">Export</span>
           </a>
-          <a class="nav-link position-relative text-danger px-0 py-2" href="#!" onclick="deleteTeams('page_form')">
+          <a class="nav-link position-relative text-danger px-0 py-2" href="#!"  onclick="teamPost('delete_team')">
             <i class="fi-trash fs-base me-1"></i>
             <span class="hover-effect-underline stretched-link d-none d-md-inline">Delete</span>
           </a>
@@ -96,6 +96,7 @@
           int teamId = iterTeam?.Id ?? 0;
           //Pathing
           string attrTeamName = $"team_{iterTeam?.Index ?? i}_{teamId}";
+          string attrTeamNameForDel = $"team_{iterTeam?.Index ?? i}_{teamId}_d";
           string attrTeamLable = iterTeam?.Label ?? "";
           string attrTeamCtlVisible = Model.EntryType == (int)EntryType.Team ? "visible" : "invisible zero_height";
           @* string attrCanDeletePlayer = "invisible"; *@
@@ -103,7 +104,7 @@
           <div class="d-sm-flex align-items-center">
             <div class="d-inline-flex position-relative z-2 pt-1 pb-2 ps-2 p-sm-0 ms-2 ms-sm-0 me-sm-2">
               <div class="form-check position-relative z-1 fs-lg m-0">
-                <input type="checkbox" class="form-check-input">
+                <input type="checkbox" class="form-check-input" name="@attrTeamNameForDel"  />
               </div>
               <span class="position-absolute top-0 start-0 w-100 h-100 bg-body border rounded d-sm-none"></span>
             </div>
