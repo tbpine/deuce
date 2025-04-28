@@ -24,13 +24,15 @@ public class ScoringPageModel : BasePageModelAcc
 
     public Round Rounds(int r) => _schedule?.GetRounds(r) ?? new Round(0);
 
+    private readonly DbConnection _dbConnection;
 
     public ScoringPageModel(ILogger<ScoringPageModel> log, ISideMenuHandler handlerNavItems, IServiceProvider sp, IConfiguration config,
-    ITournamentGateway tgateway, SessionProxy sessionProxy, DbRepoRecordTeamPlayer dbRepoRecordTeamPlayer)
-    : base(handlerNavItems, sp, config, tgateway,sessionProxy)
+    ITournamentGateway tgateway, SessionProxy sessionProxy, DbRepoRecordTeamPlayer dbRepoRecordTeamPlayer, DbConnection dbConnection)
+    : base(handlerNavItems, sp, config, tgateway, sessionProxy)
     {
         _log = log;
         _deRepoRecordTeamPlayer = dbRepoRecordTeamPlayer;
+        _dbConnection = dbConnection;
     }
 
     public async Task<IActionResult> OnGetAsync()
@@ -44,6 +46,20 @@ public class ScoringPageModel : BasePageModelAcc
     {
         foreach (var kp in this.Request.Form)
             Debug.Write(kp.Key + "=" + kp.Value + "\n");
+            
+        await LoadCurrentTournament();
+
+        if (this.Request.Form["action"] == "save")
+        {
+            //Get round permutation and games
+
+            FormReaderScoring formReader = new FormReaderScoring();
+            List<deuce.Match> matches = formReader.Parse(this.Request.Form, _tournament ?? new(), _currentRound);
+                        
+
+
+        }
+
         string? strCR = this.Request.Form["current_round"];
         _currentRound = int.Parse(strCR ?? "0");
         await LoadCurrentTournament();
@@ -56,16 +72,14 @@ public class ScoringPageModel : BasePageModelAcc
     {
         //Get the current tournament
         //DB access
-        _tournament =  await _tourGatway?.GetCurrentTournament()!;
+        _tournament =  await _tourGateway?.GetCurrentTournament()!;
         if (_tournament is  null) return;
 
         IGameMaker gm = new GameMakerTennis();
-
         
-        var recordsTeamPlayers = await _deRepoRecordTeamPlayer.GetList();
         //Extract teams and players
-        TeamRepo teamRepo = new TeamRepo(recordsTeamPlayers);
-        List<Team> listOfTeams = teamRepo.ExtractFromRecordTeamPlayer();
+        TeamRepo teamRepo = new TeamRepo(_tournament, _dbConnection);
+        List<Team> listOfTeams = (await teamRepo.GetListAsync(_sessionProxy?.TournamentId ?? 0));
 
         //TODO: This is incorrect.
         //The schedule should be built from

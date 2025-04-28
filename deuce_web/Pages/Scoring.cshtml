@@ -40,7 +40,7 @@
             </a>
         </div>
         <div class="d-flex flex-wrap" id="published-action-buttons">
-            <a class="nav-link position-relative px-0 pe-sm-2 py-2 me-4" href="#!">
+            <a class="nav-link position-relative px-0 pe-sm-2 py-2 me-4" onclick="postAction('save')">
                 <i class="fi-save fs-base me-2"></i>
                 <span class="hover-effect-underline stretched-link d-none d-md-inline">Save</span>
             </a>
@@ -54,7 +54,8 @@
     </div>
 
     <!-- Published listings -->
-    <form asp-action="~/Scoring" method="post" id="the_form">
+    <form asp-action="~/Scoring" method="post" id="mainForm">
+        <input type="hidden" name="action"/>
         <input id="current_round" name="current_round" type="hidden" value="0"/>
         <div class="vstack gap-4" id="publishedSelection">
             @{int rIdx = 0;}
@@ -93,14 +94,14 @@
                                     @for(int i = 0; i < Model.NoSets;i++)
                                     {
                                         <div class="col">
-                                            <input class="form-control border-black pb-1" style="width:90px" name="home_match_@(j)_set_@(i+1)" >
+                                            <input class="form-control border-black pb-1" style="width:90px" name="home_perm_@(perm.Id)_match_@(j)_set_@(i+1)" >
                                         </div>
                                     }
                                     <div class="col pt-1">@(match.GetAwayTeam())</div>
                                     @for(int i = 0; i < Model.NoSets;i++)
                                     {
                                         <div class="col">
-                                            <input class="form-control border-black pt-1" style="width:90px" name="away_match_@(j)_set_@(i+1)">
+                                            <input class="form-control border-black pt-1" style="width:90px" name="away_perm_@(perm.Id)_match_@(j)_set_@(i+1)">
                                         </div>
                                     }
                                     
@@ -122,23 +123,4 @@
 
 </div>
 </div>
-
-<script >
-    function func1(round)
-    {
-        let n1 = document.getElementById("current_round");
-        n1.setAttribute("value", round);
-        
-        document.getElementById("the_form").submit();
-
-    }
-
-    function toogleExpansion(name)
-    {
-        let n1 = document.getElementById(name);
-        let c = n1.getAttribute("class");
-
-        if (c === "fi-plus position-relative top-50 start-0 translate-middle-y") n1.setAttribute("class", "fi-minus position-relative top-50 start-0 translate-middle-y");
-        else n1.setAttribute("class", "fi-plus position-relative top-50 start-0 translate-middle-y");
-    }
-</script>
+<script src="~/js/scoring.js"></script>

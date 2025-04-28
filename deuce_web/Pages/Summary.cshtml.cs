@@ -50,7 +50,7 @@ public class SummaryPageModel : BasePageModelAcc
          //Validate tournament
          //Show /Hide the start button 
          ResultTournamentAction resultVal = new();
-         if (_tourGatway is not null) resultVal = await _tourGatway.ValidateCurrentTournament();
+         if (_tourGateway is not null) resultVal = await _tourGateway.ValidateCurrentTournament();
 
          if ((resultVal?.Status ?? ResultStatus.Error) == ResultStatus.Error)
             Error = resultVal?.Message ?? "";
@@ -81,11 +81,11 @@ public class SummaryPageModel : BasePageModelAcc
       if (String.Compare(strAction ?? "", "start", true) == 0)
       {
          //Create matches, permuations and rounds.
-         if (_tourGatway is not null)
+         if (_tourGateway is not null)
          {
             //Make the schedule for the tournament.
             //It's saved to the database
-            var actionResult = await _tourGatway.StartTournament();
+            var actionResult = await _tourGateway.StartTournament();
             //Go back to the tournaments listing
             if (actionResult.Status == ResultStatus.Ok)
                return Redirect(this.HttpContext.Request.PathBase + "/Tournaments");

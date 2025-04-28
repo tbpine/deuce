@@ -58,8 +58,20 @@ public class DBTournamentGateway : ITournamentGateway
         List<Tournament> listOfTour = await _dbRepoTournament.GetList(tourFilter);
         //Close if it was created.
 
+        var tournament = listOfTour.FirstOrDefault();
 
-        return listOfTour.FirstOrDefault();
+        //Get tournament details.
+
+        var tourDetail = (await _dbRepoTournamentDetail.GetList(tourFilter)).FirstOrDefault();
+
+        if (tournament is not null)
+        {
+            tournament.TeamSize = tourDetail?.TeamSize ?? 0;
+            //Get format
+            tournament.Format = new Format(tourDetail?.NoSingles??1, tourDetail?.NoDoubles??1, tourDetail?.Sets??1);
+    
+        }   
+        return tournament;
 
 
     }
@@ -108,13 +120,11 @@ public class DBTournamentGateway : ITournamentGateway
         var listOfTeams = await teamRepo.GetTournamentEntries();
 
         //Check for byes
-
-
         Team bye = new Team(-1, "BYE");
         for (int i = 0; i < currentTour.TeamSize; i++) bye.AddPlayer(new Player() { Id = -1, First = "BYE", Last = "", Index = i, Ranking = 0d });
 
 
-        if ((listOfTeams?.Count ?? 0 % 2) > 0) { listOfTeams?.Add(bye); }
+        if (((listOfTeams?.Count ?? 0) % 2) > 0) { listOfTeams?.Add(bye); }
 
         //------------------------------
         //| Create schedule.
@@ -123,11 +133,12 @@ public class DBTournamentGateway : ITournamentGateway
 
         FactorySchedulers facSchedulers = new FactorySchedulers();
         var tournamentScheduler = facSchedulers.Create(currentTour, gameMaker);
-        tournamentScheduler.Run(listOfTeams ?? new());
+        var schedule= tournamentScheduler.Run(listOfTeams ?? new());
 
         //Check if the schedule is correct
-        if (currentTour.Schedule is not null)
+        if (schedule is not null)
         {
+            currentTour.Schedule = schedule;    
             //Schedule was created for this
             //tournament. Save to the database
             //and change it's status

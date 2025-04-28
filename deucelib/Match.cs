@@ -13,6 +13,7 @@ public class Match
     private List<Player> _home = new();
     private List<Player> _away = new();
     private string? _score;
+    public string? Score { get=>_score; set=>_score = value; }
     private int _round;
 
     private Permutation? _perm;
