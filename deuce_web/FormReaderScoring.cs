@@ -25,7 +25,7 @@ class FormReaderScoring
     /// <param name="tournament">Tournament where player is registered</param>
     /// <param name="round">Round in the tournament</param>
     /// <returns>List of teams</returns>
-    public List<deuce.Match> Parse(IFormCollection form, Tournament tournament, int roundIdx)
+    public List<Score> Parse(IFormCollection form, Tournament tournament, int roundIdx)
     {
 
         //Need schedule to get the matches

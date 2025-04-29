@@ -236,37 +236,47 @@ SELECT LAST_INSERT_ID() 'id';
 
 END//
 
-DROP PROCEDURE IF EXISTS `sp_get_result`//
 
-CREATE PROCEDURE `sp_get_result`(
+DROP PROCEDURE IF EXISTS `sp_get_score`//
+
+CREATE PROCEDURE `sp_get_score`(
+IN p_tournament INT,
+IN p_permutation INT,
+IN p_match INT
 )
 BEGIN
 
-	SELECT `id`,`tournament`,`player_1`,`player_2`,`score`,`updated_datetime`,`created_datetime`
-	FROM `result`
+	SELECT `id`, `tournament`, `permutation`, `match`, `home`, `away`, `score`, `updated_datetime`, `created_datetime`
+	FROM `score`
+	WHERE `tournament` = p_tournament
+	AND (`permutation` = p_permutation OR ISNULL(p_permutation))
+	AND (`match` = p_match OR ISNULL(p_match))
 	ORDER BY `id`;
 
+END//
 
- END//
+DROP PROCEDURE IF EXISTS `sp_set_score`//
 
-
-DROP PROCEDURE IF EXISTS `sp_set_result`//
-
-CREATE PROCEDURE `sp_set_result`(
-IN p_id INT,
-IN p_tournament INT,
-IN p_player_1 INT,
-IN p_player_2 INT,
-IN p_score VARCHAR(300))
+CREATE PROCEDURE `sp_set_score`(
+IN p_id 				INT,
+IN p_tournament 		INT,
+IN p_permutation 		INT,
+IN p_match				INT,
+IN p_home 				INT,
+IN p_away 				INT,
+IN p_notes 				VARCHAR(300))
 
 BEGIN
 
-INSERT INTO `result`(`id`,`tournament`,`player_1`,`player_2`,`score`,`updated_datetime`,`created_datetime`) VALUES (p_id, p_tournament, p_player_1, p_player_2, p_score, NOW(), NOW())
-ON DUPLICATE KEY UPDATE `tournament` = p_tournament,`player_1` = p_player_1,`player_2` = p_player_2,`score` = p_score,`updated_datetime` = NOW();
+INSERT INTO `score`(`id`,`tournament`,`permutation`, `match`, `home`,`away`,`score`,`updated_datetime`,`created_datetime`) 
+VALUES (p_id, p_tournament, p_permutation, p_match, p_home, p_away, p_notes, NOW(), NOW())
+ON DUPLICATE KEY UPDATE `tournament` = p_tournament, `permutation` = p_permutation, `match` = p_match,  
+`home` = p_home, `away` = p_away, `score` = p_notes, `updated_datetime` = NOW();
 
 SELECT LAST_INSERT_ID() 'id';
 
 END//
+
 
 DROP PROCEDURE IF EXISTS `sp_get_permutation`//
 
