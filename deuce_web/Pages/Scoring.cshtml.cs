@@ -54,9 +54,9 @@ public class ScoringPageModel : BasePageModelAcc
             //Get round permutation and games
 
             FormReaderScoring formReader = new FormReaderScoring();
-            List<deuce.Match> matches = formReader.Parse(this.Request.Form, _tournament ?? new(), _currentRound);
-                        
-
+            List<Score> formScores = formReader.Parse(this.Request.Form, _schedule??new(_tournament??new()), _currentRound, _tournament?.Id ?? 0);
+            //Use proxy to save
+            ProxyScores.Save(formScores, _dbConnection);
 
         }
 
@@ -72,11 +72,11 @@ public class ScoringPageModel : BasePageModelAcc
     {
         //Get the current tournament
         //DB access
-        _tournament =  await _tourGateway?.GetCurrentTournament()!;
-        if (_tournament is  null) return;
+        _tournament = await _tourGateway?.GetCurrentTournament()!;
+        if (_tournament is null) return;
 
         IGameMaker gm = new GameMakerTennis();
-        
+
         //Extract teams and players
         TeamRepo teamRepo = new TeamRepo(_tournament, _dbConnection);
         List<Team> listOfTeams = (await teamRepo.GetListAsync(_sessionProxy?.TournamentId ?? 0));
@@ -89,8 +89,9 @@ public class ScoringPageModel : BasePageModelAcc
         FactorySchedulers fac = new();
         IScheduler matchMaker = fac.Create(_tournament, gm);
         _schedule = matchMaker.Run(listOfTeams);
-
+        
     }
+
 
 
 }

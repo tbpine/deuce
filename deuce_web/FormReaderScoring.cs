@@ -1,5 +1,4 @@
 using deuce;
-using System.Diagnostics;
 using System.Text.RegularExpressions;
 
 
@@ -25,19 +24,18 @@ class FormReaderScoring
     /// <param name="tournament">Tournament where player is registered</param>
     /// <param name="round">Round in the tournament</param>
     /// <returns>List of teams</returns>
-    public List<Score> Parse(IFormCollection form, Tournament tournament, int roundIdx)
+    public List<Score> Parse(IFormCollection form, Schedule schedule, int roundIdx, int tournamentId)
     {
 
-        //Need schedule to get the matches
-        //and permutaions
-        if (tournament.Schedule is null) return new();
-
-        List<deuce.Match> matches = new();
+        //Chek if the schedule is not null
+        if (schedule is null) throw new ArgumentNullException(nameof(schedule));
+        //Make a list of Score to return
+        List<deuce.Score> scores = new();
 
         foreach (var kp in form)
         {
 
-            //Path format 
+            //Path format home|away_perm_1_match_1_set_1=0
 
             //Ignore the action value
             if (kp.Key == "action") continue;
@@ -51,21 +49,51 @@ class FormReaderScoring
                 string strMatchId = m.Groups[3].Value;
                 string strSetId = m.Groups[4].Value;
 
+                string? strScore = kp.Value.FirstOrDefault();
+                int teamScore = int.TryParse(strScore, out teamScore) ? teamScore : 0;
+
                 if (int.TryParse(strPermId, out int permId) &&
                     int.TryParse(strMatchId, out int matchId) &&
-                    int.TryParse(strSetId, out int setId))
+                    int.TryParse(strSetId, out int setId) &&
+                    !string.IsNullOrEmpty(strScore))
                 {
-                    var round = tournament.Schedule.GetRoundAtIndex(roundIdx);
-                    var perm = round.Permutations.First(e => e.Id == permId);
-                    deuce.Match match = perm.Matches.First(e => e.Id == matchId);
-                    //Need a score parser
-                    matches.Add(match);
-                    
+                    var round = schedule.GetRoundAtIndex(roundIdx);
+                    var perm = round.Permutations.FirstOrDefault(e => e.Id == permId);
+                    deuce.Match? match = perm?.Matches.FirstOrDefault(e => e.Id == matchId);
+
+                    //Check if the score exists
+
+                    var existingScore = scores.FirstOrDefault(e => e.Permutation == permId
+                    && e.Match == matchId && e.Tournament == tournamentId);
+
+                    if (existingScore is not null)
+                    {
+                        existingScore.Home = strHomeAway == "home" ? teamScore : existingScore.Home;
+                        existingScore.Away = strHomeAway == "away" ? teamScore : existingScore.Away;
+                        
+                    }
+                    else
+                    {
+                        Score score = new Score()
+                        {
+                            Id = 0,
+                            Tournament = tournamentId,
+                            Round = roundIdx,
+                            Permutation = perm?.Id??0,
+                            Match = match?.Id??0,
+                            Home = strHomeAway == "home" ? teamScore : 0,
+                            Away = strHomeAway == "away" ? teamScore : 0,
+                            Set = setId
+                        };
+                        scores.Add(score);
+
+                    }
+
                 }
             }
         }
 
-        return matches;
+        return scores;
     }
 
 

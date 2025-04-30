@@ -18,7 +18,7 @@
         <li class="nav-item me-1" role="presentation">
         @{ string active = (i == (Model.CurrentRound+1) ? "active" : "");}                    
             <button type="button" class="nav-link text-nowrap @active" id="published-tab" data-bs-toggle="pill" data-bs-target="#published" role="tab" aria-controls="published"
-            onclick="func1(@(i-1));" > 
+            onclick="changeRound(@(i-1));" > 
         @i
             </button> 
         </li>
@@ -55,7 +55,7 @@
 
     <!-- Published listings -->
     <form asp-action="~/Scoring" method="post" id="mainForm">
-        <input type="hidden" name="action"/>
+        <input type="hidden" name="action" id="action"/>
         <input id="current_round" name="current_round" type="hidden" value="0"/>
         <div class="vstack gap-4" id="publishedSelection">
             @{int rIdx = 0;}

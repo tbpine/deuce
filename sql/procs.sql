@@ -260,18 +260,19 @@ DROP PROCEDURE IF EXISTS `sp_set_score`//
 CREATE PROCEDURE `sp_set_score`(
 IN p_id 				INT,
 IN p_tournament 		INT,
+IN p_round 				INT,
 IN p_permutation 		INT,
-IN p_match				INT,
 IN p_home 				INT,
 IN p_away 				INT,
+IN p_set 				INT,
 IN p_notes 				VARCHAR(300))
 
 BEGIN
 
-INSERT INTO `score`(`id`,`tournament`,`permutation`, `match`, `home`,`away`,`score`,`updated_datetime`,`created_datetime`) 
-VALUES (p_id, p_tournament, p_permutation, p_match, p_home, p_away, p_notes, NOW(), NOW())
-ON DUPLICATE KEY UPDATE `tournament` = p_tournament, `permutation` = p_permutation, `match` = p_match,  
-`home` = p_home, `away` = p_away, `score` = p_notes, `updated_datetime` = NOW();
+INSERT INTO `score`(`id`,`tournament`,`round`,`permutation`, `match`, `home`,`away`,`set`,`notes`,`updated_datetime`,`created_datetime`) 
+VALUES (p_id, p_tournament, p_round, p_permutation, p_match, p_home, p_away,p_set, p_notes, NOW(), NOW())
+ON DUPLICATE KEY UPDATE `tournament` = p_tournament, `round` = p_round, `permutation` = p_permutation, `match` = p_match,  
+`home` = p_home, `away` = p_away, `set` = p_set, `notes` = p_notes, `updated_datetime` = NOW();
 
 SELECT LAST_INSERT_ID() 'id';
 

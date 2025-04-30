@@ -148,10 +148,12 @@ ALTER TABLE `player` auto_increment = 1000;
 CREATE TABLE IF NOT EXISTS `score` (
     `id` 					INT PRIMARY KEY AUTO_INCREMENT,
     `tournament` 			INT NOT NULL,
+    `round` 			    INT NOT NULL,
     `permutation` 			INT NOT NULL,
     `match` 				INT NOT NULL,
-    `home` 				INT NOT NULL,
-    `away` 				INT NOT NULL,
+    `home` 				    INT NOT NULL,
+    `away` 				    INT NOT NULL,
+    `set` 				    INT NOT NULL,
     `notes` 				VARCHAR(300),
     `updated_datetime` 		TIMESTAMP,
     `created_datetime` 		TIMESTAMP

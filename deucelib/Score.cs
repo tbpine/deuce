@@ -1,3 +1,4 @@
+namespace deuce;
 /// <summary>
 /// Represents a score entity with details about a match, players, and related metadata.
 /// </summary>
@@ -12,6 +13,16 @@ public class Score
     /// Gets or sets the identifier of the tournament associated with the score.
     /// </summary>
     public int Tournament { get; set; }
+
+    /// <summary>
+    /// Gets or sets the round number associated with the score.
+    /// </summary>
+    public int Round { get; set; }
+
+    /// <summary>
+    /// Gets or sets the set number associated with the score.
+    /// </summary>
+    public int Set { get; set; }
 
     /// <summary>
     /// Gets or sets the permutation index, which may represent a specific configuration or scenario.
