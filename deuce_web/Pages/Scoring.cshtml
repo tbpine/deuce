@@ -74,6 +74,8 @@
                     {
                         Match match = perm.GetMatchAtIndex(j);
 
+                        //Find the score for this match
+                        List<Score>? matchScores = Model.GetScore(Model.CurrentRound, perm.Id, match.Id);                    
                         <!-- Item -->
                         <div class="d-sm-flex align-items-center border mb-2 pb-2" >
                             <div class="d-inline-flex position-relative z-2 pt-1 pb-2 ps-2 p-sm-0 ms-2 ms-sm-0 me-sm-0 w-100"
@@ -93,15 +95,19 @@
                                     <div class="col pt-1" ><span>@(match.GetHomeTeam())</span></div>
                                     @for(int i = 0; i < Model.NoSets;i++)
                                     {
+                                        var setScore = i >= 0 && i < (matchScores?.Count() ?? 0) ? matchScores?.ElementAt(i) : null;
                                         <div class="col">
-                                            <input class="form-control border-black pb-1" style="width:90px" name="home_perm_@(perm.Id)_match_@(j)_set_@(i+1)" >
+                                            <input class="form-control border-black pb-1" style="width:90px" name="home_perm_@(perm.Id)_match_@(match.Id)_set_@(i+1)" 
+                                            value="@(setScore?.Home)" >
                                         </div>
                                     }
                                     <div class="col pt-1">@(match.GetAwayTeam())</div>
                                     @for(int i = 0; i < Model.NoSets;i++)
                                     {
+                                        var setScore = i >= 0 && i < (matchScores?.Count() ?? 0) ? matchScores?.ElementAt(i) : null;
                                         <div class="col">
-                                            <input class="form-control border-black pt-1" style="width:90px" name="away_perm_@(perm.Id)_match_@(j)_set_@(i+1)">
+                                            <input class="form-control border-black pt-1" style="width:90px" name="away_perm_@(perm.Id)_match_@(match.Id)_set_@(i+1)"
+                                            value="@(setScore?.Away)" >
                                         </div>
                                     }
                                     

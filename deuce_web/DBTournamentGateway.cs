@@ -90,8 +90,7 @@ public class DBTournamentGateway : ITournamentGateway
         }
 
         //Load the current tournament and it's details
-        Filter filter = new Filter() { TournamentId = _sessionProxy.TournamentId };
-        var currentTour = (await _dbRepoTournament.GetList(filter)).FirstOrDefault();
+        var currentTour =await GetCurrentTournament();
 
         if (currentTour is null) return new(ResultStatus.Error, "Missing tournament");
 
@@ -105,16 +104,6 @@ public class DBTournamentGateway : ITournamentGateway
         FactoryGameMaker factoryGameMaker = new FactoryGameMaker();
 
         IGameMaker gameMaker = factoryGameMaker.Create(selectedSport);
-
-        //Fill in missing info for the tournament.
-        if (selectedSport?.Key == "tennis")
-        {
-            //Load tournament details
-            var tourDetail = (await _dbRepoTournamentDetail.GetList(filter)).FirstOrDefault();
-
-            if (tourDetail is null) return new(ResultStatus.Error, "Missing tournament details");
-            currentTour.Format = new Format(tourDetail.NoSingles, tourDetail.NoDoubles, tourDetail.Sets);
-        }
         //Get the list of teams
         TeamRepo teamRepo = new TeamRepo(currentTour, _dbconn);
         var listOfTeams = await teamRepo.GetTournamentEntries();
@@ -150,6 +139,9 @@ public class DBTournamentGateway : ITournamentGateway
                 currentTour.Status = TournamentStatus.Start;
                 //Save tournament status
                 await _dbRepoTournamentStatus.SetAsync(currentTour);
+                //Return result status Ok
+                return new(ResultStatus.Ok, "Schedule created and saved.");
+                
             }
 
         }

@@ -24,11 +24,9 @@ class FormReaderScoring
     /// <param name="tournament">Tournament where player is registered</param>
     /// <param name="round">Round in the tournament</param>
     /// <returns>List of teams</returns>
-    public List<Score> Parse(IFormCollection form, Schedule schedule, int roundIdx, int tournamentId)
+    public List<Score> Parse(IFormCollection form,  int roundIdx, int tournamentId)
     {
 
-        //Chek if the schedule is not null
-        if (schedule is null) throw new ArgumentNullException(nameof(schedule));
         //Make a list of Score to return
         List<deuce.Score> scores = new();
 
@@ -57,9 +55,6 @@ class FormReaderScoring
                     int.TryParse(strSetId, out int setId) &&
                     !string.IsNullOrEmpty(strScore))
                 {
-                    var round = schedule.GetRoundAtIndex(roundIdx);
-                    var perm = round.Permutations.FirstOrDefault(e => e.Id == permId);
-                    deuce.Match? match = perm?.Matches.FirstOrDefault(e => e.Id == matchId);
 
                     //Check if the score exists
 
@@ -79,8 +74,8 @@ class FormReaderScoring
                             Id = 0,
                             Tournament = tournamentId,
                             Round = roundIdx,
-                            Permutation = perm?.Id??0,
-                            Match = match?.Id??0,
+                            Permutation = permId,
+                            Match =matchId,
                             Home = strHomeAway == "home" ? teamScore : 0,
                             Away = strHomeAway == "away" ? teamScore : 0,
                             Set = setId

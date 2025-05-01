@@ -236,24 +236,31 @@ SELECT LAST_INSERT_ID() 'id';
 
 END//
 
-
 DROP PROCEDURE IF EXISTS `sp_get_score`//
 
-CREATE PROCEDURE `sp_get_score`(
-IN p_tournament INT,
-IN p_permutation INT,
-IN p_match INT
+CREATE PROCEDURE `sp_get_score` (
+IN p_tournament INT
 )
 BEGIN
 
-	SELECT `id`, `tournament`, `permutation`, `match`, `home`, `away`, `score`, `updated_datetime`, `created_datetime`
+	SELECT `id`, `tournament`, `round`, `permutation`, `match`, `set`,`home`, `away`, `notes`, `updated_datetime`, `created_datetime`
 	FROM `score`
-	WHERE `tournament` = p_tournament
-	AND (`permutation` = p_permutation OR ISNULL(p_permutation))
-	AND (`match` = p_match OR ISNULL(p_match))
-	ORDER BY `id`;
+    WHERE (`tournament` = p_tournament OR ISNULL(p_tournament))
+	ORDER BY `id` , `tournament`, `permutation`, `match`, `set`;
 
 END//
+
+DROP PROCEDURE IF EXISTS `sp_clear_score`//
+
+CREATE PROCEDURE `sp_clear_score` (
+IN p_tournament INT
+)
+BEGIN
+DELETE FROM `score` WHERE `tournament` = p_tournament;
+
+END//
+
+
 
 DROP PROCEDURE IF EXISTS `sp_set_score`//
 
@@ -262,6 +269,7 @@ IN p_id 				INT,
 IN p_tournament 		INT,
 IN p_round 				INT,
 IN p_permutation 		INT,
+IN p_match				INT,
 IN p_home 				INT,
 IN p_away 				INT,
 IN p_set 				INT,
@@ -528,14 +536,15 @@ CREATE PROCEDURE `sp_set_match_player`(
 IN p_id INT,
 IN p_match INT,
 IN p_player_home INT,
-IN p_player_away INT)
+IN p_player_away INT,
+IN p_tournament INT)
 
 BEGIN
 
-INSERT INTO `match_player`(`id`,`match`,`player_home`,`player_away`,`updated_datetime`, `created_datetime`)
- VALUES (p_id, p_match, p_player_home, p_player_away, NOW(), NOW())
+INSERT INTO `match_player`(`id`,`match`,`player_home`,`player_away`,`tournament`,`updated_datetime`, `created_datetime`)
+ VALUES (p_id, p_match, p_player_home, p_player_away, p_tournament,NOW(), NOW())
 ON DUPLICATE KEY UPDATE `match` = p_match,`player_home` = p_player_home,`player_away` = p_player_away,
-`updated_datetime` = NOW();
+`updated_datetime` = NOW(), `tournament` = p_tournament;
 
 SELECT LAST_INSERT_ID() 'id';
 

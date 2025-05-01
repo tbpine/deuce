@@ -24,7 +24,6 @@ public class UnitTestsBuilderSchedule
         TournamentRepo tourRepo = new(conn, tournament, orgainization);
         await tourRepo.Save();
 
-
         var dbrepo = new DbRepoRecordSchedule(conn);
         //Load schedule for tournament 3 , tournament must exist
         List<RecordSchedule> recordsSched = await dbrepo.GetList(new Filter() { TournamentId = tournament.Id });
