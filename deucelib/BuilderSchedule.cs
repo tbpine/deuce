@@ -101,7 +101,19 @@ public class BuilderSchedule
                 var foundTeam = _teams.Find(e => e.Id == recordMatch.TeamHome);
                 if (foundTeam is not null) state.Permutation.AddTeam(foundTeam);
             }
+            else
+            {
+                //Make a bye team
+                Team byeTeam = new Team() { Id = 0, Label = "BYE" };
 
+                //This is a bye, add a bye player to the match
+                if (state.Match.Home is not null)
+                    state.Match.AddAway(new Player() { Id = 0, First = "Bye", Last = "Bye", Bye = true });
+                else if (state.Match.Away is not null)
+                    state.Match.AddHome(new Player() { Id = 0, First = "Bye", Last = "Bye", Bye = true });
+                //Add the bye team
+                state.Permutation.AddTeam(byeTeam);
+            }
 
         }
 

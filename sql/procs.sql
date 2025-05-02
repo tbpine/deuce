@@ -203,7 +203,7 @@ IN p_tournament INT
 )
 BEGIN
 
-	SELECT `id`,`first_name`,`last_name`,`middle_name`,`utr`,`member`,`bye`, `updated_datetime`,`created_datetime`
+	SELECT `id`,`first_name`,`last_name`,`middle_name`,`utr`,`member`, `updated_datetime`,`created_datetime`
 	FROM `player`
     WHERE `tournament` = p_tournament OR ISNULL(p_tournament)
 	ORDER BY `first_name`,`last_name`, `middle_name`;
@@ -221,17 +221,16 @@ IN p_middle_name 		VARCHAR(100),
 IN p_last_name 			VARCHAR(100),
 IN p_tournament 		INT,
 IN p_utr 				DECIMAL(6,2),
-IN p_member 			INT,
-IN p_bye 				INT
+IN p_member 			INT
 
 )
 
 BEGIN
 
-INSERT INTO `player`(`id`,`first_name`,`middle_name`,`last_name`,`tournament`, `utr`,`member`,`bye`,`updated_datetime`,`created_datetime`) 
-VALUES (p_id, p_first_name, p_middle_name, p_last_name, p_tournament,  p_utr, p_member, p_bye,NOW(), NOW())
+INSERT INTO `player`(`id`,`first_name`,`middle_name`,`last_name`,`tournament`, `utr`,`member`,`updated_datetime`,`created_datetime`) 
+VALUES (p_id, p_first_name, p_middle_name, p_last_name, p_tournament,  p_utr, p_member,NOW(), NOW())
 ON DUPLICATE KEY UPDATE `utr` = p_utr, first_name = p_first_name, middle_name = p_middle_name,
-last_name = p_last_name,  `updated_datetime` = NOW(), `tournament` = p_tournament, `member` = p_member, `bye` = p_bye;
+last_name = p_last_name,  `updated_datetime` = NOW(), `tournament` = p_tournament, `member` = p_member;
 
 SELECT LAST_INSERT_ID() 'id';
 
@@ -410,7 +409,6 @@ p.id `player_id`, tp.`index` 'player_index', p.first_name , p.last_name, p.utr, 
 FROM `team_player` tp LEFT JOIN `team` t ON t.id = tp.team
 LEFT JOIN `player` p ON p.id = tp.`player`
 WHERE tp.`tournament` = p_tournament
-AND p.bye is null
 ORDER BY `team_index`, `player_index`;
 
 END//

@@ -43,15 +43,19 @@ public class DbRepoMatch : DbRepoBase<Match>
         //Save home players
         foreach (Player player in obj.Home)
         {
+            //Null in the player id means the bye player
+            object normalizedId = player.Id <= 0  ? DBNull.Value : player.Id;
             var cmd2 = _dbconn.CreateCommandStoreProc("sp_set_match_player", ["p_id","p_match", "p_player_home", "p_player_away", "p_tournament"],
-            [DBNull.Value, obj.Id,  player.Id,  DBNull.Value , tourId], null);
+            [DBNull.Value, obj.Id,  normalizedId,  DBNull.Value , tourId], null);
             await cmd2.ExecuteNonQueryAsync();
         }
 
         foreach (Player player in obj.Away)
         {
+            //Null in the player id means the bye player
+            object normalizedId = player.Id <= 0  ? DBNull.Value : player.Id;
             var cmd2 = _dbconn.CreateCommandStoreProc("sp_set_match_player", ["p_id","p_match", "p_player_home", "p_player_away", "p_tournament"],
-            [DBNull.Value, obj.Id,  DBNull.Value,  player.Id , tourId], null );
+            [DBNull.Value, obj.Id,  DBNull.Value,  normalizedId, tourId], null );
             await cmd2.ExecuteNonQueryAsync();
         }
 

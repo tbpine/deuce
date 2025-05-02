@@ -37,6 +37,7 @@ INSERT INTO `sport` VALUES (4, "Table Tennis", "type", "table_tennis","assets/ic
 DELETE FROM `tournament` WHERE id = 1;
 INSERT INTO `tournament` VALUES (1, "test_tournament", "2025-01-01", null, 4, 0, 1, 0, 0 , 0 , 0, 1, 1, 1, now(), now(), 1);
 
+
 -- iso3166 
 delete from `iso_3166`;
 

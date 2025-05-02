@@ -41,8 +41,16 @@ public class ScoringPageModel : BasePageModelAcc
 
     public async Task<IActionResult> OnGetAsync()
     {
-        await LoadCurrentTournament();
-        Title = _tournament?.Label ?? "";
+        try
+        {
+            await LoadCurrentTournament();
+            Title = _tournament?.Label ?? "";
+        }
+        catch(Exception ex)
+        {
+            _log.LogCritical(ex.Message);
+        }   
+        
         return Page();
     }
 

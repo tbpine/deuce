@@ -37,7 +37,11 @@ public class Permutation
     /// </summary>
     /// <param name="index">Index</param>
     /// <returns>Team at index</returns>
-    public Team GetTeamAtIndex(int index) => _teams[index];
+    public Team GetTeamAtIndex(int index) 
+    {
+        return index >= 0 && index < _teams.Count ? _teams[index] : new Team(){Id = 0, Label = "BYE"};
+        
+    } 
     public Match GetMatchAtIndex(int index) => _matches[index];
     public void AddMatch(Match match) => _matches.Add(match);
 

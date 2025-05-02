@@ -110,17 +110,13 @@ public class DBTournamentGateway : ITournamentGateway
 
         //Check for byes
         Team bye = new Team(-1, "BYE");
-        for (int i = 0; i < currentTour.TeamSize; i++) bye.AddPlayer(new Player() { Id = -1, First = "BYE", Last = "", Index = i, Ranking = 0d });
+        for (int i = 0; i < currentTour.TeamSize; i++) bye.AddPlayer(new Player() { Id = -1, First = "BYE", Last = "BYEd", Index = i, Ranking = 0d });
 
 
-        if (((listOfTeams?.Count ?? 0) % 2) > 0)
-        {
-            listOfTeams?.Add(bye);
-        }
+        if (((listOfTeams?.Count ?? 0) % 2) > 0) listOfTeams?.Add(bye);
 
         //------------------------------
         //| Create schedule.
-        //| 
         //------------------------------
 
         FactorySchedulers facSchedulers = new FactorySchedulers();

@@ -8,12 +8,12 @@ public static class PermutationEx
     /// <summary>
     /// Get a string summary of the round.
     /// </summary>
-    /// <param name="round">Round to get the summary</param>
+    /// <param name="perm">Permutation to get the summary</param>
     /// <returns>string summary of the round.</returns>
-    public static string GetSummary(this Permutation round)
+    public static string GetSummary(this Permutation perm)
     {
-        Team home = round.GetTeamAtIndex(0);
-        Team away = round.GetTeamAtIndex(1);
+        Team home = perm.GetTeamAtIndex(0);
+        Team away = perm.GetTeamAtIndex(1);
 
         string homePlayers = String.IsNullOrEmpty(home.Label) ? home.GetPlayerCSV() : home.Label;
         string awayPlayers =  String.IsNullOrEmpty(away.Label) ? away.GetPlayerCSV() : away.Label;

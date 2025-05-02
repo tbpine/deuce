@@ -31,7 +31,6 @@ public class DbRepoPlayer : DbRepoBase<Player>
                 Last = r.Parse<string>("last_name"),
                 Middle = r.Parse<string>("middle_name"),
                 Ranking = r.Parse<double>("utr"),
-                Bye = r.Parse<bool>("bye"),
                 Tournament  = new () { Id = filter.TournamentId},
                 Member  = new () { Id = r.Parse<int>("member") }
             };
@@ -53,8 +52,8 @@ public class DbRepoPlayer : DbRepoBase<Player>
         object primaryKeyId = obj.Id < 1 ? DBNull.Value : obj.Id;
 
         var command = _dbconn.CreateCommandStoreProc("sp_set_player", ["p_id",  "p_first_name", "p_last_name",
-        "p_middle_name", "p_tournament", "p_utr", "p_member", "p_bye"], [primaryKeyId, obj.First, obj.Last , obj.Middle, obj.Tournament?.Id,  obj.Ranking ,
-        obj.Member?.Id, obj.Bye?1:0]);
+        "p_middle_name", "p_tournament", "p_utr", "p_member"], [primaryKeyId, obj.First, obj.Last , obj.Middle, obj.Tournament?.Id,  obj.Ranking ,
+        obj.Member?.Id]);
         
         obj.Id = command.GetIntegerFromScaler(command.ExecuteScalar());
 

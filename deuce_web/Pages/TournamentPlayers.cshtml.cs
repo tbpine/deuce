@@ -152,12 +152,6 @@ public class TournamentPlayersPageModel : BasePageModelWizard
 
         //Organization DTO
         Organization organization = new Organization() { Id = _sessionProxy?.OrganizationId ?? 1 };
-        //If there's odd number of teams, add a bye team
-        if (teams.Count % 2 != 0)
-        {
-            Team byeTeam = new Team();
-            byeTeam.CreateBye(tournament.TeamSize, organization, teams.Count);
-        }
         //Assign to repos
 
         //Assign references to the team dbrepo

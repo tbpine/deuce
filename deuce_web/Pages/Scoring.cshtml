@@ -80,15 +80,6 @@
                         <div class="d-sm-flex align-items-center border mb-2 pb-2" >
                             <div class="d-inline-flex position-relative z-2 pt-1 pb-2 ps-2 p-sm-0 ms-2 ms-sm-0 me-sm-0 w-100"
                             style="height:120px;">
-                                @* <div class="form-check position-relative z-1 fs-lg m-0">
-                                <input type="checkbox" class="form-check-input" checked>
-                                </div> *@
-                                        @{
-                                            int totalCols = @Model.NoSets + 1;
-                                            //Out of 12.
-                                            // Bootstrap always has 12  columns.
-                                            
-                                    } 
 
                                 <div class="row w-100 ms-0">
                                     <div class="row">
@@ -96,7 +87,7 @@
                                         <!-- #headers  -->
                                         @for(int i = 0; i < Model.NoSets;i++)
                                         {
-                                            <div class="col-1 mb-3 bg-body-secondary"><span>@(i+1)</span></div>
+                                            <div class="col-1 mb-3 bg-body-secondary">@(i+1)</div>
                                         }
                                     </div>
                                     <div class="row">
@@ -105,20 +96,39 @@
                                         {
                                             var setScore = i >= 0 && i < (matchScores?.Count() ?? 0) ? matchScores?.ElementAt(i) : null;
                                             <div class="col-1">
-                                                <input class="form-control border-black pb-1"  name="home_perm_@(perm.Id)_match_@(match.Id)_set_@(i+1)" 
-                                                value="@(setScore?.Home)" >
+                                                @if (match.GetHomeAt(0).Bye || match.GetAwayAt(0).Bye)
+                                                {
+                                                    <input class="form-control border-black p-1" name="home_perm_@(perm.Id)_match_@(match.Id)_set_@(i+1)" 
+                                                    value="@(setScore?.Home)" disabled>
+                                                }
+                                                else
+                                                {
+                                                    <input  class="form-control border-black p-1"  name="home_perm_@(perm.Id)_match_@(match.Id)_set_@(i+1)" 
+                                                    value="@(setScore?.Home)" >
+                                                    
+                                                }
                                             </div>
                                         }
                                         
                                     </div>
                                     <div class="row">
+
                                         <div class="col-5 pt-1">@(match.GetAwayTeam())</div>
                                         @for(int i = 0; i < Model.NoSets;i++)
                                         {
                                             var setScore = i >= 0 && i < (matchScores?.Count() ?? 0) ? matchScores?.ElementAt(i) : null;
                                             <div class="col-1">
-                                                <input class="form-control border-black pt-1"  name="away_perm_@(perm.Id)_match_@(match.Id)_set_@(i+1)"
-                                                value="@(setScore?.Away)" >
+                                                @if (match.GetAwayAt(0).Bye || match.GetHomeAt(0).Bye)
+                                                {
+                                                    <input  class="form-control border-black p-1" name="away_perm_@(perm.Id)_match_@(match.Id)_set_@(i+1)" 
+                                                    value="@(setScore?.Away)" disabled>
+                                                }
+                                                else
+                                                {
+                                                    <input  class="form-control border-black p-1"  name="away_perm_@(perm.Id)_match_@(match.Id)_set_@(i+1)" 
+                                                    value="@(setScore?.Away)" >
+                                                    
+                                                }
                                             </div>
                                         }
                                     </div>
