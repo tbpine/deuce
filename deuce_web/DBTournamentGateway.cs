@@ -113,7 +113,10 @@ public class DBTournamentGateway : ITournamentGateway
         for (int i = 0; i < currentTour.TeamSize; i++) bye.AddPlayer(new Player() { Id = -1, First = "BYE", Last = "", Index = i, Ranking = 0d });
 
 
-        if (((listOfTeams?.Count ?? 0) % 2) > 0) { listOfTeams?.Add(bye); }
+        if (((listOfTeams?.Count ?? 0) % 2) > 0)
+        {
+            listOfTeams?.Add(bye);
+        }
 
         //------------------------------
         //| Create schedule.
@@ -158,14 +161,16 @@ public class DBTournamentGateway : ITournamentGateway
     /// has enough players and format is defined correctly
     /// </summary>
     /// <returns>ResultTournamentAction instance of the result</returns>
-    public async Task<ResultTournamentAction> ValidateCurrentTournament()
+    public async Task<ResultTournamentAction> ValidateCurrentTournament(Tournament theCurrentTour)
     {
-        //Get the current tournament
+        //Check if there's a tournament saved
+        int tourId = _sessionProxy?.TournamentId ?? 0;
+        if (tourId < 1) return new(ResultStatus.Warning, "Current tournament is unsaved.");
+
+        //Check if the current tournament is valid i.e
+        //has enough players and format is defined correctly
         Filter filter = new() { TournamentId = _sessionProxy?.TournamentId??0};
 
-        var theCurrentTour = (await _dbRepoTournament.GetList(filter)).FirstOrDefault();
-
-        if (theCurrentTour is null) return new (ResultStatus.Error, "There was an error retrieving your tournament.");
         //Use the dbrepo to get the rows of players 
         var listOfPayers= await _dbRepoRecordTeamPlayer.GetList(filter);
 

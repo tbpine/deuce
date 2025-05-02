@@ -29,15 +29,48 @@ public static class TeamExt
     /// <returns>csv of players in a team (unquoted) </returns>
     public static bool HasPlayer(this Team team, Player find)
     {
-        foreach(Player player in team.Players)
+        foreach (Player player in team.Players)
         {
-            if (player.Id == find.Id)  return true;
+            if (player.Id == find.Id) return true;
         }
 
         return false;
 
     }
 
-   
+
+
+    /// <summary>
+    /// Creates a bye team with the same number of players as the tournament team size.
+    /// </summary>
+    /// <param name="team">Team object</param>
+    /// <param name="teamSize">Tournament team size</param>
+    /// <returns></returns>
+    public static void CreateBye(this Team team, int teamSize, Organization org, int index)
+    {
+
+        team.Id = 0;
+        team.Label = "BYE";
+        team.Club = org;
+        team.Index = index;
+
+        //Add tournament team size number of new players to the bye team
+        for (int i = 0; i < teamSize; i++)
+        {
+            Player player = new()
+            {
+                Id = 0,
+                First = "BYE",
+                Last = "BYE",
+                Team = team,
+                Bye = true
+            };
+
+            team.AddPlayer(player);
+        }
+
+
+    }
+
 
 }

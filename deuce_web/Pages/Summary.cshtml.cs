@@ -19,7 +19,7 @@ public class SummaryPageModel : BasePageModelAcc
    // For page values
    private Tournament? _tournament;
    private TournamentDetail? _tournamentDetail;
-
+  
    public Tournament? Tournament { get => _tournament; }
    public TournamentDetail? TournamentDetail { get => _tournamentDetail; }
 
@@ -50,7 +50,7 @@ public class SummaryPageModel : BasePageModelAcc
          //Validate tournament
          //Show /Hide the start button 
          ResultTournamentAction resultVal = new();
-         if (_tourGateway is not null) resultVal = await _tourGateway.ValidateCurrentTournament();
+         if (_tourGateway is not null && _tournament is not null) resultVal = await _tourGateway.ValidateCurrentTournament(_tournament);
 
          if ((resultVal?.Status ?? ResultStatus.Error) == ResultStatus.Error)
             Error = resultVal?.Message ?? "";
@@ -126,13 +126,13 @@ public class SummaryPageModel : BasePageModelAcc
          ClubId = myOrg.Id
       };
 
-      var listOfTournament = await _dbrepoTournament.GetList(filter);
+      //Use the base tournament gateway to get the tournament instance
+      _tournament = await _tourGateway.GetCurrentTournament();
 
       //Load tournament details
       var listOfTournamentDetails = await _dbrepoTournamentDetail.GetList(filter);
 
       //Set page values
-      _tournament = listOfTournament.FirstOrDefault();
       _tournamentDetail = listOfTournamentDetails.FirstOrDefault();
 
    }

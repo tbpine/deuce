@@ -1,8 +1,8 @@
 using deuce;
 using deuce_web;
+using deuce.ext;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using ZstdSharp.Unsafe;
 
 public class TournamentPlayersPageModel : BasePageModelWizard
 {
@@ -17,6 +17,7 @@ public class TournamentPlayersPageModel : BasePageModelWizard
     private readonly TeamRepo _teamRepo;
 
     private readonly IFormReaderPlayers _adaptorTeams;
+    private readonly ITournamentGateway _tournamentGateway;
 
     private List<Team>? _teams;
 
@@ -29,7 +30,7 @@ public class TournamentPlayersPageModel : BasePageModelWizard
     public List<Team>? Teams { get => _teams; }
 
     private List<Player>? _players;
-    public List<Player>? Players { get=>_players;}
+    public List<Player>? Players { get => _players; }
 
     private TournamentDetail? _tournamentDetail;
 
@@ -37,7 +38,7 @@ public class TournamentPlayersPageModel : BasePageModelWizard
     IConfiguration config, IHandlerNavItems handlerNavItems,
     DbRepoTournamentDetail dbRepoTournamentDetail, DbRepoRecordTeamPlayer dbRepoRecordTeamPlayer, DbRepoTeam dbRepoTeam,
     DbRepoTournament dbRepoTournament, IFormReaderPlayers adaptorTeams, DbRepoMember dbRepoMember, DbRepoVenue dbRepoVenue,
-    TeamRepo teamRepo, DbRepoPlayer dbRepoPlayer) : base(handlerNavItems, sp, config)
+    TeamRepo teamRepo, DbRepoPlayer dbRepoPlayer, ITournamentGateway tournamentGateway) : base(handlerNavItems, sp, config)
     {
         _log = log;
         _teams = null;
@@ -50,9 +51,10 @@ public class TournamentPlayersPageModel : BasePageModelWizard
         _dbRepoVenue = dbRepoVenue;
         _teamRepo = teamRepo;
         _dbRepoPlayer = dbRepoPlayer;
+        _tournamentGateway = tournamentGateway;
     }
 
-    
+
 
     public async Task<IActionResult> OnGet()
     {
@@ -74,7 +76,7 @@ public class TournamentPlayersPageModel : BasePageModelWizard
         FormUtils.DebugOut(this.HttpContext.Request.Form);
 
         //Convert form values into a teams.
-        Filter tourFilter = new() { TournamentId = _sessionProxy?.TournamentId ?? 0 } ;
+        Filter tourFilter = new() { TournamentId = _sessionProxy?.TournamentId ?? 0 };
         _tournamentDetail = (await _dbRepoTournamentDetail.GetList(tourFilter)).FirstOrDefault();
 
         if (_tournamentDetail is null)
@@ -87,7 +89,7 @@ public class TournamentPlayersPageModel : BasePageModelWizard
         //Tournament DTO.
         Tournament tournament = new()
         {
-            Id = _sessionProxy?.TournamentId ?? 0,  
+            Id = _sessionProxy?.TournamentId ?? 0,
             TeamSize = _tournamentDetail.TeamSize
         };
 
@@ -99,15 +101,15 @@ public class TournamentPlayersPageModel : BasePageModelWizard
         //and then show the same page ( Don't validate and save).
         string? action = this.HttpContext.Request.Form["action"];
 
-        if (string.Compare(action ?? "", "add_team", StringComparison.OrdinalIgnoreCase) == 0 )
+        if (string.Compare(action ?? "", "add_team", StringComparison.OrdinalIgnoreCase) == 0)
         {
             var formAdaptor = new FormReaderPlayersList();
             var formTeams = formAdaptor.Parse(HttpContext.Request.Form, tournament);
-          
+
             var newTeam = formTeams.FirstOrDefault();
             if (newTeam is not null)
             {
-                newTeam.Index = teams.Count;    
+                newTeam.Index = teams.Count;
                 //Add new team
                 teams.Add(newTeam);
             }
@@ -125,8 +127,8 @@ public class TournamentPlayersPageModel : BasePageModelWizard
             var deletedTeams = formReader.Parse(HttpContext.Request.Form, tournament);
 
             //Put players back in the list
-            foreach(Team team in deletedTeams)
-                teams.RemoveAll(e=>e.Id == team.Id && e.Index == team.Index);
+            foreach (Team team in deletedTeams)
+                teams.RemoveAll(e => e.Id == team.Id && e.Index == team.Index);
 
             _teams = teams;
 
@@ -142,56 +144,58 @@ public class TournamentPlayersPageModel : BasePageModelWizard
         //Warning or error
         if (isvalidTeams.Result != RetCodeTeamAction.Success)
         {
-            Error = isvalidTeams.Result == RetCodeTeamAction.Error ? isvalidTeams?.Message??"" : "";
+            Error = isvalidTeams.Result == RetCodeTeamAction.Error ? isvalidTeams?.Message ?? "" : "";
             _teams = teams;
             await LoadPage(false);
             return Page();
         }
 
-
+        //Organization DTO
+        Organization organization = new Organization() { Id = _sessionProxy?.OrganizationId ?? 1 };
+        //If there's odd number of teams, add a bye team
+        if (teams.Count % 2 != 0)
+        {
+            Team byeTeam = new Team();
+            byeTeam.CreateBye(tournament.TeamSize, organization, teams.Count);
+        }
         //Assign to repos
 
-        int currentTourId = _sessionProxy?.TournamentId ?? 0;
+        //Assign references to the team dbrepo
+        _dbRepoTeam.Organization = organization;
+        _dbRepoTeam.TournamentId = tournament.Id;
 
-        if (currentTourId > 0)
+        //----------------------------------------
+        //Sync between form and db
+        //----------------------------------------
+
+        //Get teams from db
+        List<Team> teamsInDB = await _teamRepo.GetListAsync(tournament.Id);
+
+        SyncMaster<Team> syncMaster = new(teams, teamsInDB);
+        //Add handlers to insert, update and delete teams
+        syncMaster.Add += (sender, team) =>
         {
-            //Assign references to the team dbrepo
-            _dbRepoTeam.Organization = new Organization() { Id = _sessionProxy?.OrganizationId ?? 1 };
-            _dbRepoTeam.TournamentId = currentTourId;
+            //Add team to db
+            if (team is not null) _dbRepoTeam.Set(team); ;
 
-            //----------------------------------------
-            //Sync between form and db
-            //----------------------------------------
-
-            //Get teams from db
-            List<Team> teamsInDB = await _teamRepo.GetListAsync(currentTourId);
-            
-            SyncMaster<Team> syncMaster = new(teams, teamsInDB);
-            //Add handlers to insert, update and delete teams
-            syncMaster.Add += (sender, team) =>
-            {
-                //Add team to db
-                if(team is not null) _dbRepoTeam.Set(team);;
-                 
-            };
+        };
 
 
-            syncMaster.Update +=  (sender, team) =>
-            {
-                //Add team to db
-                  if (team is not null && team?.Dest is not null)
-                        _dbRepoTeam.Set(team.Dest);
-            };
+        syncMaster.Update += (sender, team) =>
+        {
+            //Add team to db
+            if (team is not null && team?.Dest is not null)
+                _dbRepoTeam.Set(team.Dest);
+        };
 
-            syncMaster.Remove +=  (sender, team) =>
-            {
-                //Add team to db
-                if (team is not null) _dbRepoTeam.Delete(team);
-            };
+        syncMaster.Remove += (sender, team) =>
+        {
+            //Add team to db
+            if (team is not null) _dbRepoTeam.Delete(team);
+        };
 
-            syncMaster.Run();
+        syncMaster.Run();
 
-        }
 
 
         return NextPage("");
@@ -204,18 +208,19 @@ public class TournamentPlayersPageModel : BasePageModelWizard
         EntryType = _sessionProxy?.EntryType ?? (int)deuce.EntryType.Team;
         int currentTourId = _sessionProxy?.TournamentId ?? 0;
 
-        
+
         try
         {
             Organization organization = new Organization() { Id = orgId };
-            Filter filter = new() { TournamentId = currentTourId , ClubId = organization.Id};
+            Filter filter = new() { TournamentId = currentTourId, ClubId = organization.Id };
 
             //Select all players registered for the tournament
             //Get all players tournament id = 0
 
-            Filter filterPlayer = new() { TournamentId = 0};
+            Filter filterPlayer = new() { TournamentId = 0 };
             _players = await _dbRepoPlayer.GetList(filterPlayer);
-            var currentTour = (await _dbRepoTournament.GetList(filter)).FirstOrDefault();
+
+            var currentTour = await _tournamentGateway.GetCurrentTournament();
 
             //Deflat saved teams
             if (currentTour is not null)
@@ -244,7 +249,7 @@ public class TournamentPlayersPageModel : BasePageModelWizard
                 //Don't use no of entries
                 //Count the number of teams
                 EntryType = currentTour.EntryType;
-                NoTeams = _teams?.Count()??0;
+                NoTeams = _teams?.Count() ?? 0;
                 TeamSize = _tournamentDetail?.TeamSize ?? 1;
 
             }
@@ -258,16 +263,16 @@ public class TournamentPlayersPageModel : BasePageModelWizard
 
 
             //Remove players from the list that are already in a team
-            foreach(Team team in _teams ?? new List<Team>())
+            foreach (Team team in _teams ?? new List<Team>())
             {
                 foreach (Player player in team.Players)
                 {
-                    var foundPlayer = _players.Find(e=> e.Id == player.Id);  
+                    var foundPlayer = _players.Find(e => e.Id == player.Id);
                     if (foundPlayer is not null) foundPlayer.Team = team;
                 }
             }
 
-          
+
 
         }
         catch (Exception ex)
@@ -295,9 +300,9 @@ public class TournamentPlayersPageModel : BasePageModelWizard
                 string contentType = file.ContentType;
 
                 // Check if the file is an Excel file based on content type or file extension
-                if (contentType == "application/vnd.ms-excel" || 
+                if (contentType == "application/vnd.ms-excel" ||
                 contentType == "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-                 || fileName.ToLower().EndsWith(".xls") 
+                 || fileName.ToLower().EndsWith(".xls")
                  || fileName.ToLower().EndsWith(".xlsx")
                  || contentType == "text/csv"
                  || fileName.ToLower().EndsWith(".csv"))
@@ -327,5 +332,5 @@ public class TournamentPlayersPageModel : BasePageModelWizard
 
         return "";
     }
-   
+
 }

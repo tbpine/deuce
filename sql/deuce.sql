@@ -139,8 +139,10 @@ CREATE TABLE IF NOT EXISTS `player` (
 	`tournament`				INT,
     `utr` 						DECIMAL(6,2),
     `member`					INT,
+    `bye`						INT,
     `updated_datetime` 			TIMESTAMP,
-    `created_datetime` 			TIMESTAMP
+    `created_datetime` 			TIMESTAMP,
+    
 );
 
 ALTER TABLE `player` auto_increment = 1000;

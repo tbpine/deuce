@@ -23,7 +23,7 @@ public class BasePageModelAcc : PageModel
     protected IConfiguration _config;
 
     //Load tournament details
-    protected ITournamentGateway? _tourGateway;
+    protected ITournamentGateway _tourGateway;
 
     protected ISideMenuHandler? _handlerNavItems;
     public IEnumerable<NavItem>? NavItems { get => _handlerNavItems?.NavItems; }

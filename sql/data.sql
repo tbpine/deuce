@@ -24,7 +24,7 @@ INSERT INTO `interval` VALUES (6, "Monthly");
 INSERT INTO `interval` VALUES (7, "Annually");
 
 DELETE FROM `organization` WHERE id = 1;
-insert into `organization` values (null, 'test_organization', 'tester', null, 1, now(), now());
+insert into `organization` values (1, 'test_organization', 'tester', null, 1, now(), now());
 
 TRUNCATE `sport`;
 
