@@ -53,7 +53,7 @@ public class Player
 
     public override string ToString()
     {
-        return _first + " " + _last;
+        return _bye? "BYE" : _first + " " + _last;
     }
 
     /// <summary>

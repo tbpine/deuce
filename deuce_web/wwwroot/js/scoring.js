@@ -42,3 +42,20 @@ function postAction(action)
     
     form.submit();
 }
+
+/**
+ * Populates all number input fields with random values between 1 and 6.
+ *
+ * This function selects all input elements of type "number" on the page
+ * and assigns each of them a random integer value between 1 and 6 (inclusive).
+ */
+
+function makeRandomScore() {
+    //foreach input element not disabled, enter a random number between 1 and 6
+    let inputs = document.querySelectorAll("input:not([disabled])");
+    inputs.forEach(input => {
+        let randomNumber = Math.floor(Math.random() * 6) + 1; // Random number between 1 and 6
+        input.value = randomNumber;
+    });
+}
+

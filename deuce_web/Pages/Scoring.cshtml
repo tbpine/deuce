@@ -51,6 +51,13 @@
                 <span class="hover-effect-underline stretched-link d-none d-md-inline">Reload</span>
             </a>
         </div>
+        <div class="d-flex flex-wrap" id="published-action-buttons">
+            <a class="nav-link position-relative px-0 pe-sm-2 py-2 me-4" href="#!" onclick="makeRandomScore()">
+                <i class="fi-refresh-ccw fs-base me-2"></i>
+                <span class="hover-effect-underline stretched-link d-none d-md-inline">Random</span>
+            </a>
+        </div>
+
     </div>
 
     <!-- Published listings -->
@@ -96,7 +103,7 @@
                                         {
                                             var setScore = i >= 0 && i < (matchScores?.Count() ?? 0) ? matchScores?.ElementAt(i) : null;
                                             <div class="col-1">
-                                                @if (match.GetHomeAt(0).Bye || match.GetAwayAt(0).Bye)
+                                                @if (match.IsByeMatch())
                                                 {
                                                     <input class="form-control border-black p-1" name="home_perm_@(perm.Id)_match_@(match.Id)_set_@(i+1)" 
                                                     value="@(setScore?.Home)" disabled>
@@ -118,7 +125,7 @@
                                         {
                                             var setScore = i >= 0 && i < (matchScores?.Count() ?? 0) ? matchScores?.ElementAt(i) : null;
                                             <div class="col-1">
-                                                @if (match.GetAwayAt(0).Bye || match.GetHomeAt(0).Bye)
+                                                @if (match.IsByeMatch())
                                                 {
                                                     <input  class="form-control border-black p-1" name="away_perm_@(perm.Id)_match_@(match.Id)_set_@(i+1)" 
                                                     value="@(setScore?.Away)" disabled>

@@ -7,8 +7,9 @@ namespace deuce.ext;
 /// <summary>
 /// Match class extensions.
 /// </summary>
-public static class MatchExt {
-    
+public static class MatchExt
+{
+
     /// <summary>
     /// True if two matches have the same players in a 
     /// the same round.
@@ -16,8 +17,8 @@ public static class MatchExt {
     /// <param name="m">Lhs</param>
     /// <param name="other">Rhs</param>
     /// <returns>True if two matches have the same players in a the same round.</returns>
-    public static bool IsSameGame (this Match m, Match other)
-     {
+    public static bool IsSameGame(this Match m, Match other)
+    {
         //If all player in the other game
         //is the same as this game.
         bool isSameHomePlayers = true;
@@ -40,26 +41,43 @@ public static class MatchExt {
 
         return other.Home.Count() == m.Home.Count() &&
                other.Away.Count() == m.Away.Count() &&
-               isSameHomePlayers &&  isSameAwayPlayers &&  other.Round == m.Round;
+               isSameHomePlayers && isSameAwayPlayers && other.Round == m.Round;
 
-     }
+    }
 
-     public static string GetHomeTeam(this Match match)
-     {
-        StringBuilder sb= new();
+    public static string GetHomeTeam(this Match match)
+    {
+        StringBuilder sb = new();
         for (int i = 0; i < match.Home.Count(); i++)
-            sb.Append(match.GetHomeAt(i).ToString() + (i == match.Home.Count()-1 ? "" : "/"));
-        return sb.ToString();
-     }
+        {
+            //if the player is a bye player then don't add it to the string
+            if (match.GetHomeAt(i).Bye) continue;
 
-     public static string GetAwayTeam(this Match match)
-     {
-        StringBuilder sb= new();
+            sb.Append(match.GetHomeAt(i).ToString() + (i == match.Home.Count() - 1 ? "" : "/"));
+        }
+        return sb.ToString();
+    }
+
+    public static string GetAwayTeam(this Match match)
+    {
+        StringBuilder sb = new();
         for (int i = 0; i < match.Away.Count(); i++)
-            sb.Append(match.GetAwayAt(i).ToString() + (i == match.Away.Count()-1 ? "" : "/"));
+        {
+            //if the player is a bye player then don't add it to the string
+            if (match.GetAwayAt(i).Bye) continue;
+            sb.Append(match.GetAwayAt(i).ToString() + (i == match.Away.Count() - 1 ? "" : "/"));
+        }
         return sb.ToString();
-     }
+    }
 
-      public static string GetTitle(this Match match) => match.IsDouble ? "Doubles" : "Singles";
+    public static string GetTitle(this Match match) => match.IsDouble ? "Doubles" : "Singles";
 
+    //returns true if this match is a bye match
+    public static bool IsByeMatch(this Match match)
+    {
+        //Return true if either home or away team id is less than 0
+        //or if the home team is empty and the away team is empty.
+        return (match.Home.FirstOrDefault()?.Bye??false) || (match.Away.FirstOrDefault()?.Bye??false) ;
+        
+    }
 }
