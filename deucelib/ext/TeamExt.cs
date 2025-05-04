@@ -15,7 +15,10 @@ public static class TeamExt
     public static string GetPlayerCSV(this Team team)
     {
         StringBuilder sb = new();
-        foreach (Player player in team.Players) sb.Append(player.ToString() + ",");
+        foreach (Player player in team.Players)
+        {
+            sb.Append(player.ToString() + ",");
+        }
         sb.Remove(sb.Length - 1, 1);
 
         return sb.ToString();

@@ -24,7 +24,7 @@ class FormReaderScoring
     /// <param name="tournament">Tournament where player is registered</param>
     /// <param name="round">Round in the tournament</param>
     /// <returns>List of teams</returns>
-    public List<Score> Parse(IFormCollection form,  int roundIdx, int tournamentId)
+    public List<Score>  Parse(IFormCollection form,   int tournamentId)
     {
 
         //Make a list of Score to return
@@ -38,19 +38,23 @@ class FormReaderScoring
             //Ignore the action value
             if (kp.Key == "action") continue;
 
-            var m = Regex.Match(kp.Key, @"^(home|away)_perm_(\d+)_match_(\d+)_set_(\d+)");
+            var m = Regex.Match(kp.Key, @"^(home|away)_(\d+)_round_(\d+)_perm_(\d+)_match_(\d+)_set_(\d+)");
 
             if (m.Success)
             {
                 string strHomeAway = m.Groups[1].Value;
-                string strPermId = m.Groups[2].Value;
-                string strMatchId = m.Groups[3].Value;
-                string strSetId = m.Groups[4].Value;
+                string strId = m.Groups[2].Value;
+                string strRound = m.Groups[3].Value;
+                string strPermId = m.Groups[4].Value;
+                string strMatchId = m.Groups[5].Value;
+                string strSetId = m.Groups[6].Value;
 
                 string? strScore = kp.Value.FirstOrDefault();
                 int teamScore = int.TryParse(strScore, out teamScore) ? teamScore : 0;
 
-                if (int.TryParse(strPermId, out int permId) &&
+                if (int.TryParse(strId, out int id) &&
+                    int.TryParse(strRound, out int roundIdx) &&
+                    int.TryParse(strPermId, out int permId) &&
                     int.TryParse(strMatchId, out int matchId) &&
                     int.TryParse(strSetId, out int setId) &&
                     !string.IsNullOrEmpty(strScore))
@@ -58,9 +62,11 @@ class FormReaderScoring
 
                     //Check if the score exists
 
-                    var existingScore = scores.FirstOrDefault(e => e.Permutation == permId
-                    && e.Match == matchId && e.Tournament == tournamentId);
+                    var existingScore = scores.FirstOrDefault(e => id > 0 && e.Id == id);
+                    if (existingScore is null) existingScore = scores.FirstOrDefault(  e => e.Permutation == permId && e.Round == roundIdx
+                    && e.Match == matchId && e.Tournament == tournamentId && e.Set == setId);
 
+        
                     if (existingScore is not null)
                     {
                         existingScore.Home = strHomeAway == "home" ? teamScore : existingScore.Home;
@@ -71,7 +77,7 @@ class FormReaderScoring
                     {
                         Score score = new Score()
                         {
-                            Id = 0,
+                            Id = id,
                             Tournament = tournamentId,
                             Round = roundIdx,
                             Permutation = permId,

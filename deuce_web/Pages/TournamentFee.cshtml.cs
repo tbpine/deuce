@@ -76,10 +76,10 @@ public class TournamentPricePageModel : BasePageModelWizard
    /// <returns>True if page values are correct</returns>
    private bool Validate()
    {
-      decimal dPrice = decimal.TryParse(Fee, out dPrice) ? dPrice : 0;
-      if ((double)dPrice == 0d)
+      decimal dPrice = 0M;
+      if (!String.IsNullOrEmpty(Fee) && !decimal.TryParse(Fee??"", out dPrice))
       {
-         Fee = "";
+         ModelState.AddModelError("Fee", "Please enter a valid fee.");
          return false;
       }
       return true;

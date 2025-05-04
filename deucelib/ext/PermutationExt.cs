@@ -16,8 +16,15 @@ public static class PermutationEx
         Team away = perm.GetTeamAtIndex(1);
 
         string homePlayers = String.IsNullOrEmpty(home.Label) ? home.GetPlayerCSV() : home.Label;
-        string awayPlayers =  String.IsNullOrEmpty(away.Label) ? away.GetPlayerCSV() : away.Label;
-        return $"{homePlayers} vs {awayPlayers}";
+        string awayPlayers = String.IsNullOrEmpty(away.Label) ? away.GetPlayerCSV() : away.Label;
 
+        if (home.Id <= 0 && away.Id > 0)
+            return $"{awayPlayers} has a BYE";
+        else if (away.Id <= 0 && home.Id > 0)
+            return $"{homePlayers} has a BYE";
+        else if (home.Id <= 0 && away.Id <= 0)
+            return $"";
+        else
+            return $"{homePlayers} vs {awayPlayers}";
     }
 }

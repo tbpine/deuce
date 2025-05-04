@@ -47,11 +47,17 @@ public static class MatchExt
 
     public static string GetHomeTeam(this Match match)
     {
+
         StringBuilder sb = new();
         for (int i = 0; i < match.Home.Count(); i++)
         {
-            //if the player is a bye player then don't add it to the string
-            if (match.GetHomeAt(i).Bye) continue;
+            //if the player is a bye player then make sb = "BYE", then break out of the loop
+            if (match.GetHomeAt(i).Bye)
+            {
+                sb.Clear();
+                sb.Append("BYE");
+                break;
+            }
 
             sb.Append(match.GetHomeAt(i).ToString() + (i == match.Home.Count() - 1 ? "" : "/"));
         }
@@ -60,11 +66,18 @@ public static class MatchExt
 
     public static string GetAwayTeam(this Match match)
     {
+
         StringBuilder sb = new();
         for (int i = 0; i < match.Away.Count(); i++)
         {
-            //if the player is a bye player then don't add it to the string
-            if (match.GetAwayAt(i).Bye) continue;
+            //if the player is a bye player then make sb = "BYE", then break out of the loop
+            if (match.GetAwayAt(i).Bye)
+            {
+                sb.Clear();
+                sb.Append("BYE");
+                break;
+            }
+
             sb.Append(match.GetAwayAt(i).ToString() + (i == match.Away.Count() - 1 ? "" : "/"));
         }
         return sb.ToString();
@@ -77,7 +90,7 @@ public static class MatchExt
     {
         //Return true if either home or away team id is less than 0
         //or if the home team is empty and the away team is empty.
-        return (match.Home.FirstOrDefault()?.Bye??false) || (match.Away.FirstOrDefault()?.Bye??false) ;
-        
+        return (match.Home.FirstOrDefault()?.Bye ?? false) || (match.Away.FirstOrDefault()?.Bye ?? false);
+
     }
 }

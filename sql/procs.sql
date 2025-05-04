@@ -239,13 +239,15 @@ END//
 DROP PROCEDURE IF EXISTS `sp_get_score`//
 
 CREATE PROCEDURE `sp_get_score` (
-IN p_tournament INT
+IN p_tournament INT,
+IN p_round INT
 )
 BEGIN
 
 	SELECT `id`, `tournament`, `round`, `permutation`, `match`, `set`,`home`, `away`, `notes`, `updated_datetime`, `created_datetime`
 	FROM `score`
     WHERE (`tournament` = p_tournament OR ISNULL(p_tournament))
+    AND (`round` = p_round OR ISNULL(p_round))
 	ORDER BY `id` , `tournament`, `permutation`, `match`, `set`;
 
 END//
@@ -253,10 +255,23 @@ END//
 DROP PROCEDURE IF EXISTS `sp_clear_score`//
 
 CREATE PROCEDURE `sp_clear_score` (
-IN p_tournament INT
+IN p_tournament INT,
+IN p_round INT
+
 )
 BEGIN
-DELETE FROM `score` WHERE `tournament` = p_tournament;
+DELETE FROM `score` WHERE `tournament` = p_tournament AND `round` = p_round;
+
+END//
+
+DROP PROCEDURE IF EXISTS `sp_delete_score`//
+
+CREATE PROCEDURE `sp_delete_score` (
+IN p_id INT
+
+)
+BEGIN
+DELETE FROM `score` WHERE `id` = p_id;
 
 END//
 

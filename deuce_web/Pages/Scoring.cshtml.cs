@@ -43,14 +43,15 @@ public class ScoringPageModel : BasePageModelAcc
     {
         try
         {
+
             await LoadCurrentTournament();
             Title = _tournament?.Label ?? "";
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             _log.LogCritical(ex.Message);
-        }   
-        
+        }
+
         return Page();
     }
 
@@ -59,33 +60,30 @@ public class ScoringPageModel : BasePageModelAcc
         foreach (var kp in this.Request.Form)
             Debug.Write(kp.Key + "=" + kp.Value + "\n");
 
-
         try
         {
 
-            if (this.Request.Form["action"] == "save")
-            {
-                //Get round permutation and games
+            //Get round permutation and games
+            int currentRound = _sessionProxy?.CurrentRound??0;
+            FormReaderScoring formReader = new FormReaderScoring();
+            var formScores = formReader.Parse(this.Request.Form, _sessionProxy?.TournamentId ?? 0);
+            //Use proxy to save
+            await ProxyScores.Save(_sessionProxy?.TournamentId ?? 0, formScores, currentRound, _dbConnection);
 
-                FormReaderScoring formReader = new FormReaderScoring();
-                List<Score> formScores = formReader.Parse(this.Request.Form, _currentRound, _sessionProxy?.TournamentId ?? 0);
-                //Clear score first
-                ProxyScores.ClearScores(_sessionProxy?.TournamentId??0, _dbConnection);
-                //Use proxy to save
-                ProxyScores.Save(formScores, _dbConnection);
-
-            }
         }
         catch (Exception ex)
         {
             _log.LogCritical(ex.Message);
         }
 
-        await LoadCurrentTournament();
+        //Get the selected round from the form (what was selected on screen)  
         string? strCR = this.Request.Form["current_round"];
         _currentRound = int.Parse(strCR ?? "0");
+        
         Title = _tournament?.Label ?? "";
-
+        //Set session current round to the one selected on the form
+        await LoadCurrentTournament();
+        if (_sessionProxy is not null) _sessionProxy.CurrentRound = _currentRound;
         return Page();
     }
 
@@ -110,7 +108,7 @@ public class ScoringPageModel : BasePageModelAcc
         _schedule = await BuildScheduleFromDB();
 
         //Get scores using  ProxyScores method GetScores
-        List<Score> listOfScores = await ProxyScores.GetScores(_tournament.Id, _dbConnection);
+        List<Score> listOfScores = await ProxyScores.GetScores(_tournament.Id, _currentRound, _dbConnection);
         //use LINQ t6o filter scores by round order by permutation and set
         _roundScores = listOfScores.Where(s => s.Round == _currentRound).OrderBy(s => s.Permutation).ThenBy(s => s.Match).ThenBy(s => s.Set).ToList();
 
@@ -128,23 +126,23 @@ public class ScoringPageModel : BasePageModelAcc
     //Build schedule from the database
     public async Task<Schedule?> BuildScheduleFromDB()
     {
-        if (_tournament is null) return null;  
+        if (_tournament is null) return null;
         //Load schedule from the database
 
         List<RecordSchedule> recordsSched = await _dbRepoRecordSchedule.GetList(new Filter() { TournamentId = _tournament?.Id ?? 0 });
 
         //List of players and teams for this tournament
         var dbrepotp = new DbRepoRecordTeamPlayer(_dbConnection);
-        List<RecordTeamPlayer> teamplayers = await dbrepotp.GetList(new Filter() { TournamentId = _tournament?.Id??0 });
+        List<RecordTeamPlayer> teamplayers = await dbrepotp.GetList(new Filter() { TournamentId = _tournament?.Id ?? 0 });
 
         PlayerRepo playerRepo = new PlayerRepo();
         TeamRepo teamRepo = new TeamRepo(teamplayers);
 
         List<Player> players = playerRepo.ExtractFromRecordTeamPlayer(teamplayers);
         List<Team> teams = teamRepo.ExtractFromRecordTeamPlayer();
-        if (_tournament is not null)_tournament.Teams = teams;
+        if (_tournament is not null) _tournament.Teams = teams;
 
-        BuilderSchedule builderSchedule = new BuilderSchedule(recordsSched, players, teams, _tournament??new(), _dbConnection);
+        BuilderSchedule builderSchedule = new BuilderSchedule(recordsSched, players, teams, _tournament ?? new(), _dbConnection);
         return builderSchedule.Create();
 
     }

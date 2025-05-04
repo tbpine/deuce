@@ -36,8 +36,11 @@ public class DbRepoScore : DbRepoBase<Score>
             var command = _dbconn.CreateCommandStoreProc("sp_set_score", ["p_id",  "p_tournament","p_round", "p_permutation",
         "p_match", "p_home", "p_away", "p_set", "p_notes"], [primaryKeyId, obj.Tournament, obj.Round, obj.Permutation , obj.Match, obj.Home,  obj.Away ,
          obj.Set, obj.Notes], localTran);
-            obj.Id = command.GetIntegerFromScaler(command.ExecuteScalar());
-            localTran.Commit();
+         object? result = command.ExecuteScalar(); 
+         if (primaryKeyId == DBNull.Value)
+            obj.Id = command.GetIntegerFromScaler(result);
+            
+        localTran.Commit();
 
 
         }
@@ -64,8 +67,9 @@ public class DbRepoScore : DbRepoBase<Score>
         var scores = new List<Score>();
         _dbconn.Open();
         var command = _dbconn.CreateCommandStoreProc("sp_get_score",
-            new[] { "p_tournament" },
-            new object[] { filter.TournamentId });
+            new[] { "p_tournament", "p_round" },
+            new object[] { filter.TournamentId, filter.Round  });
+        // Execute the command asynchronously and read the results
 
         using var reader = await command.ExecuteReaderAsync();
         while (await reader.ReadAsync())
@@ -92,12 +96,12 @@ public class DbRepoScore : DbRepoBase<Score>
     }
 
     //clear scores by calling the stored procedure "sp_clear_score"
-    public void ClearScores(int tournamentId)
+    public void ClearScores(int tournamentId, int round)
     {
         _dbconn.Open();
         var localTran = _dbconn.BeginTransaction();
-        var command = _dbconn.CreateCommandStoreProc("sp_clear_score", ["p_tournament"]
-        , [tournamentId], localTran);
+        var command = _dbconn.CreateCommandStoreProc("sp_clear_score", ["p_tournament", "p_round"],
+            [tournamentId, round], localTran);
         try
         {
             command.ExecuteNonQuery();
@@ -106,10 +110,32 @@ public class DbRepoScore : DbRepoBase<Score>
         catch (DbException ex)
         {
             localTran.Rollback();
-            throw new InvalidOperationException("Error executing stored procedure.", ex);   
+            throw new InvalidOperationException("Error executing stored procedure.", ex);
         }
 
         _dbconn.Close();
     }
+
+    public override void Delete(Score obj)
+    {
+        //Call the stored procedure to delete the score record from the database
+        Score score = obj as Score ?? throw new ArgumentNullException(nameof(obj));
+
+        _dbconn.Open();
+        var localTran = _dbconn.BeginTransaction();
+        var command = _dbconn.CreateCommandStoreProc("sp_delete_score", ["p_id"],
+            [score.Id], localTran);
+        try
+        {
+            command.ExecuteNonQuery();
+            localTran.Commit();
+        }
+        catch (DbException)
+        {
+            localTran.Rollback();
+        }
+        _dbconn.Close();    
+    }
+
 
 }

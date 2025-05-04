@@ -51,8 +51,10 @@ function postAction(action)
  */
 
 function makeRandomScore() {
-    //foreach input element not disabled, enter a random number between 1 and 6
-    let inputs = document.querySelectorAll("input:not([disabled])");
+    // Select all input elements with the class form-input
+    // and type number, excluding disabled and hidden inputs
+    let inputs = document.querySelectorAll(".form-control:not([disabled]):not([hidden])");
+    
     inputs.forEach(input => {
         let randomNumber = Math.floor(Math.random() * 6) + 1; // Random number between 1 and 6
         input.value = randomNumber;

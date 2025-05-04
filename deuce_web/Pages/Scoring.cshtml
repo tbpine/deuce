@@ -87,30 +87,34 @@
                         <div class="d-sm-flex align-items-center border mb-2 pb-2" >
                             <div class="d-inline-flex position-relative z-2 pt-1 pb-2 ps-2 p-sm-0 ms-2 ms-sm-0 me-sm-0 w-100"
                             style="height:120px;">
+                                        @{
+                                            int firstColWidth = Model.NoSets > 7 ? 4 : 5;
+                                            int setColWidth = 1; 
+                                        }
 
                                 <div class="row w-100 ms-0">
                                     <div class="row">
-                                        <div class="col-5 mb-3 bg-body-secondary">@(match.GetTitle())</div>
+                                        <div class="col-@firstColWidth mb-3 bg-body-secondary">@(match.GetTitle())</div>
                                         <!-- #headers  -->
                                         @for(int i = 0; i < Model.NoSets;i++)
                                         {
-                                            <div class="col-1 mb-3 bg-body-secondary">@(i+1)</div>
+                                            <div class="col-@setColWidth mb-3 bg-body-secondary">@(i+1)</div>
                                         }
                                     </div>
                                     <div class="row">
-                                        <div class="col-5 pt-1" >@(match.GetHomeTeam())</div>
+                                        <div class="col-@firstColWidth pt-1" >@(match.GetHomeTeam())</div>
                                         @for(int i = 0; i < Model.NoSets;i++)
                                         {
                                             var setScore = i >= 0 && i < (matchScores?.Count() ?? 0) ? matchScores?.ElementAt(i) : null;
-                                            <div class="col-1">
+                                            <div class="col-@setColWidth">
                                                 @if (match.IsByeMatch())
                                                 {
-                                                    <input class="form-control border-black p-1" name="home_perm_@(perm.Id)_match_@(match.Id)_set_@(i+1)" 
+                                                    <input class="form-control border-black p-1" name="home_@(setScore?.Id??0)_round_@(Model.CurrentRound)_perm_@(perm.Id)_match_@(match.Id)_set_@(i+1)" 
                                                     value="@(setScore?.Home)" disabled>
                                                 }
                                                 else
                                                 {
-                                                    <input  class="form-control border-black p-1"  name="home_perm_@(perm.Id)_match_@(match.Id)_set_@(i+1)" 
+                                                    <input  class="form-control border-black p-1"  name="home_@(setScore?.Id??0)_round_@(Model.CurrentRound)_perm_@(perm.Id)_match_@(match.Id)_set_@(i+1)" 
                                                     value="@(setScore?.Home)" >
                                                     
                                                 }
@@ -120,19 +124,19 @@
                                     </div>
                                     <div class="row">
 
-                                        <div class="col-5 pt-1">@(match.GetAwayTeam())</div>
+                                        <div class="col-@firstColWidth pt-1">@(match.GetAwayTeam())</div>
                                         @for(int i = 0; i < Model.NoSets;i++)
                                         {
                                             var setScore = i >= 0 && i < (matchScores?.Count() ?? 0) ? matchScores?.ElementAt(i) : null;
-                                            <div class="col-1">
+                                            <div class="col-@setColWidth">
                                                 @if (match.IsByeMatch())
                                                 {
-                                                    <input  class="form-control border-black p-1" name="away_perm_@(perm.Id)_match_@(match.Id)_set_@(i+1)" 
+                                                    <input  class="form-control border-black p-1" name="away_@(setScore?.Id??0)_round_@(Model.CurrentRound)_perm_@(perm.Id)_match_@(match.Id)_set_@(i+1)" 
                                                     value="@(setScore?.Away)" disabled>
                                                 }
                                                 else
                                                 {
-                                                    <input  class="form-control border-black p-1"  name="away_perm_@(perm.Id)_match_@(match.Id)_set_@(i+1)" 
+                                                    <input  class="form-control border-black p-1"  name="away_@(setScore?.Id??0)_round_@(Model.CurrentRound)_perm_@(perm.Id)_match_@(match.Id)_set_@(i+1)" 
                                                     value="@(setScore?.Away)" >
                                                     
                                                 }

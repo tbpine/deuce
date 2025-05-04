@@ -7,8 +7,10 @@ public class SessionProxy : ISessionProxy
     private const string Key_Current_Session = "CurrentTournament";
     private const string Key_Current_OrganizationId = "OrganizationId";
     private const string Key_Current_EntryType = "EntryType";
+    private const string Key_Current_Current_Round = "CurrentRound";
+
     //Keep reference to the browser session
-    private  ISession? _session;
+    private ISession? _session;
 
     public SessionProxy()
     {
@@ -38,6 +40,12 @@ public class SessionProxy : ISessionProxy
     {
         get => _session?.GetInt32(Key_Current_EntryType) ?? 1;
         set => _session?.SetInt32(Key_Current_EntryType, value);
+    }
+
+    public int CurrentRound
+    {
+        get => _session?.GetInt32(Key_Current_Current_Round) ?? 1;
+        set => _session?.SetInt32(Key_Current_Current_Round, value);
     }
 
     /// <summary>
