@@ -57,7 +57,9 @@ public class PdfPrinter
 
 
         //Set PDF byte stream to the output.
-        doc.Close();
+        doc.Close(); 
+        pdfdoc.Close(); // Close the document to ensure all content is written.
+        pdfwriter.Close();
         await Task.Delay(2000); // Give time for the stream to close properly.
     }
 }

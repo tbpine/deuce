@@ -34,13 +34,13 @@
     <!-- Master checkbox + Action buttons -->
     <div class="nav align-items-center mb-4">
         <div class="d-flex flex-wrap" id="published-action-buttons">
-            <a class="nav-link position-relative px-0 pe-sm-2 py-2 me-4" onclick="postAction('print')">
+            <a class="nav-link position-relative px-0 pe-sm-2 py-2 me-4" onclick="printToWindow(false, @(Model.CurrentRound))">
                 <i class="fi-printer fs-base me-2"></i>
                 <span class="hover-effect-underline stretched-link d-none d-md-inline">Print</span>
             </a>
         </div>
         <div class="d-flex flex-wrap" id="published-action-buttons">
-            <a class="nav-link position-relative px-0 pe-sm-2 py-2 me-4" onclick="postAction('print_scores')">
+            <a class="nav-link position-relative px-0 pe-sm-2 py-2 me-4" onclick="printToWindow(true, @(Model.CurrentRound))">
                 <i class="fi-printer fs-base me-2"></i>
                 <span class="hover-effect-underline stretched-link d-none d-md-inline">Print Scores</span>
             </a>

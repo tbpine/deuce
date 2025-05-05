@@ -61,3 +61,17 @@ function makeRandomScore() {
     });
 }
 
+/**
+ * Open another window and print to it
+ */
+function printToWindow(showScores, round)
+{
+    //Get the base url and add an action parameter to it
+    let baseUrl = window.location.href.split("?")[0];
+    let action = document.getElementById("action").value;
+    var url = baseUrl + "?action=" + (showScores ? "print_scores" : "print"); 
+    url += "&round=" + round;
+    //Open in a new window
+    window.open(url, "_blank");
+}
+
