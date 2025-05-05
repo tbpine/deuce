@@ -43,8 +43,10 @@ public class ScoringPageModel : BasePageModelAcc
     {
         try
         {
+            //Set the current round to zero in the session proxy
+            _sessionProxy.CurrentRound = 0;
 
-            await LoadCurrentTournament();
+            await LoadPage();
             Title = _tournament?.Label ?? "";
         }
         catch (Exception ex)
@@ -60,15 +62,21 @@ public class ScoringPageModel : BasePageModelAcc
         foreach (var kp in this.Request.Form)
             Debug.Write(kp.Key + "=" + kp.Value + "\n");
 
+
         try
         {
+            //If the submitted action is "print" then call PrintSchedule
+            if (this.Request.Form["action"] == "print")
+            {
+                return await PrintSchedule();
+            }
 
             //Get round permutation and games
-            int currentRound = _sessionProxy?.CurrentRound??0;
+            int currentRound = _sessionProxy?.CurrentRound ?? 0;
             FormReaderScoring formReader = new FormReaderScoring();
             var formScores = formReader.Parse(this.Request.Form, _sessionProxy?.TournamentId ?? 0);
             //Use proxy to save
-            await ProxyScores.Save(_sessionProxy?.TournamentId ?? 0, formScores, currentRound, _dbConnection);
+            await ScoreKeeper.Save(_sessionProxy?.TournamentId ?? 0, formScores, currentRound, _dbConnection);
 
         }
         catch (Exception ex)
@@ -79,15 +87,15 @@ public class ScoringPageModel : BasePageModelAcc
         //Get the selected round from the form (what was selected on screen)  
         string? strCR = this.Request.Form["current_round"];
         _currentRound = int.Parse(strCR ?? "0");
-        
+
         Title = _tournament?.Label ?? "";
         //Set session current round to the one selected on the form
-        await LoadCurrentTournament();
+        await LoadPage();
         if (_sessionProxy is not null) _sessionProxy.CurrentRound = _currentRound;
         return Page();
     }
 
-    private async Task LoadCurrentTournament()
+    private async Task LoadPage()
     {
         //Get the current tournament
         //DB access
@@ -144,6 +152,44 @@ public class ScoringPageModel : BasePageModelAcc
 
         BuilderSchedule builderSchedule = new BuilderSchedule(recordsSched, players, teams, _tournament ?? new(), _dbConnection);
         return builderSchedule.Create();
+
+    }
+
+
+    private async Task<IActionResult> PrintSchedule()
+    {
+        _tournament = await _tourGateway.GetCurrentTournament();
+        //call the builderSchedulefromdb method to get the schedule from the database
+        //and build the schedule object
+        //Get tournament details 
+        _schedule = await BuildScheduleFromDB();
+
+        //Get scores for the current round
+        //from the form values
+        FormReaderScoring formReader = new FormReaderScoring();
+        var formScores = formReader.Parse(this.Request.Form, _sessionProxy?.TournamentId ?? 0);
+
+
+        //Load Page and return if the schedule is null
+        if (_schedule is null || _tournament is null)
+        {
+            await LoadPage();
+            return Page();
+        }
+
+
+        //Use the PdfPrinter class to generate the PDF
+
+        PdfPrinter pdfPrinter = new PdfPrinter(_schedule);
+        //Get the response output stream
+        //Send the PDF in the response.
+        this.Response.ContentType = "application/pdf";
+
+        //Call the print method to generate the PDF
+        await pdfPrinter.Print(this.HttpContext.Response.BodyWriter.AsStream(true), _tournament, _schedule, _currentRound,
+        formScores);
+
+        return Page();
 
     }
 }

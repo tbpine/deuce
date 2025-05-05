@@ -1,4 +1,3 @@
-using iText.Kernel.Colors;
 using iText.Kernel.Pdf;
 using iText.Layout;
 
@@ -19,6 +18,7 @@ public class PdfPrinter
     /// Set schedule to print
     /// </summary>
     /// <param name="s">Schedule to print</param>
+    /// <param name="scores">Optionally, a list of scores</param>
     public PdfPrinter(Schedule s)
     {
         _schedule = s;
@@ -31,20 +31,22 @@ public class PdfPrinter
     /// <param name="tournament">Tournament details</param>
     /// <param name="s">Schedule</param>
     /// <param name="round">Print only matches for this round</param>
-    public void Print(Stream output, Tournament tournament, Schedule s, int round)
+    /// <param name="scores">Optionally, a list of scores to print</param>
+    public async Task Print(Stream output, Tournament tournament, Schedule s, int round, List<Score>? scores = null)
     {
+
         //iText set up
         var pdfwriter = new PdfWriter(output);
         var pdfdoc = new PdfDocument(pdfwriter);
-        var doc = new Document(pdfdoc);
+        var doc = new Document(pdfdoc, iText.Kernel.Geom.PageSize.A4, true);
 
         //Generate the document based on
         //the type of sport played.
         if (tournament.Sport == 1)
         {
-            TemplateTennis template = new ();
-            
-            template.Generate(doc, pdfdoc, s, tournament, round);
+            TemplateTennis template = new();
+
+            template.Generate(doc, pdfdoc, s, tournament, round, scores);
         }
         else
         {
@@ -56,5 +58,6 @@ public class PdfPrinter
 
         //Set PDF byte stream to the output.
         doc.Close();
+        await Task.Delay(2000); // Give time for the stream to close properly.
     }
 }

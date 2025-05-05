@@ -17,7 +17,7 @@ public class BasePageModelAcc : PageModel
     protected string? _showBackButton;
     protected string? _backPage;
 
-    protected SessionProxy? _sessionProxy;
+    protected SessionProxy _sessionProxy;
 
     protected IServiceProvider _serviceProvider;
     protected IConfiguration _config;
@@ -34,7 +34,7 @@ public class BasePageModelAcc : PageModel
     public string? BackPage { get => _backPage; set => _backPage = value; }
 
     public BasePageModelAcc(ISideMenuHandler handlerNavItems, IServiceProvider sp, IConfiguration config,
-    ITournamentGateway tgateway, SessionProxy? sessionProxy)
+    ITournamentGateway tgateway, SessionProxy sessionProxy)
     {
         _handlerNavItems = handlerNavItems;
         _serviceProvider = sp;

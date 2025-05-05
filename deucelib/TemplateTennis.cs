@@ -32,7 +32,9 @@ public class TemplateTennis
     /// <param name="s">Collection of matches by rounds</param>
     /// <param name="tournament">Tournament details</param>
     /// <param name="roundNo">The round to print</param>
-    public void Generate(Document doc, PdfDocument pdfdoc, Schedule s, Tournament tournament, int roundNo)
+    /// <param name="scores">Optionally, a list of scores to print</param>
+    public void Generate(Document doc, PdfDocument pdfdoc, Schedule s, Tournament tournament, int roundNo,
+    List<Score>? scores = null)
     {
         // Layout : A grid for each match. Player names in the first column,
         // scores after.
@@ -90,7 +92,6 @@ public class TemplateTennis
                 // Could be doubles (4 players in a match specifies a doubles match)
                 //4 players, indicates doubles
                 string homeName = match.GetHomeTeam();
-
                 string awayName = match.GetAwayTeam();
 
                 //Add headers
@@ -102,6 +103,8 @@ public class TemplateTennis
                 for (int i = 0; i < noScores; i++)
                 {
                     Cell headerScore = new Cell().Add(new Paragraph($"Set {i + 1}")).SetBackgroundColor(ColorConstants.LIGHT_GRAY).SetPadding(5);
+                    headerScore.SetTextAlignment(TextAlignment.CENTER);
+                    headerScore.SetVerticalAlignment(VerticalAlignment.MIDDLE);
                     tbl.AddHeaderCell(headerScore);
                 }
 
@@ -110,14 +113,52 @@ public class TemplateTennis
                 var cellHome = new Cell().Add(new Paragraph(homeName));
                 cellHome.SetPadding(10);
                 tbl.AddCell(cellHome);
+                
+                
 
-                for (int i = 0; i < noScores; i++) tbl.AddCell(MakeScoreCell(2f));
+                //Home scores
+                for (int i = 0; i < noScores; i++)
+                {
+                    //Find the score for this match.
+                    //If no score, then add a blank cell.
+                    //If score, then add the score.
+                    var score = scores?.Find(x => x.Match == match.Id && x.Set == i+1 && x.Round == roundNo);
+                    var cellHomeScore = new Cell(); //MakeScoreCell(2f, score?.Away.ToString() ?? "");
+
+                    if (score is not null)
+                    {
+                        var scoreParagraph = new Paragraph(score.Home.ToString());
+                        scoreParagraph.SetTextAlignment(TextAlignment.CENTER);
+                        scoreParagraph.SetVerticalAlignment(VerticalAlignment.MIDDLE);
+                        scoreParagraph.SetFontSize(16);
+                        cellHomeScore.Add(scoreParagraph);
+                    }
+
+                    tbl.AddCell(cellHomeScore);
+                }
 
                 var cellAway = new Cell().Add(new Paragraph(awayName));
                 cellAway.SetPadding(10);
                 tbl.AddCell(cellAway);
 
-                for (int i = 0; i < noScores; i++) tbl.AddCell(MakeScoreCell(2f));
+                for (int i = 0; i < noScores; i++)
+                {
+                        //Find the score for this match.
+                    //If no score, then add a blank cell.
+                    //If score, then add the score.
+                    var score = scores?.Find(x => x.Match == match.Id && x.Set == i+1 && x.Round == roundNo);
+                    var cellAwayScore = new Cell(); //MakeScoreCell(2f, score?.Away.ToString() ?? "");
+                    if (score is not null)
+                    {
+                        var scoreParagraph = new Paragraph(score.Away.ToString());
+                        scoreParagraph.SetTextAlignment(TextAlignment.CENTER);
+                        scoreParagraph.SetVerticalAlignment(VerticalAlignment.MIDDLE);
+                        scoreParagraph.SetFontSize(16);
+                        cellAwayScore.Add(scoreParagraph);
+                    }
+                    tbl.AddCell(cellAwayScore);
+                }    
+                    
                 tbl.SetMarginBottom(15f);
 
                 tables.Add(tbl);
@@ -140,11 +181,12 @@ public class TemplateTennis
     /// </summary>
     /// <param name="borderSize">How thick the score box is</param>
     /// <param name="padding">Size of margin around the score box container</param>
+    /// <param name="text">Optionally, text to display</param>
     /// <returns></returns>
-    private Cell MakeScoreCell(float padding)
+    private Cell MakeScoreCell(float padding, string? text = "")
     {
         var scell = new Cell();
-        scell.SetNextRenderer(new ScoreBoxCellRenderer(scell));
+        scell.SetNextRenderer(new ScoreBoxCellRenderer(scell, text));
         scell.SetPadding(padding);
 
         return scell;
@@ -155,7 +197,7 @@ public class TemplateTennis
         PdfFont font = PdfFontFactory.CreateFont(StandardFonts.HELVETICA_BOLD);
         string tname = $"{t.Label}";
         //Find the date this round was held
-        Interval interval= new Interval(t.Interval, "");
+        Interval interval = new Interval(t.Interval, "");
         DateTime roundDate = t.Start.AddDays(roundNo * Utils.GetNoDays(interval));
 
         string dates = $"{roundDate.ToString("dd MMM yyyy")}. Round {roundNo + 1}";

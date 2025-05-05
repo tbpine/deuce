@@ -1,5 +1,7 @@
 
+using iText.IO.Font.Constants;
 using iText.Kernel.Colors;
+using iText.Kernel.Font;
 using iText.Kernel.Geom;
 using iText.Kernel.Pdf.Canvas;
 using iText.Layout.Element;
@@ -9,9 +11,10 @@ namespace deuce;
 
 public class ScoreBoxCellRenderer : CellRenderer
 {
-    public ScoreBoxCellRenderer(Cell cell) : base(cell)
+    private string? _text;
+    public ScoreBoxCellRenderer(Cell cell, string? text = "") : base(cell)
     {
-
+        _text = text;
     }
 
     public override void DrawBorder(DrawContext drawContext)
@@ -22,11 +25,11 @@ public class ScoreBoxCellRenderer : CellRenderer
         float boxHeight = 15f;
 
         PdfCanvas canvas = drawContext.GetCanvas();
-        
+
 
         float x = (rectangle.GetX() + (rectangle.GetWidth() - boxWidth) / 2f);
-        float y = (rectangle.GetY() +  (rectangle.GetHeight() - boxHeight) / 2f);
-        Rectangle score = new Rectangle(x, y, boxWidth , boxHeight);
+        float y = (rectangle.GetY() + (rectangle.GetHeight() - boxHeight) / 2f);
+        Rectangle score = new Rectangle(x, y, boxWidth, boxHeight);
 
         canvas.SetStrokeColor(ColorConstants.BLACK);
         canvas.SetLineWidth(2);
@@ -34,6 +37,8 @@ public class ScoreBoxCellRenderer : CellRenderer
         canvas.Stroke();
 
         base.DrawBorder(drawContext);
-            
+
     }
+
+
 }

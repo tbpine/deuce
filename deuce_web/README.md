@@ -13,5 +13,16 @@
 - [X] Display scores for sets with bye teams
 - [] Add orgainzations (clubs)
 - [X] enable score capturing of 12 large sets
-- [] CRUD on round scores 
-    - [] Include  round indexes as part of score input names.
+- [X] CRUD on round scores 
+    - [X] Include  round indexes as part of score input names.
+- [] Add scores to the pdf printout.
+- [] Generally, push alot more logic to the lib
+    - [] Make a score keeper class to handle scores
+- [] Because data flow uses data submittion, have classes 
+that read form values. Like now, but use the factory creation 
+pattern.
+- [] Most forms use action for different work flows. Research MVC, to see
+if it can be used.
+- [] Change strings in the database to ntext. Get all lables from the database.
+- [] Editing matches, perms and sets after the tournament has started. Have to remove
+existing scores. If the current date has passed the start date, warn user that scores will be removed.
