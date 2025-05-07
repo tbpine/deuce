@@ -49,3 +49,14 @@ public enum EntryType : uint
     Team,
     Individual
 };
+
+/// <summary>
+/// Account types
+/// </summary>
+public enum AccountType : uint
+{
+    Unknown = 0,
+    Player,
+    Organizer
+};
+

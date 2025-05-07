@@ -178,12 +178,15 @@ CREATE TABLE IF NOT EXISTS `address` (
 
 
 CREATE TABLE IF NOT EXISTS `account` (
-    `id` INT PRIMARY KEY AUTO_INCREMENT,
-    `player` INT ,
-    `organization`   INT ,
-    `password` VARBINARY(48),
-    `salt` VARBINARY(8),
-    `active` INT,
+    `id` 				INT PRIMARY KEY AUTO_INCREMENT,
+    `email` 			VARCHAR(100),
+    `password` 			VARBINARY(48),
+    `salt` 				VARBINARY(8),
+    `active` 			INT,
+    `type` 			    INT ,
+    `player` 			INT ,
+    `organization`   	INT ,
+    `country`           INT,
     `updated_datetime` TIMESTAMP,
     `created_datetime` TIMESTAMP
 );
