@@ -44,7 +44,17 @@ PREPARE stmt FROM @stat;
 EXECUTE stmt;
 DEALLOCATE PREPARE stmt;
 
+SET @n = "u_account_email";
+SELECT COUNT(index_name) INTO @b FROM information_schema.statistics WHERE table_schema = DATABASE() AND index_name = @n;
+SET @stat = IF(@b = 0, "CREATE UNIQUE INDEX `u_account_email` ON `account` (`email`);", "SELECT 1 WHERE 1 = 0;");
+PREPARE stmt FROM @stat;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+
+-- ---------------------------------------------------------------------------
 -- Foreign key constraints
+-- ---------------------------------------------------------------------------
 
 -- Check that the foreign key constraints exists for the table score and column tournament
 SET @n = "fk_score_tournament";

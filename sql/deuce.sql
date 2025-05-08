@@ -184,7 +184,7 @@ CREATE TABLE IF NOT EXISTS `account` (
     `salt` 				VARBINARY(8),
     `active` 			INT,
     `type` 			    INT ,
-    `player` 			INT ,
+    `member` 			INT ,
     `organization`   	INT ,
     `country`           INT,
     `updated_datetime` TIMESTAMP,

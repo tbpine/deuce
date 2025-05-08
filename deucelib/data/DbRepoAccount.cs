@@ -30,7 +30,7 @@ public class DbRepoAccount : DbRepoBase<Account>
                 Email = r.Parse<string>("email"),
                 Password = r.Parse<string>("password"),
                 Organization = r.Parse<int>("organization"),
-                Player = r.Parse<int>("player")
+                Member = r.Parse<int>("member")
 
             };
 
@@ -55,7 +55,7 @@ public class DbRepoAccount : DbRepoBase<Account>
         object primaryKeyId = obj.Id < 1 ? DBNull.Value : obj.Id;
 
         var command = _dbconn.CreateCommandStoreProc("sp_set_account", ["p_id",  "p_email", "p_password",
-        "p_type", "p_player", "p_organization", "p_active", "p_country"], [primaryKeyId, obj.Email, obj.Password, obj.Type, obj.Player, obj.Organization, obj.Active,
+        "p_type", "p_member", "p_organization", "p_active", "p_country"], [primaryKeyId, obj.Email, obj.Password, obj.Type, obj.Member, obj.Organization, obj.Active,
         obj.Country]);
 
         obj.Id = command.GetIntegerFromScaler(command.ExecuteScalar());

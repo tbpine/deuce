@@ -881,7 +881,7 @@ CREATE PROCEDURE `sp_get_accounts`(
 BEGIN
 
 -- Get all rows from account table
-SELECT `id`, `email`, `password`, `salt`, `player`, `organization`,`active`, `updated_datetime`, `created_datetime`
+SELECT `id`, `email`, `password`, `salt`, `member`, `organization`,`active`, `updated_datetime`, `created_datetime`
 FROM `account`
 ORDER BY `id`;
 
@@ -896,15 +896,15 @@ IN p_id 			INT,
 IN p_email 			VARCHAR(100),
 IN p_password 		VARBINARY(48),
 IN p_type 			INT,
-IN p_player 		INT,
+IN p_member 		INT,
 IN p_organization 	INT,
 IN p_active 		INT,
 IN p_country		INT)
 BEGIN
 	-- Insert or update account table
-	INSERT INTO `account`(`id`,`email`,`password`,`type`,`player`,`organization`,`active`,`country`,`updated_datetime`,`created_datetime`)
-	VALUES (p_id, p_email, p_password, p_type,p_player, p_organization, p_active, p_country, NOW(), NOW())
-	ON DUPLICATE KEY UPDATE `email` = p_email, `password` = p_password, `type` = p_type, `player` = p_player, `organization` = p_organization, 
+	INSERT INTO `account`(`id`,`email`,`password`,`type`,`member`,`organization`,`active`,`country`,`updated_datetime`,`created_datetime`)
+	VALUES (p_id, p_email, p_password, p_type,p_member, p_organization, p_active, p_country, NOW(), NOW())
+	ON DUPLICATE KEY UPDATE `email` = p_email, `password` = p_password, `type` = p_type, `member` = p_member, `organization` = p_organization, 
 	`country` = p_country, `active` = p_active, `updated_datetime` = NOW();
 	-- Return the last inserted ID
 	IF ISNULL(p_id) THEN
@@ -926,7 +926,7 @@ IN p_active 		INT)
 BEGIN
 	-- Insert or update account table
 	INSERT INTO `organization`(`id`,`name`,`owner`,`abn`,`active`,`updated_datetime`,`created_datetime`)
-	VALUES (p_id, p_name, p_owner, p_anb,p_active, NOW(), NOW())
+	VALUES (p_id, p_name, p_owner, p_abn,p_active, NOW(), NOW())
 	ON DUPLICATE KEY UPDATE `name` = p_name, `owner` = p_owner, `abn` = p_abn, `active` = p_active, `updated_datetime` = NOW();
 	-- Return the last inserted ID
 	IF ISNULL(p_id) THEN
@@ -937,6 +937,19 @@ BEGIN
 
 END//
 
+DROP PROCEDURE IF EXISTS `sp_check_password`//
+
+CREATE PROCEDURE `sp_check_password`(
+IN p_email varchar(100),
+IN p_password varchar(300)
+
+)
+
+BEGIN
+
+select 1 "IsValid";
+
+END//
 
 
 DELIMITER ;

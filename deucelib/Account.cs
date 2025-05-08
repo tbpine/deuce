@@ -10,7 +10,7 @@ public class Account
     private int _id;
     private int _type;
     private bool _active = true;
-    private int _player;
+    private int _member;
     private int _organization;
     private int _country;
 
@@ -23,7 +23,7 @@ public class Account
     public int Type { get { return _type; } set { _type = value; } }
 
     public bool Active { get { return _active; } set { _active = value; } }
-    public int Player { get { return _player; } set { _player = value; } }
+    public int Member { get { return _member; } set { _member = value; } }
     public int Organization { get { return _organization; } set { _organization = value; } }
     public int Country { get { return _country; } set { _country = value; } }
    

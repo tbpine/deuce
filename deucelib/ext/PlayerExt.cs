@@ -21,7 +21,4 @@ public static class PlayerExt
         return hasDetails || isRegistered;
   }
 
-  
-
-
 }

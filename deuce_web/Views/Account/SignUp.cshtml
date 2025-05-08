@@ -1,4 +1,4 @@
-@model deuce.Account
+@model ViewModelAccount
 @using deuce
 
 <!DOCTYPE html>
@@ -90,25 +90,25 @@
         <form class="needs-validation" novalidate asp-controller="Account" asp-action="Register" method="post">
           <div class="mt-4 mb-4">
             <div class="form-check mb-4">
-              <input type="radio" class="form-check-input" id="ex-acc-type-1"  checked asp-for="Type"
+              <input type="radio" class="form-check-input" id="ex-acc-type-1"  checked asp-for="Account.Type"
                 value="1">
               <label for="ex-acc-type-1" class="form-check-label">Player</label>
             </div>
             <div class="form-check">
-              <input type="radio" class="form-check-input" id="ex-acc-type-2" asp-for="Type" value="2">
+              <input type="radio" class="form-check-input" id="ex-acc-type-2" asp-for="Account.Type" value="2">
               <label for="ex-acc-type-2" class="form-check-label">Organization</label>
             </div>
           </div>
           <div class="position-relative mt-4 mb-4">
             <label for="register-email" class="form-label">Email</label>
-            <input type="email" class="form-control form-control-lg" id="register-email" asp-for="Email" required>
+            <input type="email" class="form-control form-control-lg" id="register-email" asp-for="Account.Email" required>
             <div class="invalid-tooltip bg-transparent py-0">Enter a valid email address!</div>
           </div>
           <div class="mb-4">
             <label for="register-password" class="form-label">Password</label>
             <div class="password-toggle">
               <input type="password" class="form-control form-control-lg" id="register-password" minlength="8"
-                placeholder="Minimum 8 characters" asp-for="Password" required>
+                placeholder="Minimum 8 characters" asp-for="Account.Password" required>
               <div class="invalid-tooltip bg-transparent py-0">Password does not meet the required criteria!</div>
               <label class="password-toggle-button fs-lg" aria-label="Show/hide password">
                 <input type="checkbox" class="btn-check">
@@ -116,8 +116,13 @@
             </div>
           </div>
           <div class="position-relative mt-4 mb-4">
+            <label for="register-email" class="form-label">Name</label>
+            <input  class="form-control form-control-lg" id="name" asp-for="Name" required>
+            <div class="invalid-tooltip bg-transparent py-0">Enter your name!</a>!</div>
+          </div>
+          <div class="position-relative mt-4 mb-4">
             <label for="country" class="form-label">Country</label>
-            <select class="form-select" data-select aria-label="Basic select example" asp-for="Country">
+            <select class="form-select" data-select aria-label="Basic select example" asp-for="Account.Country">
               @{
                 List<Country> countries = (ViewData["countries"] as List<Country>) ?? new();
               }
