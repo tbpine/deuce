@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using deuce;
 using deuce.ext;
+using Microsoft.AspNetCore.Mvc.Filters;
+using System.Data.Common;
 
 public class AccountController : Controller
 {
@@ -10,29 +12,46 @@ public class AccountController : Controller
     private readonly ILogger<AccountController> _log;
     private readonly DbRepoSecurity _dbRepoSecurity;
     private readonly DbRepoMember _dbRepoMember;
+    private readonly DbConnection _dbconnection;
+
+    private ISessionProxy _sessionProxy = new SessionProxy();
     /// <summary>
     /// Inject dependencies here if needed.
     /// </summary>
     public AccountController(DbRepoAccount dbRepoAccount, ILogger<AccountController> log,
     DbRepoCountry dbRepoCountry, DbRepoOrganization dbRepoOrganization, DbRepoMember dbRepoMember,
-    DbRepoSecurity dbRepoSecurity)
+    DbRepoSecurity dbRepoSecurity, DbConnection dbconnection)
     {
-        _log = log;
+        //Initialize the repositories
+        _dbconnection = dbconnection;
         _dbRepoAccount = dbRepoAccount;
         _dbRepoCountry = dbRepoCountry;
         _dbRepoOrganization = dbRepoOrganization;
         _dbRepoMember = dbRepoMember;
         _dbRepoSecurity = dbRepoSecurity;
+        _log = log;
     }
+ 
+    /// <summary>
+    /// Execute before any action method in this controller.
+    /// </summary>
+    /// <param name="context"></param>
+    public override void OnActionExecuting(ActionExecutingContext context)
+    {
+        //Initialize the session proxy
+        _sessionProxy = new SessionProxy(context.HttpContext.Session);
+
+    }
+
     public IActionResult Index()
     {
-        return View();
+        return View(new ViewModelAccount());
     }
 
     public async Task<IActionResult> SignUp()
     {
         ViewData["countries"] = (await _dbRepoCountry.GetList());
-        return View(new ViewModelAccount());        
+        return View(new ViewModelAccount());
     }
 
     [HttpPost]
@@ -57,15 +76,15 @@ public class AccountController : Controller
             else if (vmAcc.Account.Type == (int)(deuce.AccountType.Player))
             {
                 //Populate Member name
-                vmAcc.Member.PopulateNames(deuce.Utils.SplitNames(vmAcc.Name??""));
+                vmAcc.Member.PopulateNames(deuce.Utils.SplitNames(vmAcc.Name ?? ""));
                 //Set country
                 vmAcc.Member.CountryCode = vmAcc.Account.Country;
                 //Insert a row into the players table
                 _dbRepoMember.Set(vmAcc.Member);
                 //Link to the account
-                vmAcc.Account.Member = vmAcc.Member.Id;                    
+                vmAcc.Account.Member = vmAcc.Member.Id;
             }
-            
+
             _dbRepoAccount.Set(vmAcc.Account);
         }
         catch (Exception ex)
@@ -80,21 +99,21 @@ public class AccountController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> SignIn(ViewModelAccount vmAcc)
     {
-        //Get a list of security objects with this email and 
-        //password
-        //Check if the password is valid
+        ISecurityGateway secGateway = new SecurityGatewayDefault(_dbconnection);
 
-        //Make the filter
-        Filter filter = new() { Email = vmAcc.Account.Email, Password = vmAcc.Account.Password };
-        var listOfSecurities = await _dbRepoSecurity.GetList(filter);
-        bool passed = (listOfSecurities?.Count?? 0) > 0 && (listOfSecurities?.First().IsValid??false);
+        Account? acc =  await secGateway.CheckPasswordAsync(vmAcc.Account.Email, vmAcc.Account.Password);
+        if (acc  is not  null)
+        {
+            //Set session properties from the account object
+            _sessionProxy.CurrentAccount = acc.Id;
+            _sessionProxy.OrganizationId = acc.Organization;
+            
+            return RedirectToAction("Index", "Member");
+        }
 
-        //If passed security checks, then goto the "OrgIdx" page.
-        //Else, show the index page again.
-        if (passed)
-            return Redirect("~/OrgIdx");
-        else
+        //Goto the member page
             return RedirectToAction("Index");
+     
     }
 
 }

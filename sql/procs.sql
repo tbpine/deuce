@@ -876,13 +876,15 @@ END//
 DROP PROCEDURE IF EXISTS `sp_get_accounts`//
 
 CREATE PROCEDURE `sp_get_accounts`(
+	p_email VARCHAR(100)
 )
 
 BEGIN
 
 -- Get all rows from account table
-SELECT `id`, `email`, `password`, `salt`, `member`, `organization`,`active`, `updated_datetime`, `created_datetime`
+SELECT `id`, `email`, "" as 'password', `member`, `organization`,`active`, `type`, `country`, `updated_datetime`, `created_datetime`
 FROM `account`
+WHERE `email` = p_email OR ISNULL(p_email)
 ORDER BY `id`;
 
 END//

@@ -20,7 +20,9 @@ public class DbRepoAccount : DbRepoBase<Account>
         _dbconn.Open();
         //Note, player contains a member DTO.
         List<Account> accounts = new();
-        await _dbconn.CreateReaderStoreProcAsync("sp_get_accounts", [], [],
+        object email = String.IsNullOrEmpty(filter.Email) ? DBNull.Value : filter.Email;
+
+        await _dbconn.CreateReaderStoreProcAsync("sp_get_accounts", ["p_email"], [email],
         r =>
         {
             // Create a new account object and populate it with data from the reader
@@ -30,7 +32,9 @@ public class DbRepoAccount : DbRepoBase<Account>
                 Email = r.Parse<string>("email"),
                 Password = r.Parse<string>("password"),
                 Organization = r.Parse<int>("organization"),
-                Member = r.Parse<int>("member")
+                Member = r.Parse<int>("member"),
+                Type = r.Parse<int>("type"),
+                Country = r.Parse<int>("country")
 
             };
 

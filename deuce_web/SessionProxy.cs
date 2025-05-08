@@ -1,3 +1,4 @@
+using deuce;
 /// <summary>
 /// Get / Set values from a browser's session
 /// </summary>
@@ -8,22 +9,24 @@ public class SessionProxy : ISessionProxy
     private const string Key_Current_OrganizationId = "OrganizationId";
     private const string Key_Current_EntryType = "EntryType";
     private const string Key_Current_Current_Round = "CurrentRound";
+    private const string Key_Current_Account = "Account";
+    private const string Key_Current_Organization = "Organization";
 
     //Keep reference to the browser session
     private ISession? _session;
 
     public SessionProxy()
     {
-       
-    } 
+
+    }
     /// <summary>
     /// This constructor is for the class "BasePageModelWizard".
     /// It doesn't dependency inject the "SessionProxy"class.
     /// </summary>
     /// <param name="session">Web browser Session </param>
-    public SessionProxy(ISession session)=>_session = session;
+    public SessionProxy(ISession session) => _session = session;
 
-    public ISession? Session {  set=>_session = value; }
+    public ISession? Session { set => _session = value; }
     public int TournamentId
     {
         get => _session?.GetInt32(Key_Current_Session) ?? 0;
@@ -48,6 +51,13 @@ public class SessionProxy : ISessionProxy
         set => _session?.SetInt32(Key_Current_Current_Round, value);
     }
 
+     public int CurrentAccount
+    {
+        get => _session?.GetInt32(Key_Current_Account)?? 0;
+        set => _session?.SetInt32(Key_Current_Account, value);
+    }
+
+    
     /// <summary>
     /// Clear  the current browser session
     /// </summary>

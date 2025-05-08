@@ -1,7 +1,7 @@
 using System.Data.Common;
 using System.Diagnostics;
 using deuce.ext;
-
+    
 namespace deuce;
 
 /// <summary>

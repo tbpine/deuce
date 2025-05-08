@@ -29,15 +29,16 @@ public class DbRepoOrganization : DbRepoBase<Organization>
         DbCommand cmd = _dbconn.CreateCommandStoreProc(
             "sp_set_organization",
             new[] { "p_id", "p_name", "p_owner", "p_abn", "p_active" },
-            new object[] { organization.Id, organization.Name, "", organization.Abn,
+            new object[] { organization.Id >0 ? organization.Id : DBNull.Value, organization.Name, "", organization.Abn,
             organization.Active },
             localTran
         );
 
         try
         {
-            await cmd.ExecuteNonQueryAsync();
+            object? val = await cmd.ExecuteScalarAsync();
             localTran.Commit();
+            organization.Id = Convert.ToInt32(val);
         }
         catch (Exception ex)
         {
