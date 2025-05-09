@@ -7,10 +7,6 @@ using Microsoft.AspNetCore.Mvc.Filters;
 /// </summary>
 public class TournamentController : Controller
 {
-    private string _userName = string.Empty;
-    private int _userId = 0;
-
-    private bool _loggedIn = false;
     private string? _showBackButton;
     private string? _backPage;
 
@@ -34,15 +30,6 @@ public class TournamentController : Controller
     private readonly DbRepoTournamentList _dbrepoTournamentList;
     private readonly ICacheMaster _cache;
 
-    private List<Tournament>? _tournaments;
-    //For lookups
-    private List<Interval>? _intervals;
-    private List<TournamentType>? _tourTypes;
-
-    public List<Tournament>? Tournaments { get => _tournaments; }
-
-    public List<Interval>? Intervals { get => _intervals; }
-    public List<TournamentType>? TourTypes { get => _tourTypes; }
 
     public TournamentController(ILogger<TournamentsPageModel> log, ISideMenuHandler handlerNavItems, IServiceProvider sp, IConfiguration config,
     ITournamentGateway tgateway, SessionProxy sessionProxy, ICacheMaster cache, DbRepoTournamentList dbrepoTournamentList)

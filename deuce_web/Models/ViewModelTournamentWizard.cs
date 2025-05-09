@@ -1,4 +1,5 @@
 using deuce;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 /// <summary>
 /// Data model for the tournament wizard view model.
@@ -20,9 +21,12 @@ public class ViewModelTournamentWizard
     public List<NavItem> NavItems { get => _navItems; set => _navItems = value; }
     public List<Sport> Sports { get => _sports; set => _sports = value; }
     public List<TournamentType> TournamentTypes { get => _tournamentTypes; set => _tournamentTypes = value; }
-     public string? ShowBackButton { get => _showBackButton; set => _showBackButton = value; }
+    public List<SelectListItem> Countries { get; set; } = new();
+
+    public string? ShowBackButton { get => _showBackButton; set => _showBackButton = value; }
     public string? BackPage { get => _backPage; set => _backPage = value; }
     public Tournament Tournament { get=>_tournament; set=> _tournament = value; }
+    public TournamentVenue Venue { get; set; } = new();
     public ViewModelTournamentWizard()
     { }
 }

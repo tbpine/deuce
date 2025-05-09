@@ -12,8 +12,8 @@ public class HandlerNavItems : IHandlerNavItems
     /// </summary>
     public HandlerNavItems()
     {
-        _navItems.Add(new NavItem("Tournament Details", "/TournamentDetail", false, true));
-        _navItems.Add(new NavItem("Venue", "/TournamentVenue", false, true));
+        _navItems.Add(new NavItem("Tournament Details", "/TournamentDetail", false, true,"",  "TDetail", "Index"));
+        _navItems.Add(new NavItem("Venue", "/TournamentVenue", false, true,"", "TVenue", "Index"));
         _navItems.Add(new NavItem("Format", "/TournamentFormat", false, true));
         _navItems.Add(new NavItem("Players", "/TournamentPlayers", false, true));
         _navItems.Add(new NavItem("Schedule", "/TournamentSchedule", false, true));
@@ -43,10 +43,10 @@ public class HandlerNavItems : IHandlerNavItems
     /// </summary>
     /// <param name="controller">Controller name</param>
     /// <param name="action">Action name</param>
-    public void SetControllerAction(string controller, string action)
+    public void SetControllerAction(string controller)
     {
         //Search for the item where the resource property is contains the current page.
-        var selected = _navItems.Find(e => e.Action == action && e.Controller == controller);
+        var selected = _navItems.Find(e =>  e.Controller == controller);
         if (selected is not null)
         {
             selected.IsSelected = true;

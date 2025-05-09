@@ -26,7 +26,10 @@ public class TDetailController : WizardController
         //Load page options from the from the database
         viewModel.Sports = await _cache.GetList<Sport>(CacheMasterDefault.KEY_SPORTS) ?? new();
         viewModel.TournamentTypes = await _cache.GetList<TournamentType>(CacheMasterDefault.KEY_TOURNAMENT_TYPES) ?? new();
-
+        viewModel.NavItems = new List<NavItem>(_handlerNavItems?.NavItems ?? new List<NavItem>());
+        viewModel.ShowBackButton = _showBackButton;
+        viewModel.BackPage = _backPage;
+        
         //uri query parameters could contain
         //key "new" equaling 1 meaning
         //a new tournament is added.
@@ -44,7 +47,7 @@ public class TDetailController : WizardController
         }
         else
         {
-            var listOfTours = await _dbRepoTournament.GetList(new Filter() { TournamentId = _sessionProxy.TournamentId });
+            var listOfTours = await _dbRepoTournament.GetList(new Filter() { TournamentId = _sessionProxy!.TournamentId });
             viewModel.Tournament = listOfTours.FirstOrDefault() ?? new();
         }
 
@@ -73,8 +76,16 @@ public class TDetailController : WizardController
         _sessionProxy.TournamentId = viewModel.Tournament.Id;
         //Teams or Individuals
         _sessionProxy.EntryType = viewModel.Tournament.EntryType;
-       
-        return RedirectToAction("Index", "");
+
+        var nextNavItem = NextPage("");
+
+        if (nextNavItem == null)
+        {
+            //No next page
+            return RedirectToAction("Index");
+        }
+        
+        return RedirectToAction(nextNavItem?.Action, nextNavItem?.Controller);
     }
 
     private async Task<bool> Validate(ViewModelTournamentWizard viewModel)

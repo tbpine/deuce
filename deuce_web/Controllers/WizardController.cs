@@ -40,13 +40,13 @@ public abstract class WizardController : Controller
         _sessionProxy.Session = this.HttpContext.Session;
 
         if (_handlerNavItems is null) return;
-                // Get the controller name
+        // Get the controller name
         string? controllerName = (string?)HttpContext.Request.RouteValues["controller"];
-        
+
         // Get the action name
         string? actionName = (string?)HttpContext.Request.RouteValues["action"];
 
-        _handlerNavItems.SetControllerAction(controllerName??"", actionName??"");
+        _handlerNavItems.SetControllerAction(controllerName ?? "");
 
         //Find the back page
         int selectedIdx = _handlerNavItems.GetSelectedIndex();
@@ -56,15 +56,15 @@ public abstract class WizardController : Controller
         if (_showBackButton == "visible")
         {
             var prevNavItem = _handlerNavItems.NavItems.ElementAt(selectedIdx - 1);
-            _backPage = prevNavItem.Controller + "/" + prevNavItem.Action;    
-            
+            _backPage = prevNavItem.Controller + "/" + prevNavItem.Action;
+
             if (prevNavItem.Controller.Contains("TFormat"))
             {
                 //case
                 int entryType = _sessionProxy?.EntryType ?? (int)EntryType.Team;
                 _backPage = (entryType == (int)EntryType.Team ? "TFormatTeams" : "TFormatPlayer")
                 + "/" + "Index";
-                
+
             }
         }
 
@@ -76,7 +76,7 @@ public abstract class WizardController : Controller
 
         // bool isInvalid = String.IsNullOrEmpty(uname) || !userId.HasValue;
         // _loggedIn = !isInvalid;
-    }   
+    }
 
     protected NavItem? NextPage(string replacement)
     {
@@ -84,23 +84,7 @@ public abstract class WizardController : Controller
 
         int selectedIdx = _handlerNavItems?.GetSelectedIndex() ?? -1;
 
-        if (selectedIdx >= 0)
-        {
-            string nextResource = _handlerNavItems?.GetResourceAtIndex(selectedIdx + 1) ?? "";
-            if (string.IsNullOrEmpty(nextResource))
-            {
-                //End of wizard
-                //Redirct to finishing point
-                //Schedule tournament
-                
-                return Redirect(HttpContext.Request.PathBase + "/OrgIdx");
-            }
-            else
-                return Redirect(HttpContext.Request.PathBase + nextResource);
-
-        }
-
-        return Page();
+        return selectedIdx >= 0 ? _handlerNavItems?.NavItems.ElementAt(selectedIdx + 1) : null;
 
     }
 

@@ -108,11 +108,11 @@
             <div class="progress-bar bg-light d-none d-block-dark" style="width: 28.57%"></div>
         </div>
         <div class="container d-flex gap-3 pt-3">
-            <a class="btn btn-outline-dark animate-slide-start @Model.ShowBackButton" asp-controller="TournamentWizard" asp-action="Previous">
+            <a class="btn btn-outline-dark animate-slide-start @Model.ShowBackButton" href="@Model.BackPage">
                 <i class="fi-arrow-left animate-target fs-base ms-n1 me-2"></i>
                 Back
             </a>
-            <a class="btn btn-dark animate-slide-end ms-auto" asp-controller="TournamentWizard" asp-action="Next">
+            <a class="btn btn-dark animate-slide-end ms-auto" onclick="submitForm()">
                 Next
                 <i class="fi-arrow-right animate-target fs-base ms-2 me-n1"></i>
             </a>

@@ -1,0 +1,36 @@
+@model ViewModelTournamentWizard
+@{
+    Layout="_LayoutTournamentWizard";
+}
+
+<!-- Venue  content -->
+<div class="col-lg-9">
+  <h1 class="h2 pb-2 pb-lg-3">Venue</h1>
+  <div class="pb-2 pb-lg-3"><span >Get more entries by correctly entering an address. People  nearby can search for the tournament.</span></div>
+  <div class="vstack gap-4">
+    <!-- Settings form -->
+     @{
+        string attrValidated = Model.Validated ? "was-validated" : "";
+     }
+    <form class="needs-validation @attrValidated" novalidate id="page_form" asp-controller="TVenue" asp-action="Save" method="POST">
+      <div class="position-relative mb-4">
+        <label for="CountryCode" class="form-label fs-base">Country *</label>
+        <select asp-items="Model.Countries" class="form-select" asp-for="Venue.CountryCode" required>
+        </select>
+        <div class="invalid-tooltip bg-transparent p-0">Select Country</div>
+      </div>
+      <div class="position-relative mb-4">
+        <label for="State" class="form-label fs-base">State *</label>
+        <input type="text" class="form-control form-control-lg" asp-for="Venue.State" required autocomplete="address-level2" value="@Model.Venue.State">
+        <div class="invalid-tooltip bg-transparent p-0">Enter venue state!</div>
+      </div>
+
+      <div class="position-relative mb-4">
+        <label for="Street" class="form-label fs-base">Street Address*</label>
+        <input type="text" class="form-control form-control-lg" asp-for="Venue.Street" required autocomplete="address-level1" value="@Model.Venue.Street">
+        <div class="invalid-feedback">Enter venue street address!</div>
+      </div>
+    </form>
+  </div>
+
+</div>
