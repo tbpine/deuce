@@ -31,7 +31,7 @@ public class AccountController : Controller
         _dbRepoSecurity = dbRepoSecurity;
         _log = log;
     }
- 
+
     /// <summary>
     /// Execute before any action method in this controller.
     /// </summary>
@@ -101,19 +101,19 @@ public class AccountController : Controller
     {
         ISecurityGateway secGateway = new SecurityGatewayDefault(_dbconnection);
 
-        Account? acc =  await secGateway.CheckPasswordAsync(vmAcc.Account.Email, vmAcc.Account.Password);
-        if (acc  is not  null)
+        Account? acc = await secGateway.CheckPasswordAsync(vmAcc.Account.Email, vmAcc.Account.Password);
+        if (acc is not null)
         {
             //Set session properties from the account object
             _sessionProxy.CurrentAccount = acc.Id;
             _sessionProxy.OrganizationId = acc.Organization;
-            
+
             return RedirectToAction("Index", "Member");
         }
 
         //Goto the member page
-            return RedirectToAction("Index");
-     
+        return RedirectToAction("Index");
+
     }
 
 }

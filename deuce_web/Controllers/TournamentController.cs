@@ -66,27 +66,13 @@ public class TournamentController : Controller
         //Manage session
         if (_sessionProxy is not null) _sessionProxy.Session = context.HttpContext.Session;
 
-        if (_handlerNavItems is null) return;
-
-        _handlerNavItems.Set(this.HttpContext.Request.Path);
-
-        //Find the back page
-        int selectedIdx = _handlerNavItems.GetSelectedIndex();
-        _showBackButton = selectedIdx > 0 ? "visible" : "invisible";
-        //Set the URI of the last page in the list of
-        //nav items.
-        if (_showBackButton == "visible")
-        {
-            _backPage = HttpContext.Request.PathBase + _handlerNavItems.GetResourceAtIndex(selectedIdx - 1);
-        }
-
-
     }
 
     public async Task<IActionResult> Index()
     {
         //get a list of tournaments
-        Organization thisOrg = new Organization() { Id = 1, Name = "testing" };
+        Organization thisOrg = new Organization() { Id = _sessionProxy.OrganizationId,
+            Name = "" };
 
         //Make a ViewModelTournament object and set properties
         ViewModelTournament vm = new();

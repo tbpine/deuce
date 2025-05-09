@@ -5,7 +5,7 @@ public class HandlerNavItems : IHandlerNavItems
 {
     private List<NavItem> _navItems = new();
 
-    public IEnumerable<NavItem> NavItems { get=> _navItems; }
+    public IEnumerable<NavItem> NavItems { get => _navItems; }
 
     /// <summary>
     /// Make left side navigations
@@ -27,26 +27,46 @@ public class HandlerNavItems : IHandlerNavItems
     public void Set(string resource)
     {
         //Search for the item where the resource property is contains the current page.
-        var selected = _navItems.Find(e=>resource.StartsWith(e.Resource));
-        if (selected is not null) 
+        var selected = _navItems.Find(e => resource.StartsWith(e.Resource));
+        if (selected is not null)
         {
             selected.IsSelected = true;
             //Disable items after selection
-            for(int i = _navItems.IndexOf(selected) + 1; i < _navItems.Count; i++) _navItems[i].IsDisabled = true;
+            for (int i = _navItems.IndexOf(selected) + 1; i < _navItems.Count; i++) _navItems[i].IsDisabled = true;
             //Enable navigation to items before selection
-            for(int i =0 ; i <= _navItems.IndexOf(selected); i++) _navItems[i].IsDisabled = false;
+            for (int i = 0; i <= _navItems.IndexOf(selected); i++) _navItems[i].IsDisabled = false;
         }
 
-    }  
-    public int GetSelectedIndex() 
+    }
+    /// <summary>
+    /// Set the active menu selection by controller and action
+    /// </summary>
+    /// <param name="controller">Controller name</param>
+    /// <param name="action">Action name</param>
+    public void SetControllerAction(string controller, string action)
     {
-        var selected = _navItems.Find(e=>e.IsSelected);
+        //Search for the item where the resource property is contains the current page.
+        var selected = _navItems.Find(e => e.Action == action && e.Controller == controller);
+        if (selected is not null)
+        {
+            selected.IsSelected = true;
+            //Disable items after selection
+            for (int i = _navItems.IndexOf(selected) + 1; i < _navItems.Count; i++) _navItems[i].IsDisabled = true;
+            //Enable navigation to items before selection
+            for (int i = 0; i <= _navItems.IndexOf(selected); i++) _navItems[i].IsDisabled = false;
+        }
+
+
+    }
+    public int GetSelectedIndex()
+    {
+        var selected = _navItems.Find(e => e.IsSelected);
         return selected is not null ? _navItems.IndexOf(selected) : -1;
     }
 
     public void UpdateResource(string newResource)
     {
-        var selected = _navItems.Find(e=>e.IsSelected);
+        var selected = _navItems.Find(e => e.IsSelected);
         if (selected is not null) selected.Resource = newResource;
     }
 
