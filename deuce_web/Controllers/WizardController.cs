@@ -43,9 +43,6 @@ public abstract class WizardController : Controller
         // Get the controller name
         string? controllerName = (string?)HttpContext.Request.RouteValues["controller"];
 
-        // Get the action name
-        string? actionName = (string?)HttpContext.Request.RouteValues["action"];
-
         _handlerNavItems.SetControllerAction(controllerName ?? "");
 
         //Find the back page

@@ -27,6 +27,21 @@ public class ViewModelTournamentWizard
     public string? BackPage { get => _backPage; set => _backPage = value; }
     public Tournament Tournament { get=>_tournament; set=> _tournament = value; }
     public TournamentVenue Venue { get; set; } = new();
+    public TournamentDetail TournamentDetail { get; set; } = new();
+    public Format Format { get; set; } = new(1,1,1);
+
+    public string Title { get; set; } = "";
+    public IEnumerable<SelectListItem> SelectTeamSize { get; set; } = new List<SelectListItem>();
+    public IEnumerable<SelectListItem> SelectGamesPerSet { get; set; } = new List<SelectListItem>();
+    public IEnumerable<SelectListItem> SelectSets { get; set; } = new List<SelectListItem>();
+    public IEnumerable<SelectListItem> SelectNoGames { get; set; } = new List<SelectListItem>();
+
+    public int? CustomTeamSize { get; set; }
+    public int? CustomGames { get; set; }
+    public int? CustomSingles { get; set; }
+    public int? CustomDoubles { get; set; }
+    public string? Error { get; set; }
+   
     public ViewModelTournamentWizard()
     { }
 }

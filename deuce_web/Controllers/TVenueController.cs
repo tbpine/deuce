@@ -83,7 +83,7 @@ public class TVenueController : WizardController
         int entryType = _sessionProxy?.EntryType ?? (int)deuce.EntryType.Team;
 
         if (entryType == (int)deuce.EntryType.Team)
-            return RedirectToAction("Index", "TFormatTeams");
+            return RedirectToAction("Index", "TFormatTeam");
         else if (entryType == (int)deuce.EntryType.Individual)
             return RedirectToAction("Index", "TFormatPlayer");
             

@@ -72,11 +72,11 @@ novalidate>
         <div class="col">
         @if (Model.Tournament.EntryType == (int)EntryType.Team)
         {
-          <input type="radio" class="btn-check" asp-for="Tournament.EntryType" value="1" checked>
+          <input type="radio" class="btn-check"  id="EntryTypeTeam" asp-for="Tournament.EntryType" value="1" checked>
         }
         else
         {
-          <input type="radio" class="btn-check" asp-for="Tournament.EntryType" value="1" >
+          <input type="radio" class="btn-check"  id="EntryTypeTeam" asp-for="Tournament.EntryType" value="1" >
         }
           <label class="nav-link flex-column w-100 align-items-center gap-2 rounded p-3" for="EntryTypeTeam">
             <img src="~/assets/img/teams.svg" style="weight: 32px; height: 32px;"/>
@@ -86,11 +86,11 @@ novalidate>
         <div class="col">
             @if (Model.Tournament.EntryType == (int)EntryType.Individual)
             {
-                <input type="radio" class="btn-check" asp-for="Tournament.EntryType" value="2" checked>
+                <input type="radio" class="btn-check"  id="EntryTypePlayer" asp-for="Tournament.EntryType" value="2" checked>
             }
             else
             {
-                <input type="radio" class="btn-check" asp-for="Tournament.EntryType" value="2">
+                <input type="radio" class="btn-check"  id="EntryTypeInd" asp-for="Tournament.EntryType" value="2">
             }
           <label class="nav-link flex-column w-100 align-items-center gap-2 rounded p-3" for="EntryTypeInd">
             <img src="~/assets/img/person.svg" style="weight: 32px; height: 32px;"/>

@@ -28,3 +28,4 @@ if it can be used.
 existing scores. If the current date has passed the start date, warn user that scores will be removed.
 - [] Move razor pages to MVC
     - [] Tournament wizard. Have a controller for each page. Hope that a base controller works.
+- [] Ask copilot to convert the remaining tournament wizard pages to MVC.
