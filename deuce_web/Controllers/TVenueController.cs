@@ -24,8 +24,11 @@ public class TVenueController : WizardController
     public async Task<IActionResult> Index()
     {
 
-
         ViewModelTournamentWizard viewModel = new ViewModelTournamentWizard();
+        //Set back page properties
+        viewModel.ShowBackButton = _showBackButton;
+        viewModel.BackPage = _backPage;
+        
         //Make a list of select items from the list of countries
         viewModel.Countries = (await _cache.GetList<Country>(CacheMasterDefault.KEY_ENTRY_COUNTRIES))?.Select
         (c => new SelectListItem

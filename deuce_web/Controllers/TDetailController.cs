@@ -19,7 +19,8 @@ public class TDetailController : WizardController
         _dbRepoTournamentValidation = dbRepoTournamentValidation;
     }
 
-    public async Task<IActionResult> Index(int id)
+    [HttpGet]
+    public async Task<IActionResult> Index()
     {
         ViewModelTournamentWizard viewModel = new ViewModelTournamentWizard();
         viewModel.Validated = false;
@@ -30,11 +31,10 @@ public class TDetailController : WizardController
         viewModel.ShowBackButton = _showBackButton;
         viewModel.BackPage = _backPage;
         
+
         //uri query parameters could contain
         //key "new" equaling 1 meaning
         //a new tournament is added.
-
-        _sessionProxy.TournamentId = 0;
 
         if ((_sessionProxy?.TournamentId ?? 0) == 0)
         {
@@ -43,6 +43,7 @@ public class TDetailController : WizardController
             viewModel.Tournament.Type = 1;
             viewModel.Tournament.Label = "";
             viewModel.Tournament.EntryType = 1;
+            viewModel.Tournament.TeamSize = 2;
 
         }
         else
@@ -51,11 +52,14 @@ public class TDetailController : WizardController
             viewModel.Tournament = listOfTours.FirstOrDefault() ?? new();
         }
 
+
         return View(viewModel);
     }
 
     public async Task<IActionResult> Save(ViewModelTournamentWizard viewModel)
     {
+
+        viewModel.Tournament.Id = _sessionProxy.TournamentId;
         bool pageIsValid = await Validate(viewModel);
         viewModel.Validated = true;
 

@@ -54,11 +54,15 @@ public class TFormatTeamController : WizardController
             Filter filter = new() { TournamentId = _sessionProxy.TournamentId };
             model.TournamentDetail = (await _dbRepoTournamentDetail.GetList(filter))?.FirstOrDefault() ?? new()
             {
+
                 Games = 1,
                 Sets = 1,
                 NoSingles = 2,
-                NoDoubles = 2
+                NoDoubles = 2,
+                TeamSize = 2
             };
+
+            model.Tournament.TeamSize = model.TournamentDetail.TeamSize;
 
             model.Format.NoSingles = model.TournamentDetail.NoSingles < 6 ? model.TournamentDetail.NoSingles : 99;
             model.Format.NoDoubles = model.TournamentDetail.NoDoubles < 6 ? model.TournamentDetail.NoDoubles : 99;
@@ -101,6 +105,9 @@ public class TFormatTeamController : WizardController
 
             Organization thisOrg = new() { Id = _sessionProxy?.OrganizationId ?? 1 };
             await _dbRepoTournamentDetail.SetAsync(model.TournamentDetail);
+
+            //Set proxy value
+            if (_sessionProxy is not null) _sessionProxy.TeamSize = model.Tournament.TeamSize;
         }
 
         // Redirect or go to next page as needed

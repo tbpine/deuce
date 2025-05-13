@@ -19,20 +19,9 @@ public class TPlayersController : WizardController
     private readonly IFormReaderPlayers _adaptorTeams;
     private readonly ITournamentGateway _tournamentGateway;
 
-    private List<Team>? _teams;
-
-    public int NoTeams { get; set; }
-    public int TeamSize { get; set; }
-    public int EntryType { get; set; }
     public string Error { get; set; } = "";
     public List<List<SelectListItem>>? SelectMember { get; set; } = new();
 
-    public List<Team>? Teams { get => _teams; }
-
-    private List<Player>? _players;
-    public List<Player>? Players { get => _players; }
-
-    private TournamentDetail? _tournamentDetail;
 
     public TPlayersController(ILogger<TPlayersController> log, IServiceProvider sp,
     IConfiguration config, IHandlerNavItems handlerNavItems,
@@ -41,7 +30,6 @@ public class TPlayersController : WizardController
     TeamRepo teamRepo, DbRepoPlayer dbRepoPlayer, ITournamentGateway tournamentGateway) : base(handlerNavItems, sp, config)
     {
         _log = log;
-        _teams = null;
         _dbRepoTournamentDetail = dbRepoTournamentDetail;
         _dbRepoRecordTeamPlayer = dbRepoRecordTeamPlayer;
         _dbRepoTeam = dbRepoTeam;
@@ -59,7 +47,8 @@ public class TPlayersController : WizardController
     {
         try
         {
-            await LoadPage();
+            ViewModelTournamentWizard model = new();
+            await LoadPage(null, model, true);
         }
         catch (Exception ex)
         {
@@ -71,44 +60,45 @@ public class TPlayersController : WizardController
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Save()
+    public async Task<IActionResult> Save(ViewModelTournamentWizard model)
     {
         FormUtils.DebugOut(this.Request.Form);
 
         //Convert form values into a teams.
         Filter tourFilter = new() { TournamentId = _sessionProxy?.TournamentId ?? 0 };
-        _tournamentDetail = (await _dbRepoTournamentDetail.GetList(tourFilter)).FirstOrDefault();
+        model.TournamentDetail = (await _dbRepoTournamentDetail.GetList(tourFilter)).FirstOrDefault() ?? new()
+        {
+            TeamSize = 2
+        };
 
-        if (_tournamentDetail is null)
+        if (model.TournamentDetail is null)
         {
             Error = "Tournament detail not found";
-            await LoadPage(false);
+            await LoadPage(null, model, false);
             return View();
         }
 
         //Tournament DTO.
-        Tournament tournament = new()
-        {
-            Id = _sessionProxy?.TournamentId ?? 0,
-            TeamSize = _tournamentDetail.TeamSize
-        };
-
+        model.Tournament.Id = _sessionProxy?.TournamentId ?? 0;
+        model.Tournament.TeamSize = model.TournamentDetail.TeamSize;
+    
         //Read teams from the displayed form
-        List<Team> teams = _adaptorTeams.Parse(form, tournament);
-
+        List<Team> teams = _adaptorTeams.Parse(this.Request.Form, model.Tournament);
+        var action = this.Request.Form["action"].ToString();
+        
 
         if (string.Compare(action ?? "", "delete_team", StringComparison.OrdinalIgnoreCase) == 0)
         {
             var formReader = new FormReaderPlayersDeleteTeams();
-            var deletedTeams = formReader.Parse(form, tournament);
+            var deletedTeams = formReader.Parse(this.Request.Form, model.Tournament);
 
             //Put players back in the list
             foreach (Team team in deletedTeams)
                 teams.RemoveAll(e => e.Id == team.Id && e.Index == team.Index);
 
-            _teams = teams;
+            model.Teams = teams;
 
-            await LoadPage(false);
+            await LoadPage(null, model,false);
             return View();
         }
 
@@ -116,13 +106,13 @@ public class TPlayersController : WizardController
         //Team must have players
         //A player cannot appear more than once.
         TeamValidator teamValidator = new();
-        var isvalidTeams = teamValidator.Check(teams, tournament);
+        var isvalidTeams = teamValidator.Check(teams, model.Tournament);
         //Warning or error
         if (isvalidTeams.Result != RetCodeTeamAction.Success)
         {
             Error = isvalidTeams.Result == RetCodeTeamAction.Error ? isvalidTeams?.Message ?? "" : "";
-            _teams = teams;
-            await LoadPage(false);
+            model.Teams = teams;
+            await LoadPage(null, model,false);
             return View();
         }
 
@@ -132,14 +122,14 @@ public class TPlayersController : WizardController
 
         //Assign references to the team dbrepo
         _dbRepoTeam.Organization = organization;
-        _dbRepoTeam.TournamentId = tournament.Id;
+        _dbRepoTeam.TournamentId = model.Tournament.Id; 
 
         //----------------------------------------
         //Sync between form and db
         //----------------------------------------
 
         //Get teams from db
-        List<Team> teamsInDB = await _teamRepo.GetListAsync(tournament.Id);
+        List<Team> teamsInDB = await _teamRepo.GetListAsync(model.Tournament.Id);
 
         SyncMaster<Team> syncMaster = new(teams, teamsInDB);
         //Add handlers to insert, update and delete teams
@@ -164,7 +154,7 @@ public class TPlayersController : WizardController
 
         syncMaster.Run();
 
-        return NextPage("");
+        return View(model);
     }
 
     [HttpPost]
@@ -199,7 +189,7 @@ public class TPlayersController : WizardController
 
         //Add new team , don't need to validate and save to
         //db yet. Return;
-        await LoadPage(model, false);
+        await LoadPage(null, model, false);
         return View(model);
     }
     /// <summary>
@@ -273,12 +263,12 @@ public class TPlayersController : WizardController
     /// Reads an Excel file from the request and returns its content as a string.
     /// </summary>
     /// <returns>The content of the Excel file as a string, or an empty string if an error occurs.</returns>
-    private async Task<string> ReadFileFromRequest(IFormCollection form)
+    private async Task<string> ReadFileFromRequest(ViewModelTournamentWizard model)
     {
         // Check if a file was uploaded
-        if (form.Files.Count > 0)
+        if (this.Request.Form.Files.Count > 0)
         {
-            var file = form.Files[0];
+            var file = this.Request.Form.Files[0];
 
             // Check if the file is valid
             if (file != null && file.Length > 0)
@@ -312,14 +302,14 @@ public class TPlayersController : WizardController
                     catch (Exception ex)
                     {
                         Error = $"Error reading Excel file: {ex.Message}";
-                        await LoadPage(false);
+                        await LoadPage(null, model, false);
                         return "";
                     }
                 }
                 else
                 {
                     Error = "Invalid file format. Please upload an Excel file.";
-                    await LoadPage(false);
+                    await LoadPage(null, model,false);
                     return "";
                 }
             }

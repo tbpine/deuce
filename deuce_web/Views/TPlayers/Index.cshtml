@@ -1,4 +1,5 @@
 @model ViewModelTournamentWizard
+@using deuce;
 
 @{
     Layout = "_LayoutTournamentWizard";
@@ -80,7 +81,7 @@
                         string attrTeamName = $"team_{iterTeam?.Index ?? i}_{teamId}";
                         string attrTeamNameForDel = $"team_{iterTeam?.Index ?? i}_{teamId}_d";
                         string attrTeamLable = iterTeam?.Label ?? "";
-                        string attrTeamCtlVisible = Model.EntryType == (int)EntryType.Team ? "visible" : "invisible zero_height";
+                        string attrTeamCtlVisible = Model.Tournament.EntryType == (int)EntryType.Team ? "visible" : "invisible zero_height";
 
                         <div class="d-sm-flex align-items-center">
                             <!-- Display Team Information Here -->

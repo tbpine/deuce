@@ -108,7 +108,13 @@
             <div class="progress-bar bg-light d-none d-block-dark" style="width: 28.57%"></div>
         </div>
         <div class="container d-flex gap-3 pt-3">
-            <a class="btn btn-outline-dark animate-slide-start @Model.ShowBackButton" href="@Model.BackPage">
+            @{
+                //Split the Model.BackPage into controller and action
+                string[] backPageParts = Model.BackPage?.Split('/')??new string[0];
+                string controller = backPageParts.Length > 0 ? backPageParts[0] : "";
+                string action = backPageParts.Length > 1 ? backPageParts[1] : "";
+            }
+            <a class="btn btn-outline-dark animate-slide-start @Model.ShowBackButton" asp-controller="@controller" asp-action="@action">
                 <i class="fi-arrow-left animate-target fs-base ms-n1 me-2"></i>
                 Back
             </a>

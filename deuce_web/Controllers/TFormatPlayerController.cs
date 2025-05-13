@@ -69,7 +69,26 @@ public class TFormatPlayerController : WizardController
         return View(model);
  
     }
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Save(ViewModelTournamentWizard model)
+    {
 
+        await _dbRepoTournamentDetail.SetAsync(model.TournamentDetail);
+        //Save to the session
+        _sessionProxy.TeamSize = 1; 
+
+        // Find the next navigation item
+        var nextNavItem = this.NextPage("");
+        if (nextNavItem != null)
+        {
+            // Redirect to the next page
+            return RedirectToAction(nextNavItem.Action, nextNavItem.Controller);
+        }
+        // Optionally redirect to next step or show confirmation
+        return RedirectToAction("Index");
+        
+    }
     private void PopulateSelectLists(ViewModelTournamentWizard model)
     {
 

@@ -57,7 +57,13 @@ public class SessionProxy : ISessionProxy
         set => _session?.SetInt32(Key_Current_Account, value);
     }
 
-    
+     public int TeamSize
+    {
+        get => _session?.GetInt32(Key_Current_TeamSize)?? 0;
+        set => _session?.SetInt32(Key_Current_TeamSize, value);
+    }
+
+
     /// <summary>
     /// Clear  the current browser session
     /// </summary>
