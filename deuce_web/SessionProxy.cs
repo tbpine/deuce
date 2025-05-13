@@ -10,7 +10,7 @@ public class SessionProxy : ISessionProxy
     private const string Key_Current_EntryType = "EntryType";
     private const string Key_Current_Current_Round = "CurrentRound";
     private const string Key_Current_Account = "Account";
-    private const string Key_Current_Organization = "Organization";
+    private const string Key_Current_TeamSize = "TeamSize";
 
     //Keep reference to the browser session
     private ISession? _session;

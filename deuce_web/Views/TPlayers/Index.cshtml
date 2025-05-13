@@ -1,0 +1,102 @@
+@model ViewModelTournamentWizard
+
+@{
+    Layout = "_LayoutTournamentWizard";
+}
+
+<style>
+    .zero_height {
+        height: 0px;
+    }
+</style>
+
+<!-- Account listings content -->
+<div class="col-lg-9 col-xl-8">
+    <h1 class="h2 pb-2 pb-lg-3">Players / Teams</h1>
+    <div class="pb-2 pb-lg-3">Select players that are in a team using checkboxes, add then press "Add Team". Repeat until all players are in a team</div>
+    <!-- Nav pills -->
+    <div class="nav overflow-x-auto mb-2">
+    </div>
+
+    <div class="tab-content">
+        <!-- Published tab -->
+        <div class="tab-pane fade show active" id="published" role="tabpanel" aria-labelledby="published-tab">
+            <!-- Master checkbox + Action buttons -->
+            <div class="nav align-items-center mb-4">
+                <div class="d-flex flex-wrap" id="published-action-buttons">
+                    <a class="nav-link position-relative px-0 pe-sm-2 py-2 me-4" href="#!" onclick="teamPost('add_team')">
+                        <i class="fi-plus-square fs-base me-2"></i>
+                        <span class="hover-effect-underline stretched-link d-none d-md-inline">Add Team</span>
+                    </a>
+                    <a class="nav-link position-relative px-0 pe-sm-2 py-2 me-4" href="#!">
+                        <i class="fi-layers fs-base me-2"></i>
+                        <span class="hover-effect-underline stretched-link d-none d-md-inline">Import</span>
+                    </a>
+                    <a class="nav-link position-relative px-0 pe-sm-2 py-2 me-4" href="#!">
+                        <i class="fi-share fs-base me-2"></i>
+                        <span class="hover-effect-underline stretched-link d-none d-md-inline">Export</span>
+                    </a>
+                    <a class="nav-link position-relative text-danger px-0 py-2" href="#!" onclick="teamPost('delete_team')">
+                        <i class="fi-trash fs-base me-1"></i>
+                        <span class="hover-effect-underline stretched-link d-none d-md-inline">Delete</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Published listings -->
+            <form class="vstack gap-4 mb-4" id="page_form" asp-action="Save" asp-controller="TPlayers" method="post">
+                <input name="action" id="action" type="hidden" />
+                <table id="players_table" class="table">
+                    <thead>
+                        <tr>
+                            <th scope="col" class="text-center"></th>
+                            <th scope="col" class="text-center">Player</th>
+                            <th scope="col" class="text-center">Rank</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.Players != null)
+                        {
+                            @foreach (var player in Model.Players.Where(p => p.Team == null))
+                            {
+                                string playerAttrName = $"player_{player?.Id}_{player?.First}_{player?.Last}_{player?.Middle}";
+                                <tr>
+                                    <td class="text-center"><input type="checkbox" class="form-check-input" name="@playerAttrName"></td>
+                                    <td class="text-center">@player?.ToString()</td>
+                                    <td class="text-center">@player?.Ranking</td>
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
+
+                <!-- Teams Display -->
+                @if (Model.Teams != null)
+                {
+                    @for (int i = 0; i < Model.Teams.Count; i++)
+                    {
+                        var iterTeam = Model.Teams[i];
+                        int teamId = iterTeam?.Id ?? 0;
+                        string attrTeamName = $"team_{iterTeam?.Index ?? i}_{teamId}";
+                        string attrTeamNameForDel = $"team_{iterTeam?.Index ?? i}_{teamId}_d";
+                        string attrTeamLable = iterTeam?.Label ?? "";
+                        string attrTeamCtlVisible = Model.EntryType == (int)EntryType.Team ? "visible" : "invisible zero_height";
+
+                        <div class="d-sm-flex align-items-center">
+                            <!-- Display Team Information Here -->
+                            <p>Team Name: @attrTeamLable</p>
+                        </div>
+                    }
+                }
+                <button type="submit">Save</button>
+            </form>
+
+            @{
+                string clsShowHideError = string.IsNullOrEmpty(Model.Error) ? "invisible" : "visible";
+            }
+            <div class="alert alert-primary @clsShowHideError" role="alert">@Model.Error</div>
+        </div>
+    </div>
+</div>
+
+<script src="~/js/players.js"></script>

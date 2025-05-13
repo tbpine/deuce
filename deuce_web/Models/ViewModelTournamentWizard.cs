@@ -41,7 +41,9 @@ public class ViewModelTournamentWizard
     public int? CustomSingles { get; set; }
     public int? CustomDoubles { get; set; }
     public string? Error { get; set; }
-   
+    public List<Team> Teams { get; set; } = new();
+    public List<Player> Players { get; set; } = new();
+  
     public ViewModelTournamentWizard()
     { }
 }

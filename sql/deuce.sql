@@ -140,7 +140,7 @@ CREATE TABLE IF NOT EXISTS `player` (
     `utr` 						DECIMAL(6,2),
     `member`					INT,
     `updated_datetime` 			TIMESTAMP,
-    `created_datetime` 			TIMESTAMP,
+    `created_datetime` 			TIMESTAMP
     
 );
 
