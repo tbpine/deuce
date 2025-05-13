@@ -111,7 +111,15 @@ public class TFormatTeamController : WizardController
         }
 
         // Redirect or go to next page as needed
-        return RedirectToAction("Index", "NextPageController"); // Change as appropriate
+        var nextNavItem = this.NextPage("");
+        if (nextNavItem != null)
+        {
+            // Redirect to the next page
+            return RedirectToAction(nextNavItem.Action, nextNavItem.Controller);
+        }
+
+        return View("Index");
+        
     }
 
     private bool ValidateForm(ViewModelTournamentWizard model, ref string err)

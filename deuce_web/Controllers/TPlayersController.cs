@@ -45,9 +45,14 @@ public class TPlayersController : WizardController
     [HttpGet]
     public async Task<IActionResult> Index()
     {
+        ViewModelTournamentWizard model = new();
         try
         {
-            ViewModelTournamentWizard model = new();
+            //Menus and the back button
+            model.ShowBackButton = _showBackButton;
+            model.BackPage = _backPage;
+            model.NavItems = new List<NavItem>(this._handlerNavItems?.NavItems ?? Enumerable.Empty<NavItem>());
+
             await LoadPage(null, model, true);
         }
         catch (Exception ex)
@@ -55,7 +60,7 @@ public class TPlayersController : WizardController
             _log.LogError(ex.Message);
         }
 
-        return View(); // Assuming you have a corresponding view named "Index"
+        return View(model); // Assuming you have a corresponding view named "Index"
     }
 
     [HttpPost]
@@ -64,43 +69,12 @@ public class TPlayersController : WizardController
     {
         FormUtils.DebugOut(this.Request.Form);
 
-        //Convert form values into a teams.
-        Filter tourFilter = new() { TournamentId = _sessionProxy?.TournamentId ?? 0 };
-        model.TournamentDetail = (await _dbRepoTournamentDetail.GetList(tourFilter)).FirstOrDefault() ?? new()
-        {
-            TeamSize = 2
-        };
-
-        if (model.TournamentDetail is null)
-        {
-            Error = "Tournament detail not found";
-            await LoadPage(null, model, false);
-            return View();
-        }
-
         //Tournament DTO.
         model.Tournament.Id = _sessionProxy?.TournamentId ?? 0;
-        model.Tournament.TeamSize = model.TournamentDetail.TeamSize;
-    
+        model.Tournament.TeamSize = _sessionProxy?.TeamSize ?? 2;
+
         //Read teams from the displayed form
         List<Team> teams = _adaptorTeams.Parse(this.Request.Form, model.Tournament);
-        var action = this.Request.Form["action"].ToString();
-        
-
-        if (string.Compare(action ?? "", "delete_team", StringComparison.OrdinalIgnoreCase) == 0)
-        {
-            var formReader = new FormReaderPlayersDeleteTeams();
-            var deletedTeams = formReader.Parse(this.Request.Form, model.Tournament);
-
-            //Put players back in the list
-            foreach (Team team in deletedTeams)
-                teams.RemoveAll(e => e.Id == team.Id && e.Index == team.Index);
-
-            model.Teams = teams;
-
-            await LoadPage(null, model,false);
-            return View();
-        }
 
         //Validate teams before saving:
         //Team must have players
@@ -112,8 +86,8 @@ public class TPlayersController : WizardController
         {
             Error = isvalidTeams.Result == RetCodeTeamAction.Error ? isvalidTeams?.Message ?? "" : "";
             model.Teams = teams;
-            await LoadPage(null, model,false);
-            return View();
+            await LoadPage(null, model, false);
+            return View(model);
         }
 
         //Organization DTO
@@ -122,7 +96,7 @@ public class TPlayersController : WizardController
 
         //Assign references to the team dbrepo
         _dbRepoTeam.Organization = organization;
-        _dbRepoTeam.TournamentId = model.Tournament.Id; 
+        _dbRepoTeam.TournamentId = model.Tournament.Id;
 
         //----------------------------------------
         //Sync between form and db
@@ -259,6 +233,27 @@ public class TPlayersController : WizardController
         }
     }
 
+    public async Task<IActionResult> DeleteTeam(ViewModelTournamentWizard model)
+    {
+        //Get torurnament details
+        Filter tourFilter = new() { TournamentId = _sessionProxy?.TournamentId ?? 0 };
+        model.Tournament = (await _tournamentGateway.GetCurrentTournament()) ?? new()
+        {
+        };  
+        //Get teams form the submitted form
+        model.Teams = _adaptorTeams.Parse(HttpContext.Request.Form, model.Tournament);
+
+        var formReader = new FormReaderPlayersDeleteTeams();
+        var deletedTeams = formReader.Parse(HttpContext.Request.Form, model.Tournament);
+
+        //Put players back in the list
+        foreach (Team team in deletedTeams)
+            model.Teams.RemoveAll(e => e.Id == team.Id && e.Index == team.Index);
+
+        await LoadPage(model.Tournament, model,false);
+        return View(model);
+    }
+
     /// <summary>
     /// Reads an Excel file from the request and returns its content as a string.
     /// </summary>
@@ -309,7 +304,7 @@ public class TPlayersController : WizardController
                 else
                 {
                     Error = "Invalid file format. Please upload an Excel file.";
-                    await LoadPage(null, model,false);
+                    await LoadPage(null, model, false);
                     return "";
                 }
             }

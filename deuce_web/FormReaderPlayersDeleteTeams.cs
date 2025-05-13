@@ -95,8 +95,7 @@ class FormReaderPlayersDeleteTeams : FormReaderPlayersBase
                         Id = playerId,
                         Index = idxPlayer,
                         TeamPlayerId = playerTeamId,
-                        Tournament = null
-
+                        Tournament = tournament
                     };
 
                     currentTeam?.AddPlayer(player);
