@@ -1,6 +1,7 @@
 using deuce;
 using deuce.ext;
 using deuce_web;
+using DocumentFormat.OpenXml.Wordprocessing;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 
@@ -133,11 +134,9 @@ public class TPlayersController : WizardController
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> AddTeam()
+    public async Task<IActionResult> AddTeam(ViewModelTournamentWizard model)
     {
         FormUtils.DebugOut(this.Request.Form);
-        // Make a model to hold the form data
-        var model = new ViewModelTournamentWizard();
 
         //Convert form values into a teams.
         Filter tourFilter = new() { TournamentId = _sessionProxy?.TournamentId ?? 0 };

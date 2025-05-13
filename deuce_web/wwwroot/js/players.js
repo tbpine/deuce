@@ -132,9 +132,10 @@ function showHideNewPlayer(selectid, inputid, newPlayerLabel) {
 //------------------------------------
 //Post with action
 //------------------------------------
-function teamPost(action) {
-  document.getElementById("action").value = action;
-  document.getElementById("page_form").submit();
+function teamPost(actionName) {
+  var form = document.getElementById('page_form');
+  form.action = actionName; // Set the action attribute directly
+  form.submit();
 }
 
 
