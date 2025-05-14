@@ -96,7 +96,8 @@ public class TScheduleController : WizardController
                 Interval = 4
             };
 
-
+        //If the tournament date is the minimum date, set it to the current date
+        model.Tournament.Start = model.Tournament.Start == DateTime.MinValue ? DateTime.Now : model.Tournament.Start;
 
 
     }
