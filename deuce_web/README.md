@@ -27,7 +27,7 @@ if it can be used.
 - [] Editing matches, perms and sets after the tournament has started. Have to remove
 existing scores. If the current date has passed the start date, warn user that scores will be removed.
 - [] Move razor pages to MVC
-    - [] Tournament wizard. Have a controller for each page. Hope that a base controller works.
+    - [X] Tournament wizard. Have a controller for each page. Hope that a base controller works.
 - [] Ask copilot to convert the remaining tournament wizard pages to MVC.
     - [X] Players add team function on the players page.
     - [] Wizard controller should hold the viewmodel instance and set back

@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using deuce;
 using Microsoft.AspNetCore.Mvc.Filters;
+using DocumentFormat.OpenXml.EMMA;
 
 public abstract class WizardController : Controller
 {
@@ -25,6 +26,8 @@ public abstract class WizardController : Controller
     //That is the button next and back buttons
     public string? ShowBackButton { get => _showBackButton; set => _showBackButton = value; }
     public string? BackPage { get => _backPage; set => _backPage = value; }
+
+    protected ViewModelTournamentWizard _model = new();
 
     public WizardController(IHandlerNavItems handlerNavItems, IServiceProvider sp, IConfiguration config)
     {
@@ -64,15 +67,11 @@ public abstract class WizardController : Controller
 
             }
         }
+        //Menus and back navigation
+        _model.NavItems = new List<NavItem>(_handlerNavItems.NavItems);
+        _model.ShowBackButton = _showBackButton;
+        _model.BackPage = _backPage;
 
-
-        // string? uname = this.HttpContext.Session.GetString("user_name");
-        // int? userId = this.HttpContext.Session.GetInt32("user_id");
-        // _userName = uname ?? "";
-        // _userId = userId ?? 0;
-
-        // bool isInvalid = String.IsNullOrEmpty(uname) || !userId.HasValue;
-        // _loggedIn = !isInvalid;
     }
 
     protected NavItem? NextPage(string replacement)
