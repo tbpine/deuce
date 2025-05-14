@@ -54,7 +54,7 @@ public class TPlayersController : WizardController
             model.BackPage = _backPage;
             model.NavItems = new List<NavItem>(this._handlerNavItems?.NavItems ?? Enumerable.Empty<NavItem>());
 
-            await LoadPage(null, model, true);
+            await LoadPage(model, true);
         }
         catch (Exception ex)
         {
@@ -87,7 +87,7 @@ public class TPlayersController : WizardController
         {
             Error = isvalidTeams.Result == RetCodeTeamAction.Error ? isvalidTeams?.Message ?? "" : "";
             model.Teams = teams;
-            await LoadPage(null, model, false);
+            await LoadPage(model, false);
             return View(model);
         }
 
@@ -138,14 +138,6 @@ public class TPlayersController : WizardController
     {
         FormUtils.DebugOut(this.Request.Form);
 
-        //Convert form values into a teams.
-        Filter tourFilter = new() { TournamentId = _sessionProxy?.TournamentId ?? 0 };
-        model.TournamentDetail = (await _dbRepoTournamentDetail.GetList(tourFilter)).FirstOrDefault() ??
-        new() { TeamSize = 2 };
-
-        //Tournament DTO.
-        model.Tournament.Id = _sessionProxy?.TournamentId ?? 0;
-
         //Read teams from the displayed form
         model.Teams = _adaptorTeams.Parse(this.Request.Form, model.Tournament);
 
@@ -162,43 +154,34 @@ public class TPlayersController : WizardController
 
         //Add new team , don't need to validate and save to
         //db yet. Return;
-        await LoadPage(null, model, false);
+        await LoadPage(model, false);
         return View(model);
     }
     /// <summary>
     /// Load teams from the database and mark players that are already in a team.
     /// </summary>
-    /// <param name="tournament">Null to load tournament from the database</param>
     /// <param name="model">ViewModel</param>
     /// <param name="loadDB">true to load teams from the database</param>
     /// <returns></returns>
-    private async Task LoadPage(Tournament? tournament,
-                                ViewModelTournamentWizard model, bool loadDB = true)
+    private async Task LoadPage(ViewModelTournamentWizard model, bool loadDB = true)
     {
         //Tournament format parameters
         //Load tournament for team size
 
-        int currentTourId = _sessionProxy?.TournamentId ?? 0;
+        model.Tournament.Id = _sessionProxy?.TournamentId ?? 0;
 
         try
         {
-            Filter filter = new() { TournamentId = currentTourId, ClubId = _sessionProxy?.OrganizationId ?? 0 };
 
             //Select all players registered for the tournament
             //Get all players tournament id = 0
 
-            Filter filterPlayer = new() { TournamentId = 0 };
+            Filter filterPlayer = new() { TournamentId = model.Tournament.Id};
             //Players registered for the tournament
             model.Players = (await _dbRepoPlayer.GetList(filterPlayer)) ?? new();
-            if (tournament is null)
-            {
-                model.Tournament = (await _tournamentGateway.GetCurrentTournament()) ?? new()
-                {
-                    //Defaults;
-                    EntryType = _sessionProxy?.EntryType ?? (int)deuce.EntryType.Team,
-                    TeamSize = 2
-                };
-            }
+            //Set tournament properties for this page
+            model.Tournament.TeamSize = _sessionProxy?.TeamSize ?? 2;
+            model.Tournament.EntryType = _sessionProxy?.EntryType ?? (int)deuce.EntryType.Team;
 
             //For GETS
             if (loadDB)
@@ -249,7 +232,7 @@ public class TPlayersController : WizardController
         foreach (Team team in deletedTeams)
             model.Teams.RemoveAll(e => e.Id == team.Id && e.Index == team.Index);
 
-        await LoadPage(model.Tournament, model,false);
+        await LoadPage(model,false);
         return View(model);
     }
 
@@ -296,14 +279,14 @@ public class TPlayersController : WizardController
                     catch (Exception ex)
                     {
                         Error = $"Error reading Excel file: {ex.Message}";
-                        await LoadPage(null, model, false);
+                        await LoadPage(model, false);
                         return "";
                     }
                 }
                 else
                 {
                     Error = "Invalid file format. Please upload an Excel file.";
-                    await LoadPage(null, model, false);
+                    await LoadPage(model, false);
                     return "";
                 }
             }
