@@ -28,10 +28,6 @@ public class TFormatPlayerController : WizardController
 
     public async Task<IActionResult> Index()
     {
-        ViewModelTournamentWizard model = new ();
-        model.ShowBackButton = _showBackButton;
-        model.BackPage = _backPage;
-        model.NavItems = new List<NavItem>(this._handlerNavItems?.NavItems ?? Enumerable.Empty<NavItem>());
 
                 //No validation done on loaded values.
 
@@ -39,36 +35,37 @@ public class TFormatPlayerController : WizardController
 
         //Set the title for this page 
         //to the selected sport
-        var sports = await _cache.GetList<Sport>(CacheMasterDefault.KEY_SPORTS);
+        _model.Sports = await _cache.GetList<Sport>(CacheMasterDefault.KEY_SPORTS) ?? new();
 
         if (_sessionProxy?.TournamentId > 0)
         {
             //Load the tournament details 
             //from the database
             Filter filter = new() { TournamentId = _sessionProxy?.TournamentId??0 };
-            model.TournamentDetail = (await _dbRepoTournamentDetail.GetList(filter))?.FirstOrDefault()
+            _model.TournamentDetail = (await _dbRepoTournamentDetail.GetList(filter))?.FirstOrDefault()
             ?? new()
             {
 
             };
 
-            model.Tournament  = (await _dbRepoTournament.GetList(new Filter(){TournamentId = _sessionProxy?.TournamentId??0})).FirstOrDefault()??
+            _model.Tournament  = (await _dbRepoTournament.GetList(new Filter(){TournamentId = _sessionProxy?.TournamentId??0})).FirstOrDefault()??
             new(){};
 
-            int sportId = model.Tournament?.Sport ?? 1;
+            int sportId = _model.Tournament?.Sport ?? 1;
 
-            var sport = sports?.Find(e => e.Id == sportId);
+            var sport = _model.Sports?.Find(e => e.Id == sportId);
 
-            model.Title = sport?.Label ?? "";
+            _model.Title = sport?.Label ?? "";
 
 
         }
 
-        PopulateSelectLists(model);
+        PopulateSelectLists(_model);
 
-        return View(model);
+        return View(_model);
  
     }
+    
     [HttpPost]
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Save(ViewModelTournamentWizard model)

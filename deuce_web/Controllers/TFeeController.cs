@@ -45,7 +45,7 @@ public class TFeeController : WizardController
         //Entries validated
         _model.Validated = true;
 
-        if (!Validate()) return View();
+        if (!Validate(model)) return View();
 
         //DTO (Data transfer object)
         //Tournament
@@ -63,8 +63,6 @@ public class TFeeController : WizardController
         var nextNavItem = NextPage("");
         if (nextNavItem is not null)
         {
-            //Set the next page
-            _sessionProxy?.SetNextPage(nextNavItem.Page);
             //Redirect to the next page
             return RedirectToAction(nextNavItem.Action, nextNavItem.Controller);
         }
@@ -74,7 +72,7 @@ public class TFeeController : WizardController
             //Redirect to the index page
             return RedirectToAction("Index", "Tournament");
         }
-        return View(_model);
+
 
     }
 

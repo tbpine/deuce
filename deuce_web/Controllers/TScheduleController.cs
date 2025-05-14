@@ -21,50 +21,39 @@ public class TScheduleController : WizardController
     [HttpGet]
     public async Task<ActionResult> Index()
     {
-        //Create a view model class
-        ViewModelTournamentWizard model = new ViewModelTournamentWizard();
-        //Set back page properties
-        model.ShowBackButton = _showBackButton;
-        model.BackPage = _backPage;
-        //Set NavItems
-        model.NavItems = new List<NavItem>(this._handlerNavItems?.NavItems ?? Enumerable.Empty<NavItem>());
-        model.Validated = false;
+        _model.Validated = false;
 
         try
         {
-            await LoadPage(model);
+            await LoadPage(_model);
         }
         catch (Exception)
         { }
         finally { }
 
         //Set page values
-        return View(model);
+        return View(_model);
     }
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Save(ViewModelTournamentWizard model)
+    public async Task<IActionResult> Save(ViewModelTournamentWizard formValues)
     {
         try
         {
             //Set back page properties
-            model.ShowBackButton = _showBackButton;
-            model.BackPage = _backPage;
-            //Set NavItems
-            model.NavItems = new List<NavItem>(this._handlerNavItems?.NavItems ?? Enumerable.Empty<NavItem>());
-            model.Validated = true;
+            _model.Validated = true;
 
             //Check entries.
             if (!ValidatePage())
             {
-                return View("Index", model);
+                return View("Index", _model);
             }
 
             //Load the current tournament from the database
             Organization thisOrg = new Organization() { Id = _sessionProxy?.OrganizationId ?? 0, Name = "" };
             //Save to the database.
-            await _dbrepoTournamentProps.SetAsync(model.Tournament);
+            await _dbrepoTournamentProps.SetAsync(formValues.Tournament);
 
 
         }
@@ -79,7 +68,7 @@ public class TScheduleController : WizardController
             return RedirectToAction(navItem.Action, navItem.Controller);
         }
 
-        return View("Index", model);
+        return View("Index", formValues);
 
     }
 

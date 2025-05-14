@@ -34,25 +34,21 @@ public class TFormatTeamController : WizardController
     [HttpGet]
     public async Task<IActionResult> Index()
     {
-        var model = new ViewModelTournamentWizard();
 
         try
         {
             //Transfer properties from the base class
             //to the view model.
-            model.ShowBackButton = _showBackButton;
-            model.BackPage = _backPage;
-            model.NavItems = new List<NavItem>(this._handlerNavItems?.NavItems ?? Enumerable.Empty<NavItem>());
             // LoadPage logic
             var sports = await _cache.GetList<Sport>(CacheMasterDefault.KEY_SPORTS);
-            model.Tournament = (await _dbRepoTournament.GetList(new Filter() { TournamentId = _sessionProxy.TournamentId })).FirstOrDefault() ?? 
+            _model.Tournament = (await _dbRepoTournament.GetList(new Filter() { TournamentId = _sessionProxy.TournamentId })).FirstOrDefault() ?? 
             new(){ TeamSize = 2,};
 
-            var sport = sports?.Find(e => e.Id == (model.Tournament?.Sport ?? 0));
-            model.Title = sport?.Label ?? "";
+            var sport = sports?.Find(e => e.Id == (_model.Tournament?.Sport ?? 0));
+            _model.Title = sport?.Label ?? "";
             Organization thisOrg = new() { Id = _sessionProxy.OrganizationId, Name = "testing" };
             Filter filter = new() { TournamentId = _sessionProxy.TournamentId };
-            model.TournamentDetail = (await _dbRepoTournamentDetail.GetList(filter))?.FirstOrDefault() ?? new()
+            _model.TournamentDetail = (await _dbRepoTournamentDetail.GetList(filter))?.FirstOrDefault() ?? new()
             {
 
                 Games = 1,
@@ -62,54 +58,55 @@ public class TFormatTeamController : WizardController
                 TeamSize = 2
             };
 
-            model.Tournament.TeamSize = model.TournamentDetail.TeamSize;
+            _model.Tournament.TeamSize = _model.TournamentDetail.TeamSize;
 
-            model.Format.NoSingles = model.TournamentDetail.NoSingles < 6 ? model.TournamentDetail.NoSingles : 99;
-            model.Format.NoDoubles = model.TournamentDetail.NoDoubles < 6 ? model.TournamentDetail.NoDoubles : 99;
-            model.CustomSingles = model.TournamentDetail.NoSingles < 6 ? 0 : model.TournamentDetail.NoSingles;
-            model.CustomDoubles = model.TournamentDetail.NoDoubles < 6 ? 0 : model.TournamentDetail.NoDoubles;
+            _model.Format.NoSingles = _model.TournamentDetail.NoSingles < 6 ? _model.TournamentDetail.NoSingles : 99;
+            _model.Format.NoDoubles = _model.TournamentDetail.NoDoubles < 6 ? _model.TournamentDetail.NoDoubles : 99;
+            _model.CustomSingles = _model.TournamentDetail.NoSingles < 6 ? 0 : _model.TournamentDetail.NoSingles;
+            _model.CustomDoubles = _model.TournamentDetail.NoDoubles < 6 ? 0 : _model.TournamentDetail.NoDoubles;
 
-            PopulateSelectLists(model);
-            return View(model);
+            PopulateSelectLists(_model);
+            return View(_model);
         }
         catch (Exception ex)
         {
             _log.Log(LogLevel.Error, ex.Message);
         }
 
-        return View(model);
+        return View(_model);
     }
 
     // POST: /TFormatTeam/Save
     [HttpPost]
-    public async Task<IActionResult> Save(ViewModelTournamentWizard model)
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Save(ViewModelTournamentWizard formValues)
     {
-        model.Tournament.Id = _sessionProxy.TournamentId;
-        
+        formValues.Tournament.Id = _sessionProxy.TournamentId;
+
         // Form validation logic (adapt as needed)
         string err = "";
-        if (!ValidateForm(model, ref err))
+        if (!ValidateForm(formValues, ref err))
         {
-            model.Error = err;
-            PopulateSelectLists(model);
-            return View("Index", model);
+            _model.Error = err;
+            PopulateSelectLists(_model);
+            return View("Index", _model);
         }
 
-        model.Error = string.Empty;
+        formValues.Error = string.Empty;
 
         // Save to db
         int currentTournamentId = _sessionProxy?.TournamentId ?? 0;
         if (currentTournamentId > 0)
         {
-            model.TournamentDetail.NoSingles = model.Format.NoSingles < 6 ? model.Format.NoSingles : (model.CustomSingles ?? 0);
-            model.TournamentDetail.NoDoubles = model.Format.NoDoubles < 6 ? model.Format.NoDoubles : (model.CustomDoubles ?? 0);
-            model.Tournament.TeamSize = model.Tournament.TeamSize;
+            formValues.TournamentDetail.NoSingles = formValues.Format.NoSingles < 6 ? formValues.Format.NoSingles : (formValues.CustomSingles ?? 0);
+            formValues.TournamentDetail.NoDoubles = formValues.Format.NoDoubles < 6 ? formValues.Format.NoDoubles : (formValues.CustomDoubles ?? 0);
+            formValues.Tournament.TeamSize = formValues.Tournament.TeamSize;
 
             Organization thisOrg = new() { Id = _sessionProxy?.OrganizationId ?? 1 };
-            await _dbRepoTournamentDetail.SetAsync(model.TournamentDetail);
+            await _dbRepoTournamentDetail.SetAsync(formValues.TournamentDetail);
 
             //Set proxy value
-            if (_sessionProxy is not null) _sessionProxy.TeamSize = model.Tournament.TeamSize;
+            if (_sessionProxy is not null) _sessionProxy.TeamSize = formValues.Tournament.TeamSize;
         }
 
         // Redirect or go to next page as needed
@@ -121,7 +118,7 @@ public class TFormatTeamController : WizardController
         }
 
         return View("Index");
-        
+
     }
 
     private bool ValidateForm(ViewModelTournamentWizard model, ref string err)
