@@ -24,27 +24,22 @@ public class TVenueController : WizardController
     public async Task<IActionResult> Index()
     {
 
-        ViewModelTournamentWizard viewModel = new ViewModelTournamentWizard();
-        //Set back page properties
-        viewModel.ShowBackButton = _showBackButton;
-        viewModel.BackPage = _backPage;
-        
         //Make a list of select items from the list of countries
-        viewModel.Countries = (await _cache.GetList<Country>(CacheMasterDefault.KEY_ENTRY_COUNTRIES))?.Select
+        _model.Countries = (await _cache.GetList<Country>(CacheMasterDefault.KEY_ENTRY_COUNTRIES))?.Select
         (c => new SelectListItem
         {
             Value = c.Code.ToString(),
             Text = c.Name
         })?.ToList() ?? new List<SelectListItem>();
-        viewModel.Validated = false;
+        _model.Validated = false;
 
-        viewModel.Countries.Insert(0, new SelectListItem
+        _model.Countries.Insert(0, new SelectListItem
         {
             Value = "",
             Text = ""
         });
 
-        viewModel.Venue.CountryCode = 36; //Default to Australia
+        _model.Venue.CountryCode = 36; //Default to Australia
         //Load the venue where this tournament is
         //to be held.
 
@@ -62,15 +57,13 @@ public class TVenueController : WizardController
             TournamentVenue loadedVenue = listOfVenues[0];
             //Set binded properties that will
             //be displayed on the page.
-            viewModel.Venue.Street = loadedVenue.Street;
-            viewModel.Venue.State = loadedVenue.State;
-            viewModel.Venue.CountryCode = loadedVenue.CountryCode;
+            _model.Venue.Street = loadedVenue.Street;
+            _model.Venue.State = loadedVenue.State;
+            _model.Venue.CountryCode = loadedVenue.CountryCode;
 
         }
-        //Menus
-        viewModel.NavItems = new List<NavItem>(_handlerNavItems?.NavItems ?? Enumerable.Empty<NavItem>());
 
-        return View(viewModel);
+        return View(_model);
     }
 
     [HttpPost]
@@ -78,9 +71,9 @@ public class TVenueController : WizardController
     public IActionResult Save(ViewModelTournamentWizard viewModel)
     {
         //Tournament DTO
-        Tournament tourDTO = new Tournament() { Id = _sessionProxy?.TournamentId ?? 0 };
-        viewModel.Venue.Tournament = tourDTO;
-        _dbRepoVenue.Set(viewModel.Venue);
+        _model.Tournament.Id = _sessionProxy?.TournamentId ?? 0 ;
+        _model.Venue.Tournament = _model.Tournament;
+        _dbRepoVenue.Set(_model.Venue);
 
         //Different pages for teams and individual tournaments
         int entryType = _sessionProxy?.EntryType ?? (int)deuce.EntryType.Team;
@@ -90,6 +83,6 @@ public class TVenueController : WizardController
         else if (entryType == (int)deuce.EntryType.Individual)
             return RedirectToAction("Index", "TFormatPlayer");
             
-        return View(viewModel);
+        return View(_model);
     }
 }
