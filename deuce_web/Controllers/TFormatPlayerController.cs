@@ -73,7 +73,7 @@ public class TFormatPlayerController : WizardController
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Save(ViewModelTournamentWizard model)
     {
-
+        model.Tournament.Id = _sessionProxy.TournamentId;
         await _dbRepoTournamentDetail.SetAsync(model.TournamentDetail);
         //Save to the session
         _sessionProxy.TeamSize = 1; 

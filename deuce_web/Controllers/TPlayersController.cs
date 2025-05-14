@@ -70,6 +70,11 @@ public class TPlayersController : WizardController
     {
         FormUtils.DebugOut(this.Request.Form);
 
+        //Menus and the back button
+        model.ShowBackButton = _showBackButton;
+        model.BackPage = _backPage;
+        model.NavItems = new List<NavItem>(this._handlerNavItems?.NavItems ?? Enumerable.Empty<NavItem>());
+
         //Tournament DTO.
         model.Tournament.Id = _sessionProxy?.TournamentId ?? 0;
         model.Tournament.TeamSize = _sessionProxy?.TeamSize ?? 2;
@@ -128,8 +133,17 @@ public class TPlayersController : WizardController
         };
 
         syncMaster.Run();
+        //Get the next navigation item
+        //Get the next navigation item
+        var nextNavItem = NextPage("");
+        if (nextNavItem is not null)
+        {
 
-        return View(model);
+            //Redirect to the next page
+            return RedirectToAction(nextNavItem.Action, nextNavItem.Controller);
+        }
+
+        return View("Index", model);
     }
 
     [HttpPost]
@@ -137,6 +151,10 @@ public class TPlayersController : WizardController
     public async Task<IActionResult> AddTeam(ViewModelTournamentWizard model)
     {
         FormUtils.DebugOut(this.Request.Form);
+        //Menus and the back button
+        model.ShowBackButton = _showBackButton;
+        model.BackPage = _backPage;
+        model.NavItems = new List<NavItem>(this._handlerNavItems?.NavItems ?? Enumerable.Empty<NavItem>());
 
         //Read teams from the displayed form
         model.Teams = _adaptorTeams.Parse(this.Request.Form, model.Tournament);
@@ -155,7 +173,7 @@ public class TPlayersController : WizardController
         //Add new team , don't need to validate and save to
         //db yet. Return;
         await LoadPage(model, false);
-        return View(model);
+        return View("Index", model);
     }
     /// <summary>
     /// Load teams from the database and mark players that are already in a team.
@@ -176,7 +194,7 @@ public class TPlayersController : WizardController
             //Select all players registered for the tournament
             //Get all players tournament id = 0
 
-            Filter filterPlayer = new() { TournamentId = model.Tournament.Id};
+            Filter filterPlayer = new() { TournamentId = 0 };
             //Players registered for the tournament
             model.Players = (await _dbRepoPlayer.GetList(filterPlayer)) ?? new();
             //Set tournament properties for this page
@@ -217,11 +235,11 @@ public class TPlayersController : WizardController
 
     public async Task<IActionResult> DeleteTeam(ViewModelTournamentWizard model)
     {
-        //Get torurnament details
-        Filter tourFilter = new() { TournamentId = _sessionProxy?.TournamentId ?? 0 };
-        model.Tournament = (await _tournamentGateway.GetCurrentTournament()) ?? new()
-        {
-        };  
+        //Menus and the back button
+        model.ShowBackButton = _showBackButton;
+        model.BackPage = _backPage;
+        model.NavItems = new List<NavItem>(this._handlerNavItems?.NavItems ?? Enumerable.Empty<NavItem>());
+
         //Get teams form the submitted form
         model.Teams = _adaptorTeams.Parse(HttpContext.Request.Form, model.Tournament);
 
@@ -232,8 +250,8 @@ public class TPlayersController : WizardController
         foreach (Team team in deletedTeams)
             model.Teams.RemoveAll(e => e.Id == team.Id && e.Index == team.Index);
 
-        await LoadPage(model,false);
-        return View(model);
+        await LoadPage(model, false);
+        return View("Index", model);
     }
 
     /// <summary>

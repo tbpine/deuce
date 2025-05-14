@@ -35,6 +35,7 @@ public class ViewModelTournamentWizard
     public IEnumerable<SelectListItem> SelectGamesPerSet { get; set; } = new List<SelectListItem>();
     public IEnumerable<SelectListItem> SelectSets { get; set; } = new List<SelectListItem>();
     public IEnumerable<SelectListItem> SelectNoGames { get; set; } = new List<SelectListItem>();
+    public IEnumerable<SelectListItem> SelectInterval { get; set; } = new List<SelectListItem>();
 
     public int? CustomTeamSize { get; set; }
     public int? CustomGames { get; set; }

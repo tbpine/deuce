@@ -82,11 +82,67 @@
                         string attrTeamNameForDel = $"team_{iterTeam?.Index ?? i}_{teamId}_d";
                         string attrTeamLable = iterTeam?.Label ?? "";
                         string attrTeamCtlVisible = Model.Tournament.EntryType == (int)EntryType.Team ? "visible" : "invisible zero_height";
+ <div class="d-sm-flex align-items-center">
+            <div class="d-inline-flex position-relative z-2 pt-1 pb-2 ps-2 p-sm-0 ms-2 ms-sm-0 me-sm-2">
+              <div class="form-check position-relative z-1 fs-lg m-0">
+                <input type="checkbox" class="form-check-input" name="@attrTeamNameForDel"  />
+              </div>
+              <span class="position-absolute top-0 start-0 w-100 h-100 bg-body border rounded d-sm-none"></span>
+            </div>
+            <article class="card w-100 p-2">
+              <div class="d-sm-none" style="margin-top: -44px"></div>
+              <div class="row row-cols-2 row-cols-*-2 g-0 @attrTeamCtlVisible">
+                <div class="col-3">
+                  <label for="@attrTeamName" class="form-label p-2">@(i + 1).Team Name:</label>
+                </div>
+                <div class="col-6">
+                  <input id="@attrTeamName" class="form-control p-2 " name="@attrTeamName" value="@attrTeamLable" />
+                </div>
 
-                        <div class="d-sm-flex align-items-center">
-                            <!-- Display Team Information Here -->
-                            <p>Team Name: @attrTeamLable</p>
-                        </div>
+              </div>
+    
+              @for (int j = 0; j < iterTeam?.Players.Count(); j++)
+              {
+                
+                int teamPlayerId = iterTeam?.Players.ElementAt(j)?.TeamPlayerId ?? 0;
+                int playerId = iterTeam?.Players.ElementAt(j)?.Id ?? 0;
+
+                //Look up player info
+                Player? player = Model.Players?.FirstOrDefault(e => e.Id == playerId);
+
+
+                //Add form values for this player
+                string attrPlayerName = $"team_{i}_{teamId}_player_{j}_{playerId}_{teamPlayerId}";
+                //Get member's list
+                int selectionIdx = i * Model.Tournament.TeamSize + j;
+                //List<SelectListItem>? memberList = Model.SelectMember?.ElementAt(selectionIdx);
+               // memberList?.All(e => { e.Selected = false; return true; });
+
+               // var selectedMember = memberList?.Find(e => e.Value == iterPlayer?.Member?.Id.ToString());
+
+               // if (selectedMember is not null)
+               //   selectedMember.Selected = true;
+               // else if (memberList is not null && memberList.Count > 0) memberList[0].Selected = true;
+
+                string playerLabel = $"Player {j + 1}";
+                <div class="row row-cols-*-2 g-0 mb-2">
+                  <div class="col-2 me-2"><span>@playerLabel</span></div>
+                  <div class="col-6 me-2">
+                    
+                    @* <select id="@attrPlayerName" name="@attrPlayerName" class="form-select-lg" aria-label="Select Player"
+                      asp-items="@memberList"
+                      data-select='{"searchEnabled" : true , "classNames": {"containerInner": ["form-select", "form-select-lg"]}}'> 
+
+                    </select>
+                    *@
+                    
+                    <input readonly id="@attrPlayerName" name="@attrPlayerName" value="@player?.ToString()"/> 
+                  </div>
+                
+                </div>
+              }
+            </article>
+          </div>
                     }
                 }
                 

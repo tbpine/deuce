@@ -84,6 +84,8 @@ public class TFormatTeamController : WizardController
     [HttpPost]
     public async Task<IActionResult> Save(ViewModelTournamentWizard model)
     {
+        model.Tournament.Id = _sessionProxy.TournamentId;
+        
         // Form validation logic (adapt as needed)
         string err = "";
         if (!ValidateForm(model, ref err))
