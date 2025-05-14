@@ -29,4 +29,6 @@ existing scores. If the current date has passed the start date, warn user that s
 - [] Move razor pages to MVC
     - [] Tournament wizard. Have a controller for each page. Hope that a base controller works.
 - [] Ask copilot to convert the remaining tournament wizard pages to MVC.
-    - [] Players add team function on the players page.
+    - [X] Players add team function on the players page.
+    - [] Wizard controller should hold the viewmodel instance and set back
+    page properties.
