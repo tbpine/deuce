@@ -34,6 +34,22 @@ PREPARE stmt FROM @stat;
 EXECUTE stmt;
 DEALLOCATE PREPARE stmt;
 
+-- drop the unique index for the tournament event table on the tournament column
+SET @n = "u_tournament_venue_tournament";
+SELECT COUNT(index_name) INTO @b FROM information_schema.statistics WHERE table_schema = DATABASE() AND index_name = @n;
+SET @stat = IF(@b > 0, "DROP INDEX `u_tournament_venue_tournament` ON `tournament_venue`;", "SELECT 1 WHERE 1 = 0;");
+PREPARE stmt FROM @stat;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+-- drop the unique index on the tournament detail table for  the tournament column
+SET @n = "u_tournament_detail_tournament";
+SELECT COUNT(index_name) INTO @b FROM information_schema.statistics WHERE table_schema = DATABASE() AND index_name = @n;
+SET @stat = IF(@b > 0, "DROP INDEX `u_tournament_detail_tournament` ON `tournament_detail`;", "SELECT 1 WHERE 1 = 0;");
+PREPARE stmt FROM @stat;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
 -- ===============================================================
 -- Uniques
 -- ===============================================================
@@ -51,6 +67,21 @@ PREPARE stmt FROM @stat;
 EXECUTE stmt;
 DEALLOCATE PREPARE stmt;
 
+-- create a unique index for the tournament venue table on the tournament column
+SET @n = "u_tournament_venue_tournament";
+SELECT COUNT(index_name) INTO @b FROM information_schema.statistics WHERE table_schema = DATABASE() AND index_name = @n;
+SET @stat = IF(@b = 0, "CREATE UNIQUE INDEX `u_tournament_venue_tournament` ON `tournament_venue` (`tournament`);", "SELECT 1 WHERE 1 = 0;");   
+PREPARE stmt FROM @stat;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+-- create a unique index for the tournament detail table on the tournament column
+SET @n = "u_tournament_detail_tournament";
+SELECT COUNT(index_name) INTO @b FROM information_schema.statistics WHERE table_schema = DATABASE() AND index_name = @n;
+SET @stat = IF(@b = 0, "CREATE UNIQUE INDEX `u_tournament_detail_tournament` ON `tournament_detail` (`tournament`);", "SELECT 1 WHERE 1 = 0;");
+PREPARE stmt FROM @stat;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
 
 -- ---------------------------------------------------------------------------
 -- Foreign key constraints

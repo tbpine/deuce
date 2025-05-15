@@ -762,7 +762,7 @@ IN p_country_code 		INT)
 BEGIN
 
 INSERT INTO `tournament_venue`(`id`,`tournament`,`street`,`suburb`,`state`,`post_code`,`country-code`,`updated_datetime`,`created_datetime`) VALUES (p_id, p_tournament, p_street, p_suburb, p_state, p_post_code, p_country_code, NOW(), NOW())
-ON DUPLICATE KEY UPDATE `tournament` = p_tournament,`street` = p_street,`suburb` = p_suburb,`state` = p_state,`post_code` = p_post_code,`country-code` = p_country_code,`updated_datetime` = NOW();
+ON DUPLICATE KEY UPDATE `street` = p_street,`suburb` = p_suburb,`state` = p_state,`post_code` = p_post_code,`country-code` = p_country_code,`updated_datetime` = NOW();
 
 SELECT LAST_INSERT_ID() 'id';
 

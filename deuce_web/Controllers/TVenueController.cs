@@ -71,9 +71,9 @@ public class TVenueController : WizardController
     public IActionResult Save(ViewModelTournamentWizard viewModel)
     {
         //Tournament DTO
-        _model.Tournament.Id = _sessionProxy?.TournamentId ?? 0 ;
-        _model.Venue.Tournament = _model.Tournament;
-        _dbRepoVenue.Set(_model.Venue);
+        viewModel.Tournament.Id = _sessionProxy?.TournamentId ?? 0 ;
+        viewModel.Venue.Tournament = viewModel.Tournament;
+        _dbRepoVenue.Set(viewModel.Venue);
 
         //Different pages for teams and individual tournaments
         int entryType = _sessionProxy?.EntryType ?? (int)deuce.EntryType.Team;

@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Mvc;
 using deuce;
 using Microsoft.AspNetCore.Mvc.Filters;
+using DocumentFormat.OpenXml.Wordprocessing;
 
 /// <summary>
 /// Controller for member's area
@@ -30,6 +31,7 @@ public class MemberController : Controller
     public string? ShowBackButton { get => _showBackButton; set => _showBackButton = value; }
     public string? BackPage { get => _backPage; set => _backPage = value; }
 
+    protected ViewModelMember _model;
     public MemberController(ISideMenuHandler handlerNavItems, IServiceProvider sp, IConfiguration config,
     ITournamentGateway tgateway, SessionProxy sessionProxy)
     {
@@ -38,11 +40,7 @@ public class MemberController : Controller
         _config = config;
         _tourGateway = tgateway;
         _sessionProxy = sessionProxy;
-    }
-
-    public IActionResult Index()
-    {
-        return View(new ViewModelMember(_handlerNavItems));
+        _model = new ViewModelMember(_handlerNavItems);
     }
 
     public override void OnActionExecuting(ActionExecutingContext context)
@@ -63,7 +61,7 @@ public class MemberController : Controller
         //nav items.
         if (_showBackButton == "visible")
         {
-            _backPage = HttpContext.Request.PathBase + _handlerNavItems.GetResourceAtIndex(selectedIdx - 1);
+            _backPage =  _handlerNavItems.NavItems.ElementAt(selectedIdx - 1).Controller + "/" + _handlerNavItems.NavItems.ElementAt(selectedIdx - 1).Action;
         }
 
     }

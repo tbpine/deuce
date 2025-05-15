@@ -1,4 +1,4 @@
-@model ViewModelTournament
+@model ViewModelMember
 
 @{
     Layout = "_LayoutMember";
@@ -9,35 +9,42 @@
 
 
 <!-- Events go here-->
-<table class="table">
-    <thead>
-        <th>Label</th>
-        <th>Start</th>
-        <th>Interval</th>
-        <th>Type</th>
-        <th></th>
-        <th></th>
+<div class="col-lg-9">
+    <h1 class="h3 mb-0">Tournaments</h1>
+    <p class="text-muted">Here you can find all the tournaments you created.</p>
+    <table class="table">
         <thead>
-        <tbody>
-            @foreach (Tournament iterTour in Model.Tournaments)
-            {
-                string intervalLabel = Model.Intervals?.Find(e => e.Id == iterTour.Interval)?.Label ?? "";
-                string tourTypeLabel = Model.TournamentTypes?.Find(e => e.Id == iterTour.Type)?.Label ?? "";
-                <tr>
-                    <td><a class="hover-effect-underline fw-medium text-dark-emphasis text-decoration-none ms-2"
-                    asp-controller="Tournament" asp-action="Summary" asp-route-id="@iterTour.Id">@iterTour.Label</a></td>
-                    <td>@iterTour.Start.ToString("dd/MM/yyyy")</td>
-                    <td>@intervalLabel</td>
-                    <td>@tourTypeLabel</td>
-                    <td><a class="btn" asp-controller="TournamentWizard" asp-action="Index" asp-route-id="@iterTour.Id">Edit</a>
-                    <td>
-                        @if (iterTour.Status == TournamentStatus.Start)
-                        {
-                            <a class="btn" asp-controller="Tournament" asp-action="Scores" asp-route-id="@iterTour.Id">Scores</a>
-                        }
-                    </td>
-                </tr>
-            }
-        </tbody>
+            <th>Label</th>
+            <th>Start</th>
+            <th>Interval</th>
+            <th>Type</th>
+            <th></th>
+            <th></th>
+            <thead>
+            <tbody>
+                @foreach (Tournament iterTour in Model.Tournaments)
+                {
+                    string intervalLabel = Model.Intervals?.Find(e => e.Id == iterTour.Interval)?.Label ?? "";
+                    string tourTypeLabel = Model.TournamentTypes?.Find(e => e.Id == iterTour.Type)?.Label ?? "";
+                    <tr>
+                        <td><a class="hover-effect-underline fw-medium text-dark-emphasis text-decoration-none ms-2"
+                                asp-controller="Tournament" asp-action="Summary"
+                                asp-route-id="@iterTour.Id">@iterTour.Label</a></td>
+                        <td>@iterTour.Start.ToString("dd/MM/yyyy")</td>
+                        <td>@intervalLabel</td>
+                        <td>@tourTypeLabel</td>
+                        <td><a class="btn" asp-controller="TournamentWizard" asp-action="Index"
+                                asp-route-id="@iterTour.Id">Edit</a>
+                        <td>
+                            @if (iterTour.Status == TournamentStatus.Start)
+                            {
+                                <a class="btn" asp-controller="Tournament" asp-action="Scores"
+                                    asp-route-id="@iterTour.Id">Scores</a>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
 
-</table>
+    </table>
+</div>

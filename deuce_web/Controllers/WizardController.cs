@@ -80,7 +80,7 @@ public abstract class WizardController : Controller
 
         int selectedIdx = _handlerNavItems?.GetSelectedIndex() ?? -1;
 
-        return selectedIdx >= 0 ? _handlerNavItems?.NavItems.ElementAt(selectedIdx + 1) : null;
+        return selectedIdx >= 0 && selectedIdx < _handlerNavItems?.NavItems.Count() -1 ? _handlerNavItems?.NavItems.ElementAt(selectedIdx + 1) : null;
 
     }
 

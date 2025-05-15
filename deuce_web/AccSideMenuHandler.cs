@@ -11,10 +11,10 @@ public class AccSideMenuHandler : ISideMenuHandler
 
     public AccSideMenuHandler()
     {
-        _navItems.Add(new NavItem("My profile", "/OrgIdx", false, true, "fi-user", "Member", "Index"));
+        _navItems.Add(new NavItem("My profile", "/OrgIdx", false, true, "fi-user", "Profile", "Index"));
         _navItems.Add(new NavItem("Tournaments", "/Tournaments", false, true, "fi-layers", "Tournament", "Index"));
         _navItems.Add(new NavItem("Payment details", "/PaymentDetails", false, true, "fi-credit-card", "Payment", "Index"));
-        _navItems.Add(new NavItem("Account settings", "/AccSettings", false, true, "fi-settings", "Account", "Settings"));
+        _navItems.Add(new NavItem("Account settings", "/AccSettings", false, true, "fi-settings", "AccSetting", "Index"));
         _navItems.Add(new NavItem("Help centre", "/HelpCentre", false, true, "fi-help-circle", "HelpCenter", "Index"));
 
     }
