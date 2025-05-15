@@ -24,13 +24,17 @@
             <tbody>
                 @foreach (Tournament iterTour in Model.Tournaments)
                 {
-                    string intervalLabel = Model.Intervals?.Find(e => e.Id == iterTour.Interval)?.Label ?? "";
+                    
+                    string intervalLabel = iterTour.Interval == 0 ? "" : Model.Intervals?.Find(e => e.Id == iterTour.Interval)?.Label ?? "";
                     string tourTypeLabel = Model.TournamentTypes?.Find(e => e.Id == iterTour.Type)?.Label ?? "";
+                    //If the tournament start date is minimal, then set it to blank
+                    string startDate = iterTour.Start == DateTime.MinValue ?"" : iterTour.Start.ToString("dd/MM/yyyy");
+
                     <tr>
                         <td><a class="hover-effect-underline fw-medium text-dark-emphasis text-decoration-none ms-2"
                                 asp-controller="Tournament" asp-action="Summary"
                                 asp-route-id="@iterTour.Id">@iterTour.Label</a></td>
-                        <td>@iterTour.Start.ToString("dd/MM/yyyy")</td>
+                        <td>@startDate</td>
                         <td>@intervalLabel</td>
                         <td>@tourTypeLabel</td>
                         <td><a class="btn" asp-controller="TournamentWizard" asp-action="Index"
