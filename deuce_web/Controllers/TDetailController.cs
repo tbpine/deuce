@@ -1,6 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using deuce;
-using Microsoft.AspNetCore.Mvc.Filters;
+using deuce.ext;
+using System.Diagnostics;
+
 
 public class TDetailController : WizardController
 {
@@ -26,75 +28,86 @@ public class TDetailController : WizardController
         //Load page options from the from the database
         _model.Sports = await _cache.GetList<Sport>(CacheMasterDefault.KEY_SPORTS) ?? new();
         _model.TournamentTypes = await _cache.GetList<TournamentType>(CacheMasterDefault.KEY_TOURNAMENT_TYPES) ?? new();
+        //Load form values from the database
+        var rowsTournament = await _dbRepoTournament.GetList(new Filter() { TournamentId = _model.Tournament.Id });
+        var rowTournament = rowsTournament.FirstOrDefault();
+        //Copy values to the model and set the default values
 
-        var listOfTours = await _dbRepoTournament.GetList(new Filter() { TournamentId = _sessionProxy!.TournamentId });
-        _model.Tournament = listOfTours.FirstOrDefault() ?? new()
-        {
-            Sport = 1,
-            Type = 1,
-            Label = "",
-            EntryType = 1,
-            TeamSize = 2
+        _model.Tournament.Sport = rowTournament?.Sport ?? 1;
+        _model.Tournament.Type = rowTournament?.Type ?? 1;
+        _model.Tournament.Label = rowTournament?.Label ?? "";
+        _model.Tournament.EntryType = rowTournament?.EntryType ?? 1;
+        _model.Tournament.TeamSize = rowTournament?.TeamSize ?? 2;
 
-        };
-
-        return View(_model);
+        return View("Index", _model);
     }
 
-    public async Task<IActionResult> Save(ViewModelTournamentWizard viewModel)
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public async Task<IActionResult> Save(ViewModelTournamentWizard src)
     {
-        //Copy values from the submitted form
-        _model.Tournament = viewModel.Tournament;
-        bool pageIsValid = await Validate(_model);
+        
+        //The data pipe line is this:
+        //1. Dependecies injections (menus)
+        //2. Session
+        //3. Form values
+
+        Tournament obj = _model.Tournament;
+        //Set form values
+        obj.Label = src.Tournament.Label;
+        obj.Sport = src.Tournament.Sport;
+        obj.Type = src.Tournament.Type;
+        obj.EntryType = src.Tournament.EntryType;
+
+        bool pageIsValid = await Validate(obj, _model);
         _model.Validated = true;
 
         if (!pageIsValid)
         {
             //Set errors
-            _model.Tournament.Label = "";
-            return View(_model);
+            obj.Label = "";
+            return View("Index", _model);
         }
 
-        Organization org = new Organization() { Id = _sessionProxy.OrganizationId, Name = "" };
+
         //Load or not, if the id is zero , set it's status to new.
 
-        _model.Tournament.Status = _model.Tournament.Id == 0 ? TournamentStatus.New : _model.Tournament.Status;
+        obj.Status = obj.IsNew() ? TournamentStatus.New : obj.Status;
         //Save the tournament to db
-        await _dbRepoTournament.SetAsync(_model.Tournament);
+        await _dbRepoTournament.SetAsync(obj);
         //Save tournament id
-        _sessionProxy.TournamentId = _model.Tournament.Id;
+        _sessionProxy.TournamentId = obj.Id;
         //Teams or Individuals
-        _sessionProxy.EntryType = _model.Tournament.EntryType;
+        _sessionProxy.EntryType = obj.EntryType;
 
         var nextNavItem = NextPage("");
 
-        if (nextNavItem == null)
+        if (nextNavItem is not null)
         {
             //No next page
-            return RedirectToAction("Index");
+            return RedirectToAction(nextNavItem?.Action, nextNavItem?.Controller);
         }
 
-        return RedirectToAction(nextNavItem?.Action, nextNavItem?.Controller);
+        return View("Index", _model);
     }
 
-    private async Task<bool> Validate(ViewModelTournamentWizard viewModel)
+    private async Task<bool> Validate(Tournament obj, ViewModelTournamentWizard model)
     {
         //Reset validation
-        Tournament tournament = viewModel.Tournament;
 
-        viewModel.NameValidation = "";
+        model.NameValidation = "";
 
         //Check that the label is valid
         //in the database
-        Filter filter = new() { TournamentLabel = tournament.Label };
+        Filter filter = new() { TournamentLabel = obj.Label };
         //Validation is done in the first record.
         var valResult = (await _dbRepoTournamentValidation.GetList(filter)).FirstOrDefault();
 
         if (!(valResult?.IsValid ?? false) && _sessionProxy?.TournamentId <= 0)
         {
             //There's a tournament with the same name
-            viewModel.NameValidation = "required";
-            tournament.Label = "";
+            model.NameValidation = "required";
+            obj.Label = "";
             return false;
         }
 

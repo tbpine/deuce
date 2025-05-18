@@ -71,6 +71,9 @@ public abstract class WizardController : Controller
         _model.NavItems = new List<NavItem>(_handlerNavItems.NavItems);
         _model.ShowBackButton = _showBackButton;
         _model.BackPage = _backPage;
+        //Fill model with saved session values
+        _model.Tournament.Id = _sessionProxy?.TournamentId ?? 0;
+        _model.Tournament.Organization = new Organization() { Id = _sessionProxy?.OrganizationId??0, Name = "" };
 
     }
 
@@ -79,8 +82,25 @@ public abstract class WizardController : Controller
         if (_handlerNavItems is null) return null;
 
         int selectedIdx = _handlerNavItems?.GetSelectedIndex() ?? -1;
+        //If the replacement is a non empty string, then split
+        //into controller and action.
+        if (!string.IsNullOrEmpty(replacement))
+        {
+            string[] parts = replacement.Split('/');
+            if (parts.Length == 2)
+            {
+                //Find the index of the item in the list
+                var selectedNavItem = _handlerNavItems?.NavItems.ElementAt(selectedIdx);
+                if (selectedNavItem is not null)
+                {
+                    selectedNavItem.Action = parts[1];
+                    selectedNavItem.Controller = parts[0];
+                }
+                
+            }
+        }
 
-        return selectedIdx >= 0 && selectedIdx < _handlerNavItems?.NavItems.Count() -1 ? _handlerNavItems?.NavItems.ElementAt(selectedIdx + 1) : null;
+        return selectedIdx >= 0 && selectedIdx < _handlerNavItems?.NavItems.Count() - 1 ? _handlerNavItems?.NavItems.ElementAt(selectedIdx + 1) : null;
 
     }
 

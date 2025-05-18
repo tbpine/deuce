@@ -41,6 +41,7 @@ public class MemberController : Controller
         _tourGateway = tgateway;
         _sessionProxy = sessionProxy;
         _model = new ViewModelMember(_handlerNavItems);
+
     }
 
     public override void OnActionExecuting(ActionExecutingContext context)
@@ -61,8 +62,9 @@ public class MemberController : Controller
         //nav items.
         if (_showBackButton == "visible")
         {
-            _backPage =  _handlerNavItems.NavItems.ElementAt(selectedIdx - 1).Controller + "/" + _handlerNavItems.NavItems.ElementAt(selectedIdx - 1).Action;
+            _backPage = _handlerNavItems.NavItems.ElementAt(selectedIdx - 1).Controller + "/" + _handlerNavItems.NavItems.ElementAt(selectedIdx - 1).Action;
         }
+
 
     }
 

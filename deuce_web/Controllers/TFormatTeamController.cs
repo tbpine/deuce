@@ -100,8 +100,9 @@ public class TFormatTeamController : WizardController
         {
             formValues.TournamentDetail.NoSingles = formValues.Format.NoSingles < 6 ? formValues.Format.NoSingles : (formValues.CustomSingles ?? 0);
             formValues.TournamentDetail.NoDoubles = formValues.Format.NoDoubles < 6 ? formValues.Format.NoDoubles : (formValues.CustomDoubles ?? 0);
-            formValues.Tournament.TeamSize = formValues.Tournament.TeamSize;
-
+            formValues.TournamentDetail.TeamSize = formValues.Tournament.TeamSize;
+            formValues.TournamentDetail.TournamentId = currentTournamentId;
+            
             Organization thisOrg = new() { Id = _sessionProxy?.OrganizationId ?? 1 };
             await _dbRepoTournamentDetail.SetAsync(formValues.TournamentDetail);
 

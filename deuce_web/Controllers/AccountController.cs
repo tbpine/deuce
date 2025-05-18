@@ -108,7 +108,7 @@ public class AccountController : Controller
             _sessionProxy.CurrentAccount = acc.Id;
             _sessionProxy.OrganizationId = acc.Organization;
 
-            return RedirectToAction("Index", "Member");
+            return RedirectToAction("Index", "Profile");
         }
 
         //Goto the member page

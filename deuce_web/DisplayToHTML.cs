@@ -51,6 +51,13 @@ public class DisplayToHTML
             if (iId.HasValue)
                textDisplay = await _lookup.GetLabel(iId.HasValue ? iId.Value : 0, lookupType) ?? "";
          }
+        
+         else if (propInfo?.PropertyType == typeof(DateTime))
+         {
+            //If the property is a DateTime, then format it
+            DateTime? dtValue = (DateTime?)propInfo?.GetValue(obj);
+            textDisplay = dtValue.HasValue ? (dtValue.Value.Equals(DateTime.MinValue) ? "" : dtValue.Value.ToString(format)) : "";
+         }
          else
          {
             //Find the property type

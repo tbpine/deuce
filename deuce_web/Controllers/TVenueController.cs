@@ -71,18 +71,19 @@ public class TVenueController : WizardController
     public IActionResult Save(ViewModelTournamentWizard viewModel)
     {
         //Tournament DTO
-        viewModel.Tournament.Id = _sessionProxy?.TournamentId ?? 0 ;
+        viewModel.Tournament.Id = _sessionProxy?.TournamentId ?? 0;
         viewModel.Venue.Tournament = viewModel.Tournament;
         _dbRepoVenue.Set(viewModel.Venue);
 
         //Different pages for teams and individual tournaments
         int entryType = _sessionProxy?.EntryType ?? (int)deuce.EntryType.Team;
-
+        //Get
+        
         if (entryType == (int)deuce.EntryType.Team)
             return RedirectToAction("Index", "TFormatTeam");
         else if (entryType == (int)deuce.EntryType.Individual)
-            return RedirectToAction("Index", "TFormatPlayer");
-            
-        return View(_model);
+            return RedirectToAction("TFormatPlayer", "TFormatPlayer");
+
+        return View("Index", _model);
     }
 }

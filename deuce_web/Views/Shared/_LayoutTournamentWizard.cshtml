@@ -60,6 +60,7 @@
                                     string isDisabled = navItem.IsDisabled ? "disabled" : "active";
                                     string isSelected = navItem.IsSelected ? @"aria-current=""page""" : "";
                                     string backPage = !navItem.IsDisabled ? $"href={Model.BackPage}" : "";
+                                
 
                                     <li class="nat-item">
 
@@ -82,8 +83,12 @@
                                         }
                                         else
                                         {
+                                            string navController = navItem.Controller;
+                                            if (navItem.Label == "Format") 
+                                                navController= Model.Tournament.EntryType == (int)deuce.EntryType.Team  ? "TFormatTeam" : "TFormatPlayer"; 
+
                                             <a class="nav-link d-inline-flex position-relative px-0 px-lg-3 active"
-                                                asp-controller="@navItem.Controller" asp-action="@navItem.Action">
+                                                asp-controller="@navController" asp-action="@navItem.Action">
                                                 <i class="fi-check-circle fs-lg me-2"></i>
                                                 <span class="hover-effect-underline stretched-link">@navItem.Label</span>
                                             </a>

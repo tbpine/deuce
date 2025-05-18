@@ -61,7 +61,7 @@ public class TPlayersController : WizardController
             _log.LogError(ex.Message);
         }
 
-        return View(model); // Assuming you have a corresponding view named "Index"
+        return View("Index", model); // Assuming you have a corresponding view named "Index"
     }
 
     [HttpPost]
@@ -93,7 +93,7 @@ public class TPlayersController : WizardController
             Error = isvalidTeams.Result == RetCodeTeamAction.Error ? isvalidTeams?.Message ?? "" : "";
             model.Teams = teams;
             await LoadPage(model, false);
-            return View(model);
+            return View("Index", model);
         }
 
         //Organization DTO

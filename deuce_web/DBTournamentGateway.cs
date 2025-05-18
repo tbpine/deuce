@@ -47,14 +47,53 @@ public class DBTournamentGateway : ITournamentGateway
 
         Debug.Print($"Select tournament #{tourId}");
 
-        Organization thisOrg = new() { Id = _sessionProxy?.OrganizationId ?? 1, Name = "" };
-
         //Load a the current tournament from the database
         //Create a scoped db connection.
         //Use a DBRepo to build the object
         //Select the tournment.Returns in the first element
         //Create filter
         Filter tourFilter = new Filter() { TournamentId = tourId };
+        List<Tournament> listOfTour = await _dbRepoTournament.GetList(tourFilter);
+        //Close if it was created.
+
+        var tournament = listOfTour.FirstOrDefault();
+
+        //Get tournament details.
+
+        var tourDetail = (await _dbRepoTournamentDetail.GetList(tourFilter)).FirstOrDefault();
+
+        if (tournament is not null)
+        {
+            tournament.TeamSize = tourDetail?.TeamSize ?? 0;
+            //Get format
+            tournament.Format = new Format(tourDetail?.NoSingles??1, tourDetail?.NoDoubles??1, tourDetail?.Sets??1);
+    
+        }   
+        return tournament;
+
+
+    }
+
+    /// <summary>
+    /// Load  tournament details from an id
+    /// </summary>
+    /// <param name="dbconn">Database connection</param>
+    /// <returns>Tournmanet instance</returns>
+    public async Task<Tournament?> GetTournament(int id)
+    {
+
+
+        //Check if there's a tournament saved
+        if (id < 1) return null;
+
+        Debug.Print($"Select tournament #{id}");
+
+        //Load a the current tournament from the database
+        //Create a scoped db connection.
+        //Use a DBRepo to build the object
+        //Select the tournment.Returns in the first element
+        //Create filter
+        Filter tourFilter = new Filter() { TournamentId = id };
         List<Tournament> listOfTour = await _dbRepoTournament.GetList(tourFilter);
         //Close if it was created.
 
@@ -90,7 +129,7 @@ public class DBTournamentGateway : ITournamentGateway
         }
 
         //Load the current tournament and it's details
-        var currentTour =await GetCurrentTournament();
+        var currentTour = await GetCurrentTournament();
 
         if (currentTour is null) return new(ResultStatus.Error, "Missing tournament");
 
@@ -121,12 +160,12 @@ public class DBTournamentGateway : ITournamentGateway
 
         FactorySchedulers facSchedulers = new FactorySchedulers();
         var tournamentScheduler = facSchedulers.Create(currentTour, gameMaker);
-        var schedule= tournamentScheduler.Run(listOfTeams ?? new());
+        var schedule = tournamentScheduler.Run(listOfTeams ?? new());
 
         //Check if the schedule is correct
         if (schedule is not null)
         {
-            currentTour.Schedule = schedule;    
+            currentTour.Schedule = schedule;
             //Schedule was created for this
             //tournament. Save to the database
             //and change it's status
@@ -140,7 +179,7 @@ public class DBTournamentGateway : ITournamentGateway
                 await _dbRepoTournamentStatus.SetAsync(currentTour);
                 //Return result status Ok
                 return new(ResultStatus.Ok, "Schedule created and saved.");
-                
+
             }
 
         }

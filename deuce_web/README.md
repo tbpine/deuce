@@ -33,4 +33,5 @@ existing scores. If the current date has passed the start date, warn user that s
     - [X] Wizard controller should hold the viewmodel instance and set back
     page properties.
 - [X] Move member's area to MVC
-    - [] Derive Controllers in the member's area from MemberController
+    - [X] Derive Controllers in the member's area from MemberController
+- [] Wizard testing for each screen.

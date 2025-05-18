@@ -8,14 +8,14 @@
 @{
   string clsValidate = Model.Validated ? "was-validated" : "";
 }
-<form id="page_form" class="col-lg-9 col-xl-8 needs-validation @clsValidate" asp-action="Save" method="post"
+<form id="page_form" class="col-lg-9 col-xl-8 needs-validation @clsValidate" asp-controller="TDetail"  asp-action="Save" method="post"
 novalidate >
   <h1 class="h2 mb-n2 mb-lg-3">Tournament Details</h1>
   <!-- Type -->
   <div class="pt-3 mt-3">
     <h2 class="h6 pb-1 mb-2">Label *</h2>
     <div>
-      <input asp-for="Tournament.Label" class="form-control mb-2" placeholder="Give it a name ?" value="@Model.Tournament.Label" required>
+      <input  asp-for="Tournament.Label" class="form-control mb-2" placeholder="Give it a name ?" value="@Model.Tournament.Label" required>
       <div class="invalid-feedback">Name exists. Choose another name.</div>
     </div>
     <h2 class="h6 pb-1 mb-2">Sport *</h2>
@@ -26,11 +26,11 @@ novalidate >
         <div class="col">
           @if (isSelected == "checked")
           {
-            <input type="radio" class="btn-check" id="@(sport.Key)" asp-for="Tournament.Sport" value="@sport.Id" checked>
+            <input type="radio"  class="btn-check" id="@(sport.Key)" asp-for="Tournament.Sport" value="@sport.Id" checked>
           }
           else
           {
-            <input type="radio" class="btn-check" id="@(sport.Key)" asp-for="Tournament.Sport" value="@sport.Id" >
+            <input type="radio"  class="btn-check" id="@(sport.Key)" asp-for="Tournament.Sport" value="@sport.Id" >
           }
           <label class="nav-link flex-column w-100 align-items-center gap-2 rounded p-3" for="@sport.Key">
             <img src="@sport.Icon" style="weight: 32px; height: 32px;"/>
@@ -52,11 +52,11 @@ novalidate >
         <div>
           @if (selectedTourType == "checked")
           {
-            <input type="radio" class="btn-check" id="@tourType.Key" asp-for="Tournament.Type" value="@tourType.Id" checked>
+            <input type="radio"  class="btn-check" id="@tourType.Key" asp-for="Tournament.Type" value="@tourType.Id" checked>
           }
           else
           {
-            <input type="radio" class="btn-check" id="@tourType.Key" asp-for="Tournament.Type" value="@tourType.Id" >
+            <input type="radio"  class="btn-check" id="@tourType.Key" asp-for="Tournament.Type" value="@tourType.Id" >
           }
           <label class="nav-link" for="@tourType.Key">@tourType.Label</label>
         </div>
@@ -72,11 +72,11 @@ novalidate >
         <div class="col">
         @if (Model.Tournament.EntryType == (int)EntryType.Team)
         {
-          <input type="radio" class="btn-check"  id="EntryTypeTeam" asp-for="Tournament.EntryType" value="1" checked>
+          <input type="radio"  class="btn-check"  id="EntryTypeTeam" asp-for="Tournament.EntryType" value="1" checked>
         }
         else
         {
-          <input type="radio" class="btn-check"  id="EntryTypeTeam" asp-for="Tournament.EntryType" value="1" >
+          <input type="radio"  class="btn-check"  id="EntryTypeTeam" asp-for="Tournament.EntryType" value="1" >
         }
           <label class="nav-link flex-column w-100 align-items-center gap-2 rounded p-3" for="EntryTypeTeam">
             <img src="~/assets/img/teams.svg" style="weight: 32px; height: 32px;"/>
@@ -86,11 +86,11 @@ novalidate >
         <div class="col">
             @if (Model.Tournament.EntryType == (int)EntryType.Individual)
             {
-                <input type="radio" class="btn-check"  id="EntryTypePlayer" asp-for="Tournament.EntryType" value="2" checked>
+                <input type="radio"  class="btn-check"  id="EntryTypePlayer" asp-for="Tournament.EntryType" value="2" checked>
             }
             else
             {
-                <input type="radio" class="btn-check"  id="EntryTypeInd" asp-for="Tournament.EntryType" value="2">
+                <input type="radio"  class="btn-check"  id="EntryTypeInd" asp-for="Tournament.EntryType" value="2">
             }
           <label class="nav-link flex-column w-100 align-items-center gap-2 rounded p-3" for="EntryTypeInd">
             <img src="~/assets/img/person.svg" style="weight: 32px; height: 32px;"/>
