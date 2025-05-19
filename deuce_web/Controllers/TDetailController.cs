@@ -37,7 +37,6 @@ public class TDetailController : WizardController
         _model.Tournament.Type = rowTournament?.Type ?? 1;
         _model.Tournament.Label = rowTournament?.Label ?? "";
         _model.Tournament.EntryType = rowTournament?.EntryType ?? 1;
-        _model.Tournament.TeamSize = rowTournament?.TeamSize ?? 2;
 
         return View("Index", _model);
     }

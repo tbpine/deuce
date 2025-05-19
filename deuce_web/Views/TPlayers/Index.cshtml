@@ -114,7 +114,7 @@
                 //Add form values for this player
                 string attrPlayerName = $"team_{i}_{teamId}_player_{j}_{playerId}_{teamPlayerId}";
                 //Get member's list
-                int selectionIdx = i * Model.Tournament.TeamSize + j;
+                int selectionIdx = i * Model.Tournament.Details.TeamSize + j;
                 //List<SelectListItem>? memberList = Model.SelectMember?.ElementAt(selectionIdx);
                // memberList?.All(e => { e.Selected = false; return true; });
 

@@ -90,8 +90,9 @@ public class TournamentPlayersPageModel : BasePageModelWizard
         Tournament tournament = new()
         {
             Id = _sessionProxy?.TournamentId ?? 0,
-            TeamSize = _tournamentDetail.TeamSize
         };
+
+        tournament.Details.TeamSize = _sessionProxy?.TeamSize ?? 1;
 
         //Read teams from the displayed form
         List<Team> teams = _adaptorTeams.Parse(HttpContext.Request.Form, tournament);

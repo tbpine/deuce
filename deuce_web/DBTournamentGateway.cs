@@ -37,13 +37,13 @@ public class DBTournamentGateway : ITournamentGateway
     /// </summary>
     /// <param name="dbconn">Database connectoin</param>
     /// <returns>Tournmanet instance</returns>
-    public async Task<Tournament?> GetCurrentTournament()
+    public async Task<Tournament> GetCurrentTournament()
     {
 
 
         //Check if there's a tournament saved
         int tourId = _sessionProxy?.TournamentId ?? 0;
-        if (tourId < 1) return null;
+        if (tourId < 1) return new();
 
         Debug.Print($"Select tournament #{tourId}");
 
@@ -55,22 +55,17 @@ public class DBTournamentGateway : ITournamentGateway
         Filter tourFilter = new Filter() { TournamentId = tourId };
         List<Tournament> listOfTour = await _dbRepoTournament.GetList(tourFilter);
         //Close if it was created.
+        if (listOfTour.Count  == 0) return new();
 
-        var tournament = listOfTour.FirstOrDefault();
+        var tournament = listOfTour.First();
 
         //Get tournament details.
 
-        var tourDetail = (await _dbRepoTournamentDetail.GetList(tourFilter)).FirstOrDefault();
+        var tourDetails = (await _dbRepoTournamentDetail.GetList(tourFilter));
 
-        if (tournament is not null)
-        {
-            tournament.TeamSize = tourDetail?.TeamSize ?? 0;
-            //Get format
-            tournament.Format = new Format(tourDetail?.NoSingles??1, tourDetail?.NoDoubles??1, tourDetail?.Sets??1);
-    
-        }   
+        tournament.Details = tourDetails.Count > 0 ? tourDetails.First() : new TournamentDetail();
+
         return tournament;
-
 
     }
 
@@ -79,12 +74,12 @@ public class DBTournamentGateway : ITournamentGateway
     /// </summary>
     /// <param name="dbconn">Database connection</param>
     /// <returns>Tournmanet instance</returns>
-    public async Task<Tournament?> GetTournament(int id)
+    public async Task<Tournament> GetTournament(int id)
     {
 
 
         //Check if there's a tournament saved
-        if (id < 1) return null;
+        if (id < 1) return new();
 
         Debug.Print($"Select tournament #{id}");
 
@@ -96,20 +91,17 @@ public class DBTournamentGateway : ITournamentGateway
         Filter tourFilter = new Filter() { TournamentId = id };
         List<Tournament> listOfTour = await _dbRepoTournament.GetList(tourFilter);
         //Close if it was created.
+        if (listOfTour.Count == 0) return new();
 
-        var tournament = listOfTour.FirstOrDefault();
+        var tournament = listOfTour.First();
 
         //Get tournament details.
 
-        var tourDetail = (await _dbRepoTournamentDetail.GetList(tourFilter)).FirstOrDefault();
+        var tourDetail = await _dbRepoTournamentDetail.GetList(tourFilter);
 
-        if (tournament is not null)
-        {
-            tournament.TeamSize = tourDetail?.TeamSize ?? 0;
-            //Get format
-            tournament.Format = new Format(tourDetail?.NoSingles??1, tourDetail?.NoDoubles??1, tourDetail?.Sets??1);
-    
-        }   
+        //Get format
+        tournament.Details = tourDetail.Count > 0 ? tourDetail.First() : new(); 
+           
         return tournament;
 
 
@@ -149,7 +141,7 @@ public class DBTournamentGateway : ITournamentGateway
 
         //Check for byes
         Team bye = new Team(-1, "BYE");
-        for (int i = 0; i < currentTour.TeamSize; i++) bye.AddPlayer(new Player() { Id = -1, First = "BYE", Last = "BYEd", Index = i, Ranking = 0d });
+        for (int i = 0; i < currentTour.Details.TeamSize; i++) bye.AddPlayer(new Player() { Id = -1, First = "BYE", Last = "BYEd", Index = i, Ranking = 0d });
 
 
         if (((listOfTeams?.Count ?? 0) % 2) > 0) listOfTeams?.Add(bye);

@@ -36,7 +36,7 @@ public class TeamValidator
         //Check that teams have the specified number of players
         foreach (var team in teams)
         {
-            if (team.Players.Count() != tournament.TeamSize)
+            if (team.Players.Count() != tournament.Details.TeamSize)
                 return new(RetCodeTeamAction.Error, $"Invalid number of players in team {team.Label}");
         }
         

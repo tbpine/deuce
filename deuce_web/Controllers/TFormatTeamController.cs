@@ -41,16 +41,14 @@ public class TFormatTeamController : WizardController
             //to the view model.
             // LoadPage logic
             var sports = await _cache.GetList<Sport>(CacheMasterDefault.KEY_SPORTS);
-            _model.Tournament = (await _dbRepoTournament.GetList(new Filter() { TournamentId = _sessionProxy.TournamentId })).FirstOrDefault() ?? 
-            new(){ TeamSize = 2,};
+            //Load tournament  from the database
+            var rowTournament = (await _dbRepoTournament.GetList(new Filter() { TournamentId = _sessionProxy.TournamentId })).FirstOrDefault();
+            //Load tournament details from the database using the dbRpepoTournamentDetail
+            var rowTournamentDetail = (await _dbRepoTournamentDetail.GetList(new Filter() { TournamentId = _sessionProxy.TournamentId })).FirstOrDefault();
 
-            var sport = sports?.Find(e => e.Id == (_model.Tournament?.Sport ?? 0));
-            _model.Title = sport?.Label ?? "";
-            Organization thisOrg = new() { Id = _sessionProxy.OrganizationId, Name = "testing" };
-            Filter filter = new() { TournamentId = _sessionProxy.TournamentId };
-            _model.TournamentDetail = (await _dbRepoTournamentDetail.GetList(filter))?.FirstOrDefault() ?? new()
+            _model.Tournament.Sport = rowTournament?.Sport ?? 1;
+            _model.Tournament.Details = rowTournamentDetail?? new()
             {
-
                 Games = 1,
                 Sets = 1,
                 NoSingles = 2,
@@ -58,10 +56,12 @@ public class TFormatTeamController : WizardController
                 TeamSize = 2
             };
 
-            _model.Tournament.TeamSize = _model.TournamentDetail.TeamSize;
+            var sport = sports?.Find(e => e.Id == (_model.Tournament?.Sport ?? 1));
+            _model.Title = sport?.Label ?? "";
+            
+            Filter filter = new() { TournamentId = _sessionProxy.TournamentId };
+          
 
-            _model.Format.NoSingles = _model.TournamentDetail.NoSingles < 6 ? _model.TournamentDetail.NoSingles : 99;
-            _model.Format.NoDoubles = _model.TournamentDetail.NoDoubles < 6 ? _model.TournamentDetail.NoDoubles : 99;
             _model.CustomSingles = _model.TournamentDetail.NoSingles < 6 ? 0 : _model.TournamentDetail.NoSingles;
             _model.CustomDoubles = _model.TournamentDetail.NoDoubles < 6 ? 0 : _model.TournamentDetail.NoDoubles;
 
@@ -100,14 +100,14 @@ public class TFormatTeamController : WizardController
         {
             formValues.TournamentDetail.NoSingles = formValues.Format.NoSingles < 6 ? formValues.Format.NoSingles : (formValues.CustomSingles ?? 0);
             formValues.TournamentDetail.NoDoubles = formValues.Format.NoDoubles < 6 ? formValues.Format.NoDoubles : (formValues.CustomDoubles ?? 0);
-            formValues.TournamentDetail.TeamSize = formValues.Tournament.TeamSize;
+            formValues.TournamentDetail.TeamSize = formValues.Tournament.Details.TeamSize;
             formValues.TournamentDetail.TournamentId = currentTournamentId;
             
             Organization thisOrg = new() { Id = _sessionProxy?.OrganizationId ?? 1 };
             await _dbRepoTournamentDetail.SetAsync(formValues.TournamentDetail);
 
             //Set proxy value
-            if (_sessionProxy is not null) _sessionProxy.TeamSize = formValues.Tournament.TeamSize;
+            if (_sessionProxy is not null) _sessionProxy.TeamSize = formValues.Tournament.Details.TeamSize;
         }
 
         // Redirect or go to next page as needed
@@ -124,7 +124,7 @@ public class TFormatTeamController : WizardController
 
     private bool ValidateForm(ViewModelTournamentWizard model, ref string err)
     {
-        if (model.Tournament.TeamSize < 1)
+        if (model.Tournament.Details.TeamSize < 1)
         {
             err = "Select or specify no of players in a team (Team Size *)";
             return false;

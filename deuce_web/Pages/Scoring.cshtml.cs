@@ -19,7 +19,7 @@ public class ScoringPageModel : BasePageModelAcc
     private int _currentRound = 0;
 
     public int NoRounds { get => _schedule?.NoRounds ?? 0; }
-    public int NoSets { get => _tournament?.Format?.NoSets ?? 1; }
+    public int NoSets { get => _tournament?.Details?.Sets ?? 1; }
     public int CurrentRound { get => _currentRound; }
 
     public Round Rounds(int r) => _schedule?.GetRounds(r) ?? new Round(0);

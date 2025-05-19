@@ -74,6 +74,7 @@ public abstract class WizardController : Controller
         //Fill model with saved session values
         _model.Tournament.Id = _sessionProxy?.TournamentId ?? 0;
         _model.Tournament.Organization = new Organization() { Id = _sessionProxy?.OrganizationId??0, Name = "" };
+        _model.Tournament.EntryType =  _sessionProxy?.EntryType ?? (int)EntryType.Team;
 
     }
 

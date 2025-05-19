@@ -77,7 +77,7 @@ public class TPlayersController : WizardController
 
         //Tournament DTO.
         model.Tournament.Id = _sessionProxy?.TournamentId ?? 0;
-        model.Tournament.TeamSize = _sessionProxy?.TeamSize ?? 2;
+        model.Tournament.Details.TeamSize = _sessionProxy?.TeamSize ?? 2;
 
         //Read teams from the displayed form
         List<Team> teams = _adaptorTeams.Parse(this.Request.Form, model.Tournament);
@@ -198,7 +198,7 @@ public class TPlayersController : WizardController
             //Players registered for the tournament
             model.Players = (await _dbRepoPlayer.GetList(filterPlayer)) ?? new();
             //Set tournament properties for this page
-            model.Tournament.TeamSize = _sessionProxy?.TeamSize ?? 2;
+            model.Tournament.Details.TeamSize = _sessionProxy?.TeamSize ?? 2;
             model.Tournament.EntryType = _sessionProxy?.EntryType ?? (int)deuce.EntryType.Team;
 
             //For GETS

@@ -55,7 +55,7 @@ public class TemplateTennis
         foreach (Permutation perm in perms)
         {
             // Calculate how many boxes to print for scores:
-            int noScores = tournament?.Format?.NoSets ?? 1;
+            int noScores = tournament?.Details?.Sets ?? 1;
 
             var thome = perm.GetTeamAtIndex(0);
             var taway = perm.GetTeamAtIndex(1);
@@ -202,7 +202,7 @@ public class TemplateTennis
 
         string dates = $"{roundDate.ToString("dd MMM yyyy")}. Round {roundNo + 1}";
         string loc = $"Location :";
-        string format = $"Format : {t!.Format?.NoSingles ?? 1} singles , {t.Format?.NoDoubles ?? 1} doubles, sets : {t.Format?.NoSets ?? 1}";
+        string format = $"Format : {t!.Details?.NoSingles ?? 1} singles , {t.Details?.NoDoubles ?? 1} doubles, sets : {t.Details?.Sets ?? 1}";
 
 
         doc.SetFont(font);

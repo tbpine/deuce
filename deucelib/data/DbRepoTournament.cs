@@ -9,7 +9,7 @@ public class DbRepoTournament : DbRepoBase<Tournament>
     //------------------------------------
     //| Internals                         |
     //------------------------------------
-    private readonly Organization? _organization;
+    private  Organization _organization = new();
 
     /// <summary>
     /// Construct with a db connection to the target db.

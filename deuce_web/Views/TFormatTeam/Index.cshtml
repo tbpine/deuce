@@ -17,7 +17,7 @@
     <div class="col">
       <label class="form-label" >Team Size *</label>
       <select class="form-select form-select-lg" onchange="showHideElement('Format.TeamSize','team_size_cont','99')"
-        asp-for="Tournament.TeamSize" asp-items="Model.SelectTeamSize" value="@Model.Tournament.TeamSize">
+        asp-for="Tournament.Details.TeamSize" asp-items="Model.SelectTeamSize" value="@Model.Tournament.Details.TeamSize">
       </select>
     </div>
     <div class="col">

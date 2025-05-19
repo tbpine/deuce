@@ -8,7 +8,7 @@ public class DbRepoTournamentList : DbRepoBase<Tournament>
     //------------------------------------
     //| Internals                         |
     //------------------------------------
-    private  Organization? _organization;
+    private  Organization _organization;
 
     public Organization Organization { set=>_organization = value; }
 
@@ -26,7 +26,7 @@ public class DbRepoTournamentList : DbRepoBase<Tournament>
     /// </summary>
     public DbRepoTournamentList(DbConnection dbconn) : base(dbconn)
     {
-        _organization = null;
+        _organization = new(); 
     }
 
     public override async Task<List<Tournament>> GetList(Filter filter)

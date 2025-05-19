@@ -29,10 +29,16 @@ public class GameMakerTennis : IGameMaker
         Player[] a2 = q2.ToArray();
 
 
-        Format fmt = t.Format??new Format(1, 0, 1);
+        TournamentDetail fmt = t.Details ?? new TournamentDetail()
+        {
+            NoSingles = 1,
+            NoDoubles = 0,
+            TeamSize = 1
+        };
+        
         Debug.Write($"|");
 
-        for (int i = 0; i < fmt.NoSingles && i  < t.TeamSize; i++)
+        for (int i = 0; i < fmt.NoSingles && i  < (t.Details?.TeamSize??0); i++)
         {
             Player pHome = a1[i];
             Player pAway = a2[i];

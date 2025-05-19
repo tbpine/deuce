@@ -73,7 +73,7 @@ class FormReaderPlayersList : FormReaderPlayersBase
 
         //Add subs
 
-        for (int i = 0; i < tournament.TeamSize; i++)
+        for (int i = 0; i < tournament.Details.TeamSize; i++)
         {
             //Add subs if the team size
             //is more than the specified team

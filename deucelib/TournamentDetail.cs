@@ -24,5 +24,13 @@ public class TournamentDetail
     [Display("Team size", null)]
     public int TeamSize { get { return _teamSize; } set { _teamSize = value; } }
 
+    public TournamentDetail()
+    {
 
+        _games = 1;
+        _sets = 1;
+        _noSingles = 2;
+        _noDoubles = 2;
+        _teamSize = 2;
+    }
 }

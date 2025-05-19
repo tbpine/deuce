@@ -45,8 +45,8 @@ public class TVenueController : WizardController
 
         Filter filter = new Filter()
         {
-            TournamentId = _sessionProxy.TournamentId,
-            ClubId = _sessionProxy.OrganizationId
+            TournamentId = _model.Tournament.Id,
+            ClubId = _model.Tournament.Organization?.Id??0
         };
 
         var listOfVenues = await _dbRepoVenue.GetList(filter);
@@ -68,15 +68,18 @@ public class TVenueController : WizardController
 
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public IActionResult Save(ViewModelTournamentWizard viewModel)
+    public IActionResult Save(ViewModelTournamentWizard src)
     {
-        //Tournament DTO
-        viewModel.Tournament.Id = _sessionProxy?.TournamentId ?? 0;
-        viewModel.Venue.Tournament = viewModel.Tournament;
-        _dbRepoVenue.Set(viewModel.Venue);
+        //Form to model values
+        _model.Venue.Tournament = _model.Tournament; 
+        _model.Venue.CountryCode = src.Venue.CountryCode;
+        _model.Venue.Street = src.Venue.Street;
+        _model.Venue.State = src.Venue.State;
+
+        _dbRepoVenue.Set(src.Venue);
 
         //Different pages for teams and individual tournaments
-        int entryType = _sessionProxy?.EntryType ?? (int)deuce.EntryType.Team;
+        int entryType = _model.Tournament.EntryType;
         //Get
         
         if (entryType == (int)deuce.EntryType.Team)

@@ -6,8 +6,8 @@ using deuce;
 /// </summary>
 public interface ITournamentGateway
 {
-     Task<Tournament?> GetCurrentTournament();
-     Task<Tournament?> GetTournament(int id);
+     Task<Tournament> GetCurrentTournament();
+     Task<Tournament> GetTournament(int id);
      Task<ResultTournamentAction> StartTournament();
      Task<ResultTournamentAction> ValidateCurrentTournament(Tournament tournament);
 }
