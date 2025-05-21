@@ -42,9 +42,9 @@ public class TFormatTeamController : WizardController
             // LoadPage logic
             var sports = await _cache.GetList<Sport>(CacheMasterDefault.KEY_SPORTS);
             //Load tournament  from the database
-            var rowTournament = (await _dbRepoTournament.GetList(new Filter() { TournamentId = _sessionProxy.TournamentId })).FirstOrDefault();
+            var rowTournament = (await _dbRepoTournament.GetList(new Filter() { TournamentId = _model.Tournament.Id })).FirstOrDefault();
             //Load tournament details from the database using the dbRpepoTournamentDetail
-            var rowTournamentDetail = (await _dbRepoTournamentDetail.GetList(new Filter() { TournamentId = _sessionProxy.TournamentId })).FirstOrDefault();
+            var rowTournamentDetail = (await _dbRepoTournamentDetail.GetList(new Filter() { TournamentId = _model.Tournament.Id })).FirstOrDefault();
 
             _model.Tournament.Sport = rowTournament?.Sport ?? 1;
             _model.Tournament.Details = rowTournamentDetail?? new()
@@ -81,34 +81,35 @@ public class TFormatTeamController : WizardController
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Save(ViewModelTournamentWizard formValues)
     {
-        formValues.Tournament.Id = _sessionProxy.TournamentId;
 
         // Form validation logic (adapt as needed)
         string err = "";
-        if (!ValidateForm(formValues, ref err))
+        _model.Tournament.Details.TournamentId = _model.Tournament.Id;
+        
+        _model.Tournament.Details.TeamSize = formValues.Tournament.Details.TeamSize < 99 ?
+        formValues.Tournament.Details.TeamSize : formValues.CustomTeamSize??2;
+        _model.Tournament.Details.Games = formValues.Tournament.Details.Games < 7 ?
+         formValues.Tournament.Details.Games : formValues.CustomGames ?? 1;
+        _model.Tournament.Details.Sets = formValues.Tournament.Details.Sets;
+        _model.Tournament.Details.NoSingles = formValues.Tournament.Details.NoSingles < 99 ?
+         formValues.Tournament.Details.NoSingles : formValues.CustomSingles ?? 1;
+        _model.Tournament.Details.NoDoubles = formValues.Tournament.Details.NoDoubles < 99 ?
+         formValues.Tournament.Details.NoDoubles : formValues.CustomDoubles ?? 1;
+
+        if (!ValidateForm(_model, ref err))
         {
             _model.Error = err;
             PopulateSelectLists(_model);
             return View("Index", _model);
         }
 
-        formValues.Error = string.Empty;
+        _model.Error = string.Empty;
 
         // Save to db
-        int currentTournamentId = _sessionProxy?.TournamentId ?? 0;
-        if (currentTournamentId > 0)
-        {
-            formValues.TournamentDetail.NoSingles = formValues.Format.NoSingles < 6 ? formValues.Format.NoSingles : (formValues.CustomSingles ?? 0);
-            formValues.TournamentDetail.NoDoubles = formValues.Format.NoDoubles < 6 ? formValues.Format.NoDoubles : (formValues.CustomDoubles ?? 0);
-            formValues.TournamentDetail.TeamSize = formValues.Tournament.Details.TeamSize;
-            formValues.TournamentDetail.TournamentId = currentTournamentId;
-            
-            Organization thisOrg = new() { Id = _sessionProxy?.OrganizationId ?? 1 };
-            await _dbRepoTournamentDetail.SetAsync(formValues.TournamentDetail);
+        await _dbRepoTournamentDetail.SetAsync(_model.Tournament.Details);
 
-            //Set proxy value
-            if (_sessionProxy is not null) _sessionProxy.TeamSize = formValues.Tournament.Details.TeamSize;
-        }
+        //Set proxy value
+        if (_sessionProxy is not null) _sessionProxy.TeamSize = _model.Tournament.Details.TeamSize;
 
         // Redirect or go to next page as needed
         var nextNavItem = this.NextPage("");
@@ -118,7 +119,7 @@ public class TFormatTeamController : WizardController
             return RedirectToAction(nextNavItem.Action, nextNavItem.Controller);
         }
 
-        return View("Index");
+        return View("Index", _model);
 
     }
 
@@ -182,7 +183,7 @@ public class TFormatTeamController : WizardController
         {
             new SelectListItem("Number of games per set", "0"),
             new SelectListItem("6 (Standard rules)", "1"),
-            new SelectListItem("4 (Fast four)", "2"),
+            new SelectListItem("4 (Fast four)","2"),
             new SelectListItem("Custom", "99")
         };
     }

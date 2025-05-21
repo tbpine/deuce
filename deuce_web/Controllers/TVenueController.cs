@@ -70,13 +70,17 @@ public class TVenueController : WizardController
     [ValidateAntiForgeryToken]
     public IActionResult Save(ViewModelTournamentWizard src)
     {
-        //Form to model values
-        _model.Venue.Tournament = _model.Tournament; 
+        
+        //1.Session
+        //2.Form
+        //Save
+
+        _model.Venue.Tournament = _model.Tournament;
         _model.Venue.CountryCode = src.Venue.CountryCode;
         _model.Venue.Street = src.Venue.Street;
         _model.Venue.State = src.Venue.State;
 
-        _dbRepoVenue.Set(src.Venue);
+        _dbRepoVenue.Set(_model.Venue);
 
         //Different pages for teams and individual tournaments
         int entryType = _model.Tournament.EntryType;
@@ -85,7 +89,7 @@ public class TVenueController : WizardController
         if (entryType == (int)deuce.EntryType.Team)
             return RedirectToAction("Index", "TFormatTeam");
         else if (entryType == (int)deuce.EntryType.Individual)
-            return RedirectToAction("TFormatPlayer", "TFormatPlayer");
+            return RedirectToAction("Index", "TFormatPlayer");
 
         return View("Index", _model);
     }

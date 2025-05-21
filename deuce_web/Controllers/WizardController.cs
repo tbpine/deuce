@@ -62,7 +62,7 @@ public abstract class WizardController : Controller
             {
                 //case
                 int entryType = _sessionProxy?.EntryType ?? (int)EntryType.Team;
-                _backPage = (entryType == (int)EntryType.Team ? "TFormatTeams" : "TFormatPlayer")
+                _backPage = (entryType == (int)EntryType.Team ? "TFormatTeam" : "TFormatPlayer")
                 + "/" + "Index";
 
             }
