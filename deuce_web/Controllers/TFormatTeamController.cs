@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using deuce;
 using deuce_web;
+using iText.Forms.Xfdf;
 
 /// <summary>
 /// Controller for the Tournament Format Team page.
@@ -47,23 +48,25 @@ public class TFormatTeamController : WizardController
             var rowTournamentDetail = (await _dbRepoTournamentDetail.GetList(new Filter() { TournamentId = _model.Tournament.Id })).FirstOrDefault();
 
             _model.Tournament.Sport = rowTournament?.Sport ?? 1;
-            _model.Tournament.Details = rowTournamentDetail?? new()
+            _model.Tournament.Details = rowTournamentDetail ?? new()
             {
-                Games = 1,
+                Games = 6,
                 Sets = 1,
                 NoSingles = 2,
                 NoDoubles = 2,
                 TeamSize = 2
             };
 
+            SetCustomValues(_model, "Tournament.Details.TeamSize", "CustomTeamSize", 6);
+            SetCustomValues(_model, "Tournament.Details.Games","CustomGames", 6);
+            SetCustomValues(_model,"Tournament.Details.NoSingles", "CustomSingles", 6);
+            SetCustomValues(_model, "Tournament.Details.NoDoubles","CustomDoubles", 6);
+
             var sport = sports?.Find(e => e.Id == (_model.Tournament?.Sport ?? 1));
             _model.Title = sport?.Label ?? "";
-            
-            Filter filter = new() { TournamentId = _sessionProxy.TournamentId };
-          
 
-            _model.CustomSingles = _model.TournamentDetail.NoSingles < 6 ? 0 : _model.TournamentDetail.NoSingles;
-            _model.CustomDoubles = _model.TournamentDetail.NoDoubles < 6 ? 0 : _model.TournamentDetail.NoDoubles;
+            Filter filter = new() { TournamentId = _sessionProxy.TournamentId };
+
 
             PopulateSelectLists(_model);
             return View(_model);
@@ -85,10 +88,10 @@ public class TFormatTeamController : WizardController
         // Form validation logic (adapt as needed)
         string err = "";
         _model.Tournament.Details.TournamentId = _model.Tournament.Id;
-        
+
         _model.Tournament.Details.TeamSize = formValues.Tournament.Details.TeamSize < 99 ?
-        formValues.Tournament.Details.TeamSize : formValues.CustomTeamSize??2;
-        _model.Tournament.Details.Games = formValues.Tournament.Details.Games < 7 ?
+        formValues.Tournament.Details.TeamSize : formValues.CustomTeamSize ?? 2;
+        _model.Tournament.Details.Games = formValues.Tournament.Details.Games < 99 ?
          formValues.Tournament.Details.Games : formValues.CustomGames ?? 1;
         _model.Tournament.Details.Sets = formValues.Tournament.Details.Sets;
         _model.Tournament.Details.NoSingles = formValues.Tournament.Details.NoSingles < 99 ?
@@ -182,9 +185,39 @@ public class TFormatTeamController : WizardController
         model.SelectGamesPerSet = new[]
         {
             new SelectListItem("Number of games per set", "0"),
-            new SelectListItem("6 (Standard rules)", "1"),
-            new SelectListItem("4 (Fast four)","2"),
+            new SelectListItem("6 (Standard rules)", "6"),
+            new SelectListItem("4 (Fast four)","4"),
             new SelectListItem("Custom", "99")
         };
     }
+
+    /// <summary>
+    /// Set custom values for selection lists.
+    /// </summary>
+    /// <param name="src">model</param>
+    /// <param name="src">Which property can be specified</param>
+    /// <param name="dest">Property containing the custom value</param>
+    /// <param name="limit">Highest non custom value</param>
+    private void SetCustomValues(object source,  string src, string dest, int limit)
+    {
+        Type type = source.GetType();
+        //Get the integer value from "src" property of the model
+        int value = (int)(Utils.GetPropertyByPath(source, src)?? 0);
+
+        //If the value is greater than the limit, set src to 99
+        if (value > limit)
+        {
+            Utils.SetPropertyByPath(source, src, 99);
+            //Set the destination property to the value
+            Utils.SetPropertyByPath(source, dest, value);;
+        }
+        else
+        {
+            //Otherwise set the destination property to 0
+            Utils.SetPropertyByPath(source, dest, 0);
+        }
+
+
+    }
+
 }

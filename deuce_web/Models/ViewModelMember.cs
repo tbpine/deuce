@@ -23,6 +23,8 @@ public class ViewModelMember
 
     public Tournament Tournament { get; set; } = new();
     public TournamentDetail TournamentDetail { get; set; } = new();
+
+    public Organization Organization { get; set; } = new();
     public string Error { get; set; } = "";
 
     //For summary
@@ -39,6 +41,7 @@ public class ViewModelMember
     {
         _sideMenuHandler = sidemenu;
     }
+
 
 
 }

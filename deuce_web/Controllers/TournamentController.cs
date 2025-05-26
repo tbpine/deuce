@@ -66,10 +66,10 @@ public class TournamentController : MemberController
         Filter filter = new Filter()
         {
             TournamentId = id,
-            ClubId = _sessionProxy.OrganizationId // Assuming organization ID is available in session
+            ClubId = _model.Organization.Id // Assuming organization ID is available in session
         };
 
-        
+
         Tournament tournament = (await _tourGateway.GetTournament(id)) ?? new();
         TournamentDetail tournamentDetail = (await _dbRepoTournamentDetail.GetList(filter)).FirstOrDefault() ?? new();
 
@@ -91,6 +91,28 @@ public class TournamentController : MemberController
         _model.HtmlTour = await _displayToHTML.ExtractDisplayProperty(tournament!);
         _model.HtmlTourDetail = await _displayToHTML.ExtractDisplayProperty(tournamentDetail);
 
+        //Set session tournament id
+        _sessionProxy.TournamentId = id; 
+
         return View("Summary", _model);
     }
+
+    public async Task<IActionResult> Start()
+    {
+        
+        //Make the schedule for the tournament.
+        //It's saved to the database
+        var actionResult = await _tourGateway.StartTournament();
+        //Go back to the tournaments listing
+        if (actionResult.Status == ResultStatus.Ok)
+            return RedirectToAction("Index", "Tournament");
+        else
+        {
+            //Could not create shedule.
+            //Display error.
+            _model.Error = actionResult.Message;
+        }
+        //If there's an error, go back to the summary page
+        return View("Summary", _model);
+   }
 }

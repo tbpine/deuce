@@ -65,7 +65,11 @@ public class MemberController : Controller
             _backPage = _handlerNavItems.NavItems.ElementAt(selectedIdx - 1).Controller + "/" + _handlerNavItems.NavItems.ElementAt(selectedIdx - 1).Action;
         }
 
-
+        //Fill _model properties with session values
+        _model.Tournament.Id = _sessionProxy?.TournamentId ?? 0;
+        _model.Organization.Id = _sessionProxy?.OrganizationId ?? 0;
+        
+        
     }
 
     protected IActionResult NextPage(string replacement)

@@ -21,7 +21,7 @@
       </select>
     </div>
     <div class="col" >
-      <label class="form-label" asp-for="TournamentDetail.Games">Games per set *</label>
+      <label class="form-label" >Games per set *</label>
       <select class="form-select form-select-lg" id="Games" asp-for="Tournament.Details.Games" asp-items="Model.SelectGamesPerSet"
         onchange="showHideElement('Games','fixed_game_2','99')" >
       </select>
@@ -45,24 +45,24 @@
   </div>
   <div class="row row-cols-1 row-cols-sm-2 g-3 g-sm-4 pb-3 pb-sm-4 mb-xl-2">
     <div class="col">
-      <label class="form-label" asp-for="Format.NoSingles">No Singles *</label>
+      <label class="form-label" >No Singles *</label>
       <select class="form-select form-select-lg" asp-for="Tournament.Details.NoSingles"
         onchange="showHideElement('NoSingles','no_singles_cont','99')"
         asp-items="Model.SelectNoGames" id="NoSingles">
       </select>
     </div>
     <div class="col">
-      <label class="form-label" asp-for="Format.NoDoubles">No Doubles *</label>
+      <label class="form-label" >No Doubles *</label>
       <select class="form-select form-select-lg" onchange="showHideElement('NoDoubles','no_doubles_cont','99')"
         asp-for="Tournament.Details.NoDoubles" asp-items="Model.SelectNoGames" id="NoDoubles">
       </select>
     </div>
     <div class="col invisible zero-height" id="no_singles_cont">
-      <label class="form-label" asp-for="CustomSingles">Specify number of singles *</label>
+      <label class="form-label" >Specify number of singles *</label>
       <input class="form-control form-control-lg" asp-for="CustomSingles" placeholder="2" />
     </div>
     <div class="col invisible zero-height" id="no_doubles_cont">
-      <label class="form-label" asp-for="CustomDoubles">Specify number of doubles *</label>
+      <label class="form-label" >Specify number of doubles *</label>
       <input class="form-control form-control-lg" asp-for="CustomDoubles" placeholder="2" />
     </div>
   </div>
