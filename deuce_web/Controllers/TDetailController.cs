@@ -22,8 +22,12 @@ public class TDetailController : WizardController
     }
 
     [HttpGet]
-    public async Task<IActionResult> Index()
+    public async Task<IActionResult> Index(int id)
     {
+        //Set the session proxy
+        _sessionProxy.TournamentId = id;
+        _model.Tournament.Id = id;
+
         _model.Validated = false;
         //Load page options from the from the database
         _model.Sports = await _cache.GetList<Sport>(CacheMasterDefault.KEY_SPORTS) ?? new();

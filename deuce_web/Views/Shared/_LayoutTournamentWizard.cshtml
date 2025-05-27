@@ -119,11 +119,22 @@
                 string[] backPageParts = Model.BackPage?.Split('/')??new string[0];
                 string controller = backPageParts.Length > 0 ? backPageParts[0] : "";
                 string action = backPageParts.Length > 1 ? backPageParts[1] : "";
+                
             }
-            <a class="btn btn-outline-dark animate-slide-start @Model.ShowBackButton" asp-controller="@controller" asp-action="@action">
-                <i class="fi-arrow-left animate-target fs-base ms-n1 me-2"></i>
-                Back
-            </a>
+            @if(string.IsNullOrEmpty(Model.RouteData))
+            {
+                <a class="btn btn-outline-dark animate-slide-start @Model.ShowBackButton" asp-controller="@controller" asp-action="@action" asp-route-id="@Model.RouteData">
+                    <i class="fi-arrow-left animate-target fs-base ms-n1 me-2"></i>
+                    Back
+                </a>
+            }
+            else
+            {
+                <a class="btn btn-outline-dark animate-slide-start @Model.ShowBackButton" asp-controller="@controller" asp-action="@action" asp-route-id="@Model.RouteData">
+                    <i class="fi-arrow-left animate-target fs-base ms-n1 me-2"></i>
+                    Back
+                </a>
+            }
             <a class="btn btn-dark animate-slide-end ms-auto" onclick="submitForm()">
                 Next
                 <i class="fi-arrow-right animate-target fs-base ms-2 me-n1"></i>

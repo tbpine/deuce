@@ -37,7 +37,7 @@
                         <td>@startDate</td>
                         <td>@intervalLabel</td>
                         <td>@tourTypeLabel</td>
-                        <td><a class="btn" asp-controller="TournamentWizard" asp-action="Index"
+                        <td><a class="btn" asp-controller="TDetail" asp-action="Index"
                                 asp-route-id="@iterTour.Id">Edit</a>
                         <td>
                             @if (iterTour.Status == TournamentStatus.Start)

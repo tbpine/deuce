@@ -11,6 +11,7 @@ public class ViewModelTournamentWizard
     protected bool _loggedIn = false;
     protected string? _showBackButton;
     protected string? _backPage;
+    protected string? _routeData;
     public bool Validated { get; set; }
     public string NameValidation { get; set; } = "";
 
@@ -25,6 +26,7 @@ public class ViewModelTournamentWizard
 
     public string? ShowBackButton { get => _showBackButton; set => _showBackButton = value; }
     public string? BackPage { get => _backPage; set => _backPage = value; }
+    public string? RouteData { get => _routeData; set => _routeData = value; }
     public Tournament Tournament { get=>_tournament; set=> _tournament = value; }
     public TournamentVenue Venue { get; set; } = new();
     public TournamentDetail TournamentDetail { get; set; } = new();

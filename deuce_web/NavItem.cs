@@ -29,6 +29,7 @@ public class NavItem
         Action = action;
     }
 
+
     public string Label { get; set; } = "";
     public string Resource { get; set; } = "";
     public bool IsSelected { get; set; }
@@ -36,6 +37,7 @@ public class NavItem
     public string Icon { get; set; } = "";
     public string Controller { get; set; } = String.Empty;
     public string Action { get; set; } = String.Empty;
+    public string? RouteData { get; set; }
 
     
 };
