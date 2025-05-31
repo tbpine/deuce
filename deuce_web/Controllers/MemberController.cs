@@ -68,7 +68,7 @@ public class MemberController : Controller
         //Fill _model properties with session values
         _model.Tournament.Id = _sessionProxy?.TournamentId ?? 0;
         _model.Organization.Id = _sessionProxy?.OrganizationId ?? 0;
-        
+        _model.CurrentRound = _sessionProxy?.CurrentRound ?? 0;
         
     }
 

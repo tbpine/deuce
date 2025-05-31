@@ -122,32 +122,79 @@ public class TournamentController : MemberController
 
     public async Task<IActionResult> Scores()
     {
-        //Get the current tournament
-        //DB access
-        _model.Tournament = await _tourGateway.GetTournament(_model.Tournament.Id);
-
-        IGameMaker gm = new GameMakerTennis();
-
-        //Extract teams and players
-        TeamRepo teamRepo = new TeamRepo(_model.Tournament, _dbConnection);
-        List<Team> listOfTeams = (await teamRepo.GetListAsync(_model.Tournament.Id));
-
-        //TODO: This is incorrect.
-        //The schedule should be built from
-        //rows of the match and match_player tables
-        //respectively.
-        //Get the schedule from the database
-        _model.Schedule = await BuildScheduleFromDB();
-
-        //Get scores using  ProxyScores method GetScores
-        List<Score> listOfScores = await ProxyScores.GetScores(_model.Tournament.Id, _model.CurrentRound, _dbConnection);
-        //use LINQ t6o filter scores by round order by permutation and set
-        _model.RoundScores = listOfScores.Where(s => s.Round == _model.CurrentRound).OrderBy(s => s.Permutation).ThenBy(s => s.Match).ThenBy(s => s.Set).ToList();
-
+        try
+        {
+            //Set the current round to zero
+            _model.CurrentRound = 0;
+            _sessionProxy.CurrentRound = 0;
+            await LoadScore();
+        }
+        catch (Exception ex)
+        {
+            _log.LogCritical(ex, ex.Message);
+            _model.Error = ex.Message;
+        }
+        
         return View("Scores", _model);
 
     }
 
+   
+    public async Task<IActionResult> ChangeRound(int newRound)
+    {
+        //Save the current round before changing
+        try
+        {
+            //Get scores from the form
+            FormReaderScoring formReader = new FormReaderScoring();
+            var formScores = formReader.Parse(this.Request.Form, _model.Tournament.Id ?? 0);
+        }
+        catch (Exception ex)
+        {
+            _log.LogCritical(ex, ex.Message);
+            _model.Error = ex.Message;
+        }
+    }
+
+    /// <summary>
+    /// Save scores for the current round.
+    /// </summary>
+    /// <returns></returns>
+    public async Task<IActionResult> SaveScores()
+    {
+        foreach (var kp in this.Request.Form)
+            Debug.Write(kp.Key + "=" + kp.Value + "\n");
+
+        try
+        {
+            //Get round permutation and games
+            int currentRound = _model.CurrentRound;
+            FormReaderScoring formReader = new FormReaderScoring();
+            var formScores = formReader.Parse(this.Request.Form, _model.Tournament.Id ?? 0);
+            //Use proxy to save
+            await ScoreKeeper.Save(_model.Tournament.Id, formScores, currentRound, _dbConnection);
+
+            //Get the selected round from the form (what was selected on screen)  
+            string? strCR = this.Request.Form["current_round"];
+            _currentRound = int.Parse(strCR ?? "0");
+
+            Title = _tournament?.Label ?? "";
+            //Set session current round to the one selected on the form
+            await LoadPage();
+            if (_sessionProxy is not null) _sessionProxy.CurrentRound = _currentRound;
+            return Page();
+
+        }
+        catch (Exception ex)
+        {
+            _log.LogCritical(ex.Message);
+        }
+
+        return Page();
+    }
+
+   
+    // ...existing code...
     //Build schedule from the database
     private async Task<Schedule?> BuildScheduleFromDB()
     {
@@ -173,5 +220,5 @@ public class TournamentController : MemberController
     public IActionResult Edit()
     {
         return RedirectToAction("Index", "TDetail", new { id = _model.Tournament.Id });
-    }   
+    }
 }

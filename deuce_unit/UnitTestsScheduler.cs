@@ -16,8 +16,13 @@ public class UnitTestsScheduler
         tournament.Type = 1;
         //1 for tennis for now.
         tournament.Sport = 1;
-        tournament.Format = new Format(1, 1, 1);
-        tournament.TeamSize = 1;
+        tournament.Details = new TournamentDetail
+        {
+            Sets = 1,
+            NoSingles = 1,
+            NoDoubles = 1,
+        };
+        tournament.Details.TeamSize = 1;
 
         IGameMaker gm = new GameMakerTennis();
         //Teams
@@ -59,9 +64,13 @@ public class UnitTestsScheduler
         tournament.Type = 1;
         //1 for tennis for now.
         tournament.Sport = 1;
-        Format fmt = new Format(noSingles, noDoubles, 1);
-        tournament.Format = fmt;
-        tournament.TeamSize = teamSize;
+        tournament.Details = new TournamentDetail
+        {
+            Sets = 1,
+            NoSingles = noSingles,
+            NoDoubles = noDoubles,
+        };
+        tournament.Details.TeamSize = teamSize;
 
         IGameMaker gm = new GameMakerTennis();
         //Teams
@@ -70,12 +79,12 @@ public class UnitTestsScheduler
         for (int i = 0; i < noTeams; i++)
         {
             Team t = new Team(i + 1, $"team_{i + 1}");
-            for (int j = 0; j < tournament.TeamSize; j++)
+            for (int j = 0; j < tournament.Details.TeamSize; j++)
             {
                 t.AddPlayer(new Player
                 {
-                    Id = j + i*tournament.TeamSize,
-                    First = $"player_{j + i*tournament.TeamSize}",
+                    Id = j + i*tournament.Details.TeamSize,
+                    First = $"player_{j + i*tournament.Details.TeamSize}",
                     Last = $""
                 });
             }
@@ -92,8 +101,8 @@ public class UnitTestsScheduler
 
         Assert.IsNotNull(results, "Null result");
         Assert.AreEqual<int>(results.NoRounds, noTeams - 1, "Incorrect rounds");
-        Assert.AreEqual<int>(results.GetRoundAtIndex(0)?.NoGames() ?? 0, (fmt.NoSingles + fmt.NoDoubles) * (noTeams /2) , "Incorrect games");
-        //Assert.AreEqual<int>(results.NoMatches(), (fmt.NoSingles + fmt.NoDoubles) * (noTeams /2) * (noTeams-1), "Incorrect games");
+        Assert.AreEqual<int>(results.GetRoundAtIndex(0)?.NoGames() ?? 0, (tournament.Details.NoSingles + tournament.Details.NoDoubles) * (noTeams /2) , "Incorrect games");
+        //Assert.AreEqual<int>(results.NoMatches(), (tournament.Details.NoSingles + tournament.Details.NoDoubles) * (noTeams /2) * (noTeams-1), "Incorrect games");
     }
 
 

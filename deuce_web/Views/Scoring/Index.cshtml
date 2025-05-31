@@ -7,7 +7,7 @@
 
 <!-- Account listings content -->
 <div class="col-lg-9">
-<h1 class="h2 pb-2 pb-lg-3">Model.Title</h1>
+<h1 class="h2 pb-2 pb-lg-3">@Model.Title</h1>
 
 <!-- Nav pills -->
 <div class="nav overflow-x-auto mb-2">
@@ -17,7 +17,7 @@
         <li class="nav-item me-1" role="presentation">
         @{ string active = (i == (Model.CurrentRound+1) ? "active" : "");}                    
             <button type="button" class="nav-link text-nowrap @active" id="published-tab" data-bs-toggle="pill" data-bs-target="#published" role="tab" aria-controls="published"
-            asp-contoller="Tournament" asp-action="ChangeRound" asp-route-id="@(i-1)" > 
+            asp-controller="Scoring" asp-action="ChangeRound" asp-route-round="@(i-1)"> 
         @i
             </button> 
         </li>
@@ -33,25 +33,25 @@
     <!-- Master checkbox + Action buttons -->
     <div class="nav align-items-center mb-4">
         <div class="d-flex flex-wrap" id="published-action-buttons">
-            <a class="nav-link position-relative px-0 pe-sm-2 py-2 me-4" onclick="printToWindow(false, @(Model.CurrentRound))">
+            <a class="nav-link position-relative px-0 pe-sm-2 py-2 me-4" asp-controller="Scoring" asp-action="Print" asp-route-round="@(Model.CurrentRound)">
                 <i class="fi-printer fs-base me-2"></i>
                 <span class="hover-effect-underline stretched-link d-none d-md-inline">Print</span>
             </a>
         </div>
         <div class="d-flex flex-wrap" id="published-action-buttons">
-            <a class="nav-link position-relative px-0 pe-sm-2 py-2 me-4" onclick="printToWindow(true, @(Model.CurrentRound))">
+            <a class="nav-link position-relative px-0 pe-sm-2 py-2 me-4" asp-controller="Scoring" asp-action="PrintScores" asp-route-round="@(Model.CurrentRound)">
                 <i class="fi-printer fs-base me-2"></i>
                 <span class="hover-effect-underline stretched-link d-none d-md-inline">Print Scores</span>
             </a>
         </div>
         <div class="d-flex flex-wrap" id="published-action-buttons">
-            <a class="nav-link position-relative px-0 pe-sm-2 py-2 me-4" onclick="postAction('save')">
+            <a class="nav-link position-relative px-0 pe-sm-2 py-2 me-4" asp-controller="Scoring" asp-action="Save" >
                 <i class="fi-save fs-base me-2"></i>
                 <span class="hover-effect-underline stretched-link d-none d-md-inline">Save</span>
             </a>
         </div>
         <div class="d-flex flex-wrap" id="published-action-buttons">
-            <a class="nav-link position-relative px-0 pe-sm-2 py-2 me-4" href="#!">
+            <a class="nav-link position-relative px-0 pe-sm-2 py-2 me-4" asp-controller="Scoring" asp-action="Reload" >
                 <i class="fi-refresh-ccw fs-base me-2"></i>
                 <span class="hover-effect-underline stretched-link d-none d-md-inline">Reload</span>
             </a>

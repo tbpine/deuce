@@ -15,8 +15,15 @@ public class UnitsPdfWriter
         tournament.Type = 1;
         //1 for tennis for now.
         tournament.Sport = 1;
-        tournament.Format = new Format(2, 2, 1);
-        tournament.TeamSize = 2;
+        tournament.Details = new TournamentDetail
+        {
+            Sets = 1,
+            NoSingles = 2,
+            NoDoubles = 1,
+            TeamSize = 2
+        };
+
+        tournament.Details.TeamSize = 2;
         tournament.Start = DateTime.Now;
         tournament.End = DateTime.Now;
         tournament.Interval = 1;
@@ -29,7 +36,7 @@ public class UnitsPdfWriter
 
         for (int i = 0; i < noPlayers; i++)
         {
-            if (i % tournament.TeamSize == 0)
+            if (i % tournament.Details.TeamSize == 0)
             {
                 currentTeam = new Team(i + 1, $"team_{i + 1}");
                 teams.Add(currentTeam);

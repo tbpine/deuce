@@ -22,8 +22,8 @@ class AssignTournament
 
         //1 for tennis for now.
         tournament.Sport = sport;
-        tournament.Format = new Format(noSingle, noDouble, sets);
-        tournament.TeamSize = teamSize;
+        tournament.Details = new TournamentDetail(noSingle, noDouble, sets);
+        tournament.Details.TeamSize = teamSize;
 
         IGameMaker gm = new GameMakerTennis();
 

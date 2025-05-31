@@ -33,4 +33,12 @@ public class TournamentDetail
         _noDoubles = 2;
         _teamSize = 2;
     }
+
+     public TournamentDetail(int noSingle, int noDoubles, int noSets)
+    {
+
+        _noSingles = 2;
+        _noDoubles = 2;
+        _sets = noSets;
+    }
 }
