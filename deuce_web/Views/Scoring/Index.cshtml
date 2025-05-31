@@ -33,13 +33,13 @@
     <!-- Master checkbox + Action buttons -->
     <div class="nav align-items-center mb-4">
         <div class="d-flex flex-wrap" id="published-action-buttons">
-            <a class="nav-link position-relative px-0 pe-sm-2 py-2 me-4" asp-controller="Scoring" asp-action="Print" asp-route-round="@(Model.CurrentRound)">
+            <a class="nav-link position-relative px-0 pe-sm-2 py-2 me-4" asp-controller="Scoring" asp-action="Print" asp-route-round="@(Model.CurrentRound)" asp-route-show_scores="false">
                 <i class="fi-printer fs-base me-2"></i>
                 <span class="hover-effect-underline stretched-link d-none d-md-inline">Print</span>
             </a>
         </div>
         <div class="d-flex flex-wrap" id="published-action-buttons">
-            <a class="nav-link position-relative px-0 pe-sm-2 py-2 me-4" asp-controller="Scoring" asp-action="PrintScores" asp-route-round="@(Model.CurrentRound)">
+            <a class="nav-link position-relative px-0 pe-sm-2 py-2 me-4" asp-controller="Scoring" asp-action="Print" asp-route-round="@(Model.CurrentRound)" asp-route-show_scores="true">
                 <i class="fi-printer fs-base me-2"></i>
                 <span class="hover-effect-underline stretched-link d-none d-md-inline">Print Scores</span>
             </a>

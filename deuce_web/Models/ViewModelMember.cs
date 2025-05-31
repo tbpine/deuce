@@ -32,7 +32,7 @@ public class ViewModelMember
 
     public int NoRounds { get => _schedule?.NoRounds ?? 0; }
     public int NoSets { get => Tournament?.Details?.Sets ?? 1; }
-    public int CurrentRound { get => _currentRound; }
+    public int CurrentRound { get => _currentRound; set => _currentRound = value; }
 
     public Schedule? Schedule { get => _schedule; set => _schedule = value; }
 
@@ -41,8 +41,8 @@ public class ViewModelMember
     //For summary
     public string HtmlTour { get; set; } = "";
     public string HtmlTourDetail { get; set; } = "";
-
-
+    public string Title { get; set; }
+    
     /// <summary>
     /// List of tournaments.
     /// </summary>

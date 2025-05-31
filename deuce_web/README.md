@@ -34,4 +34,5 @@ existing scores. If the current date has passed the start date, warn user that s
     page properties.
 - [X] Move member's area to MVC
     - [X] Derive Controllers in the member's area from MemberController
-- [] Wizard testing for each screen.
+- [X] Wizard testing for each screen.
+ - [] Scoring controller

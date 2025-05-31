@@ -4,15 +4,15 @@
 
 using Microsoft.AspNetCore.Mvc;
 using deuce;
+using System.Data.Common;
 
-
-public class ScoringController : MemberedController
+public class ScoringController : MemberController
 {
 
     private readonly DbRepoRecordTeamPlayer _deRepoRecordTeamPlayer;
     private readonly DbRepoRecordSchedule _dbRepoRecordSchedule;
     private readonly DbConnection _dbConnection;
-
+    private readonly ILogger<ScoringController> _log;
 
     /// <summary>
     /// Scoring controller for managing scores in tournaments.
@@ -29,20 +29,20 @@ public class ScoringController : MemberedController
     /// <param name="dbRepoRecordSchedule">DbRepo record schedule</param>
     public ScoringController(ILogger<ScoringController> log, ISideMenuHandler handlerNavItems, IServiceProvider sp, IConfiguration config,
     ITournamentGateway tgateway, SessionProxy sessionProxy, DbRepoRecordTeamPlayer dbRepoRecordTeamPlayer, DbConnection dbConnection,
-    DbRepoRecordSchedule dbRepoRecordSchedule)
+    DbRepoRecordSchedule dbRepoRecordSchedule) : base( handlerNavItems, sp, config, tgateway, sessionProxy)
     {
-        base(log, handlerNavItems, sp, config, tgateway, sessionProxy);
+        _log = log;
         _deRepoRecordTeamPlayer = dbRepoRecordTeamPlayer;
         _dbRepoRecordSchedule = dbRepoRecordSchedule;
         _dbConnection = dbConnection;
     }
 
     [HttpGet]
-    public async Task<IActionResult> Index(int tournamentId)
+    public async Task<IActionResult> Index(int tournament)
     {
         // Set the tournament ID in the model
-        _model.Tournament.Id = tournamentId;
-        SessionProxy.TournamentId = tournamentId;
+        _model.Tournament.Id = tournament;
+        _sessionProxy.TournamentId = tournament;
         // Set the current round to 0
         _model.CurrentRound = 0;
         
@@ -53,8 +53,7 @@ public class ScoringController : MemberedController
         catch (Exception ex)
         {
             // Log the error and return an error view
-            _log.LogError(ex, "Error retrieving tournament details for ID {TournamentId}", tournamentId);
-            return View("Error", new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+            _log.LogError(ex, "Error retrieving tournament details for ID {TournamentId}", _model.Tournament.Id);
         }
 
         // Load the scores for the current tournament
@@ -123,7 +122,7 @@ public class ScoringController : MemberedController
 
     }
 
-    public async Task<IActionResult> Print(int round, bool showScores)
+    public async Task<IActionResult> Print(int round, bool show_scores)
     {
         //Get the current tournament from the gateway
 
@@ -139,7 +138,7 @@ public class ScoringController : MemberedController
         List<Score>? formScores = null;
         //Get scores for the current round
         //from the form values
-        if (showScores)
+        if (show_scores)
         {
 
             // FormReaderScoring formReader = new FormReaderScoring();
@@ -179,18 +178,14 @@ public class ScoringController : MemberedController
             _log.LogError(ex.Message);
         }   
 
-        return Page();
+        return View("Index", _model);
 
-    }
-
-    public async Task<IActionResult> PrintScores(int round)
-    {
-    }
-    {
     }
 
     public async Task<IActionResult> Reload()
     {
+        await LoadPage();
+        return View("Index", _model);
     }
 
 
