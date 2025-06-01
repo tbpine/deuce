@@ -15,9 +15,11 @@
     <ul class="nav nav-pills flex-nowrap gap-2 pb-2 mb-1" role="tablist" id="pills_round">
     @for(int i = 1 ; i <=  Model.NoRounds; i++){
         <li class="nav-item me-1" role="presentation">
-        @{ string active = (i == (Model.CurrentRound+1) ? "active" : "");}                    
+        @{ string active = (i == (Model.CurrentRound+1) ? "active" : "");
+            string action = $"Scoring/ChangeRound?round={i-1}";
+        }                    
             <button type="button" class="nav-link text-nowrap @active" id="published-tab" data-bs-toggle="pill" data-bs-target="#published" role="tab" aria-controls="published"
-            asp-controller="Scoring" asp-action="ChangeRound" asp-route-round="@(i-1)"> 
+            onclick="submitAction('@action')"> 
         @i
             </button> 
         </li>
@@ -66,7 +68,7 @@
     </div>
 
     <!-- Published listings -->
-    <form asp-action="~/Scoring" method="post" id="mainForm">
+    <form  method="post" id="mainForm" >
         <input type="hidden" name="action" id="action"/>
         <input id="current_round" name="current_round" type="hidden" value="0"/>
         <div class="vstack gap-4" id="publishedSelection">

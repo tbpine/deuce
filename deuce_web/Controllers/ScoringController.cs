@@ -5,7 +5,7 @@
 using Microsoft.AspNetCore.Mvc;
 using deuce;
 using System.Data.Common;
-
+using System.Diagnostics;
 public class ScoringController : MemberController
 {
 
@@ -45,7 +45,7 @@ public class ScoringController : MemberController
         _sessionProxy.TournamentId = tournament;
         // Set the current round to 0
         _model.CurrentRound = 0;
-        
+        _sessionProxy.CurrentRound = 0;
         try
         {
             await LoadScore();
@@ -85,7 +85,7 @@ public class ScoringController : MemberController
         //Change the round in the model
         _model.CurrentRound = round;
         //And the session proxy
-        _sessionProxy.CurrentRound = round;
+        if (_sessionProxy is not null) _sessionProxy.CurrentRound = round;
         //Reload the scores for the new round
         await LoadScore();
 
@@ -153,16 +153,16 @@ public class ScoringController : MemberController
         _model.Tournament.Schedule = schedule;
 
         //Load Page and return if the schedule is null
-        if (schedule is null || _tournament is null)
+        if (schedule is null || tournament is null)
         {
-            await LoadPage();
-            return Page();
+            await LoadScore();
+            return View("Index", _model);
         }
 
 
         //Use the PdfPrinter class to generate the PDF
 
-        PdfPrinter pdfPrinter = new PdfPrinter(_schedule);
+        PdfPrinter pdfPrinter = new PdfPrinter(schedule);
         //Get the response output stream
         //Send the PDF in the response.
         this.Response.ContentType = "application/pdf";
@@ -184,7 +184,7 @@ public class ScoringController : MemberController
 
     public async Task<IActionResult> Reload()
     {
-        await LoadPage();
+        await LoadScore();
         return View("Index", _model);
     }
 

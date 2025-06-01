@@ -41,7 +41,7 @@ public class ViewModelMember
     //For summary
     public string HtmlTour { get; set; } = "";
     public string HtmlTourDetail { get; set; } = "";
-    public string Title { get; set; }
+    public string Title { get; set; } = "";
     
     /// <summary>
     /// List of tournaments.

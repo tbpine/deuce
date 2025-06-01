@@ -75,3 +75,14 @@ function printToWindow(showScores, round)
     window.open(url, "_blank");
 }
 
+/**
+ * 
+ * @param {*} action action to take Contoller/Action/Id
+ */
+function submitAction(action)
+{
+    let mForm= document.getElementById("mainForm");
+    mForm.action = action;
+    mForm.submit();
+
+}
