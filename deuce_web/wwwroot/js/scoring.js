@@ -67,11 +67,7 @@ function makeRandomScore() {
 function printToWindow(showScores, round)
 {
     //Get the base url and add an action parameter to it
-    let baseUrl = window.location.href.split("?")[0];
-    let action = document.getElementById("action").value;
-    var url = baseUrl + "?action=" + (showScores ? "print_scores" : "print"); 
-    url += "&round=" + round;
-    //Open in a new window
+    let url = window.location.protocol + "//" + window.location.host + "/Scoring/Print?round=" + round + "&show_scores=" + (showScores? "true" : "false");
     window.open(url, "_blank");
 }
 
@@ -82,7 +78,9 @@ function printToWindow(showScores, round)
 function submitAction(action)
 {
     let mForm= document.getElementById("mainForm");
-    mForm.action = action;
+    // Build URL from protocal and domain
+    let baseUrl = window.location.protocol + "//" + window.location.host + "/" + action;
+    mForm.action =  baseUrl;
     mForm.submit();
 
 }
