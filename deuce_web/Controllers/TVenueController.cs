@@ -7,11 +7,11 @@ using deuce;
 /// </summary>
 public class TVenueController : WizardController
 {
-    private readonly ILogger<TournamentVenuePageModel> _log;
+    private readonly ILogger<TVenueController> _log;
     private readonly DbRepoVenue _dbRepoVenue;
     private readonly ICacheMaster _cache;
 
-    public TVenueController(ILogger<TournamentVenuePageModel> log, IHandlerNavItems handlerNavItems,
+    public TVenueController(ILogger<TVenueController> log, IHandlerNavItems handlerNavItems,
    IConfiguration cfg, IServiceProvider sp, DbRepoVenue dbrepoVenue, ICacheMaster cache) : base(handlerNavItems, sp, cfg)
     {
         _log = log;

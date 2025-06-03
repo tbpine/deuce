@@ -9,7 +9,7 @@ using System.Data.Common;
 public class TournamentController : MemberController
 {
 
-    private readonly ILogger<TournamentsPageModel> _log;
+    private readonly ILogger<TournamentController> _log;
     private readonly DbRepoTournamentList _dbrepoTournamentList;
     private readonly ICacheMaster _cache;
 
@@ -19,7 +19,7 @@ public class TournamentController : MemberController
     private readonly DbConnection _dbConnection;
     private readonly DbRepoRecordSchedule _dbRepoRecordSchedule;
 
-    public TournamentController(ILogger<TournamentsPageModel> log, ISideMenuHandler handlerNavItems, IServiceProvider sp, IConfiguration config,
+    public TournamentController(ILogger<TournamentController> log, ISideMenuHandler handlerNavItems, IServiceProvider sp, IConfiguration config,
     ITournamentGateway tgateway, SessionProxy sessionProxy, ICacheMaster cache, DbRepoTournamentList dbrepoTournamentList,
     DbRepoTournament dbRepoTournament, DbRepoTournamentDetail dbRepoTournamentDetail, DisplayToHTML displayToHTML, DbConnection dbConnection,
     DbRepoRecordSchedule dbRepoRecordSchedule)

@@ -7,13 +7,13 @@ using deuce_web.ext;
 
 public class TFormatPlayerController : WizardController
 {
-    private readonly ILogger<TournamentFormatPlayerPageModel> _log;
+    private readonly ILogger<TFormatPlayerController> _log;
     // private readonly IFormValidator _formValidator;
     private readonly ICacheMaster _cache;
     private readonly DbRepoTournamentDetail _dbRepoTournamentDetail;
     private readonly DbRepoTournament _dbRepoTournament;
 
-    public TFormatPlayerController(ILogger<TournamentFormatPlayerPageModel> log, IServiceProvider sp,
+    public TFormatPlayerController(ILogger<TFormatPlayerController> log, IServiceProvider sp,
     IConfiguration cfg, IHandlerNavItems hNavItems, ICacheMaster cache,
     DbRepoTournamentDetail dbRepoTournamentDetail,DbRepoTournament dbRepoTournament) 
     : base(hNavItems, sp, cfg)
