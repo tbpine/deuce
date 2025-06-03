@@ -11,7 +11,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 builder.Services.AddControllersWithViews();
 
-builder.Services.AddRazorPages();
+// builder.Services.AddRazorPages();
 
 //
 //Store the client's session in memory: server side.
@@ -88,7 +88,7 @@ app.UseForwardedHeaders(new ForwardedHeadersOptions
 
 app.UseAuthorization();
 app.UseSession();
-app.MapRazorPages();
+// app.MapRazorPages();
 
 app.MapControllerRoute(
     name: "default",

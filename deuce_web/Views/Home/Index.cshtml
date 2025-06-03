@@ -1,0 +1,829 @@
+@{
+  Layout = "_LayoutIndex";
+}
+<!-- Hero with search form and featured events slider -->
+<section class="position-relative overflow-hidden pt-5" style="margin-top: -76px">
+  <div class="container position-relative pt-5 mt-sm-2">
+
+    <!-- Search form -->
+    <form class="position-relative z-3 bg-body border rounded shadow p-2 mb-4">
+      <div class="d-flex flex-column flex-md-row gap-2 p-1">
+        <div class="d-flex flex-column flex-sm-row w-100 gap-2 gap-sm-3">
+          <div class="position-relative w-100">
+            <i class="fi-search position-absolute top-50 start-0 translate-middle-y fs-xl text-secondary-emphasis ms-2"></i>
+            <input type="search" class="form-control form-control-lg form-icon-start border-0 rounded-0 pe-0" placeholder="Search by Artist, Events" required>
+          </div>
+          <hr class="d-sm-none m-0">
+          <hr class="vr d-none d-sm-block my-2">
+          <div class="position-relative w-100" style="max-width: 200px">
+            <i class="fi-map-pin position-absolute top-50 start-0 translate-middle-y z-1 fs-xl text-secondary-emphasis ms-2"></i>
+            <select class="form-select form-select-lg form-icon-start border-0" data-select='{
+            "classNames": {
+            "containerInner": ["form-select", "form-select-lg", "form-icon-start", "border-0"]
+            },
+            "searchEnabled": true
+            }' aria-label="Location select" required>
+              <option value="">Location</option>
+              <option value="New York">New York</option>
+              <option value="Los Angeles">Los Angeles</option>
+              <option value="Chicago">Chicago</option>
+              <option value="Houston">Houston</option>
+              <option value="Phoenix">Phoenix</option>
+              <option value="Philadelphia">Philadelphia</option>
+              <option value="San Antonio">San Antonio</option>
+              <option value="San Diego">San Diego</option>
+              <option value="Dallas">Dallas</option>
+              <option value="San Jose">San Jose</option>
+            </select>
+          </div>
+        </div>
+        <button type="submit" class="btn btn-lg btn-primary">Search</button>
+      </div>
+    </form>
+
+    <!-- Featured events slider -->
+    <div class="row position-relative z-2">
+      <div class="col-md-4 d-flex flex-column">
+        <div class="text-center text-md-start pt-3 pt-md-4 pt-lg-5 mt-xl-5 mb-4">
+          <h1 class="display-5 mt-xxl-3 mb-xxl-4">Tournaments Near You</h1>
+          <p class="mb-0">Register for all tournaments in one place</p>
+        </div>
+        <div class="d-flex justify-content-center justify-content-md-start gap-3 mt-auto pb-lg-2 mb-4 mb-md-0 mb-lg-4">
+          <button type="button" class="btn btn-icon btn-outline-secondary animate-slide-start bg-body rounded-circle" id="hero-prev" aria-label="Prev">
+            <i class="fi-chevron-left fs-lg animate-target"></i>
+          </button>
+          <button type="button" class="btn btn-icon btn-outline-secondary animate-slide-end bg-body rounded-circle" id="hero-next" aria-label="Next">
+            <i class="fi-chevron-right fs-lg animate-target"></i>
+          </button>
+        </div>
+      </div>
+      <div class="col-md-8">
+        <div class="swiper" data-swiper='{
+        "effect": "creative",
+        "loop": true,
+        "speed": 450,
+        "autoplay": {
+        "delay": 7000,
+        "disableOnInteraction": false
+        },
+        "creativeEffect": {
+        "prev": {
+        "translate": [0, 0, -800]
+        },
+        "next": {
+        "translate": [0, 0, -800]
+        }
+        },
+        "navigation": {
+        "prevEl": "#hero-prev",
+        "nextEl": "#hero-next"
+        }
+        }'>
+          <div class="swiper-wrapper">
+
+            <!-- Event -->
+            <div class="swiper-slide">
+              <a class="ratio d-block bg-body-secondary rounded-4 overflow-hidden" href="single-entry-events.html" style="--fn-aspect-ratio: calc(463 / 856 * 100%)">
+                <img src="assets/img/home/events/hero-slider/01.jpg" alt="Image">
+              </a>
+              <div class="position-absolute shadow" style="bottom: 9%; left: 7%; width: 160px; height: 86px" data-bs-theme="light">
+                <div class="position-absolute vstack text-white z-2" style="top: 19px; left: 75px">
+                  <div style="font-size: 10px; line-height: 10px">From</div>
+                  <div class="fs-4 fw-semibold">$56</div>
+                </div>
+                <svg class="position-relative z-1" style="margin: 4px 0 0 8px" xmlns="http://www.w3.org/2000/svg" width="142" height="69"><path class="text-primary" d="M8 0h31.189c.666 2.588 3.015 4.5 5.811 4.5s5.145-1.912 5.811-4.5H134a8 8 0 0 1 8 8v53a8 8 0 0 1-8 8H50.659c-.824-2.33-3.046-4-5.659-4s-4.835 1.67-5.659 4H8a8 8 0 0 1-8-8V8a8 8 0 0 1 8-8z" fill="currentColor"/><path d="M45 65V4.5c2.796 0 5.145-1.912 5.811-4.5H134a8 8 0 0 1 8 8v53a8 8 0 0 1-8 8H50.659c-.824-2.33-3.046-4-5.659-4z" fill="url(#A)"/><path d="M45 4v61" stroke="#1d2735" stroke-width="1.5" stroke-dasharray="4 2"/><path d="M23.5 25l.008 8.919a1 1 0 0 0 .499.865l7.72 4.466-7.728-4.453a1 1 0 0 0-.998 0l-7.728 4.453 7.72-4.466a1 1 0 0 0 .499-.865L23.5 25z" stroke="currentColor" stroke-width="2" style="color: var(--fn-primary-text-emphasis)"/><defs><linearGradient id="A" x1="46" y1="35.5" x2="66.5" y2="35.5" gradientUnits="userSpaceOnUse"><stop stop-color="rgba(0,0,0,.15)"/><stop class="text-primary" offset="1" stop-color="currentColor" stop-opacity="0"/></linearGradient></defs></svg>
+                <img src="assets/img/home/events/hero-slider/ticket.png" class="position-absolute top-0 start-0 w-100 h-100 object-fit-cover" alt="Ticket">
+              </div>
+            </div>
+
+            <!-- Event -->
+            <div class="swiper-slide">
+              <a class="ratio d-block bg-body-secondary rounded-4 overflow-hidden" href="single-entry-events.html" style="--fn-aspect-ratio: calc(463 / 856 * 100%)">
+                <img src="assets/img/home/events/hero-slider/02.jpg" alt="Image">
+              </a>
+              <div class="position-absolute shadow" style="bottom: 9%; left: 7%; width: 160px; height: 86px" data-bs-theme="light">
+                <div class="position-absolute vstack text-white z-2" style="top: 19px; left: 75px">
+                  <div style="font-size: 10px; line-height: 10px">From</div>
+                  <div class="fs-4 fw-semibold">$40</div>
+                </div>
+                <svg class="position-relative z-1" style="margin: 4px 0 0 8px" xmlns="http://www.w3.org/2000/svg" width="142" height="69"><path class="text-primary" d="M8 0h31.189c.666 2.588 3.015 4.5 5.811 4.5s5.145-1.912 5.811-4.5H134a8 8 0 0 1 8 8v53a8 8 0 0 1-8 8H50.659c-.824-2.33-3.046-4-5.659-4s-4.835 1.67-5.659 4H8a8 8 0 0 1-8-8V8a8 8 0 0 1 8-8z" fill="currentColor"/><path d="M45 65V4.5c2.796 0 5.145-1.912 5.811-4.5H134a8 8 0 0 1 8 8v53a8 8 0 0 1-8 8H50.659c-.824-2.33-3.046-4-5.659-4z" fill="url(#A)"/><path d="M45 4v61" stroke="#1d2735" stroke-width="1.5" stroke-dasharray="4 2"/><path d="M23.5 25l.008 8.919a1 1 0 0 0 .499.865l7.72 4.466-7.728-4.453a1 1 0 0 0-.998 0l-7.728 4.453 7.72-4.466a1 1 0 0 0 .499-.865L23.5 25z" stroke="currentColor" stroke-width="2" style="color: var(--fn-primary-text-emphasis)"/><defs><linearGradient id="A" x1="46" y1="35.5" x2="66.5" y2="35.5" gradientUnits="userSpaceOnUse"><stop stop-color="rgba(0,0,0,.15)"/><stop class="text-primary" offset="1" stop-color="currentColor" stop-opacity="0"/></linearGradient></defs></svg>
+                <img src="assets/img/home/events/hero-slider/ticket.png" class="position-absolute top-0 start-0 w-100 h-100 object-fit-cover" alt="Ticket">
+              </div>
+            </div>
+
+            <!-- Event -->
+            <div class="swiper-slide">
+              <a class="ratio d-block bg-body-secondary rounded-4 overflow-hidden" href="single-entry-events.html" style="--fn-aspect-ratio: calc(463 / 856 * 100%)">
+                <img src="assets/img/home/events/hero-slider/03.jpg" alt="Image">
+              </a>
+              <div class="position-absolute shadow" style="bottom: 9%; left: 7%; width: 160px; height: 86px" data-bs-theme="light">
+                <div class="position-absolute vstack text-white z-2" style="top: 19px; left: 75px">
+                  <div style="font-size: 10px; line-height: 10px">From</div>
+                  <div class="fs-4 fw-semibold">Free</div>
+                </div>
+                <svg class="position-relative z-1" style="margin: 4px 0 0 8px" xmlns="http://www.w3.org/2000/svg" width="142" height="69"><path class="text-primary" d="M8 0h31.189c.666 2.588 3.015 4.5 5.811 4.5s5.145-1.912 5.811-4.5H134a8 8 0 0 1 8 8v53a8 8 0 0 1-8 8H50.659c-.824-2.33-3.046-4-5.659-4s-4.835 1.67-5.659 4H8a8 8 0 0 1-8-8V8a8 8 0 0 1 8-8z" fill="currentColor"/><path d="M45 65V4.5c2.796 0 5.145-1.912 5.811-4.5H134a8 8 0 0 1 8 8v53a8 8 0 0 1-8 8H50.659c-.824-2.33-3.046-4-5.659-4z" fill="url(#A)"/><path d="M45 4v61" stroke="#1d2735" stroke-width="1.5" stroke-dasharray="4 2"/><path d="M23.5 25l.008 8.919a1 1 0 0 0 .499.865l7.72 4.466-7.728-4.453a1 1 0 0 0-.998 0l-7.728 4.453 7.72-4.466a1 1 0 0 0 .499-.865L23.5 25z" stroke="currentColor" stroke-width="2" style="color: var(--fn-primary-text-emphasis)"/><defs><linearGradient id="A" x1="46" y1="35.5" x2="66.5" y2="35.5" gradientUnits="userSpaceOnUse"><stop stop-color="rgba(0,0,0,.15)"/><stop class="text-primary" offset="1" stop-color="currentColor" stop-opacity="0"/></linearGradient></defs></svg>
+                <img src="assets/img/home/events/hero-slider/ticket.png" class="position-absolute top-0 start-0 w-100 h-100 object-fit-cover" alt="Ticket">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <span class="position-absolute z-1 fw-bold" style="top: -15px; right: 100%; margin-right: -216px; font-size: 128px; color: var(--fn-tertiary-bg); text-shadow: 1px 1px 0 var(--fn-border-color), -1px 1px 0 var(--fn-border-color), -1px -1px 0 var(--fn-border-color), 1px -1px 0 var(--fn-border-color)">Hobbies</span>
+    <span class="position-absolute z-1 fw-bold" style="top: 82px; right: 100%; margin-right: -365px; font-size: 128px; color: var(--fn-tertiary-bg); text-shadow: 1px 1px 0 var(--fn-border-color), -1px 1px 0 var(--fn-border-color), -1px -1px 0 var(--fn-border-color), 1px -1px 0 var(--fn-border-color)">Concerts</span>
+    <span class="position-absolute z-1 fw-bold" style="top: 110px; left: 100%; margin-left: 90px; font-size: 128px; color: var(--fn-tertiary-bg); text-shadow: 1px 1px 0 var(--fn-border-color), -1px 1px 0 var(--fn-border-color), -1px -1px 0 var(--fn-border-color), 1px -1px 0 var(--fn-border-color)">Sports</span>
+    <span class="position-absolute z-1 fw-bold" style="top: 206px; left: 100%; margin-left: 10px; font-size: 128px; color: var(--fn-tertiary-bg); text-shadow: 1px 1px 0 var(--fn-border-color), -1px 1px 0 var(--fn-border-color), -1px -1px 0 var(--fn-border-color), 1px -1px 0 var(--fn-border-color)">Theaters</span>
+  </div>
+  <span class="position-absolute top-0 start-0 w-100 bg-body-tertiary d-lg-none" style="height: calc(100% - 20px)"></span>
+  <span class="position-absolute top-0 start-0 w-100 bg-body-tertiary d-none d-lg-block" style="height: calc(100% - 52px)"></span>
+</section>
+
+
+<!-- Categories: Row of cards that turns into carousel on screens < 1200px wide (xl breakpoint) -->
+<section class="container pt-2 pt-sm-3 pt-md-4 pt-lg-5 my-xxl-3">
+  <div class="swiper py-5" data-swiper='{
+  "slidesPerView": 2,
+  "spaceBetween": 16,
+  "pagination": {
+  "el": ".swiper-pagination",
+  "clickable": true
+  },
+  "breakpoints": {
+  "560": {
+  "slidesPerView": 3,
+  "spaceBetween": 24
+  },
+  "768": {
+  "slidesPerView": 4,
+  "spaceBetween": 24
+  },
+  "920": {
+  "slidesPerView": 5,
+  "spaceBetween": 24
+  },
+  "1200": {
+  "slidesPerView": 6,
+  "spaceBetween": 24
+  }
+  }
+  }'>
+    <div class="swiper-wrapper">
+
+      <!-- Category -->
+      <div class="swiper-slide">
+        <div class="nav nav-pills">
+          <a class="nav-link flex-column justify-content-center gap-2 flex-shrink-0 rounded-circle p-0 mx-auto" href="listings-events.html" style="width: 150px; height: 150px">
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor"><path d="M29.206 4.898c-.137-.317-.505-.463-.822-.326s-.462.505-.325.822c.947 2.189.68 4.708-.65 6.639l-.027-.029-9.515-9.515-.029-.027a6.91 6.91 0 0 1 6.639-.65c.317.137.685-.009.822-.326s-.009-.685-.326-.822a8.16 8.16 0 0 0-8.471 1.246l-.035-.001c-.529 0-1.026.206-1.399.58a1.98 1.98 0 0 0-.526 1.855 8.13 8.13 0 0 0-.9 4.516l-.051.053L3.402 21.086a3.39 3.39 0 0 0 .063 4.436l-.273.273a3.64 3.64 0 0 0 0 5.142C3.901 31.646 4.832 32 5.763 32s1.862-.354 2.571-1.063l2.919-2.919c.602-.602 1.582-.602 2.184 0l.985.985c.244.244.64.244.884 0s.244-.64 0-.884l-.985-.985a2.8 2.8 0 0 0-3.951 0l-2.92 2.919a2.39 2.39 0 0 1-3.374 0 2.39 2.39 0 0 1 0-3.374l.273-.273a3.39 3.39 0 0 0 2.104.853l.152.003a3.39 3.39 0 0 0 2.181-.793L20.958 16.28a.65.65 0 0 0 .054-.051l.732.033a8.12 8.12 0 0 0 3.783-.933c.15.035.303.053.456.053a1.97 1.97 0 0 0 1.399-.579c.394-.394.587-.915.578-1.433 1.978-2.344 2.472-5.643 1.247-8.473zM7.983 25.511a2.14 2.14 0 0 1-2.899-.128l-.297-.297-.298-.298a2.14 2.14 0 0 1-.128-2.899l9.75-11.648 5.521 5.521-11.648 9.75zm12.565-10.602l-5.585-5.586a6.89 6.89 0 0 1 .388-3.751l8.949 8.949a6.9 6.9 0 0 1-3.752.388zm5.949-.989a.73.73 0 0 1-1.031 0l-9.515-9.516a.73.73 0 0 1 0-1.031c.138-.138.321-.214.515-.214a.72.72 0 0 1 .515.214l9.515 9.515a.73.73 0 0 1 0 1.031zm-11.199.652c-.409-.409-.953-.635-1.532-.635a2.15 2.15 0 0 0-1.532.635l-2.021 2.021a2.15 2.15 0 0 0-.635 1.532 2.15 2.15 0 0 0 .635 1.532 2.16 2.16 0 0 0 3.064 0l2.021-2.021a2.17 2.17 0 0 0 0-3.064zm-4.202 4.202a.91.91 0 0 1-.268-.648.91.91 0 0 1 .268-.648l.569-.569 1.296 1.296-.569.569a.92.92 0 0 1-1.296 0zm3.318-2.021l-.569.569-1.296-1.296.569-.569a.91.91 0 0 1 1.296 0 .92.92 0 0 1 0 1.296zM27.043 3.455c.16 0 .32-.061.442-.183l.008-.008c.244-.244.244-.64 0-.884s-.64-.244-.884 0l-.008.008c-.244.244-.244.64 0 .884.122.122.282.183.442.183z"/></svg>
+            Tennis
+          </a>
+        </div>
+      </div>
+
+      <!-- Category -->
+      <div class="swiper-slide">
+        <div class="nav nav-pills">
+          <a class="nav-link flex-column justify-content-center gap-2 flex-shrink-0 rounded-circle p-0 mx-auto" href="listings-events.html" style="width: 150px; height: 150px">
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor"><path d="M31.384 11.639c-1.165-4.11-3.861-7.52-7.591-9.602S15.746-.552 11.636.613a15.98 15.98 0 0 0-9.062 6.693c-.187.29-.105.677.185.864s.677.105.864-.185a14.73 14.73 0 0 1 .618-.881l3.134.232c3.901.288 7.726 1.519 11.064 3.558a5.78 5.78 0 0 0 3.018.849h.468c.411 0 .818-.044 1.215-.13.374 1.208.591 2.469.644 3.762H1.268a14.57 14.57 0 0 1 .31-2.459c.073-.337-.142-.67-.48-.742s-.67.142-.742.48c-.544 2.533-.456 5.198.255 7.707a15.89 15.89 0 0 0 7.591 9.603C10.618 31.313 13.281 32 15.974 32a16.07 16.07 0 0 0 4.385-.613 15.89 15.89 0 0 0 9.603-7.591c2.083-3.73 2.587-8.047 1.422-12.157zm-8.2-8.511a14.77 14.77 0 0 1 3.262 2.464c.103 1.269-.312 2.485-1.173 3.426a4.54 4.54 0 0 1-1.367 1.024c-.571-1.425-1.352-2.771-2.334-4.007a16.16 16.16 0 0 0-6.226-4.767 14.65 14.65 0 0 1 7.837 1.86zm-1.26 7.366h-.468c-.835 0-1.653-.23-2.366-.666A26.08 26.08 0 0 0 7.467 6.09l-2.233-.165c1.82-1.945 4.146-3.372 6.743-4.109.209-.059.419-.113.629-.163a14.87 14.87 0 0 1 7.989 5.158 14.77 14.77 0 0 1 2.119 3.614 4.63 4.63 0 0 1-.789.068zm2.402.726c.702-.32 1.341-.78 1.871-1.36a5.8 5.8 0 0 0 1.432-2.932c1.156 1.482 2.025 3.188 2.553 5.051a14.85 14.85 0 0 1 .55 3.396h-5.699c-.054-1.429-.292-2.822-.707-4.155zM1.269 16.625h22.514a14.79 14.79 0 0 1-.51 3.303 5.89 5.89 0 0 0-1.196-.123h-.479a5.91 5.91 0 0 0-3.083.867 25.44 25.44 0 0 1-11.338 3.646l-3.196.236c-.965-1.357-1.7-2.884-2.168-4.534a14.8 14.8 0 0 1-.545-3.396zm3.65 9.113l2.35-.174c4.194-.31 8.308-1.633 11.897-3.826a4.66 4.66 0 0 1 2.431-.684h.479c.276 0 .547.025.812.07a14.75 14.75 0 0 1-2.294 4.064 14.87 14.87 0 0 1-8.002 5.162 14.81 14.81 0 0 1-3.782-1.478 14.76 14.76 0 0 1-3.892-3.134zm15.099 4.446c-1.544.438-3.119.619-4.677.552a16.16 16.16 0 0 0 6.232-4.77c1.086-1.367 1.926-2.868 2.508-4.462a4.66 4.66 0 0 1 1.437 1.068 4.61 4.61 0 0 1 1.203 3.555 14.65 14.65 0 0 1-6.703 4.058zm8.852-6.998c-.295.529-.619 1.034-.97 1.516-.192-1.1-.694-2.137-1.46-2.974-.558-.61-1.233-1.091-1.976-1.419.33-1.19.521-2.423.568-3.685h5.702a14.68 14.68 0 0 1-1.864 6.562zM1.797 10.732c.345 0 .625-.28.625-.625s-.28-.625-.625-.625-.625.28-.625.625.28.625.625.625z"/></svg>
+            Badminton
+          </a>
+        </div>
+      </div>
+
+      <!-- Category -->
+      <div class="swiper-slide">
+        <div class="nav nav-pills">
+          <a class="nav-link flex-column justify-content-center gap-2 flex-shrink-0 rounded-circle p-0 mx-auto" href="listings-events.html" style="width: 150px; height: 150px">
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor"><path d="M9.785 13.397a.62.62 0 0 0-.403-.147c-.345 0-.625.28-.625.625 0 .216.11.407.277.519a.62.62 0 0 0 .348.106c.345 0 .625-.28.625-.625 0-.192-.086-.363-.222-.478zm22.169-8.56c-.08-.226-.282-.387-.52-.414l-3.481-.387-.387-3.481c-.027-.239-.188-.442-.415-.521s-.479-.021-.649.149c-.076.076.71-.713-4.957 4.975a14.33 14.33 0 0 0-7.162-1.91 14.375 14.375 0 1 0 0 28.75 14.37 14.37 0 0 0 14.375-14.375 14.34 14.34 0 0 0-1.909-7.162l4.959-4.977c.17-.171.227-.423.147-.649zM26.468 1.99zm0 0l.265 2.383-4.093 4.098-.264-2.376 4.091-4.105zm-15.76 10.533c.169.301.55.408.851.238.924-.52 1.821-.762 2.824-.762a5.58 5.58 0 0 1 3.506 1.23l-1.784 1.787a3.1 3.1 0 0 0-1.721-.517 3.13 3.13 0 0 0-3.125 3.125 3.13 3.13 0 0 0 3.125 3.125 3.13 3.13 0 0 0 3.125-3.125 3.1 3.1 0 0 0-.519-1.725l1.784-1.787c.8.995 1.235 2.22 1.235 3.512 0 3.102-2.523 5.625-5.625 5.625s-5.625-2.523-5.625-5.625a5.53 5.53 0 0 1 .163-1.349c.078-.336-.131-.672-.467-.75s-.672.131-.75.467a6.75 6.75 0 0 0-.196 1.632c0 3.791 3.084 6.875 6.875 6.875s6.875-3.084 6.875-6.875a6.82 6.82 0 0 0-1.597-4.401l1.77-1.773a9.35 9.35 0 0 1 2.251 7.372c-.599 4.663-4.596 8.178-9.3 8.178a9.39 9.39 0 0 1-9.375-9.375 9.39 9.39 0 0 1 9.375-9.375 9.3 9.3 0 0 1 6.164 2.318l-1.771 1.773a6.82 6.82 0 0 0-4.394-1.591c-1.209 0-2.333.302-3.436.922-.301.169-.408.55-.238.851zm3.233 5.544c.243.243.639.245.884-.001l1.249-1.251a1.86 1.86 0 0 1 .183.809 1.88 1.88 0 0 1-1.875 1.875 1.88 1.88 0 0 1-1.875-1.875 1.88 1.88 0 0 1 1.875-1.875 1.86 1.86 0 0 1 .807.182l-1.249 1.251c-.244.244-.244.64.001.884zm13.567-.442c0 7.237-5.888 13.125-13.125 13.125S1.258 24.862 1.258 17.625 7.146 4.5 14.383 4.5c2.396 0 4.729.648 6.767 1.877l.359 3.228-.077.077A10.54 10.54 0 0 0 14.383 7 10.64 10.64 0 0 0 3.758 17.625 10.64 10.64 0 0 0 14.383 28.25c5.331 0 9.862-3.984 10.539-9.27.386-3.09-.56-6.122-2.605-8.416l.067-.067 3.246.361c1.229 2.038 1.878 4.371 1.878 6.768zm-1.596-7.994l-2.398-.266 1.405-1.407c-.015.016-.454.454 2.698-2.701l2.39.266c-.091.091.709-.712-4.095 4.109z"/></svg>
+            Martial Arts
+          </a>
+        </div>
+      </div>
+
+      <!-- Category -->
+      <div class="swiper-slide">
+        <div class="nav nav-pills">
+          <a class="nav-link flex-column justify-content-center gap-2 flex-shrink-0 rounded-circle p-0 mx-auto" href="listings-events.html" style="width: 150px; height: 150px">
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor"><path d="M16.625 5.767V3.75h3.125c.345 0 .625-.28.625-.625v-2.5c0-.345-.28-.625-.625-.625h-7.5c-.345 0-.625.28-.625.625v2.5c0 .345.28.625.625.625h3.125v2.017c-7.012.333-12.5 6.116-12.5 13.108a13.13 13.13 0 0 0 13.081 13.124L16 32a13.13 13.13 0 0 0 13.125-13.125c0-7.071-5.575-12.778-12.5-13.108zm8.686 11.267c1.874.659 2.564 1.383 2.564 1.842s-.69 1.183-2.564 1.842a26.54 26.54 0 0 0 0-3.684zm1.211-3.666a11.83 11.83 0 0 1 1.166 3.41c-.634-.411-1.473-.781-2.508-1.102a23.58 23.58 0 0 0-.649-3.32c.714.301 1.38.64 1.991 1.012zm-1.432-2.133a19.09 19.09 0 0 0-1.041-.407 18.88 18.88 0 0 0-.407-1.041 11.79 11.79 0 0 1 1.448 1.448zm-4.793 7.052a48.27 48.27 0 0 0-.08-2.313c1.386.151 2.676.378 3.809.673a25.18 25.18 0 0 1 .099 2.23 25.17 25.17 0 0 1-.099 2.23c-1.124.292-2.426.522-3.821.674a47.57 47.57 0 0 0 .091-3.494zm3.574-2.967c-1.256-.298-2.547-.489-3.748-.612-.121-1.353-.301-2.596-.535-3.695a21.62 21.62 0 0 1 3.477.8c.357 1.106.627 2.282.805 3.507zm-2.363-6.965a14.97 14.97 0 0 1 1.013 1.992 23.71 23.71 0 0 0-3.254-.64c-.29-1.018-.634-1.862-1.027-2.492a11.83 11.83 0 0 1 3.267 1.14zM16 22a40.26 40.26 0 0 1-3.011-.111l-.04-.551c-.02-.344-.315-.608-.66-.587s-.608.316-.588.66l.024.361c-1.369-.153-2.646-.38-3.751-.667a25.14 25.14 0 0 1-.099-2.23 25.38 25.38 0 0 1 .099-2.23c1.118-.291 2.388-.515 3.752-.667l-.025.36c-.021.345.241.641.585.662s.641-.241.662-.585l.041-.553a40.38 40.38 0 0 1 3.01-.111 40.24 40.24 0 0 1 2.956.107 46.58 46.58 0 0 1 .09 2.442c.014 1.242-.02 2.45-.095 3.594-.963.071-1.952.107-2.951.107zm2.848 1.153c-.136 1.388-.337 2.656-.596 3.746a25.4 25.4 0 0 1-4.456.004c-.321-1.272-.54-2.632-.676-3.752a41.91 41.91 0 0 0 2.88.099 41.73 41.73 0 0 0 2.848-.097zM13.121 14.6c.144-1.166.367-2.513.679-3.752a25.03 25.03 0 0 1 2.199-.098 25.01 25.01 0 0 1 2.276.104c.252 1.085.449 2.351.581 3.744a41.94 41.94 0 0 0-2.857-.098 42.06 42.06 0 0 0-2.879.1zm-.246-12.1V1.25h6.25V2.5h-6.25zm3.076 4.503c.008-.001.016-.001.024-.002.015-.001.02 0 .025 0 .063 0 .125.002.188.003.209.035.527.185.902.734.309.452.589 1.074.834 1.834A26.13 26.13 0 0 0 16 9.5a26.28 26.28 0 0 0-1.825.065c.534-1.579 1.173-2.516 1.776-2.562zm-5.459 1.351a11.84 11.84 0 0 1 3.384-1.161c-.393.626-.744 1.459-1.055 2.502-1.152.142-2.274.36-3.343.651a15.01 15.01 0 0 1 1.013-1.992zm1.986 2.648a34.7 34.7 0 0 0-.628 3.708 29.37 29.37 0 0 0-3.721.609 21.48 21.48 0 0 1 .806-3.507c1.116-.36 2.308-.632 3.543-.81zm-4.12-1.217c-.144.337-.28.685-.407 1.041a18.87 18.87 0 0 0-1.041.407 11.85 11.85 0 0 1 1.448-1.448zm-2.88 3.581c.611-.373 1.276-.711 1.991-1.012a23.55 23.55 0 0 0-.649 3.32c-1.035.322-1.874.691-2.508 1.102a11.83 11.83 0 0 1 1.166-3.41zm1.211 3.666a26.5 26.5 0 0 0 0 3.684c-1.874-.659-2.564-1.383-2.564-1.842s.69-1.183 2.564-1.842zm-1.211 7.35a11.83 11.83 0 0 1-1.166-3.41c.634.411 1.473.781 2.508 1.102a23.55 23.55 0 0 0 .649 3.32c-.714-.301-1.38-.64-1.991-1.012zm1.432 2.133a18.85 18.85 0 0 0 1.041.407 18.87 18.87 0 0 0 .407 1.041 11.87 11.87 0 0 1-1.448-1.448zm1.219-4.086a30.13 30.13 0 0 0 3.717.611c.13 1.129.335 2.451.627 3.709a21.47 21.47 0 0 1-3.538-.81c-.358-1.107-.628-2.283-.806-3.509zm2.363 6.966c-.373-.611-.711-1.276-1.012-1.991 1.067.292 2.184.51 3.338.651.312 1.042.663 1.875 1.057 2.501-1.18-.214-2.323-.605-3.383-1.161zm6.85.125c-.295.56-.768 1.228-1.342 1.228h-.015c-.616-.027-1.27-.966-1.813-2.563A26.58 26.58 0 0 0 16 28.25a26.5 26.5 0 0 0 1.894-.068 8.77 8.77 0 0 1-.552 1.34zm4.166-.125a11.83 11.83 0 0 1-3.316 1.15 6.29 6.29 0 0 0 .255-.441c.308-.583.57-1.281.793-2.055a23.55 23.55 0 0 0 3.28-.644c-.301.714-.64 1.38-1.012 1.991zm-1.944-2.652c.247-1.157.424-2.421.542-3.699 1.352-.139 2.63-.348 3.764-.616-.178 1.226-.448 2.402-.806 3.509-1.104.357-2.277.626-3.5.805zm4.077 1.22a18.86 18.86 0 0 0 .407-1.041 19.09 19.09 0 0 0 1.041-.407 11.86 11.86 0 0 1-1.448 1.448zm2.88-3.581c-.61.373-1.276.711-1.991 1.012.29-1.06.507-2.171.649-3.32 1.035-.322 1.874-.691 2.508-1.102a11.85 11.85 0 0 1-1.166 3.41zM29.75 4.125h-.625V3.5c0-.345-.28-.625-.625-.625s-.625.28-.625.625v.625h-.625c-.345 0-.625.28-.625.625s.28.625.625.625h.625V6c0 .345.28.625.625.625s.625-.28.625-.625v-.625h.625c.345 0 .625-.28.625-.625s-.28-.625-.625-.625zm-25 0h-.625V3.5c0-.345-.28-.625-.625-.625s-.625.28-.625.625v.625H2.25c-.345 0-.625.28-.625.625s.28.625.625.625h.625V6c0 .345.28.625.625.625s.625-.28.625-.625v-.625h.625c.345 0 .625-.28.625-.625s-.28-.625-.625-.625zm0 25.375h-.625v-.625c0-.345-.28-.625-.625-.625s-.625.28-.625.625v.625H2.25c-.345 0-.625.28-.625.625s.28.625.625.625h.625v.625c0 .345.28.625.625.625s.625-.28.625-.625v-.625h.625c.345 0 .625-.28.625-.625s-.28-.625-.625-.625zm25 0h-.625v-.625c0-.345-.28-.625-.625-.625s-.625.28-.625.625v.625h-.625c-.345 0-.625.28-.625.625s.28.625.625.625h.625v.625c0 .345.28.625.625.625s.625-.28.625-.625v-.625h.625c.345 0 .625-.28.625-.625s-.28-.625-.625-.625zM12.255 18.25c-.35 0-.63.28-.63.625s.28.625.625.625.625-.281.625-.625-.277-.622-.62-.625z"/></svg>
+            Squash
+          </a>
+        </div>
+      </div>
+
+      <!-- Category -->
+      <div class="swiper-slide">
+        <div class="nav nav-pills">
+          <a class="nav-link flex-column justify-content-center gap-2 flex-shrink-0 rounded-circle p-0 mx-auto" href="listings-events.html" style="width: 150px; height: 150px">
+            <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="currentColor"><path d="M15.603 10.903h.903c.345 0 .625-.28.625-.625s-.28-.625-.625-.625h-.349l.319-.886c.117-.325-.052-.683-.377-.8s-.683.052-.8.376l-.506 1.407a.86.86 0 0 0 .81 1.152zM2.195 32h27.609c.345 0 .625-.28.625-.625v-2.906c0-.345-.28-.625-.625-.625h-.954v-.766a1.86 1.86 0 0 0-.581-1.35v-2.562a7.5 7.5 0 0 0-.043-.79c-.037-.343-.344-.592-.688-.556s-.592.344-.555.688a6.26 6.26 0 0 1 .036.658v2.048h-.034-1.846a1.87 1.87 0 0 0-.286.022v-2.027c0-.345-.28-.625-.625-.625s-.625.28-.625.625v2.814c-.207.3-.329.665-.329 1.057v.766h-6.649v-1.852a1.9 1.9 0 0 0 1.272-1.791v-.902A1.9 1.9 0 0 0 16 21.4a1.9 1.9 0 0 0-1.897 1.897v.902a1.9 1.9 0 0 0 1.272 1.791v1.852h-6.69v-.766c0-.394-.123-.76-.333-1.062v-2.809c0-.345-.28-.625-.625-.625s-.625.28-.625.625v2.027a1.87 1.87 0 0 0-.282-.021H4.984v-2.047c0-2.437 1.362-3.986 4.417-5.021l1.311-.41 1.78 3.628a.63.63 0 0 0 .974.194L16 19.322l2.484 2.183a.63.63 0 0 0 .975-.197l1.746-3.601 1.398.436a11.91 11.91 0 0 1 1.525.629c.308.155.684.032.84-.276s.032-.684-.276-.84c-.5-.252-1.053-.481-1.693-.699l-1.935-.604-.035-.011-1.727-.539-.294-1.868c1.673-1.031 2.791-2.88 2.791-4.985V7.32h.061c.345 0 .625-.28.625-.625v-.256A6.45 6.45 0 0 0 16.044 0h-.256a6.45 6.45 0 0 0-6.441 6.441v.256c0 .345.28.625.625.625h.124v1.63c0 2.135 1.15 4.006 2.863 5.028l-.267 1.827-3.67 1.147c-1.637.554-2.841 1.242-3.693 2.11-1.057 1.076-1.593 2.456-1.593 4.102v2.521a1.86 1.86 0 0 0-.625 1.391v.766h-.914c-.345 0-.625.28-.625.625v2.906c0 .345.28.625.625.625zm13.157-8.702A.65.65 0 0 1 16 22.65a.65.65 0 0 1 .648.647v.902a.65.65 0 0 1-.648.648.65.65 0 0 1-.647-.648v-.902zm-2.099-3.221L11.92 17.36l1.202-.378 1.907 1.53-1.776 1.565zm5.439-.052l-1.72-1.512 1.861-1.495.044-.035 1.122.349-1.305 2.693zM15.788 1.25h.256a5.2 5.2 0 0 1 5.178 4.822h-4.055c-.521 0-1.038-.156-1.474-.439-.462-.3-.756-.736-1.062-1.182-.082-.12-.158-.254-.255-.363a.63.63 0 0 0-.991.071l-.452.689a2.73 2.73 0 0 1-1.339 1.061c-.316.115-.647.163-.983.163a5.2 5.2 0 0 1 5.178-4.822zm-4.442 7.701V7.264c1.036-.179 1.973-.778 2.572-1.641.733 1.055 1.964 1.699 3.249 1.699h3.382v1.629a4.61 4.61 0 0 1-4.359 4.594 4.58 4.58 0 0 1-.713-.018 4.61 4.61 0 0 1-4.13-4.577zm3.576 5.761a5.88 5.88 0 0 0 2.907-.219l.241 1.533L16 17.687l-2.078-1.667.219-1.501a5.8 5.8 0 0 0 .779.193zM4.359 27.078a.62.62 0 0 1 .615-.615H6.82c.339 0 .615.276.615.615v.766H4.359v-.766zm22.7-.61a.62.62 0 0 1 .541.61v.766h-3.076v-.766c0-.339.276-.615.615-.615h1.846c.024 0 .05.002.074.005zM2.82 29.094h26.359v1.656H2.82v-1.656zm23.184-8.956c.217.52.987.496 1.168-.038.183-.539-.424-1.028-.912-.737a.63.63 0 0 0-.256.775z"/></svg>
+            Table tennis
+          </a>
+        </div>
+      </div>
+
+      <!-- Pagination (Bullets) -->
+      <div class="swiper-pagination position-static mt-3"></div>
+    </div>
+</section>
+
+
+<!-- Upcoming online events -->
+<section class="container pt-2 pt-sm-3 pt-md-4 pt-lg-5 my-xxl-3">
+  <div class="row pb-5">
+    <div class="col-lg-3 vstack mb-4 mb-lg-0">
+      <div class="d-flex flex-lg-column justify-content-between gap-3 order-lg-2 pt-lg-5 mt-lg-5 mb-3 mb-sm-4 mb-lg-0">
+        <h2 class="mb-0">Upcoming Online Events</h2>
+        <div class="nav">
+          <a class="nav-link position-relative fs-base text-nowrap py-1 px-0" href="listings-events.html">
+            <span class="hover-effect-underline stretched-link me-1">View all</span>
+            <i class="fi-chevron-right fs-lg"></i>
+          </a>
+        </div>
+      </div>
+
+      <!-- Date master slider -->
+      <div class="row row-cols-2 row-cols-lg-1 align-items-center g-4">
+        <div class="col">
+          <div class="swiper" data-swiper='{
+          "spaceBetween": 32,
+          "controlSlider": "#listings",
+          "grabCursor": true,
+          "navigation": {
+          "prevEl": "#online-prev",
+          "nextEl": "#online-next"
+          }
+          }'>
+            <div class="swiper-wrapper">
+              @{
+                string dayOfMonth = DateTime.Now.Day.ToString();
+                string tommorrow = DateTime.Now.AddDays(1).Day.ToString();
+                string monthYear = DateTime.Now.ToString("MMMM, yyyy");
+                
+              }
+              <div class="swiper-slide">
+                <div class="display-3" style="color: var(--fn-body-bg); text-shadow: 1px 1px 0 var(--fn-component-color), -1px 1px 0 var(--fn-component-color), -1px -1px 0 var(--fn-component-color), 1px -1px 0 var(--fn-component-color)">@dayOfMonth</div>
+                <div class="text-body-secondary">@monthYear</div>
+              </div>
+              <div class="swiper-slide">
+                <div class="display-3" style="color: var(--fn-body-bg); text-shadow: 1px 1px 0 var(--fn-component-color), -1px 1px 0 var(--fn-component-color), -1px -1px 0 var(--fn-component-color), 1px -1px 0 var(--fn-component-color)">@tommorrow</div>
+                <div class="text-body-secondary">@monthYear</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="col d-flex justify-content-end justify-content-lg-start gap-3">
+          <button type="button" class="btn btn-icon btn-outline-secondary animate-slide-start bg-body rounded-circle" id="online-prev" aria-label="Prev">
+            <i class="fi-chevron-left fs-lg animate-target"></i>
+          </button>
+          <button type="button" class="btn btn-icon btn-outline-secondary animate-slide-end bg-body rounded-circle" id="online-next" aria-label="Next">
+            <i class="fi-chevron-right fs-lg animate-target"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-1 d-none d-lg-block">
+      <hr class="vr h-100 m-0">
+    </div>
+    <div class="col-lg-8">
+      <div class="swiper" id="listings" data-swiper='{
+        "allowTouchMove": false,
+        "spaceBetween": 24
+      }'>
+        <div class="swiper-wrapper">
+          <div class="swiper-slide">
+            <div class="row row-cols-1 row-cols-sm-2 g-4 g-sm-3 g-md-4">
+
+              <!-- Event listing -->
+              <div class="col">
+                <article class="card h-100 hover-effect-scale hover-effect-opacity bg-body-tertiary border-0">
+                  <div class="position-absolute top-0 end-0 z-2 hover-effect-target opacity-0 pt-1 pt-sm-0 pe-1 pe-sm-0 mt-2 mt-sm-3 me-2 me-sm-3">
+                    <button type="button" class="btn btn-sm btn-icon btn-light bg-light border-0 rounded-circle animate-pulse" aria-label="Add to wishlist">
+                      <i class="fi-heart animate-target fs-sm"></i>
+                    </button>
+                  </div>
+                  <div class="bg-body-secondary rounded overflow-hidden">
+                    <div class="ratio hover-effect-target" style="--fn-aspect-ratio: calc(160 / 416 * 100%)">
+                      <img src="assets/img/home/events/events/01.jpg" alt="Image">
+                    </div>
+                  </div>
+                  <div class="card-body pb-2">
+                    <ul class="list-unstyled flex-row flex-wrap align-items-center gap-2 fs-sm mb-2">
+                      <li class="d-flex align-items-center">
+                        <i class="fi-calendar me-1"></i>
+                        Nov 28
+                      </li>
+                      <li>15:00</li>
+                      <li class="d-flex mx-n1">
+                        <i class="fi-bullet fs-base"></i>
+                      </li>
+                      <li>Online event</li>
+                    </ul>
+                    <h3 class="h5 mb-0">
+                      <a class="hover-effect-underline stretched-link" href="single-entry-events.html">Christian in Chicago</a>
+                    </h3>
+                  </div>
+                  <div class="card-footer bg-transparent border-0 pt-1 pb-4">
+                    <div class="h5 text-info mb-0">Free</div>
+                  </div>
+                </article>
+              </div>
+
+              <!-- Event listing -->
+              <div class="col">
+                <article class="card h-100 hover-effect-scale hover-effect-opacity bg-body-tertiary border-0">
+                  <div class="position-absolute top-0 end-0 z-2 hover-effect-target opacity-0 pt-1 pt-sm-0 pe-1 pe-sm-0 mt-2 mt-sm-3 me-2 me-sm-3">
+                    <button type="button" class="btn btn-sm btn-icon btn-light bg-light border-0 rounded-circle animate-pulse" aria-label="Add to wishlist">
+                      <i class="fi-heart animate-target fs-sm"></i>
+                    </button>
+                  </div>
+                  <div class="bg-body-secondary rounded overflow-hidden">
+                    <div class="ratio hover-effect-target" style="--fn-aspect-ratio: calc(160 / 416 * 100%)">
+                      <img src="assets/img/home/events/events/02.jpg" alt="Image">
+                    </div>
+                  </div>
+                  <div class="card-body pb-2">
+                    <ul class="list-unstyled flex-row flex-wrap align-items-center gap-2 fs-sm mb-2">
+                      <li class="d-flex align-items-center">
+                        <i class="fi-calendar me-1"></i>
+                        Nov 28
+                      </li>
+                      <li>17:00</li>
+                      <li class="d-flex mx-n1">
+                        <i class="fi-bullet fs-base"></i>
+                      </li>
+                      <li>Online event</li>
+                    </ul>
+                    <h3 class="h5 mb-0">
+                      <a class="hover-effect-underline stretched-link" href="single-entry-events.html">Motivational Podcast</a>
+                    </h3>
+                  </div>
+                  <div class="card-footer bg-transparent border-0 pt-1 pb-4">
+                    <div class="h5 text-info mb-0">$15.00</div>
+                  </div>
+                </article>
+              </div>
+
+              <!-- Event listing -->
+              <div class="col">
+                <article class="card h-100 hover-effect-scale hover-effect-opacity bg-body-tertiary border-0">
+                  <div class="position-absolute top-0 end-0 z-2 hover-effect-target opacity-0 pt-1 pt-sm-0 pe-1 pe-sm-0 mt-2 mt-sm-3 me-2 me-sm-3">
+                    <button type="button" class="btn btn-sm btn-icon btn-light bg-light border-0 rounded-circle animate-pulse" aria-label="Add to wishlist">
+                      <i class="fi-heart animate-target fs-sm"></i>
+                    </button>
+                  </div>
+                  <div class="bg-body-secondary rounded overflow-hidden">
+                    <div class="ratio hover-effect-target" style="--fn-aspect-ratio: calc(160 / 416 * 100%)">
+                      <img src="assets/img/home/events/events/03.jpg" alt="Image">
+                    </div>
+                  </div>
+                  <div class="card-body pb-2">
+                    <ul class="list-unstyled flex-row flex-wrap align-items-center gap-2 fs-sm mb-2">
+                      <li class="d-flex align-items-center">
+                        <i class="fi-calendar me-1"></i>
+                        Nov 28
+                      </li>
+                      <li>08:30</li>
+                      <li class="d-flex mx-n1">
+                        <i class="fi-bullet fs-base"></i>
+                      </li>
+                      <li>Online event</li>
+                    </ul>
+                    <h3 class="h5 mb-0">
+                      <a class="hover-effect-underline stretched-link" href="single-entry-events.html">Sunday Online Meditation</a>
+                    </h3>
+                  </div>
+                  <div class="card-footer bg-transparent border-0 pt-1 pb-4">
+                    <div class="h5 text-info mb-0">$23.00</div>
+                  </div>
+                </article>
+              </div>
+
+              <!-- Event listing -->
+              <div class="col">
+                <article class="card h-100 hover-effect-scale hover-effect-opacity bg-body-tertiary border-0">
+                  <div class="position-absolute top-0 end-0 z-2 hover-effect-target opacity-0 pt-1 pt-sm-0 pe-1 pe-sm-0 mt-2 mt-sm-3 me-2 me-sm-3">
+                    <button type="button" class="btn btn-sm btn-icon btn-light bg-light border-0 rounded-circle animate-pulse" aria-label="Add to wishlist">
+                      <i class="fi-heart animate-target fs-sm"></i>
+                    </button>
+                  </div>
+                  <div class="bg-body-secondary rounded overflow-hidden">
+                    <div class="ratio hover-effect-target" style="--fn-aspect-ratio: calc(160 / 416 * 100%)">
+                      <img src="assets/img/home/events/events/04.jpg" alt="Image">
+                    </div>
+                  </div>
+                  <div class="card-body pb-2">
+                    <ul class="list-unstyled flex-row flex-wrap align-items-center gap-2 fs-sm mb-2">
+                      <li class="d-flex align-items-center">
+                        <i class="fi-calendar me-1"></i>
+                        Nov 28
+                      </li>
+                      <li>10:00</li>
+                      <li class="d-flex mx-n1">
+                        <i class="fi-bullet fs-base"></i>
+                      </li>
+                      <li>Online event</li>
+                    </ul>
+                    <h3 class="h5 mb-0">
+                      <a class="hover-effect-underline stretched-link" href="single-entry-events.html">Morning Stretching &amp; Exercise</a>
+                    </h3>
+                  </div>
+                  <div class="card-footer bg-transparent border-0 pt-1 pb-4">
+                    <div class="h5 text-info mb-0">$12.00</div>
+                  </div>
+                </article>
+              </div>
+            </div>
+          </div>
+          <div class="swiper-slide">
+            <div class="row row-cols-1 row-cols-sm-2 g-4 g-sm-3 g-md-4">
+
+              <!-- Event listing -->
+              <div class="col">
+                <article class="card h-100 hover-effect-scale hover-effect-opacity bg-body-tertiary border-0">
+                  <div class="position-absolute top-0 end-0 z-2 hover-effect-target opacity-0 pt-1 pt-sm-0 pe-1 pe-sm-0 mt-2 mt-sm-3 me-2 me-sm-3">
+                    <button type="button" class="btn btn-sm btn-icon btn-light bg-light border-0 rounded-circle animate-pulse" aria-label="Add to wishlist">
+                      <i class="fi-heart animate-target fs-sm"></i>
+                    </button>
+                  </div>
+                  <div class="bg-body-secondary rounded overflow-hidden">
+                    <div class="ratio hover-effect-target" style="--fn-aspect-ratio: calc(160 / 416 * 100%)">
+                      <img src="assets/img/home/events/events/05.jpg" alt="Image">
+                    </div>
+                  </div>
+                  <div class="card-body pb-2">
+                    <ul class="list-unstyled flex-row flex-wrap align-items-center gap-2 fs-sm mb-2">
+                      <li class="d-flex align-items-center">
+                        <i class="fi-calendar me-1"></i>
+                        Nov 29
+                      </li>
+                      <li>13:45</li>
+                      <li class="d-flex mx-n1">
+                        <i class="fi-bullet fs-base"></i>
+                      </li>
+                      <li>Online event</li>
+                    </ul>
+                    <h3 class="h5 mb-0">
+                      <a class="hover-effect-underline stretched-link" href="single-entry-events.html">Virtual Taste of Chicago</a>
+                    </h3>
+                  </div>
+                  <div class="card-footer bg-transparent border-0 pt-1 pb-4">
+                    <div class="h5 text-info mb-0">$10.00</div>
+                  </div>
+                </article>
+              </div>
+
+              <!-- Event listing -->
+              <div class="col">
+                <article class="card h-100 hover-effect-scale hover-effect-opacity bg-body-tertiary border-0">
+                  <div class="position-absolute top-0 end-0 z-2 hover-effect-target opacity-0 pt-1 pt-sm-0 pe-1 pe-sm-0 mt-2 mt-sm-3 me-2 me-sm-3">
+                    <button type="button" class="btn btn-sm btn-icon btn-light bg-light border-0 rounded-circle animate-pulse" aria-label="Add to wishlist">
+                      <i class="fi-heart animate-target fs-sm"></i>
+                    </button>
+                  </div>
+                  <div class="bg-body-secondary rounded overflow-hidden">
+                    <div class="ratio hover-effect-target" style="--fn-aspect-ratio: calc(160 / 416 * 100%)">
+                      <img src="assets/img/home/events/events/06.jpg" alt="Image">
+                    </div>
+                  </div>
+                  <div class="card-body pb-2">
+                    <ul class="list-unstyled flex-row flex-wrap align-items-center gap-2 fs-sm mb-2">
+                      <li class="d-flex align-items-center">
+                        <i class="fi-calendar me-1"></i>
+                        Nov 29
+                      </li>
+                      <li>16:00</li>
+                      <li class="d-flex mx-n1">
+                        <i class="fi-bullet fs-base"></i>
+                      </li>
+                      <li>Online event</li>
+                    </ul>
+                    <h3 class="h5 mb-0">
+                      <a class="hover-effect-underline stretched-link" href="single-entry-events.html">Digital Business Summit</a>
+                    </h3>
+                  </div>
+                  <div class="card-footer bg-transparent border-0 pt-1 pb-4">
+                    <div class="h5 text-info mb-0">$40.00</div>
+                  </div>
+                </article>
+              </div>
+
+              <!-- Event listing -->
+              <div class="col">
+                <article class="card h-100 hover-effect-scale hover-effect-opacity bg-body-tertiary border-0">
+                  <div class="position-absolute top-0 end-0 z-2 hover-effect-target opacity-0 pt-1 pt-sm-0 pe-1 pe-sm-0 mt-2 mt-sm-3 me-2 me-sm-3">
+                    <button type="button" class="btn btn-sm btn-icon btn-light bg-light border-0 rounded-circle animate-pulse" aria-label="Add to wishlist">
+                      <i class="fi-heart animate-target fs-sm"></i>
+                    </button>
+                  </div>
+                  <div class="bg-body-secondary rounded overflow-hidden">
+                    <div class="ratio hover-effect-target" style="--fn-aspect-ratio: calc(160 / 416 * 100%)">
+                      <img src="assets/img/home/events/events/07.jpg" alt="Image">
+                    </div>
+                  </div>
+                  <div class="card-body pb-2">
+                    <ul class="list-unstyled flex-row flex-wrap align-items-center gap-2 fs-sm mb-2">
+                      <li class="d-flex align-items-center">
+                        <i class="fi-calendar me-1"></i>
+                        Nov 29
+                      </li>
+                      <li>12:00</li>
+                      <li class="d-flex mx-n1">
+                        <i class="fi-bullet fs-base"></i>
+                      </li>
+                      <li>Online event</li>
+                    </ul>
+                    <h3 class="h5 mb-0">
+                      <a class="hover-effect-underline stretched-link" href="single-entry-events.html">Virtual City Art Expo</a>
+                    </h3>
+                  </div>
+                  <div class="card-footer bg-transparent border-0 pt-1 pb-4">
+                    <div class="h5 text-info mb-0">Free</div>
+                  </div>
+                </article>
+              </div>
+
+              <!-- Event listing -->
+              <div class="col">
+                <article class="card h-100 hover-effect-scale hover-effect-opacity bg-body-tertiary border-0">
+                  <div class="position-absolute top-0 end-0 z-2 hover-effect-target opacity-0 pt-1 pt-sm-0 pe-1 pe-sm-0 mt-2 mt-sm-3 me-2 me-sm-3">
+                    <button type="button" class="btn btn-sm btn-icon btn-light bg-light border-0 rounded-circle animate-pulse" aria-label="Add to wishlist">
+                      <i class="fi-heart animate-target fs-sm"></i>
+                    </button>
+                  </div>
+                  <div class="bg-body-secondary rounded overflow-hidden">
+                    <div class="ratio hover-effect-target" style="--fn-aspect-ratio: calc(160 / 416 * 100%)">
+                      <img src="assets/img/home/events/events/08.jpg" alt="Image">
+                    </div>
+                  </div>
+                  <div class="card-body pb-2">
+                    <ul class="list-unstyled flex-row flex-wrap align-items-center gap-2 fs-sm mb-2">
+                      <li class="d-flex align-items-center">
+                        <i class="fi-calendar me-1"></i>
+                        Nov 29
+                      </li>
+                      <li>15:30</li>
+                      <li class="d-flex mx-n1">
+                        <i class="fi-bullet fs-base"></i>
+                      </li>
+                      <li>Online event</li>
+                    </ul>
+                    <h3 class="h5 mb-0">
+                      <a class="hover-effect-underline stretched-link" href="single-entry-events.html">Fitness Fest Online</a>
+                    </h3>
+                  </div>
+                  <div class="card-footer bg-transparent border-0 pt-1 pb-4">
+                    <div class="h5 text-info mb-0">$25.00</div>
+                  </div>
+                </article>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- Filterable events -->
+<section class="bg-body-tertiary py-2 py-sm-3 py-md-4 py-lg-5">
+  <div class="container py-5 my-xxl-3">
+    <h2 class="text-nowrap pb-2 pb-lg-3">Choose Your Event</h2>
+
+    <!-- Filters + Sort selector -->
+    <div class="row g-3 pb-3 mb-lg-3">
+      <div class="col-lg-9 col-xl-8">
+        <div class="row row-cols-1 row-cols-sm-2 row-cols-md-4 g-2 g-md-3">
+          <div class="col">
+            <div class="position-relative">
+              <i class="fi-menu position-absolute top-50 start-0 translate-middle-y ms-3"></i>
+              <select class="form-select form-icon-start bg-transparent" data-select='{
+                "classNames": {
+                  "containerInner": ["form-select", "form-icon-start", "bg-transparent"]
+                }
+              }' aria-label="Category select">
+                <option value="">Sport</option>
+                <option value="Tennis">Tennis</option>
+                <option value="Badminton">Badminton</option>
+                <option value="Squash">Squash</option>
+                <option value="Table tennis">Table tennis</option>
+                <option value="Martial Arts">Martial Arts</option>
+              </select>
+            </div>
+          </div>
+          <div class="col">
+            <div class="position-relative">
+              <i class="fi-map-pin position-absolute top-50 start-0 translate-middle-y ms-3"></i>
+              <select class="form-select form-icon-start bg-transparent" data-select='{
+                "searchEnabled": true,
+                "classNames": {
+                  "containerInner": ["form-select", "form-icon-start", "bg-transparent"]
+                }
+              }' aria-label="Location select">
+              <option value="">Location</option>
+              <option value="New York">Sydney</option>
+              <option value="Los Angeles">Brisbane</option>
+              <option value="Chicago">Melbourne</option>
+              <option value="Houston">Adeliade</option>
+              <option value="Phoenix">Perth</option>
+              <option value="Philadelphia">Darwin</option>
+              </select>
+            </div>
+          </div>
+          <div class="col">
+            <div class="position-relative">
+              <i class="fi-calendar position-absolute top-50 start-0 translate-middle-y ms-3"></i>
+              <input type="text" class="form-control form-icon-start bg-transparent" data-datepicker='{"dateFormat": "M j, Y"}' placeholder="Date">
+            </div>
+          </div>
+          <div class="col">
+            <div class="position-relative">
+              <i class="fi-credit-card position-absolute top-50 start-0 translate-middle-y ms-3"></i>
+              <select class="form-select form-icon-start bg-transparent" data-select='{
+                "classNames": {
+                  "containerInner": ["form-select", "form-icon-start", "bg-transparent"]
+                }
+              }' aria-label="Price select">
+                <option value="">Price</option>
+                <option value="Free">Free</option>
+                <option value="Up to $25">Up to $25</option>
+                <option value="$25 - $50">$25 - $50</option>
+                <option value="$50 - $100">$50 - $100</option>
+                <option value="$100 - $200">$100 - $200</option>
+                <option value="Over $200">Over $200</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-3 col-xl-4 d-flex align-items-center justify-content-lg-end gap-3">
+        <div class="fs-sm fw-semibold text-dark-emphasis d-none d-sm-inline d-lg-none d-xl-inline">Sort by:</div>
+        <div class="position-relative" style="width: 160px">
+          <i class="fi-sort position-absolute top-50 start-0 translate-middle-y z-2"></i>
+          <select class="form-select bg-transparent border-0 rounded-0 ps-4 pe-1" data-select='{
+            "removeItemButton": false,
+            "classNames": {
+              "containerInner": ["form-select", "bg-transparent", "border-0", "rounded-0", "ps-4", "pe-1"]
+            }
+          }'>
+          <option value="Most popular">Most popular</option>
+          <option value="Best rated">Best rated</option>
+          <option value="Most recent">Most recent</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- Row of event cards that turns into carousel on screens < 992px wide (lg breakpoint) -->
+    <div class="mx-n2">
+      <div class="swiper px-2 pb-4" data-swiper='{
+        "slidesPerView": 1,
+        "spaceBetween": 24,
+        "pagination": {
+          "el": ".swiper-pagination",
+          "clickable": true
+        },
+        "breakpoints": {
+          "500": {
+            "slidesPerView": 2
+          },
+          "992": {
+            "slidesPerView": 3
+          }
+        }
+      }'>
+        <div class="swiper-wrapper">
+
+          <!-- Event listing card -->
+          <div class="swiper-slide h-auto">
+            <article class="card h-100 hover-effect-scale hover-effect-opacity border-0 shadow">
+              <div class="position-absolute top-0 end-0 z-2 hover-effect-target opacity-0 pt-1 pt-sm-0 pe-1 pe-sm-0 mt-2 mt-sm-3 me-2 me-sm-3">
+                <button type="button" class="btn btn-sm btn-icon btn-light bg-light border-0 rounded-circle animate-pulse" aria-label="Add to wishlist">
+                  <i class="fi-heart animate-target fs-sm"></i>
+                </button>
+              </div>
+              <div class="bg-body-secondary rounded overflow-hidden">
+                <div class="ratio hover-effect-target" style="--fn-aspect-ratio: calc(250 / 416 * 100%)">
+                  <img src="assets/img/listings/events/13.jpg" alt="Image">
+                </div>
+              </div>
+              <div class="card-body">
+                <ul class="list-unstyled flex-row flex-wrap align-items-center gap-2 fs-sm mb-2">
+                  <li class="d-flex align-items-center">
+                    <i class="fi-calendar me-1"></i>
+                    Sep 23
+                  </li>
+                  <li>18:00</li>
+                  <li class="d-flex mx-n1">
+                    <i class="fi-bullet fs-base"></i>
+                  </li>
+                  <li>Conference</li>
+                </ul>
+                <h3 class="h5 pt-1 mb-2">
+                  <a class="hover-effect-underline stretched-link" href="single-entry-events.html">Chicago Business Conference</a>
+                </h3>
+                <div class="d-flex align-items-center fs-sm">
+                  <i class="fi-map-pin me-1"></i>
+                  Chicago
+                </div>
+              </div>
+              <div class="card-footer d-flex align-items-center justify-content-between gap-3 bg-transparent border-0 pt-0 pb-4">
+                <div class="h5 text-info mb-0">$75.00</div>
+                <button type="button" class="btn btn-outline-dark position-relative z-2">Book now</button>
+              </div>
+            </article>
+          </div>
+
+          <!-- Event listing card -->
+          <div class="swiper-slide h-auto">
+            <article class="card h-100 hover-effect-scale hover-effect-opacity border-0 shadow">
+              <div class="position-absolute top-0 end-0 z-2 hover-effect-target opacity-0 pt-1 pt-sm-0 pe-1 pe-sm-0 mt-2 mt-sm-3 me-2 me-sm-3">
+                <button type="button" class="btn btn-sm btn-icon btn-light bg-light border-0 rounded-circle animate-pulse" aria-label="Add to wishlist">
+                  <i class="fi-heart animate-target fs-sm"></i>
+                </button>
+              </div>
+              <div class="bg-body-secondary rounded overflow-hidden">
+                <div class="ratio hover-effect-target" style="--fn-aspect-ratio: calc(250 / 416 * 100%)">
+                  <img src="assets/img/listings/events/14.jpg" alt="Image">
+                </div>
+              </div>
+              <div class="card-body">
+                <ul class="list-unstyled flex-row flex-wrap align-items-center gap-2 fs-sm mb-2">
+                  <li class="d-flex align-items-center">
+                    <i class="fi-calendar me-1"></i>
+                    Nov 8
+                  </li>
+                  <li>17:30</li>
+                  <li class="d-flex mx-n1">
+                    <i class="fi-bullet fs-base"></i>
+                  </li>
+                  <li>Concert</li>
+                </ul>
+                <h3 class="h5 pt-1 mb-2">
+                  <a class="hover-effect-underline stretched-link" href="single-entry-events.html">Classic Music Evening</a>
+                </h3>
+                <div class="d-flex align-items-center fs-sm">
+                  <i class="fi-map-pin me-1"></i>
+                  Boston
+                </div>
+              </div>
+              <div class="card-footer d-flex align-items-center justify-content-between gap-3 bg-transparent border-0 pt-0 pb-4">
+                <div class="h5 text-info mb-0">$60.00</div>
+                <button type="button" class="btn btn-outline-dark position-relative z-2">Book now</button>
+              </div>
+            </article>
+          </div>
+
+          <!-- Event listing card -->
+          <div class="swiper-slide h-auto">
+            <article class="card h-100 hover-effect-scale hover-effect-opacity border-0 shadow">
+              <div class="position-absolute top-0 end-0 z-2 hover-effect-target opacity-0 pt-1 pt-sm-0 pe-1 pe-sm-0 mt-2 mt-sm-3 me-2 me-sm-3">
+                <button type="button" class="btn btn-sm btn-icon btn-light bg-light border-0 rounded-circle animate-pulse" aria-label="Add to wishlist">
+                  <i class="fi-heart animate-target fs-sm"></i>
+                </button>
+              </div>
+              <div class="bg-body-secondary rounded overflow-hidden">
+                <div class="ratio hover-effect-target" style="--fn-aspect-ratio: calc(250 / 416 * 100%)">
+                  <img src="assets/img/listings/events/03.jpg" alt="Image">
+                </div>
+              </div>
+              <div class="card-body">
+                <ul class="list-unstyled flex-row flex-wrap align-items-center gap-2 fs-sm mb-2">
+                  <li class="d-flex align-items-center">
+                    <i class="fi-calendar me-1"></i>
+                    Oct 16
+                  </li>
+                  <li>22:00</li>
+                  <li class="d-flex mx-n1">
+                    <i class="fi-bullet fs-base"></i>
+                  </li>
+                  <li>Disco</li>
+                </ul>
+                <h3 class="h5 pt-1 mb-2">
+                  <a class="hover-effect-underline stretched-link" href="single-entry-events.html">Sunset Disco Party</a>
+                </h3>
+                <div class="d-flex align-items-center fs-sm">
+                  <i class="fi-map-pin me-1"></i>
+                  San Francisco
+                </div>
+              </div>
+              <div class="card-footer d-flex align-items-center justify-content-between gap-3 bg-transparent border-0 pt-0 pb-4">
+                <div class="h5 text-info mb-0">$45.00</div>
+                <button type="button" class="btn btn-outline-dark position-relative z-2">Book now</button>
+              </div>
+            </article>
+          </div>
+        </div>
+
+        <!-- Pagination (Bullets) -->
+        <div class="swiper-pagination position-static mt-3 mt-md-4"></div>
+      </div>
+    </div>
+
+    <!-- View all button -->
+    <div class="text-center pt-md-2 pt-lg-3">
+      <a class="btn btn-lg btn-primary" href="listings-events.html">View all 32 events</a>
+    </div>
+  </div>
+</section>
+
+
