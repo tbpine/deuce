@@ -1,7 +1,7 @@
 /// <summary>
 /// Define left side nav menu
 /// </summary>
-public class HandlerNavItems : IHandlerNavItems
+public class TourWizardNav : IHandlerNavItems
 {
     private List<NavItem> _navItems = new();
 
@@ -10,12 +10,12 @@ public class HandlerNavItems : IHandlerNavItems
     /// <summary>
     /// Make left side navigations
     /// </summary>
-    public HandlerNavItems()
+    public TourWizardNav()
     {
         _navItems.Add(new NavItem("Tournament Details", "/TournamentDetail", false, true,"",  "TDetail", "Index"));
         _navItems.Add(new NavItem("Venue", "/TournamentVenue", false, true,"", "TVenue", "Index"));
         //Both team and player formats
-        _navItems.Add(new NavItem("Format", "/TournamentFormat", false, true, "", "TFormatTeamPlayer", "Index"));
+        _navItems.Add(new NavItem("Format", "/TournamentFormat", false, true, "", "TFormatTeam", "Index"));
         _navItems.Add(new NavItem("Players", "/TournamentPlayers", false, true, "", "TPlayers", "Index"));
         _navItems.Add(new NavItem("Schedule", "/TournamentSchedule", false, true, "", "TSchedule", "Index"));
         _navItems.Add(new NavItem("Fee", "/TournamentFee", false, true, "", "TFee", "Index"));

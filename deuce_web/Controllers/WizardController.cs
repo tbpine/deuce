@@ -58,15 +58,7 @@ public abstract class WizardController : Controller
             var prevNavItem = _handlerNavItems.NavItems.ElementAt(selectedIdx - 1);
             _backPage = prevNavItem.Controller + "/" + prevNavItem.Action;
 
-            if (prevNavItem.Controller.Contains("TFormat"))
-            {
-                //case
-                int entryType = _sessionProxy?.EntryType ?? (int)EntryType.Team;
-                _backPage = (entryType == (int)EntryType.Team ? "TFormatTeam" : "TFormatPlayer")
-                + "/" + "Index";
-
-            }
-            else if (prevNavItem.Controller.Contains("TDetail"))
+            if (prevNavItem.Controller.Contains("TDetail"))
             {
                 _model.RouteData = (_sessionProxy?.TournamentId??0).ToString();
             }   

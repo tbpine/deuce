@@ -82,15 +82,7 @@ public class TVenueController : WizardController
 
         _dbRepoVenue.Set(_model.Venue);
 
-        //Different pages for teams and individual tournaments
-        int entryType = _model.Tournament.EntryType;
-        //Get
-        
-        if (entryType == (int)deuce.EntryType.Team)
-            return RedirectToAction("Index", "TFormatTeam");
-        else if (entryType == (int)deuce.EntryType.Individual)
-            return RedirectToAction("Index", "TFormatPlayer");
-
-        return View("Index", _model);
+        // Add parameters to RedirectToAction using an anonymous object
+        return RedirectToAction("Index", "TFormatTeam", new {entry_type = _model.Tournament.EntryType });
     }
 }

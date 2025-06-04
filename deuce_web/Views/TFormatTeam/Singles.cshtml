@@ -1,4 +1,4 @@
-@model ViewModelTournamentWizard;
+@model ViewModelTournamentWizard
 @using deuce
 
 @{
@@ -12,13 +12,13 @@
 @{
   string attrValidation = Model.Validated ? "was-validated" : "";
 }
-<form id="page_form" class="col-lg-9 col-xl-8 needs-validation @attrValidation" asp-controller="TFormatPlayer" asp-action="Save" method="post" novalidate>
+<form id="page_form" class="col-lg-9 col-xl-8 needs-validation @attrValidation" asp-action="Save" method="post" novalidate>
     <!-- Property location inputs -->
       <h1 class="h2 pb-1 pb-lg-2">@Model.Title</h1>
       <div class="row row-cols-2 row-cols-sm-2 g-3 g-sm-4 pb-3 pb-sm-4 mb-xl-2">
         <div class="col">
           <label class="form-label" >Sets *</label>
-          <select class="form-select form-select-lg" asp-for="TournamentDetail.Sets" asp-items="Model.SelectGamesPerSet"  onchange="showHideElement('Games','fixed_game_2','99')" value="@Model.TournamentDetail.Sets" required>
+          <select class="form-select form-select-lg" asp-for="TournamentDetail.Sets" asp-items="Model.SelectSets"  value="@Model.TournamentDetail.Sets" required>
           </select>
           <div class="invalid-feedback">How many sets played ?</div>
         </div>
@@ -38,18 +38,6 @@
         </div>
         
       </div>
-
-      <div class="row row-cols-2 row-cols-sm-2 g-3 g-sm-4 pb-3 pb-sm-4 mb-xl-2">
-        <div class="col">
-          <label class="form-label" >Sets *</label>
-          <select class="form-select form-select-lg"  asp-for="Format.NoSets"  asp-items="Model.SelectSets" required>
-          </select>
-          <div class="invalid-feedback">How many sets are played ?</div>
-        </div>
-        <div>
-        </div>
-      </div>
-      
       
 </form>
 

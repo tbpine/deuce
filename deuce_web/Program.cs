@@ -31,7 +31,7 @@ builder.Services.AddSession(options => {
 });
 
 builder.Services.AddScoped<DbConnection, DbConnectionLocal>();
-builder.Services.AddScoped<IHandlerNavItems, HandlerNavItems>();
+builder.Services.AddScoped<IHandlerNavItems, TourWizardNav>();
 builder.Services.AddScoped<ISideMenuHandler, AccSideMenuHandler>();
 builder.Services.AddScoped<DbRepoTournament>();
 builder.Services.AddScoped<DbRepoTournamentFee>();

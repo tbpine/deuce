@@ -33,11 +33,13 @@ public class TFormatTeamController : WizardController
 
     // GET: /TFormatTeam/
     [HttpGet]
-    public async Task<IActionResult> Index()
+    public async Task<IActionResult> Index(int entry_type)
     {
 
         try
         {
+            _model.Tournament.EntryType = entry_type;
+
             //Transfer properties from the base class
             //to the view model.
             // LoadPage logic
@@ -54,29 +56,42 @@ public class TFormatTeamController : WizardController
                 Sets = 1,
                 NoSingles = 2,
                 NoDoubles = 2,
-                TeamSize = 2
+                TeamSize = entry_type == (int)EntryType.Team ? 2 : 1
             };
 
             SetCustomValues(_model, "Tournament.Details.TeamSize", "CustomTeamSize", 6);
-            SetCustomValues(_model, "Tournament.Details.Games","CustomGames", 6);
-            SetCustomValues(_model,"Tournament.Details.NoSingles", "CustomSingles", 6);
-            SetCustomValues(_model, "Tournament.Details.NoDoubles","CustomDoubles", 6);
+            SetCustomValues(_model, "Tournament.Details.Games", "CustomGames", 6);
+            SetCustomValues(_model, "Tournament.Details.NoSingles", "CustomSingles", 6);
+            SetCustomValues(_model, "Tournament.Details.NoDoubles", "CustomDoubles", 6);
 
             var sport = sports?.Find(e => e.Id == (_model.Tournament?.Sport ?? 1));
             _model.Title = sport?.Label ?? "";
 
             Filter filter = new() { TournamentId = _sessionProxy.TournamentId };
 
-
             PopulateSelectLists(_model);
-            return View(_model);
+
         }
         catch (Exception ex)
         {
             _log.Log(LogLevel.Error, ex.Message);
         }
 
-        return View(_model);
+        return View(GetView((EntryType)entry_type), _model);
+    }
+
+    /// <summary>
+    /// Get the view name based on the entry type.
+    /// </summary>
+    /// <param name="entryType"></param>
+    /// <returns></returns>
+    private string GetView(EntryType entryType)
+    {
+        return entryType switch
+        {
+            EntryType.Individual => "Singles",
+            _ => "Index"
+        };
     }
 
     // POST: /TFormatTeam/Save
@@ -198,18 +213,18 @@ public class TFormatTeamController : WizardController
     /// <param name="src">Which property can be specified</param>
     /// <param name="dest">Property containing the custom value</param>
     /// <param name="limit">Highest non custom value</param>
-    private void SetCustomValues(object source,  string src, string dest, int limit)
+    private void SetCustomValues(object source, string src, string dest, int limit)
     {
         Type type = source.GetType();
         //Get the integer value from "src" property of the model
-        int value = (int)(Utils.GetPropertyByPath(source, src)?? 0);
+        int value = (int)(Utils.GetPropertyByPath(source, src) ?? 0);
 
         //If the value is greater than the limit, set src to 99
         if (value > limit)
         {
             Utils.SetPropertyByPath(source, src, 99);
             //Set the destination property to the value
-            Utils.SetPropertyByPath(source, dest, value);;
+            Utils.SetPropertyByPath(source, dest, value); ;
         }
         else
         {
