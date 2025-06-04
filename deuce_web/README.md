@@ -35,4 +35,6 @@ existing scores. If the current date has passed the start date, warn user that s
 - [X] Move member's area to MVC
     - [X] Derive Controllers in the member's area from MemberController
 - [X] Wizard testing for each screen.
- - [] Scoring controller
+ - [X] Scoring controller
+- [] Don't need seperate controllers for team and player formats. Use one controller
+and represent the appropreite view. Makes navigation easier.
