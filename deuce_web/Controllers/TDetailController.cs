@@ -49,7 +49,7 @@ public class TDetailController : WizardController
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> Save(ViewModelTournamentWizard src)
     {
-        
+
         //The data pipe line is this:
         //1. Dependecies injections (menus)
         //2. Session
@@ -94,6 +94,12 @@ public class TDetailController : WizardController
         return View("Index", _model);
     }
 
+    /// <summary>
+    /// Validates the tournament object.
+    /// Checks if the label is unique in the database.
+    /// </summary>
+    /// <param name="obj">The tournament object to validate.</param>
+    /// <param name="model"> The view model containing validation state.</param>
     private async Task<bool> Validate(Tournament obj, ViewModelTournamentWizard model)
     {
         //Reset validation

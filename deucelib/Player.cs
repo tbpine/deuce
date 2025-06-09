@@ -44,6 +44,14 @@ public class Player
     /// <summary>
     /// The empty constructor
     /// </summary>
+    public Player(bool bye)
+    {
+        _bye = bye;
+    }
+
+    /// <summary>
+    /// The empty constructor
+    /// </summary>
     public Player()
     {
 

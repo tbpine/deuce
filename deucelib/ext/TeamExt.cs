@@ -4,6 +4,7 @@ using System.Text;
 using Org.BouncyCastle.Crypto.Modes.Gcm;
 
 namespace deuce.ext;
+
 public static class TeamExt
 {
 
@@ -19,7 +20,7 @@ public static class TeamExt
         {
             sb.Append(player.ToString() + ",");
         }
-        sb.Remove(sb.Length - 1, 1);
+        if (sb.Length>0) sb.Remove(sb.Length - 1, 1);
 
         return sb.ToString();
 
@@ -74,6 +75,7 @@ public static class TeamExt
 
 
     }
+    
 
 
 }

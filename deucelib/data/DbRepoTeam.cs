@@ -5,6 +5,7 @@ using System.Runtime.ExceptionServices;
 using System.Runtime.Serialization;
 using System.Runtime.Versioning;
 using deuce.ext;
+using Org.BouncyCastle.Asn1.EdEC;
 
 namespace deuce;
 /// <summary>
@@ -209,7 +210,9 @@ public class DbRepoTeam : DbRepoBase<Team>
         TeamRepo teamRepo = new(teamplayers);
         var dest = teamRepo.ExtractFromRecordTeamPlayer();
 
-        SyncMaster<Team> syncTeam = new(src, dest);
+        //Skip teams with bye players
+        Predicate<Team> predSkipByes = e => e.Players.Any(p => p.Bye);
+        SyncMaster<Team> syncTeam = new(src, dest, new List<Predicate<Team>>() { predSkipByes });
 
         //Use lists to sore
         //pending changes.
@@ -269,7 +272,7 @@ public class DbRepoTeam : DbRepoBase<Team>
         //------------------------------------
         //| Apply DB Changes                 |
         //------------------------------------
-
+        _dbconn.Open(); 
         DbTransaction localtran = _dbconn.BeginTransaction();
 
         try
@@ -340,7 +343,7 @@ public class DbRepoTeam : DbRepoBase<Team>
 
 
             var reader = cmdSetTeamPlayer.ExecuteReader();
-            if (reader.Read()) player.Id = reader.GetInt32(reader.GetOrdinal("player_id"));
+            if (reader.Read()) player.TeamPlayerId = reader.GetInt32(reader.GetOrdinal("id"));
             reader.Close();
 
         }

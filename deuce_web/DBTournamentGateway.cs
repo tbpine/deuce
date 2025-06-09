@@ -111,19 +111,13 @@ public class DBTournamentGateway : ITournamentGateway
     /// Start the current tournament
     /// </summary>
     /// <returns></returns>
-    public async Task<ResultTournamentAction> StartTournament()
+    public async Task<ResultTournamentAction> StartTournament(int tournamentId)
     {
-        //Parameter checks
-        if (_sessionProxy.TournamentId <= 0)
-        {
-            //Tournament not saved , exit
-            return new(ResultStatus.Warning, "Current tournament is unsaved.");
-        }
 
         //Load the current tournament and it's details
-        var currentTour = await GetCurrentTournament();
+        var currentTour = await GetTournament(tournamentId);
 
-        if (currentTour is null) return new(ResultStatus.Error, "Missing tournament");
+        if (currentTour is null) return new(ResultStatus.Error, "Unable to tournament.");
 
         //check what sports it is
         var listOfSports = await _cache.GetList<Sport>(CacheMasterDefault.KEY_SPORTS);

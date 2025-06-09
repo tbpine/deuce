@@ -11,4 +11,14 @@ public static class TournamentExt
     {
         return tournament.Id == 0;
     }
+
+    public static List<Team> CreateByeTeams(this Tournament tournament, int size)
+    {
+        //Create a list of teams to return
+        List<Team> byeTeams = new();
+        //Loop through 0 to size-1
+        for (int i = 0; i < size; i++) byeTeams.Add(new Team(i, "BYE", tournament.Details.TeamSize));
+        
+        return byeTeams;
+   }
 }

@@ -42,6 +42,19 @@ public class Team
         _label = label;
     }
 
+    /// <summary>
+    /// Construct with bye players
+    /// </summary>
+    /// <param name="id">DB identifier</param>
+    /// <param name="label">Team name</param>
+    /// <param name="teamSize">Create a number players in your team</param>
+    public Team(int id, string label, int noByePlayers)
+    {
+        _id = id;
+        _label = label;
+        for (int i = 0; i < noByePlayers; i++) _players.Add(new Player(true)); 
+    }
+
     public Team()
     {
 
@@ -76,5 +89,13 @@ public class Team
     public Player? Find(Predicate<Player> pred)
     {
         return _players.Find(pred);
+    }
+ 
+    ///
+    ///Ranking property 
+    //Get the average ranking of all players or return 0 if no players
+    public double Ranking
+    {
+        get=> _players.Count == 0 ?   0 :  _players.Sum(p => p.Ranking) / _players.Count;
     }
 }

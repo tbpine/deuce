@@ -14,6 +14,9 @@ class DbConnectionLocal : DbConnection
 
     //Don't close connection
     private  bool _keepAlive;
+    /// <summary>
+    /// If true, there's an existing transaction on the connection.
+    /// </summary>
     public void KeepAlive(bool value) {_keepAlive = value; }
 
     public DbConnectionLocal(string connStr)
@@ -68,6 +71,7 @@ class DbConnectionLocal : DbConnection
         //and reader.
                
           _connection.Open();
+          
 
         Debug.WriteLine($"DBCONN:{this.GetHashCode()}|opened.");
     }
@@ -75,7 +79,7 @@ class DbConnectionLocal : DbConnection
 
     protected override DbTransaction BeginDbTransaction(IsolationLevel isolationLevel)
     {
-        return _connection.BeginTransaction();
+        return  _connection.BeginTransaction();;
     }
 
     protected override DbCommand CreateDbCommand()

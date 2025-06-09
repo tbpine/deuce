@@ -1,5 +1,6 @@
 using System.Data.Common;
 using System.Diagnostics;
+using Org.BouncyCastle.Asn1.Eac;
 
 namespace deuce;
 
@@ -79,47 +80,51 @@ public class BuilderSchedule
                 state.Permutation.AddMatch(state.Match);
 
             }
-
-            //Players
-            if (recordMatch.PlayerAway > 0)
+            //A match can involve multiple players on each side.
+            //Check home side has enough players.
+            if ((state.Match.Home?.Count() ?? 0) < (_tournament.Details?.TeamSize ?? 1))
             {
-                Player? playerAway = _players?.Find(e => e.Id == recordMatch.PlayerAway);
-                if (playerAway != null)
+                Player playerHome = _players?.Find(e => e.Id == recordMatch.PlayerHome) ?? new Player();
+                state.Match.AddHome(playerHome);
+                
+                //If a team exists in _team , then added it to the permutation
+                //But, if the team does not exist, then create a new team with an empty label
+                var team = state.Permutation.Teams.FirstOrDefault(e => e.Id == recordMatch.TeamHome);
+
+                if (team is null)
                 {
-                    state.Match.AddAway(playerAway);
-                    //Add teams to the permutation
-                    var foundTeam = _teams.Find(e => e.Id == recordMatch.TeamAway);
-                    if (foundTeam is not null) state.Permutation.AddTeam(foundTeam);
+                    team = _teams.Find(e => e.Id == recordMatch.TeamHome);
+                    if (team is null) team = new Team(0, "");
 
+                    state.Permutation.AddTeam(team);
                 }
+                team.AddPlayer(playerHome);
             }
-            else if (recordMatch.PlayerHome > 0)
+            else if ((state.Match.Away?.Count() ?? 0) < (_tournament.Details?.TeamSize ?? 1))
             {
-                Player? playerHome = _players?.Find(e => e.Id == recordMatch.PlayerHome);
-                if (playerHome != null) state.Match.AddHome(playerHome);
-                //Add teams to the permutation
-                var foundTeam = _teams.Find(e => e.Id == recordMatch.TeamHome);
-                if (foundTeam is not null) state.Permutation.AddTeam(foundTeam);
-            }
-            else
-            {
-                //Make a bye team
-                Team byeTeam = new Team() { Id = 0, Label = "BYE" };
+               Player playerAway = _players?.Find(e => e.Id == recordMatch.PlayerAway) ?? new Player();
+                state.Match.AddAway(playerAway);
+                
+                //If a team exists in _team , then added it to the permutation
+                //But, if the team does not exist, then create a new team with an empty label
+                var team = state.Permutation.Teams.FirstOrDefault(e => e.Id == recordMatch.TeamAway);
 
-                //This is a bye, add a bye player to the match
-                if (state.Match.Home is not null)
-                    state.Match.AddAway(new Player() { Id = 0, First = "Bye", Last = "Bye", Bye = true });
-                else if (state.Match.Away is not null)
-                    state.Match.AddHome(new Player() { Id = 0, First = "Bye", Last = "Bye", Bye = true });
-                //Add the bye team
-                state.Permutation.AddTeam(byeTeam);
+                if (team is null)
+                {
+                    team = _teams.Find(e => e.Id == recordMatch.TeamAway);
+                    if (team is null) team = new Team(0, "");
+
+                    state.Permutation.AddTeam(team);
+                }
+                team.AddPlayer(playerAway);
             }
 
+          
         }
 
-        //Last set of games
 
 
         return schedule;
     }
+
 }

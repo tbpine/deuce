@@ -13,16 +13,18 @@ public class UnitTestsMatch
     public async Task set_match_returns_id()
     {
         //Assign
-        MySqlConnection conn = new("Server=localhost;Database=deuce;User Id=deuce;Password=deuce;");
+        DbConnectionLocal conn = new("Server=localhost;Database=deuce;User Id=deuce;Password=deuce;");
         //players , permutation and round, and tournament
         //Action
 
         try
         {
             conn.Open();
+            DbRepoPlayer dbRepoPlayer = new(conn);
+            var entries = await dbRepoPlayer.GetList(new Filter() { ClubId = 1, TournamentId = 0 });
             //Create tournament
             AssignTournament tourRepo = new();
-            Tournament tour = tourRepo.MakeRandom(1, "UnitTestsMatch test tour", 8, 1, 1, 0,1, 1);
+            Tournament tour = tourRepo.MakeRandom(1, "UnitTestsMatch test tour", 8, 1, 1, 0,1, 1, entries);
             Schedule? schedule = tour.Schedule;
 
             Assert.IsNotNull(schedule, "Tournment has no schedule");

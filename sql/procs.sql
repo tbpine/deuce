@@ -588,8 +588,8 @@ BEGIN
 
 select m.id 'match_id', m.permutation, m.round, player_home, player_away, home.team 'team_home', away.team 'team_away'
  from `match` m left join `match_player` p on p.`match`= m.id 
- left join `team_player` home on home.player = p.player_home
- left join `team_player` away on away.player = p.player_away
+ left join `team_player` home on (home.player = p.player_home and home.tournament = p_tournament)
+ left join `team_player` away on (away.player = p.player_away and away.tournament = p_tournament)
  where p.tournament = p_tournament
  order by m.round, m.permutation;
  

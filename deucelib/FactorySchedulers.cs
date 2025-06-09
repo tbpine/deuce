@@ -15,7 +15,7 @@ public class FactorySchedulers
     {
         switch (t.Type)
         {
-            case 1: { return new SchedulerRR(t, gm); }
+            case 2: { return new SchedulerKnockOut(t, gm); }
         }
 
         return new SchedulerRR(t, gm);

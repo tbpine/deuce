@@ -38,3 +38,6 @@ existing scores. If the current date has passed the start date, warn user that s
  - [X] Scoring controller
 - [] Don't need seperate controllers for team and player formats. Use one controller
 and represent the appropreite view. Makes navigation easier.
+- [] Byes for knockout. 2^Ceil(log(n)) - n ,  where n = number of players
+- [] concentrate on uniting of tournament strategies
+- [X] ~~Add a boolean to the DBLocationConnection class to mark transctions~~

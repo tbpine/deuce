@@ -101,6 +101,11 @@ public class TournamentController : MemberController
         return View("Summary", _model);
     }
 
+    /// <summary>
+    /// Start the tournament.
+    /// This method is called when the user clicks the "Start Tournament" button.
+    /// </summary>
+    /// <returns>An IActionResult that redirects to the tournament index page or returns the summary view with an error message.</returns>
     public async Task<IActionResult> Start()
     {
 
@@ -120,7 +125,7 @@ public class TournamentController : MemberController
         return View("Summary", _model);
     }
 
-   
+
     public IActionResult Edit()
     {
         return RedirectToAction("Index", "TDetail", new { id = _model.Tournament.Id });
