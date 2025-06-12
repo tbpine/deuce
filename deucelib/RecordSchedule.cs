@@ -1,1 +1,1 @@
-public record RecordSchedule (int Match, int Permutation, int Round, int PlayerHome, int PlayerAway, int TeamHome, int TeamAway);
+public record RecordSchedule (int Match, int Permutation, int Round, int PlayerHome, int PlayerAway, int TeamHome, int TeamAway, int PlayersPerSide);

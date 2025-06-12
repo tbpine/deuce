@@ -184,13 +184,15 @@ CREATE PROCEDURE `sp_set_match`(
 IN p_id INT,
 IN p_permutation INT,
 IN p_round INT,
-IN p_tournament INT)
+IN p_tournament INT,
+IN p_players_per_side INT)
 
 BEGIN
 
-INSERT INTO `match`(`id`,`permutation`,`round`,`tournament`,`updated_datetime`,`created_datetime`) 
-VALUES (p_id, p_permutation, p_round, p_tournament, NOW(), NOW())
-ON DUPLICATE KEY UPDATE  `permutation` = p_permutation, `round` = p_round,`tournament` = p_tournament,`updated_datetime` = NOW();
+INSERT INTO `match`(`id`,`permutation`,`round`,`tournament`,`updated_datetime`,`created_datetime`,`players_per_side`) 
+VALUES (p_id, p_permutation, p_round, p_tournament, NOW(), NOW(), p_players_per_side)
+ON DUPLICATE KEY UPDATE  `permutation` = p_permutation, `round` = p_round,`tournament` = p_tournament,`updated_datetime` = NOW(),
+`players_per_side` = p_players_per_side;
 
 SELECT LAST_INSERT_ID() 'id';
 
@@ -206,8 +208,8 @@ BEGIN
 	SELECT `id`,`first_name`,`last_name`,`middle_name`,`utr`,`member`, `updated_datetime`,`created_datetime`
 	FROM `player`
     WHERE `tournament` = p_tournament OR ISNULL(p_tournament)
-	ORDER BY `first_name`,`last_name`, `middle_name`;
-
+	ORDER BY `first_name`,`last_name`, `middle_name`
+	LIMIT 4;
 
  END//
 
@@ -586,7 +588,7 @@ IN p_tournament INT)
 
 BEGIN
 
-select m.id 'match_id', m.permutation, m.round, player_home, player_away, home.team 'team_home', away.team 'team_away'
+select m.id 'match_id', m.permutation, m.round, m.players_per_side, p.player_home , p.player_away, home.team 'team_home', away.team 'team_away'
  from `match` m left join `match_player` p on p.`match`= m.id 
  left join `team_player` home on (home.player = p.player_home and home.tournament = p_tournament)
  left join `team_player` away on (away.player = p.player_away and away.tournament = p_tournament)
@@ -712,8 +714,10 @@ CREATE PROCEDURE `sp_clear_all_tour`(
 -- turn off foreign key checks
 SET FOREIGN_KEY_CHECKS=0;
 
+truncate `score`;
 truncate `team_player`;
 truncate `team`;
+
 truncate `match`;
 truncate `match_player`;
 truncate `tournament`;

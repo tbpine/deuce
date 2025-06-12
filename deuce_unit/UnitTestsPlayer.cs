@@ -12,7 +12,7 @@ public class UnitTestsPlayer
 {
 
     [TestMethod]
-    [DataRow(4,1)]
+    [DataRow(100,1)]
     public void set_n_non_member_players_returns_nothing(int noPlayers, int tourId)
     {
         //Assign

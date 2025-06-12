@@ -12,6 +12,7 @@
 -- drop table if exists  `team_player`;
 -- drop table if exists  `match`;
 -- drop table if exists  `match_player`;
+-- drop table if exists  `score`;
 -- drop table if exists  `sport`;
 -- drop table if exists  `settings`;
 -- drop table if exists  `member`;
@@ -235,6 +236,7 @@ CREATE TABLE IF NOT EXISTS `match` (
     `permutation`		INT,
     `round` 			INT,
     `tournament` 		INT,
+	`players_per_side`	INT,
     `updated_datetime` 	TIMESTAMP,
     `created_datetime` 	TIMESTAMP
 );

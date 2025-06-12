@@ -106,12 +106,12 @@ public class TournamentController : MemberController
     /// This method is called when the user clicks the "Start Tournament" button.
     /// </summary>
     /// <returns>An IActionResult that redirects to the tournament index page or returns the summary view with an error message.</returns>
-    public async Task<IActionResult> Start()
+    public async Task<IActionResult> Start(int tournament)
     {
 
         //Make the schedule for the tournament.
         //It's saved to the database
-        var actionResult = await _tourGateway.StartTournament();
+        var actionResult = await _tourGateway.StartTournament(tournament);
         //Go back to the tournaments listing
         if (actionResult.Status == ResultStatus.Ok)
             return RedirectToAction("Index", "Tournament");

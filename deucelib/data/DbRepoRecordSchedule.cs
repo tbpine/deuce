@@ -32,7 +32,8 @@ public class DbRepoRecordSchedule : DbRepoBase<RecordSchedule>
                                         r.Parse<int>("player_home"),
                                         r.Parse<int>("player_away"),
                                         r.Parse<int>("team_home"),
-                                        r.Parse<int>("team_away")
+                                        r.Parse<int>("team_away"),
+                                        r.Parse<int>("players_per_side")
                                                           ));
         });
 

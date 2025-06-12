@@ -43,7 +43,7 @@ public class GameMakerTennis : IGameMaker
             Player pHome = a1[i];
             Player pAway = a2[i];
             Debug.Write($"({pHome},{pAway})");
-            Match match = new Match("",  roundNo);
+            Match match = new Match("", roundNo) { PlayersPerSide = 1 };
             match.AddPairing(pHome, pAway);
             match.Permutation = perm;
             perm.AddMatch(match);
@@ -59,7 +59,7 @@ public class GameMakerTennis : IGameMaker
             Player pAway1 = a2[j % away.NoPlayers];
             Player pAway2 = a2[ (j+1) % away.NoPlayers];
             Debug.Write($"({pHome1} {pHome2},{pAway1} {pAway2})");
-            Match match = new Match("", roundNo);
+            Match match = new Match("", roundNo) { PlayersPerSide = 2 };
             match.AddHome(pHome1);
             match.AddHome(pHome2);
             match.AddAway(pAway1);

@@ -74,7 +74,8 @@ public class BuilderSchedule
                 {
                     Id = recordMatch.Match,
                     Permutation = state.Permutation,
-                    Round = state.Round.Index
+                    Round = state.Round.Index,
+                    PlayersPerSide = recordMatch.PlayersPerSide
                 };
 
                 state.Permutation.AddMatch(state.Match);
@@ -82,7 +83,7 @@ public class BuilderSchedule
             }
             //A match can involve multiple players on each side.
             //Check home side has enough players.
-            if ((state.Match.Home?.Count() ?? 0) < (_tournament.Details?.TeamSize ?? 1))
+            if ((state.Match.Home?.Count() ?? 0) < state.Match.PlayersPerSide)
             {
                 Player playerHome = _players?.Find(e => e.Id == recordMatch.PlayerHome) ?? new Player();
                 state.Match.AddHome(playerHome);
@@ -100,7 +101,7 @@ public class BuilderSchedule
                 }
                 team.AddPlayer(playerHome);
             }
-            else if ((state.Match.Away?.Count() ?? 0) < (_tournament.Details?.TeamSize ?? 1))
+            else if ((state.Match.Away?.Count() ?? 0) <  state.Match.PlayersPerSide)
             {
                Player playerAway = _players?.Find(e => e.Id == recordMatch.PlayerAway) ?? new Player();
                 state.Match.AddAway(playerAway);

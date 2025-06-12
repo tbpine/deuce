@@ -33,9 +33,9 @@ public class DbRepoMatch : DbRepoBase<Match>
         //get tournament id
         int tourId = obj.Permutation?.Round?.Tournament?.Id ?? 0;
 
-        var cmd = _dbconn.CreateCommandStoreProc("sp_set_match", ["p_id", "p_permutation", "p_round", "p_tournament" ],
+        var cmd = _dbconn.CreateCommandStoreProc("sp_set_match", ["p_id", "p_permutation", "p_round", "p_tournament" ,"p_players_per_side"],
         
-        [ primaryKeyId, obj.Permutation?.Id ?? 0, obj.Permutation?.Round?.Index ?? 0, tourId ],
+        [ primaryKeyId, obj.Permutation?.Id ?? 0, obj.Permutation?.Round?.Index ?? 0, tourId, obj.PlayersPerSide],
         null);
         object? id = await cmd.ExecuteScalarAsync();
         obj.Id = (int)(ulong)(id ?? 0L);

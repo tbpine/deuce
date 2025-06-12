@@ -44,7 +44,7 @@
     </table>
 
       <div class="alert alert-primary @classErrorVis mt-2" role="alert">@Model.Error</div>
-      <a class="btn btn-primary @classStartVis mt-2" asp-controller="Tournament" asp-action="Start">Start</a>
+      <a class="btn btn-primary @classStartVis mt-2" asp-controller="Tournament" asp-action="Start" asp-route-tournament="@Model.Tournament.Id">Start</a>
       <a class="btn btn-primary mt-2" asp-controller="Tournament" asp-action="Edit">Edit</a>
       <a class="btn btn-primary mt-2 @classScoringVis" asp-controller="Scoring" asp-action="Index" asp-route-tournament="@Model.Tournament.Id">Scores</a>
 

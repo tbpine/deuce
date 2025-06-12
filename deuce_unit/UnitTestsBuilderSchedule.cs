@@ -27,7 +27,7 @@ public class UnitTestsBuilderSchedule
         //Assign
         //Make a random tournament
         AssignTournament assignTour = new();
-        Tournament tournament = assignTour.MakeRandom(tourType, "testing_tournament", noPlayers, 1, noSingle, noDouble,
+        Tournament tournament = assignTour.MakeRandom(tourType, RandomUtil.GetRandomTournamentName(), noPlayers, 1, noSingle, noDouble,
          1, teamSize, entries);
 
 
@@ -101,7 +101,7 @@ public class UnitTestsBuilderSchedule
         //Assign
         //Make a random tournament
         AssignTournament assignTour = new();
-        Tournament tournament = assignTour.MakeRandom(tourType, "testing_tournament", noPlayers, 1, noSingle, noDouble,
+        Tournament tournament = assignTour.MakeRandom(tourType, RandomUtil.GetRandomTournamentName(), noPlayers, 1, noSingle, noDouble,
          1, teamSize, entries);
 
 
@@ -130,9 +130,11 @@ public class UnitTestsBuilderSchedule
 
             BuilderSchedule builderSchedule = new BuilderSchedule(recordsSched, players, teams, tournament, conn);
             Schedule schedule = builderSchedule.Create();
+            Assert.IsNotNull(schedule, "schedule was null");
 
             Assert.IsNotNull(schedule, "schedule was null");
             Assert.IsTrue(schedule.NoRounds > 0, $"schedule was null");
+            
         }
         catch (Exception ex)
         {

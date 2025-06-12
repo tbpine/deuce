@@ -17,7 +17,9 @@ public class Match
     private int _round;
 
     private Permutation? _perm;
-    private int p_id;
+    private int _id;
+    private int _playersPerSide = 1; // Default to single player per side
+
 
     //------------------------------------
     // Props
@@ -32,8 +34,9 @@ public class Match
 
     public IEnumerable<Player> Home { get => _home; }
     public IEnumerable<Player> Away { get => _away; }
-    public int Id { get { return p_id; } set { p_id = value; } }
-
+    public int Id { get { return _id; } set { _id = value; } }
+    
+    public int PlayersPerSide { get => _playersPerSide;  set=> _playersPerSide = value; }
 
     /// <summary>
     /// Construct with values
