@@ -13,6 +13,9 @@ public class ScoringController : MemberController
     private readonly DbRepoRecordSchedule _dbRepoRecordSchedule;
     private readonly DbConnection _dbConnection;
     private readonly ILogger<ScoringController> _log;
+    private readonly ICacheMaster _cache;
+
+
 
     /// <summary>
     /// Scoring controller for managing scores in tournaments.
@@ -29,18 +32,19 @@ public class ScoringController : MemberController
     /// <param name="dbRepoRecordSchedule">DbRepo record schedule</param>
     public ScoringController(ILogger<ScoringController> log, ISideMenuHandler handlerNavItems, IServiceProvider sp, IConfiguration config,
     ITournamentGateway tgateway, SessionProxy sessionProxy, DbRepoRecordTeamPlayer dbRepoRecordTeamPlayer, DbConnection dbConnection,
-    DbRepoRecordSchedule dbRepoRecordSchedule) : base( handlerNavItems, sp, config, tgateway, sessionProxy)
+    DbRepoRecordSchedule dbRepoRecordSchedule, ICacheMaster cache) : base(handlerNavItems, sp, config, tgateway, sessionProxy)
     {
         _log = log;
         _deRepoRecordTeamPlayer = dbRepoRecordTeamPlayer;
         _dbRepoRecordSchedule = dbRepoRecordSchedule;
         _dbConnection = dbConnection;
+        _cache = cache;
     }
 
     [HttpGet]
     public async Task<IActionResult> Index(int tournament)
     {
-        // Set the tournament ID in the model
+        // Set the tournament ID in the model, not from session
         _model.Tournament.Id = tournament;
         _sessionProxy.TournamentId = tournament;
         // Set the current round to 0
@@ -60,8 +64,15 @@ public class ScoringController : MemberController
         // Set the title for the page
         _model.Title = "Scoring";
 
+        //Get tournament type from the cache
+        var tournamentTypes = await _cache.GetList<TournamentType>(CacheMasterDefault.KEY_TOURNAMENT_TYPES);
+        //Find the KO tournament type
+        var tournamentType = tournamentTypes?.FirstOrDefault(tt => tt.Key == "ko");
+        //Load "KO.cshtml" view model if the tournament type is knockout
+        string viewName = _model.Tournament.Type == (tournamentType?.Id??-1) ? "KO" : "Index";
+
         // Return the view with the model
-        return View("Index", _model);
+        return View(viewName, _model);
     }
 
     [HttpPost]

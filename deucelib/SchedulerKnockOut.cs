@@ -39,16 +39,16 @@ class SchedulerKnockOut : SchedulerBase, IScheduler
 
         int noRounds = (int)Math.Log2(_teams.Count);
         //First round has half the number of permutations as the number of teams.
-        int noPermutations = _teams.Count /2 ;
+        int noPermutations = _teams.Count / 2;
         //for each permutation, an element in the top half of "_teams" 
         //plays against an element in the bottom half of "_teams".
         Debug.WriteLine($"ex:{exponent}|byes:{noByes}|teams:{_teams.Count}|r:{noRounds}|perms:{noPermutations}");
-        for(int i = 0; i < noPermutations; i++)
+        for (int i = 0; i < noPermutations; i++)
         {
             var home = _teams[i];
             var away = _teams[_teams.Count - i - 1];
 
-            if  (_tournament.Sport  == 1)
+            if (_tournament.Sport == 1)
             {
                 var permutation = _gameMaker.Create(_tournament, home, away, 1);
                 permutation.Id = i;
@@ -59,21 +59,21 @@ class SchedulerKnockOut : SchedulerBase, IScheduler
         }
 
         //From round 2 to the final round
-        for(int r = 2; r <= noRounds; r++)
+        for (int r = 2; r <= noRounds; r++)
         {
             //In a knockout tournament, each round has half the number of matches as the previous round.
             //For example, 8 teams = 4 matches in the first round, 2 matches in the second round, and 1 match in the final.
             Debug.Write($"Round {r}:");
-             noPermutations = (int)( _teams.Count / Math.Pow(2, r));
+            noPermutations = (int)(_teams.Count / Math.Pow(2, r));
             //Make an list empty teams
             List<Team> emptyTeams = new List<Team>();
-            for(int i =0; i < noPermutations; i++)
+            for (int i = 0; i < noPermutations; i++)
             {
                 var home = new Team(0, "") { Index = i };
                 var away = new Team(0, "") { Index = i + 1 };
-                for(int j = 0; j < _tournament.Details.TeamSize; j++)
+                for (int j = 0; j < _tournament.Details.TeamSize; j++)
                 {
-                    home.AddPlayer(new Player() {  Index = j });
+                    home.AddPlayer(new Player() { Index = j });
                     away.AddPlayer(new Player() { Index = j });
                 }
                 emptyTeams.Add(home);
@@ -86,26 +86,39 @@ class SchedulerKnockOut : SchedulerBase, IScheduler
                 var home = emptyTeams[p];
                 var away = emptyTeams[emptyTeams.Count - p - 1];
                 Debug.Write("(" + home.Index + "," + away.Index + ")");
-                
+
 
                 //Schedule matches between each team.
                 if (_tournament.Sport == 1)
                 {
                     var permutation = _gameMaker.Create(_tournament, home, away, r);
                     permutation.Id = p;
-                    schedule.AddPermutation(permutation, r);
+                    //Make round labels
+                    schedule.AddPermutation(permutation, r, GetRoundLabel(noRounds, r));
                 }
-           
+
             }
-          
+
             Debug.Write($"\n");
         }
 
-     
+
 
 
         return schedule;
     }
 
+    /// <summary>
+    /// Specific to knockout tournaments. Get Final  , Quarters, semis....
+    /// </summary>
+    private string GetRoundLabel(int totalRounds, int currentRound)
+    {
+        if (totalRounds <= 3) return String.Empty;
+        if (currentRound == totalRounds) return "Final";
+        else if (currentRound == totalRounds - 1) return "Semi Final";
+        else if (currentRound == totalRounds - 2) return "Quarter Final";
+
+        return String.Empty;
+    }
 
 }

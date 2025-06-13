@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using deuce;
 using deuce_web;
 using iText.Forms.Xfdf;
+using deuce.ext;
 
 /// <summary>
 /// Controller for the Tournament Format Team page.
@@ -50,14 +51,9 @@ public class TFormatTeamController : WizardController
             var rowTournamentDetail = (await _dbRepoTournamentDetail.GetList(new Filter() { TournamentId = _model.Tournament.Id })).FirstOrDefault();
 
             _model.Tournament.Sport = rowTournament?.Sport ?? 1;
-            _model.Tournament.Details = rowTournamentDetail ?? new()
-            {
-                Games = 6,
-                Sets = 1,
-                NoSingles = 2,
-                NoDoubles = 2,
-                TeamSize = entry_type == (int)EntryType.Team ? 2 : 1
-            };
+            //Default tournment details is based on tournament type
+            if (rowTournamentDetail is not null) _model.Tournament.Details = rowTournamentDetail;
+            else _model.Tournament.CreateDetail();
 
             SetCustomValues(_model, "Tournament.Details.TeamSize", "CustomTeamSize", 6);
             SetCustomValues(_model, "Tournament.Details.Games", "CustomGames", 6);

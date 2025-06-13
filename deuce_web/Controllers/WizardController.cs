@@ -72,6 +72,7 @@ public abstract class WizardController : Controller
         _model.Tournament.Organization = new Organization() { Id = _sessionProxy?.OrganizationId??0, Name = "" };
         _model.Tournament.EntryType =  _sessionProxy?.EntryType ?? (int)EntryType.Team;
         
+        
     }
 
     protected NavItem? NextPage(string replacement)

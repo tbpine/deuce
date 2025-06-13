@@ -36,15 +36,16 @@ public class Schedule
     /// </summary>
     /// <param name="permutation">Perm to add</param>
     /// <param name="roundNo">Round number</param>
-    public void AddPermutation(Permutation permutation, int roundNo)
+    public void AddPermutation(Permutation permutation, int roundNo, string roundLabel ="")
     {
         var existing = _rounds.Find(e=>e.Index == roundNo);
         Round round = existing is null ? new Round(roundNo) : existing;
-        
+        //Label if specified
+        round.Label = string.IsNullOrEmpty(roundLabel) ?  round.Label: roundLabel;
         if (existing is null)
         {
             round.Tournament = Tournament;
-            _rounds.Add(round); 
+            _rounds.Add(round);
 
         } 
         //Soft Link

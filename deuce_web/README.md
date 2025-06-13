@@ -41,4 +41,6 @@ and represent the appropreite view. Makes navigation easier.
 - [] Byes for knockout. 2^Ceil(log(n)) - n ,  where n = number of players
 - [] concentrate on uniting of tournament strategies
 - [X] ~~Add a boolean to the DBLocationConnection class to mark transctions~~
-- [] Fix the schedule builder when there's empty players. Each match needs number of players ?
+- [X] ~~FIX the schedule builder when there's empty players. Each match needs number of players ?~~
+- [] Review tournament wizard for KO of entry types teams or individual
+- [] Players list is readonly when the entry type is individual. Remember that indiviaula tournament are a special case of team size one.
