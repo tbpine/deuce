@@ -44,7 +44,8 @@ public class TFormatTeamController : WizardController
             //Transfer properties from the base class
             //to the view model.
             // LoadPage logic
-            var sports = await _cache.GetList<Sport>(CacheMasterDefault.KEY_SPORTS);
+            LoadPage();
+
             //Load tournament  from the database
             var rowTournament = (await _dbRepoTournament.GetList(new Filter() { TournamentId = _model.Tournament.Id })).FirstOrDefault();
             //Load tournament details from the database using the dbRpepoTournamentDetail
@@ -60,6 +61,8 @@ public class TFormatTeamController : WizardController
             SetCustomValues(_model, "Tournament.Details.NoSingles", "CustomSingles", 6);
             SetCustomValues(_model, "Tournament.Details.NoDoubles", "CustomDoubles", 6);
 
+            var sports = await _cache.GetList<Sport>(CacheMasterDefault.KEY_SPORTS);
+
             var sport = sports?.Find(e => e.Id == (_model.Tournament?.Sport ?? 1));
             _model.Title = sport?.Label ?? "";
 
@@ -74,6 +77,15 @@ public class TFormatTeamController : WizardController
         }
 
         return View(GetView((EntryType)entry_type), _model);
+    }
+
+    /// <summary>
+    ///  Load page options 
+    /// </summary>
+    /// <returns></returns>
+    private void LoadPage()
+    {
+        PopulateSelectLists(_model);
     }
 
     /// <summary>
@@ -96,19 +108,36 @@ public class TFormatTeamController : WizardController
     public async Task<IActionResult> Save(ViewModelTournamentWizard formValues)
     {
 
+        //If entry type is individual, set specific tournament details
+        //values
         // Form validation logic (adapt as needed)
         string err = "";
+        //Set details id
         _model.Tournament.Details.TournamentId = _model.Tournament.Id;
 
-        _model.Tournament.Details.TeamSize = formValues.Tournament.Details.TeamSize < 99 ?
-        formValues.Tournament.Details.TeamSize : formValues.CustomTeamSize ?? 2;
-        _model.Tournament.Details.Games = formValues.Tournament.Details.Games < 99 ?
-         formValues.Tournament.Details.Games : formValues.CustomGames ?? 1;
-        _model.Tournament.Details.Sets = formValues.Tournament.Details.Sets;
-        _model.Tournament.Details.NoSingles = formValues.Tournament.Details.NoSingles < 99 ?
-         formValues.Tournament.Details.NoSingles : formValues.CustomSingles ?? 1;
-        _model.Tournament.Details.NoDoubles = formValues.Tournament.Details.NoDoubles < 99 ?
-         formValues.Tournament.Details.NoDoubles : formValues.CustomDoubles ?? 1;
+        if (_model.Tournament.EntryType == (int)EntryType.Individual)
+        {
+            _model.Tournament.Details.Sets = formValues.Tournament.Details.Sets;
+            _model.Tournament.Details.Games = formValues.CustomGames < 99 ? formValues.Tournament.Details.Games :
+            formValues.CustomGames ?? 1;
+            _model.Tournament.Details.NoSingles = 1;
+            _model.Tournament.Details.NoDoubles = 0;
+            _model.Tournament.Details.TeamSize = 1;
+        }
+        else
+        {
+
+
+            _model.Tournament.Details.TeamSize = formValues.Tournament.Details.TeamSize < 99 ?
+            formValues.Tournament.Details.TeamSize : formValues.CustomTeamSize ?? 2;
+            _model.Tournament.Details.Games = formValues.Tournament.Details.Games < 99 ?
+             formValues.Tournament.Details.Games : formValues.CustomGames ?? 1;
+            _model.Tournament.Details.Sets = formValues.Tournament.Details.Sets;
+            _model.Tournament.Details.NoSingles = formValues.Tournament.Details.NoSingles < 99 ?
+             formValues.Tournament.Details.NoSingles : formValues.CustomSingles ?? 1;
+            _model.Tournament.Details.NoDoubles = formValues.Tournament.Details.NoDoubles < 99 ?
+             formValues.Tournament.Details.NoDoubles : formValues.CustomDoubles ?? 1;
+        }
 
         if (!ValidateForm(_model, ref err))
         {

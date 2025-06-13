@@ -23,8 +23,9 @@ public class TeamValidator
     /// <returns>false if invalid teams</returns>
     public ResultTeamAction Check(List<Team> teams, Tournament tournament)
     {
+        if (tournament.EntryType == (int)EntryType.Individual)  return new ResultTeamAction(RetCodeTeamAction.Success, ""); 
         
-        if (teams.Count == 0) return new (RetCodeTeamAction.Warning, "No teams");
+        if (teams.Count == 0) return new(RetCodeTeamAction.Warning, "No teams");
 
 
         //Get the list of all players

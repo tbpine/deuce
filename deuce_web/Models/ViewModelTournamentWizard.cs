@@ -33,6 +33,7 @@ public class ViewModelTournamentWizard
     public Format Format { get; set; } = new(1,1,1);
 
     public string Title { get; set; } = "";
+    public string SelMsg { get; set; } = "";
     public IEnumerable<SelectListItem> SelectTeamSize { get; set; } = new List<SelectListItem>();
     public IEnumerable<SelectListItem> SelectGamesPerSet { get; set; } = new List<SelectListItem>();
     public IEnumerable<SelectListItem> SelectSets { get; set; } = new List<SelectListItem>();

@@ -30,9 +30,8 @@ public class TDetailController : WizardController
 
         _model.Validated = false;
         //Load page options from the from the database
-        _model.Sports = await _cache.GetList<Sport>(CacheMasterDefault.KEY_SPORTS) ?? new();
-        _model.TournamentTypes = await _cache.GetList<TournamentType>(CacheMasterDefault.KEY_TOURNAMENT_TYPES) ?? new();
         //Load form values from the database
+        await LoadPage();
         var rowsTournament = await _dbRepoTournament.GetList(new Filter() { TournamentId = _model.Tournament.Id });
         var rowTournament = rowsTournament.FirstOrDefault();
         //Copy values to the model and set the default values
@@ -68,7 +67,9 @@ public class TDetailController : WizardController
         if (!pageIsValid)
         {
             //Set errors
+            //State less have to load page values again
             obj.Label = "";
+            await LoadPage();
             return View("Index", _model);
         }
 
@@ -124,5 +125,17 @@ public class TDetailController : WizardController
 
     }
 
+    /// <summary>
+    ///  Loads the page options and form values.
+    /// </summary>
+    /// <returns></returns>
+    private async Task LoadPage()
+    {
+
+        //Load page options from the from the database
+        _model.Sports = await _cache.GetList<Sport>(CacheMasterDefault.KEY_SPORTS) ?? new();
+        _model.TournamentTypes = await _cache.GetList<TournamentType>(CacheMasterDefault.KEY_TOURNAMENT_TYPES) ?? new();
+   
+    }
 
 }

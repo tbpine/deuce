@@ -46,22 +46,20 @@ public class TPlayersController : WizardController
     [HttpGet]
     public async Task<IActionResult> Index()
     {
-        ViewModelTournamentWizard model = new();
         try
         {
             //Menus and the back button
-            model.ShowBackButton = _showBackButton;
-            model.BackPage = _backPage;
-            model.NavItems = new List<NavItem>(this._handlerNavItems?.NavItems ?? Enumerable.Empty<NavItem>());
+            await LoadPage(_model, true);
 
-            await LoadPage(model, true);
+        
         }
         catch (Exception ex)
         {
             _log.LogError(ex.Message);
         }
 
-        return View("Index", model); // Assuming you have a corresponding view named "Index"
+        string viewName = _model.Tournament.EntryType == (int)deuce.EntryType.Individual ? "Individual" : "Index";
+        return View(viewName, _model); // Assuming you have a corresponding view named "Index"
     }
 
     [HttpPost]
@@ -70,30 +68,23 @@ public class TPlayersController : WizardController
     {
         FormUtils.DebugOut(this.Request.Form);
 
-        //Menus and the back button
-        model.ShowBackButton = _showBackButton;
-        model.BackPage = _backPage;
-        model.NavItems = new List<NavItem>(this._handlerNavItems?.NavItems ?? Enumerable.Empty<NavItem>());
-
         //Tournament DTO.
-        model.Tournament.Id = _sessionProxy?.TournamentId ?? 0;
-        model.Tournament.Details.TeamSize = _sessionProxy?.TeamSize ?? 2;
 
         //Read teams from the displayed form
-        List<Team> teams = _adaptorTeams.Parse(this.Request.Form, model.Tournament);
+        List<Team> teams = _adaptorTeams.Parse(this.Request.Form, _model.Tournament);
 
         //Validate teams before saving:
         //Team must have players
         //A player cannot appear more than once.
         TeamValidator teamValidator = new();
-        var isvalidTeams = teamValidator.Check(teams, model.Tournament);
+        var isvalidTeams = teamValidator.Check(teams, _model.Tournament);
         //Warning or error
         if (isvalidTeams.Result != RetCodeTeamAction.Success)
         {
             Error = isvalidTeams.Result == RetCodeTeamAction.Error ? isvalidTeams?.Message ?? "" : "";
-            model.Teams = teams;
-            await LoadPage(model, false);
-            return View("Index", model);
+            _model.Teams = teams;
+            await LoadPage(_model, false);
+            return View("Index", _model);
         }
 
         //Organization DTO
@@ -102,14 +93,14 @@ public class TPlayersController : WizardController
 
         //Assign references to the team dbrepo
         _dbRepoTeam.Organization = organization;
-        _dbRepoTeam.TournamentId = model.Tournament.Id;
+        _dbRepoTeam.TournamentId = _model.Tournament.Id;
 
         //----------------------------------------
         //Sync between form and db
         //----------------------------------------
 
         //Get teams from db
-        List<Team> teamsInDB = await _teamRepo.GetListAsync(model.Tournament.Id);
+        List<Team> teamsInDB = await _teamRepo.GetListAsync(_model.Tournament.Id);
 
         SyncMaster<Team> syncMaster = new(teams, teamsInDB);
         //Add handlers to insert, update and delete teams
@@ -143,7 +134,7 @@ public class TPlayersController : WizardController
             return RedirectToAction(nextNavItem.Action, nextNavItem.Controller);
         }
 
-        return View("Index", model);
+        return View("Index", _model);
     }
 
     [HttpPost]
@@ -226,6 +217,12 @@ public class TPlayersController : WizardController
                     if (hasPlayer) player.Team = team;
                 }
             }
+
+            //Set title and selection message
+            model.Title = model.Tournament.Details.TeamSize > 1 ? "Teams" : " Players";
+            model.SelMsg = model.Tournament.Details.TeamSize > 1 ? "Select players that are in a team using checkboxes, add then press \"Add Team\". Repeat until all players are in a team" : "";
+            
+
         }
         catch (Exception ex)
         {
