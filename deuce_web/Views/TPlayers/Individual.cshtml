@@ -25,10 +25,6 @@
             <!-- Master checkbox + Action buttons -->
             <div class="nav align-items-center mb-4">
                 <div class="d-flex flex-wrap" id="published-action-buttons">
-                    <a class="nav-link position-relative px-0 pe-sm-2 py-2 me-4 d-none" onclick="teamPost('/TPlayers/AddTeam')">
-                        <i class="fi-plus-square fs-base me-2"></i>
-                        <span class="hover-effect-underline stretched-link d-none d-md-inline">Add Team</span>
-                    </a>
                     <a class="nav-link position-relative px-0 pe-sm-2 py-2 me-4" href="#!">
                         <i class="fi-layers fs-base me-2"></i>
                         <span class="hover-effect-underline stretched-link d-none d-md-inline">Import</span>
@@ -37,16 +33,11 @@
                         <i class="fi-share fs-base me-2"></i>
                         <span class="hover-effect-underline stretched-link d-none d-md-inline">Export</span>
                     </a>
-                    <a class="nav-link position-relative text-danger px-0 py-2 d-none" onclick="teamPost('/TPlayers/DeleteTeam')">
-                        <i class="fi-trash fs-base me-1"></i>
-                        <span class="hover-effect-underline stretched-link d-none d-md-inline">Delete</span>
-                    </a>
                 </div>
             </div>
 
             <!-- Published listings -->
             <form class="vstack gap-4 mb-4" id="page_form" asp-action="Save" asp-controller="TPlayers" method="post">
-                <input name="action" id="action" type="hidden" />
                 <table id="players_table" class="table">
                     <thead>
                         <tr>
@@ -62,7 +53,7 @@
                             {
                                 string playerAttrName = $"player_{player?.Id}_{player?.First}_{player?.Last}_{player?.Middle}";
                                 <tr>
-                                    <td class="text-center"><input type="checkbox" class="form-check-input d-none" name="@playerAttrName"></td>
+                                    <td class="text-center"><input type="checkbox" class="form-check-input" name="@playerAttrName" checked></td>
                                     <td class="text-center">@player?.ToString()</td>
                                     <td class="text-center">@player?.Ranking</td>
                                 </tr>

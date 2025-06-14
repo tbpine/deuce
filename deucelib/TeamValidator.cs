@@ -1,12 +1,9 @@
-using System.Reflection.Metadata.Ecma335;
-using Org.BouncyCastle.Crypto.Parameters;
-
 namespace  deuce;
 
 /// <summary>
-/// Check that teams have unique players
+/// Check that teams have unique players . For entry type "team"
 /// </summary>
-public class TeamValidator
+public class TeamValidator : TeamValidatorBase
 {
 
     public TeamValidator()
@@ -21,9 +18,8 @@ public class TeamValidator
     /// </summary>
     /// <param name="teams">List of teams</param>
     /// <returns>false if invalid teams</returns>
-    public ResultTeamAction Check(List<Team> teams, Tournament tournament)
+    public override ResultTeamAction Check(List<Team> teams, Tournament tournament)
     {
-        if (tournament.EntryType == (int)EntryType.Individual)  return new ResultTeamAction(RetCodeTeamAction.Success, ""); 
         
         if (teams.Count == 0) return new(RetCodeTeamAction.Warning, "No teams");
 

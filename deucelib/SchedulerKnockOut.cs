@@ -113,10 +113,18 @@ class SchedulerKnockOut : SchedulerBase, IScheduler
     /// </summary>
     private string GetRoundLabel(int totalRounds, int currentRound)
     {
-        if (totalRounds <= 3) return String.Empty;
-        if (currentRound == totalRounds) return "Final";
-        else if (currentRound == totalRounds - 1) return "Semi Final";
-        else if (currentRound == totalRounds - 2) return "Quarter Final";
+        if (totalRounds <= 3)
+        {
+            if (currentRound == totalRounds) return "Final";
+            else
+                return String.Empty;
+        }
+        else
+        {
+            if (currentRound == totalRounds) return "Final";
+            else if (currentRound == totalRounds - 1) return "Semi Final";
+            else if (currentRound == totalRounds - 2) return "Quarter Final";
+        }
 
         return String.Empty;
     }

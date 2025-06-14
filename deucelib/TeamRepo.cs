@@ -1,5 +1,7 @@
 using System.Data.Common;
 using System.Threading.Tasks;
+using DocumentFormat.OpenXml.Office2021.Excel.Pivot;
+using Microsoft.VisualBasic;
 
 namespace deuce;
 /// <summary>
@@ -32,7 +34,7 @@ public class TeamRepo
     /// For DI purposes.
     /// </summary>
     /// <param name="dbconn">Database connection</param>
-    public TeamRepo( DbConnection? dbconn)
+    public TeamRepo(DbConnection? dbconn)
     {
         _source = new();
         _dbconn = dbconn;
@@ -45,18 +47,18 @@ public class TeamRepo
     /// <returns>List of teams for the tournament</returns>
     public async Task<List<Team>> GetListAsync(int tournamentId)
     {
-        if (_dbconn is null ) return new List<Team>();
-        
+        if (_dbconn is null) return new List<Team>();
+
         //Get the unnormalizes list of players fot the tournament
         DbRepoRecordTeamPlayer dbRepoRecordTeamPlayer = new(_dbconn);
-        Filter filter = new() { TournamentId = tournamentId};
+        Filter filter = new() { TournamentId = tournamentId };
 
-        _source =  await dbRepoRecordTeamPlayer.GetList(filter);
+        _source = await dbRepoRecordTeamPlayer.GetList(filter);
 
         //Create the team player structure
         return ExtractFromRecordTeamPlayer();
     }
-    
+
     /// <summary>
     /// 
     /// </summary>
@@ -90,7 +92,7 @@ public class TeamRepo
             player.TeamPlayerId = rteamPlayer.TeamPlayerId;
             player.First = rteamPlayer.FirstName;
             player.Last = rteamPlayer.LastName;
-            player.Member = new Member { Id = (rteamPlayer.Member?.Id??0)};
+            player.Member = new Member { Id = (rteamPlayer.Member?.Id ?? 0) };
             team.AddPlayer(player);
 
 
@@ -106,14 +108,28 @@ public class TeamRepo
     public async Task<List<Team>?> GetTournamentEntries()
     {
         //No db connnection or tournament was not specified
-        if (_dbconn is null || _tournament is null)  return null;
+        if (_dbconn is null || _tournament is null) return null;
 
         //Get the unnormalizes list of players fot the tournament
         DbRepoRecordTeamPlayer dbRepoRecordTeamPlayer = new(_dbconn);
-        Filter filter = new() { TournamentId = _tournament.Id};
-        _source =  await dbRepoRecordTeamPlayer.GetList(filter);
+        Filter filter = new() { TournamentId = _tournament.Id };
+        _source = await dbRepoRecordTeamPlayer.GetList(filter);
         //Create the team player structure
 
         return ExtractFromRecordTeamPlayer();
+    }
+
+    /// <summary>
+    ///  Synchronize the teams in the tournament for indeviduals.
+    /// </summary>
+    /// <param name="dbConnection">DbConnection</param>
+    /// <param name="tournament">Tournament</param>
+    /// <param name="dest">List of teams in the destination</param>
+    /// <param name="source">List of teams in the source</param>
+    /// <returns></returns>
+    public async Task SyncIndividualsTeams(List<Team> dest, List<Team> source)
+    {
+        
+
     }
 }

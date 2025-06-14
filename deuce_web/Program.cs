@@ -51,9 +51,14 @@ builder.Services.AddScoped<DbRepoRecordSchedule>();
 builder.Services.AddScoped<DbRepoAccount>();
 builder.Services.AddScoped<DbRepoOrganization>();
 builder.Services.AddScoped<DbRepoSecurity>();
-builder.Services.AddScoped<IFormReaderPlayers, FormReaderPlayersTeams>();
+builder.Services.AddScoped<FormReaderPlayersTeams>();
+builder.Services.AddScoped<FormReaderIndList>();
 builder.Services.AddScoped<ITournamentGateway, DBTournamentGateway>();
 builder.Services.AddScoped<TeamRepo>();
+builder.Services.AddScoped<TeamValidator>();
+builder.Services.AddScoped<TeamValidatorInd>();
+builder.Services.AddScoped<TeamSyncTeams>();
+builder.Services.AddScoped<TeamSyncInd>();
 
 //Repos
 

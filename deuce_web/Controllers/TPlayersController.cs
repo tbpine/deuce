@@ -1,3 +1,4 @@
+using System.Data.Common;
 using deuce;
 using deuce.ext;
 using deuce_web;
@@ -8,39 +9,41 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 public class TPlayersController : WizardController
 {
     private readonly ILogger<TPlayersController> _log;
-    private readonly DbRepoTournamentDetail _dbRepoTournamentDetail;
     private readonly DbRepoRecordTeamPlayer _dbRepoRecordTeamPlayer;
     private readonly DbRepoTeam _dbRepoTeam;
-    private readonly DbRepoTournament _dbRepoTournament;
-    private readonly DbRepoMember _dbRepoMember;
-    private readonly DbRepoVenue _dbRepoVenue;
     private readonly DbRepoPlayer _dbRepoPlayer;
     private readonly TeamRepo _teamRepo;
+    private readonly FormReaderPlayersTeams _adaptorTeams;
+    private readonly FormReaderIndList _adaptorInd;
+    private readonly TeamValidator _validatorTeams;
+    private readonly TeamValidatorInd _validatorInd;
+    private readonly TeamSyncTeams _syncTeams;
+    private readonly TeamSyncInd _syncInd;
 
-    private readonly IFormReaderPlayers _adaptorTeams;
-    private readonly ITournamentGateway _tournamentGateway;
 
+    private readonly DbConnection _dbconnection;
+    
     public string Error { get; set; } = "";
     public List<List<SelectListItem>>? SelectMember { get; set; } = new();
 
 
     public TPlayersController(ILogger<TPlayersController> log, IServiceProvider sp,
-    IConfiguration config, IHandlerNavItems handlerNavItems,
-    DbRepoTournamentDetail dbRepoTournamentDetail, DbRepoRecordTeamPlayer dbRepoRecordTeamPlayer, DbRepoTeam dbRepoTeam,
-    DbRepoTournament dbRepoTournament, IFormReaderPlayers adaptorTeams, DbRepoMember dbRepoMember, DbRepoVenue dbRepoVenue,
-    TeamRepo teamRepo, DbRepoPlayer dbRepoPlayer, ITournamentGateway tournamentGateway) : base(handlerNavItems, sp, config)
+    IConfiguration config, IHandlerNavItems handlerNavItems, DbRepoRecordTeamPlayer dbRepoRecordTeamPlayer, DbRepoTeam dbRepoTeam,
+     FormReaderPlayersTeams adaptorTeams, FormReaderIndList adaptorInd, TeamRepo teamRepo, DbRepoPlayer dbRepoPlayer, DbConnection dbconn,
+     TeamValidator teamV, TeamValidatorInd teamVInd, TeamSyncTeams syncTeams, TeamSyncInd syncInd) : base(handlerNavItems, sp, config)
     {
         _log = log;
-        _dbRepoTournamentDetail = dbRepoTournamentDetail;
         _dbRepoRecordTeamPlayer = dbRepoRecordTeamPlayer;
         _dbRepoTeam = dbRepoTeam;
-        _dbRepoTournament = dbRepoTournament;
         _adaptorTeams = adaptorTeams;
-        _dbRepoMember = dbRepoMember;
-        _dbRepoVenue = dbRepoVenue;
         _teamRepo = teamRepo;
         _dbRepoPlayer = dbRepoPlayer;
-        _tournamentGateway = tournamentGateway;
+        _dbconnection = dbconn;
+        _adaptorInd = adaptorInd;
+        _validatorTeams = teamV;
+        _validatorInd = teamVInd;
+        _syncTeams = syncTeams;
+        _syncInd = syncInd;
     }
 
     [HttpGet]
@@ -51,7 +54,7 @@ public class TPlayersController : WizardController
             //Menus and the back button
             await LoadPage(_model, true);
 
-        
+
         }
         catch (Exception ex)
         {
@@ -67,24 +70,28 @@ public class TPlayersController : WizardController
     public async Task<IActionResult> Save(ViewModelTournamentWizard model)
     {
         FormUtils.DebugOut(this.Request.Form);
+        IFormReaderPlayers adaptor = _model.Tournament.EntryType == (int)deuce.EntryType.Individual ?
+        _adaptorInd : _adaptorTeams;
 
-        //Tournament DTO.
 
         //Read teams from the displayed form
-        List<Team> teams = _adaptorTeams.Parse(this.Request.Form, _model.Tournament);
+        List<Team> teams = adaptor.Parse(this.Request.Form, _model.Tournament);
 
         //Validate teams before saving:
         //Team must have players
         //A player cannot appear more than once.
-        TeamValidator teamValidator = new();
-        var isvalidTeams = teamValidator.Check(teams, _model.Tournament);
+        
+        ITeamValidator validator = _model.Tournament.EntryType == (int)deuce.EntryType.Individual ?
+        _validatorInd : _validatorTeams;
+        var isvalidTeams = validator.Check(teams, _model.Tournament);
         //Warning or error
         if (isvalidTeams.Result != RetCodeTeamAction.Success)
         {
             Error = isvalidTeams.Result == RetCodeTeamAction.Error ? isvalidTeams?.Message ?? "" : "";
-            _model.Teams = teams;
+            _model.Teams =   _model.Tournament.EntryType == (int)deuce.EntryType.Individual ? new() : teams;
             await LoadPage(_model, false);
-            return View("Index", _model);
+            string viewName = _model.Tournament.EntryType == (int)deuce.EntryType.Individual ? "Individual" : "Index";
+            return View(viewName, _model); // Assuming you have a corresponding view named "Index"
         }
 
         //Organization DTO
@@ -102,28 +109,10 @@ public class TPlayersController : WizardController
         //Get teams from db
         List<Team> teamsInDB = await _teamRepo.GetListAsync(_model.Tournament.Id);
 
-        SyncMaster<Team> syncMaster = new(teams, teamsInDB);
-        //Add handlers to insert, update and delete teams
-        syncMaster.Add += (sender, team) =>
-        {
-            //Add team to db
-            if (team is not null) _dbRepoTeam.Set(team); ;
-        };
+        ITeamSync sync = _model.Tournament.EntryType == (int)deuce.EntryType.Individual ?
+            _syncInd : _syncTeams;
 
-        syncMaster.Update += (sender, team) =>
-        {
-            //Add team to db
-            if (team is not null && team?.Dest is not null)
-                _dbRepoTeam.Set(team.Dest);
-        };
-
-        syncMaster.Remove += (sender, team) =>
-        {
-            //Add team to db
-            if (team is not null) _dbRepoTeam.Delete(team);
-        };
-
-        syncMaster.Run();
+        sync.Run(teams, teamsInDB,_model.Tournament, _dbconnection);
         //Get the next navigation item
         //Get the next navigation item
         var nextNavItem = NextPage("");
@@ -221,7 +210,7 @@ public class TPlayersController : WizardController
             //Set title and selection message
             model.Title = model.Tournament.Details.TeamSize > 1 ? "Teams" : " Players";
             model.SelMsg = model.Tournament.Details.TeamSize > 1 ? "Select players that are in a team using checkboxes, add then press \"Add Team\". Repeat until all players are in a team" : "";
-            
+
 
         }
         catch (Exception ex)
@@ -309,4 +298,5 @@ public class TPlayersController : WizardController
 
         return "";
     }
+
 }

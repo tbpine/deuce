@@ -6,7 +6,7 @@ using System.Text.RegularExpressions;
 /// <summary>
 /// Converts form values into teams
 /// </summary>
-class FormReaderPlayersTeams : FormReaderPlayersBase
+public class FormReaderPlayersTeams : FormReaderPlayersBase
 {
     //to save new players
 

@@ -4,16 +4,16 @@ using System.Text.RegularExpressions;
 
 
 /// <summary>
-/// Adds a team given a set of players
+/// Crate a team for each player
 /// </summary>
-public class FormReaderPlayersList : FormReaderPlayersBase
+public class FormReaderIndList : FormReaderPlayersBase
 {
     //to save new players
 
     /// <summary>
-    /// Add players to a team
+    /// Add all players into individual teams of one
     /// </summary>
-    public FormReaderPlayersList()
+    public FormReaderIndList()
     {
 
     }
@@ -28,10 +28,9 @@ public class FormReaderPlayersList : FormReaderPlayersBase
     public override List<Team> Parse(IFormCollection form,  Tournament tournament)
     {
         //The new team created.
-        Team newTeam = new();
+        List<Team> teams = new();
         //State
         ///Transforms form values to teams
-        int playerIndex = 0;
         foreach (var kp in form)
         {
 
@@ -54,6 +53,8 @@ public class FormReaderPlayersList : FormReaderPlayersBase
 
                 if (!string.IsNullOrEmpty(player_id))
                 {
+                    Team newTeam = new Team();
+                    newTeam.Index = teams.Count; //Set the team index to the player index
                    
                     Debug.Print($"AdaptorFormAddPlayer: {kp.Key}={kp.Value}. PlayerId|{player_id}|First:{player_first}|Last:{player_last}|Middle:{player_middle}");
                     //Use DTO, as we only know the player id
@@ -62,37 +63,14 @@ public class FormReaderPlayersList : FormReaderPlayersBase
                         Id = int.TryParse(player_id, out int playerId) ? playerId : 0,
                         First = player_first,
                         Last = player_last,
-                        Index = playerIndex,
+                        Index = 1,
                         Tournament = tournament
                     });
-
-                    playerIndex++;
+                    teams.Add(newTeam);
                 }
             }
         }
 
-        //Add subs
-
-        for (int i = 0; i < tournament.Details.TeamSize; i++)
-        {
-            //Add subs if the team size
-            //is more than the specified team
-            if (i >= newTeam.Players.Count())
-            {
-                //Add a new player with empty name
-                newTeam.AddPlayer(new Player()
-                {
-                    Id = 0,
-                    First = string.Empty,
-                    Last = string.Empty,
-                    Index = i,
-                    Tournament = tournament
-                });
-
-                
-            }
-        }
-        List<Team> teams = [newTeam];
         return teams;
     }
 

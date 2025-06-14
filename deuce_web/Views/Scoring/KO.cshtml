@@ -20,7 +20,7 @@
         }                    
             <button type="button" class="nav-link text-nowrap @active" id="published-tab" data-bs-toggle="pill" data-bs-target="#published" role="tab" aria-controls="published"
             onclick="submitAction('@action')"> 
-        @Model.Rounds(i-1)?.Label ?? i
+        @(Model.Rounds(i-1)?.Label ?? i.ToString())
             </button> 
         </li>
     }

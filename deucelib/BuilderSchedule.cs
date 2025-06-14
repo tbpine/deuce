@@ -53,6 +53,7 @@ public class BuilderSchedule
             if (state.Round is null || state.Round?.Index != recordMatch.Round)
             {
                 state.Round = new Round(recordMatch.Round);
+                
                 //Reset state
                 state.Permutation = null;
                 state.Match = null;

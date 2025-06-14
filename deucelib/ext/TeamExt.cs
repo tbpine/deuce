@@ -42,8 +42,6 @@ public static class TeamExt
 
     }
 
-
-
     /// <summary>
     /// Creates a bye team with the same number of players as the tournament team size.
     /// </summary>
