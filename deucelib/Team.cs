@@ -28,7 +28,10 @@ public class Team
     public void AddPlayer(Player player)
     {
         //List is unique
-        if (!_players.Contains(player)) _players.Add(player);
+        //Find player by player id
+        if (player.Id <= 0 || _players.Exists(p => p.Id == player.Id)) return; // No player id, so no add
+        // Add player to the team
+         _players.Add(player);
     }
 
     /// <summary>

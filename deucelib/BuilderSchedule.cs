@@ -96,7 +96,7 @@ public class BuilderSchedule
                 if (team is null)
                 {
                     team = _teams.Find(e => e.Id == recordMatch.TeamHome);
-                    if (team is null) team = new Team(0, "");
+                    if (team is null) team = new Team(recordMatch.TeamHome, "");
 
                     state.Permutation.AddTeam(team);
                 }
@@ -114,7 +114,7 @@ public class BuilderSchedule
                 if (team is null)
                 {
                     team = _teams.Find(e => e.Id == recordMatch.TeamAway);
-                    if (team is null) team = new Team(0, "");
+                    if (team is null) team = new Team(recordMatch.TeamAway, "");
 
                     state.Permutation.AddTeam(team);
                 }

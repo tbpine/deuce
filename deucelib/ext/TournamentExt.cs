@@ -31,7 +31,7 @@ public static class TournamentExt
     public static void CreateDetail(this Tournament t)
     {
         //Default to tennis for now
-        t.Details = CreateDetailsForTennis(t.Type);
+        t.Details = CreateDetailsForTennis(t.EntryType);
 
     }
 
@@ -39,12 +39,12 @@ public static class TournamentExt
     /// <summary>
     ///  Create a new TournamentDetail based on the tournament type.
     /// </summary>
-    /// <param name="tournamentType">Tournament type to create details for.</param>
+    /// <param name="entryType"> teams or individuals</param>
     /// <returns></returns>
-    private static TournamentDetail CreateDetailsForTennis(int tourTypeId)
+    private static TournamentDetail CreateDetailsForTennis(int entryType)
     {
         //For round robin, set specific values
-        if (tourTypeId  == 1) // Assuming 1 is the ID for round robin
+        if (entryType  == 1) // Assuming 1 is the ID for round robin
         {
             return new TournamentDetail
             {

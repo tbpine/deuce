@@ -118,18 +118,4 @@ public class TeamRepo
 
         return ExtractFromRecordTeamPlayer();
     }
-
-    /// <summary>
-    ///  Synchronize the teams in the tournament for indeviduals.
-    /// </summary>
-    /// <param name="dbConnection">DbConnection</param>
-    /// <param name="tournament">Tournament</param>
-    /// <param name="dest">List of teams in the destination</param>
-    /// <param name="source">List of teams in the source</param>
-    /// <returns></returns>
-    public async Task SyncIndividualsTeams(List<Team> dest, List<Team> source)
-    {
-        
-
-    }
 }

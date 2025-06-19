@@ -76,11 +76,12 @@
             @foreach(var perm in  Model.Rounds(Model.CurrentRound).Permutations)
             {
                 rIdx++;
+                string permSummary = perm.GetSummary();
                 <div>
                     <i class="fi-minus position-relative top-50 start-0 translate-middle-y" id="toogle_icon_round_@rIdx"></i>
                     <a class="btn btn-outline-secondary mb-3" href="#round_@rIdx" data-bs-toggle="collapse" role="button" aria-expanded="true" aria-controls="round_@rIdx"
                     onclick="toogleExpansion('toogle_icon_round_@rIdx')">
-                    @perm.GetSummary()
+                    @permSummary
                 </a></div>
                 <div class="collapse show" id="round_@rIdx" aria-expanded="true">
                 
