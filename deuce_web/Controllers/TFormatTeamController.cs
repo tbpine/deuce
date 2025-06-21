@@ -118,7 +118,7 @@ public class TFormatTeamController : WizardController
         if (_model.Tournament.EntryType == (int)EntryType.Individual)
         {
             _model.Tournament.Details.Sets = formValues.Tournament.Details.Sets;
-            _model.Tournament.Details.Games = formValues.CustomGames < 99 ? formValues.Tournament.Details.Games :
+            _model.Tournament.Details.Games = formValues.Tournament.Details.Games < 99 ? formValues.Tournament.Details.Games :
             formValues.CustomGames ?? 1;
             _model.Tournament.Details.NoSingles = 1;
             _model.Tournament.Details.NoDoubles = 0;
