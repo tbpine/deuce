@@ -29,7 +29,7 @@ public class Team
     {
         //List is unique
         //Find player by player id
-        if (player.Id <= 0 || _players.Exists(p => p.Id == player.Id)) return; // No player id, so no add
+        if (_players.Exists(p => p.Id == player.Id)) return; // No player id, so no add
         // Add player to the team
          _players.Add(player);
     }
