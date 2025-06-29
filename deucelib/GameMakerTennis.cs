@@ -10,11 +10,6 @@ namespace deuce;
 /// </summary>
 public class GameMakerTennis : IGameMaker
 {
-    private class ScoreSummary
-    {
-        public int totalScore;
-        public int matchesWon;
-    };
 
     /// <summary>
     /// Tennis matches
@@ -85,7 +80,8 @@ public class GameMakerTennis : IGameMaker
     {
         //Create a list to hold the winners
         List<Team> winners = new List<Team>();
-        //Use LINQ to group matches by away and home teams
+        //Use LINQ to group matches by away and home 
+        //The key is this.This LINQ groups all macthes involving the same home and away teams
         var groupedMatches = from m in permutation.Matches
                              group m by new { Home = m.Home.FirstOrDefault()?.Team, Away = m.Away.FirstOrDefault()?.Team } into g
                              select new
@@ -93,46 +89,53 @@ public class GameMakerTennis : IGameMaker
                                  Teams = g.Key,
                                  Matches = g.ToList()
                              };
-        //For each group , total matches won and total score
-        Dictionary<Team, ScoreSummary> teamScores = new();
+
+        //Create a dictionary to hold the team scores
+        Dictionary<Team, ScoringStats> teamScores = new Dictionary<Team, ScoringStats>();
+        //Add each team in the permutation to the dictionary
+        foreach (var team in permutation.Teams)
+        {
+            if (!teamScores.ContainsKey(team))
+                teamScores[team] = new ScoringStats(team);
+        }
+        
         foreach (var group in groupedMatches)
         {
-            //clear team scores
-            teamScores.Clear();
 
             Team homeTeam = group.Teams.Home;
             Team awayTeam = group.Teams.Away;
 
-            teamScores[homeTeam] = new ScoreSummary();
-            teamScores[awayTeam] = new ScoreSummary();
+            teamScores[homeTeam].Reset();
+            teamScores[awayTeam].Reset();
 
             foreach (var match in group.Matches)
             {
                 //Assuming scores are in the same order as matches
                 //n sets
-                List<Score> matchScores = scores.FindAll(s => s.Match == match.Id && s.Permutation == permutation.Id);
-                if (matchScores?.Count > 0)
+                List<Score> setScores = scores.FindAll(s => s.Match == match.Id && s.Permutation == permutation.Id);
+                if (setScores?.Count > 0)
                 {
                     var summaryHome = teamScores[homeTeam];
                     var summaryAway = teamScores[awayTeam];
-                    //Get matches won and total scores for each score in matchScores
-                    var setsWonHome = 0;
-                    var setsWonAway = 0;
-                    foreach (var score in matchScores)
-                    {
-                        //Update sets won
-                        setsWonHome += score.Home > score.Away ? 1 : 0;
-                        setsWonAway += score.Home < score.Away ? 1 : 0;
+                    //Count how many sets won by each team
+                    int setsWonHome = 0;
+                    int setsWonAway = 0;
 
-                        //Update total scores all sets
-                        summaryHome.totalScore += score.Home;
-                        summaryAway.totalScore += score.Away;
+                    foreach (var score in setScores)
+                    {
+                        summaryHome.AddScore(score, match);
+                        summaryAway.AddScore(score, match);
+                        setsWonHome += score.Home > score.Away ? 1 : 0;
+                        setsWonAway += score.Away > score.Home ? 1 : 0;
                     }
 
                     //Update the summary for home and away teams
                     summaryHome.matchesWon += setsWonHome > setsWonAway ? 1 : 0;
+                    summaryHome.SetsWon += setsWonHome;
+
                     summaryAway.matchesWon += setsWonAway > setsWonHome ? 1 : 0;
-                    
+                    summaryAway.SetsWon += setsWonAway;
+
 
                 }
             }

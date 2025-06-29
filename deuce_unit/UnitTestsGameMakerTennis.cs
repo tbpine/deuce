@@ -27,6 +27,10 @@ public class UnitTestsGameMakerTennis
         //Create a random permutation
         var permutation = new Permutation(1, new Team[] { team1, team2 });
         permutation.AddMatch(match);
+        //Add teams to the permutation
+        permutation.AddTeam(team1);
+        permutation.AddTeam(team2);
+        
         //Creata a score for the match
         var score = new Score { Id = 1, Tournament = 1, Round = 1, Set = 1, Match = match.Id, Away = 6, Home = 4, Permutation = permutation.Id };
         //Create a list of scores
