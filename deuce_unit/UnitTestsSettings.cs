@@ -11,7 +11,7 @@ public class UnitTestsSettings
     [TestMethod]
     public async Task get_list()
     {
-        MySqlConnection conn = new("Server=localhost;Database=deuce;User Id=deuce;Password=deuce;");
+        DbConnectionLocal conn = new("Server=localhost;Database=deuce;User Id=deuce;Password=deuce;");
         conn.Open();
 
         DbRepoSettings dbrepo = new(conn);
