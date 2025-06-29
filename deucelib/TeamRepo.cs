@@ -7,7 +7,7 @@ namespace deuce;
 /// <summary>
 /// Extract teams from the "RecordTeamPlayer" class.
 /// </summary>
-public class TeamRepo
+public class TeamRepo 
 {
     private List<RecordTeamPlayer> _source;
     private Tournament? _tournament;

@@ -22,7 +22,7 @@ class SchedulerRR : SchedulerBase, IScheduler
         _teams = teams;
         //Add a bye for odd numbers
         if (_teams.Count % 2 > 0)
-            _teams.Add(new Team (-1, "BYE"));
+            _teams.Add(new Team(-1, "BYE"));
 
         for (int i = 0; i < _teams.Count; i++) _teams[i].Index = i + 1;
 
@@ -42,13 +42,13 @@ class SchedulerRR : SchedulerBase, IScheduler
                 Debug.Write("(" + home.Index + "," + away.Index + ")");
 
                 //Schedule matches between each team.
-                if  (_tournament.Sport  == 1)
+                if (_tournament.Sport == 1)
                 {
                     var permutation = _gameMaker.Create(_tournament, home, away, r);
                     permutation.Id = p;
                     schedule.AddPermutation(permutation, r);
                 }
-           
+
             }
             //Next Round
             var pop = _teams[0];
@@ -62,5 +62,25 @@ class SchedulerRR : SchedulerBase, IScheduler
         return schedule;
     }
 
+    /// <summary>
+    /// Executed before the end of a round.
+    /// This is where you can do any pre-round end processing, such as updating scores or checking
+    /// </summary>
+    /// <param name="schedule"> The current schedule</param>
+    /// <param name="round"> The current round number</param>
+    public void BeforeEndRound(Schedule schedule, int round, List<Score> scores)
+    {
+        //Nothing to do here
+    }
+
+    /// <summary>
+    /// Progress to the next round of the schedule.
+    /// </summary>
+    /// <param name="schedule" > The current schedule</param>
+    /// <param name="round"> The current round number</param>
+    public void NextRound(Schedule schedule, int round, int previousRound, List<Score> scores)
+    {
+        //Nothing to do here
+    }
 
 }

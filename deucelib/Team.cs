@@ -30,8 +30,10 @@ public class Team
         //List is unique
         //Find player by player id
         if (_players.Exists(p => p.Id == player.Id)) return; // No player id, so no add
-        // Add player to the team
-         _players.Add(player);
+                                                             // Add player to the team
+        _players.Add(player);
+        //Add a reference to this team
+        player.Team = this;
     }
 
     /// <summary>

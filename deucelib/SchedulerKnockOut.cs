@@ -129,4 +129,24 @@ class SchedulerKnockOut : SchedulerBase, IScheduler
         return String.Empty;
     }
 
+    public void BeforeEndRound(Schedule schedule, int round, List<Score> scores)
+    {
+        //Nothing to do here
+    }
+
+
+    public void NextRound(Schedule schedule, int round, int previousRound, List<Score> scores)
+    {
+        //Keep a list of winning teams
+        List<Team> winningTeams = new List<Team>();
+
+        //Get the round from the schedule
+        var currentRound = schedule.GetRoundAtIndex(round);
+        //For each permutation in the current round
+        foreach (var permutation in currentRound.Permutations)
+        {
+            //Example team 1 vs team 2, team 3 vs team 4
+        }
+
+    }
 }
