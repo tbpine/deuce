@@ -18,7 +18,7 @@ public class Permutation
     public Round? Round { get => _round; set => _round = value; }
 
     public IEnumerable<Team> Teams { get => _teams; }
-    public IEnumerable<Match> Matches { get => _matches; }
+    public IReadOnlyList<Match> Matches { get => _matches; }
     public int Id { get { return _id; } set { _id = value; } }
 
     /// <summary>

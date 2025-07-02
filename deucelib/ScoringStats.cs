@@ -8,13 +8,17 @@ public class ScoringStats
     private int _totalScore;
 
     private int _setsWon;
+    private int _ranking;
     private Team _team = new Team();
     private List<Score> _scores = new();
 
-    public int matchesWon { get { return _matchesWon; } set { _matchesWon = value; } }
-    public int totalScore { get { return _totalScore; } set { _totalScore = value; } }
+
+    public int MatchesWon { get { return _matchesWon; } set { _matchesWon = value; } }
+    public int TotalScore { get { return _totalScore; } set { _totalScore = value; } }
     public Team Team { get { return _team; } set { _team = value; } }
     public int SetsWon { get { return _setsWon; } set { _setsWon = value; } }
+    
+    public int Ranking { get { return _ranking; } set { _ranking = value; } }
 
     /// <summary>
     /// Default constructor for ScoringStats

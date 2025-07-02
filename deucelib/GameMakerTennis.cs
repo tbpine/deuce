@@ -98,7 +98,7 @@ public class GameMakerTennis : IGameMaker
             if (!teamScores.ContainsKey(team))
                 teamScores[team] = new ScoringStats(team);
         }
-        
+
         foreach (var group in groupedMatches)
         {
 
@@ -130,10 +130,10 @@ public class GameMakerTennis : IGameMaker
                     }
 
                     //Update the summary for home and away teams
-                    summaryHome.matchesWon += setsWonHome > setsWonAway ? 1 : 0;
+                    summaryHome.MatchesWon += setsWonHome > setsWonAway ? 1 : 0;
                     summaryHome.SetsWon += setsWonHome;
 
-                    summaryAway.matchesWon += setsWonAway > setsWonHome ? 1 : 0;
+                    summaryAway.MatchesWon += setsWonAway > setsWonHome ? 1 : 0;
                     summaryAway.SetsWon += setsWonAway;
 
 
@@ -142,16 +142,16 @@ public class GameMakerTennis : IGameMaker
 
             //If the home team won more matched than the away team , then 
             //add it to the winners list
-            if (teamScores[homeTeam].matchesWon > teamScores[awayTeam].matchesWon)
+            if (teamScores[homeTeam].MatchesWon > teamScores[awayTeam].MatchesWon)
                 winners.Add(homeTeam);
-            else if (teamScores[homeTeam].matchesWon < teamScores[awayTeam].matchesWon)
+            else if (teamScores[homeTeam].MatchesWon < teamScores[awayTeam].MatchesWon)
                 winners.Add(awayTeam);
             else
             {
                 //If they won the same number of matches, then check the total score
-                if (teamScores[homeTeam].totalScore > teamScores[awayTeam].totalScore)
+                if (teamScores[homeTeam].TotalScore > teamScores[awayTeam].TotalScore)
                     winners.Add(homeTeam);
-                else if (teamScores[homeTeam].totalScore < teamScores[awayTeam].totalScore)
+                else if (teamScores[homeTeam].TotalScore < teamScores[awayTeam].TotalScore)
                     winners.Add(awayTeam);
                 else
                 {
@@ -165,4 +165,6 @@ public class GameMakerTennis : IGameMaker
 
         return winners;
     }
+
+
 }

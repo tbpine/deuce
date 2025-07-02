@@ -59,6 +59,7 @@ builder.Services.AddScoped<TeamValidator>();
 builder.Services.AddScoped<TeamValidatorInd>();
 builder.Services.AddScoped<TeamSyncTeams>();
 builder.Services.AddScoped<TeamSyncInd>();
+builder.Services.AddScoped<IScoreKeeper, ScoreKeeper>();
 
 //Repos
 

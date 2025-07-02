@@ -22,6 +22,8 @@ public class Schedule
 
     public Round GetRoundAtIndex(int index) => _rounds[index];
 
+    public IReadOnlyList<Round> Rounds => _rounds;
+
     /// <summary>
     /// Construct with dependencies
     /// </summary>

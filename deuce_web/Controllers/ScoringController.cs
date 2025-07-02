@@ -15,7 +15,7 @@ public class ScoringController : MemberController
     private readonly ILogger<ScoringController> _log;
     private readonly ICacheMaster _cache;
 
-
+    private readonly IScoreKeeper _scoreKeeper;
 
     /// <summary>
     /// Scoring controller for managing scores in tournaments.
@@ -32,13 +32,14 @@ public class ScoringController : MemberController
     /// <param name="dbRepoRecordSchedule">DbRepo record schedule</param>
     public ScoringController(ILogger<ScoringController> log, ISideMenuHandler handlerNavItems, IServiceProvider sp, IConfiguration config,
     ITournamentGateway tgateway, SessionProxy sessionProxy, DbRepoRecordTeamPlayer dbRepoRecordTeamPlayer, DbConnection dbConnection,
-    DbRepoRecordSchedule dbRepoRecordSchedule, ICacheMaster cache) : base(handlerNavItems, sp, config, tgateway, sessionProxy)
+    DbRepoRecordSchedule dbRepoRecordSchedule, ICacheMaster cache, IScoreKeeper scorekeeper) : base(handlerNavItems, sp, config, tgateway, sessionProxy)
     {
         _log = log;
         _deRepoRecordTeamPlayer = dbRepoRecordTeamPlayer;
         _dbRepoRecordSchedule = dbRepoRecordSchedule;
         _dbConnection = dbConnection;
         _cache = cache;
+        _scoreKeeper = scorekeeper;
     }
 
     [HttpGet]
@@ -91,7 +92,7 @@ public class ScoringController : MemberController
         var formScores = formReader.Parse(this.Request.Form, _model.Tournament.Id);
 
         //Use proxy to save scores for this tournament at the current roud
-        await ScoreKeeper.Save(_sessionProxy?.TournamentId ?? 0, formScores, currentRound, _dbConnection);
+        await _scoreKeeper.Save(_sessionProxy?.TournamentId ?? 0, formScores, currentRound, _dbConnection);
 
         //Change the round in the model
         _model.CurrentRound = round;
@@ -119,7 +120,7 @@ public class ScoringController : MemberController
             // Parse scores from the form
             var formScores = formReader.Parse(this.Request.Form, _model.Tournament.Id);
             // Use proxy to save scores for this tournament at the current round
-            await ScoreKeeper.Save(_model.Tournament.Id, formScores, currentRound, _dbConnection);
+            await _scoreKeeper.Save(_model.Tournament.Id, formScores, currentRound, _dbConnection);
 
             // Reload the scores for the new round
             await LoadScore();
