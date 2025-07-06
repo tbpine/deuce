@@ -43,8 +43,7 @@ public class TemplateTennis
         MakeHeader(doc, tournament, roundNo);
 
         IEnumerable<Permutation> perms = s.GetRounds(roundNo).Permutations;
-        PdfCanvas canvas = new PdfCanvas(pdfdoc.AddNewPage());
-
+     
         //Add header
 
         List<Table> tables = new();
