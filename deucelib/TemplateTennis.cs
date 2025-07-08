@@ -46,8 +46,6 @@ public class TemplateTennis
      
         //Add header
 
-        List<Table> tables = new();
-
         PdfFont cellFont = PdfFontFactory.CreateFont(StandardFonts.HELVETICA);
 
 
@@ -160,7 +158,6 @@ public class TemplateTennis
                     
                 tbl.SetMarginBottom(15f);
 
-                tables.Add(tbl);
                 doc.Add(tbl);
 
             }
