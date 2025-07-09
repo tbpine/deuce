@@ -15,7 +15,7 @@ namespace deuce;
 /// A class containing methods to layout elements in a PDF document
 /// for tennis matches.
 /// </summary>
-public class TemplateTennis
+public class TemplateTennis : ITemplate
 {
     /// <summary>
     /// Empty constructor

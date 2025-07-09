@@ -13,15 +13,16 @@ public class PdfPrinter
     //------------------------------------
 
     private readonly Schedule _schedule;
-
+    private readonly ITemplateFactory _templateFactory;
     /// <summary>
     /// Set schedule to print
     /// </summary>
     /// <param name="s">Schedule to print</param>
     /// <param name="scores">Optionally, a list of scores</param>
-    public PdfPrinter(Schedule s)
+    public PdfPrinter(Schedule s, ITemplateFactory templateFactory)
     {
         _schedule = s;
+        _templateFactory = templateFactory;
     }
 
     /// <summary>
@@ -44,9 +45,17 @@ public class PdfPrinter
         //the type of sport played.
         if (tournament.Sport == 1)
         {
-            TemplateTennis template = new();
+            try
+            {
+                var template = _templateFactory.CreateTemplate(tournament.Type);
+                template.Generate(doc, pdfdoc, s, tournament, round, scores);
+            }
+            catch (ArgumentException ex)
+            {
+                // Handle invalid tournament type
+                Console.WriteLine(ex.Message);
+            }
 
-            template.Generate(doc, pdfdoc, s, tournament, round, scores);
         }
         else
         {
@@ -57,7 +66,7 @@ public class PdfPrinter
 
 
         //Set PDF byte stream to the output.
-        doc.Close(); 
+        doc.Close();
         pdfdoc.Close(); // Close the document to ensure all content is written.
         pdfwriter.Close();
         await Task.Delay(2000); // Give time for the stream to close properly.

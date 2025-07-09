@@ -63,7 +63,7 @@ public class UnitTestsBuilderSchedule
             {
                 string filename = tournament.Label + "_round_" + (i + 1).ToString() + ".pdf";
                 FileStream pdffile = new FileStream(filename, FileMode.Create, FileAccess.ReadWrite);
-                PdfPrinter printer = new PdfPrinter(schedule);
+                PdfPrinter printer = new PdfPrinter(schedule, new TemplateFactory());
                 await printer.Print(pdffile, tournament, schedule, i);
                 pdffile.Close();
             }

@@ -174,7 +174,7 @@ public class ScoringController : MemberController
 
         //Use the PdfPrinter class to generate the PDF
 
-        PdfPrinter pdfPrinter = new PdfPrinter(schedule);
+        PdfPrinter pdfPrinter = new PdfPrinter(schedule, new TemplateFactory());
         //Get the response output stream
         //Send the PDF in the response.
         this.Response.ContentType = "application/pdf";
