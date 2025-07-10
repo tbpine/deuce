@@ -17,7 +17,6 @@ namespace deuce;
 
 public class TemplateTennisKO : ITemplate
 {
-    private int _max_rows = 8;
     private float _page_top_margin = 10f;
     private float _page_bottom_margin = 10f;
     private float _page_left_margin = 10f;
@@ -43,11 +42,11 @@ public class TemplateTennisKO : ITemplate
             pdfdoc.GetDefaultPageSize().GetHeight(), _page_top_margin, _page_left_margin, _page_right_margin,
             _page_bottom_margin, _table_padding_top, _table_padding_bottom, _table_padding_left, _table_padding_right);
 
-        //Get the number of matches in the first round
-        int roundOneMatches = s.Rounds.FirstOrDefault(x=>x.Index == 1)?.Permutations.Sum(x => x.Matches.Count) ?? 0;
-        roundOneMatches = roundOneMatches <= _max_rows ? roundOneMatches : _max_rows;
 
-        var layout = lm.Calculate(roundOneMatches);
+        //Get the number of matches in the first round (no longer restricted to _max_rows)
+        int roundOneMatches = s.Rounds.FirstOrDefault(x=>x.Index == 1)?.Permutations.Sum(x => x.Matches.Count) ?? 0;
+
+        var layout = lm.Calculate(roundOneMatches, s.Rounds.Count);
         //Get table widths
         List<float> widths = new List<float>();
         for (int c = 0 ; c < (tournament.Details.Sets+1); c++) widths.Add(c== 0 ? 2f : 1f);
@@ -71,25 +70,33 @@ public class TemplateTennisKO : ITemplate
                     //Location , pdf starts at button left corner and expands upwards
                     matchTable.SetFixedPosition(recMatch.Left, pdfdoc.GetDefaultPageSize().GetHeight() - recMatch.Top  - recMatch.Height, recMatch.Width);
 
+                    // Calculate font size in points from pixels, and scale down for better fit
+                    float fontSizePx = recMatch.Height / 4.2f; // reduce divisor for smaller font
+                    float fontSizePt = fontSizePx * 72f / 96f;
+                    Debug.WriteLine($"Match {matchIndex} font size: {fontSizePx}px, {fontSizePt}pt");
                     //Get a list of scores
                     List<Score> matchScores = scores?.Where(x => x.Id == match.Id).ToList() ?? new List<Score>();
                     //Add a cell for the home team's CSV player
-                    Cell homeTeamCell = new Cell().Add(new Paragraph(match.Home?.FirstOrDefault()?.Team?.GetPlayerCSV()));
+                    var homeText = match.Home?.FirstOrDefault()?.Team?.GetPlayerCSV();
+                    Cell homeTeamCell = new Cell().Add(new Paragraph(homeText).SetFontSize(fontSizePt));
                     matchTable.AddCell(homeTeamCell);
                     //For each set, add a score cell
                     for (int i = 0; i < tournament.Details.Sets; i++)
                     {
-                        Cell scoreCell = new Cell().Add(new Paragraph(matchScores.Count > i ? matchScores[i].Home.ToString() : ""));
+                        string scoreText = matchScores.Count > i ? matchScores[i].Home.ToString() : "";
+                        Cell scoreCell = new Cell().Add(new Paragraph(scoreText).SetFontSize(fontSizePt));
                         matchTable.AddCell(scoreCell);
                     }
 
                     // Add a cell for the away team's CSV player
-                    Cell awayTeamCell = new Cell().Add(new Paragraph(match.Away?.FirstOrDefault()?.Team?.GetPlayerCSV()));
+                    var awayText = match.Away?.FirstOrDefault()?.Team?.GetPlayerCSV();
+                    Cell awayTeamCell = new Cell().Add(new Paragraph(awayText).SetFontSize(fontSizePt));
                     matchTable.AddCell(awayTeamCell);
                     //For each set, add a score cell
                     for (int i = 0; i < tournament.Details.Sets; i++)
                     {
-                        Cell scoreCell = new Cell().Add(new Paragraph(matchScores.Count > i ? matchScores[i].Away.ToString() : ""));
+                        string scoreText = matchScores.Count > i ? matchScores[i].Away.ToString() : "";
+                        Cell scoreCell = new Cell().Add(new Paragraph(scoreText).SetFontSize(fontSizePt));
                         matchTable.AddCell(scoreCell);
                     }
                     //Add table to the document
@@ -98,7 +105,6 @@ public class TemplateTennisKO : ITemplate
                 }
             }
         }
-                
     }
 
 
