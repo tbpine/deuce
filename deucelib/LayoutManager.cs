@@ -37,7 +37,7 @@ class LayoutManager
     {
         //the ladder algo
         //Work out the number of steps
-        int totalCols = (int)Math.Ceiling((double)steps / 2);
+        int totalCols = (int)Math.Ceiling((double)steps / 2) + 1;
 
         //Work out the visible area of the page
         float visibleHeight = _pageHeight - _page_top_margin - _page_bottom_margin;

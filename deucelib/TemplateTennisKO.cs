@@ -50,7 +50,7 @@ public class TemplateTennisKO : ITemplate
         var layout = lm.Calculate(roundOneMatches);
         //Get table widths
         List<float> widths = new List<float>();
-        for (int c = 0 ; c < tournament.Details.Sets; c++) widths.Add(c== 0 ? 2f : 1f);
+        for (int c = 0 ; c < (tournament.Details.Sets+1); c++) widths.Add(c== 0 ? 2f : 1f);
 
         foreach (Round round in s.Rounds)
         {
