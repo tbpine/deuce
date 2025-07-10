@@ -67,7 +67,7 @@ public class TournamentKOTests
         
         string filename = $"{tournament.Label}_Round.pdf";
         using FileStream pdfFile = new FileStream(filename, FileMode.Create, FileAccess.Write);
-        PdfPrinter printer = new PdfPrinter(tournament.Schedule, new TemplateFactory());
+        PdfPrinter printer = new PdfPrinter(tournament.Schedule, new PDFTemplateFactory());
         printer.Print(pdfFile, tournament, tournament.Schedule, 1);
 
 
@@ -126,7 +126,7 @@ public class TournamentKOTests
         
         string filename = $"{tournament.Label}_Round_.pdf";
         using FileStream pdfFile = new FileStream(filename, FileMode.Create, FileAccess.Write);
-        PdfPrinter printer = new PdfPrinter(tournament.Schedule, new TemplateFactory());
+        PdfPrinter printer = new PdfPrinter(tournament.Schedule, new PDFTemplateFactory());
         printer.Print(pdfFile, tournament, tournament.Schedule, 1);
     }
 

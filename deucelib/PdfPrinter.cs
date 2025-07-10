@@ -13,13 +13,13 @@ public class PdfPrinter
     //------------------------------------
 
     private readonly Schedule _schedule;
-    private readonly ITemplateFactory _templateFactory;
+    private readonly IPDFTemplateFactory _templateFactory;
     /// <summary>
     /// Set schedule to print
     /// </summary>
     /// <param name="s">Schedule to print</param>
     /// <param name="scores">Optionally, a list of scores</param>
-    public PdfPrinter(Schedule s, ITemplateFactory templateFactory)
+    public PdfPrinter(Schedule s, IPDFTemplateFactory templateFactory)
     {
         _schedule = s;
         _templateFactory = templateFactory;
@@ -43,25 +43,15 @@ public class PdfPrinter
 
         //Generate the document based on
         //the type of sport played.
-        if (tournament.Sport == 1)
+        try
         {
-            try
-            {
-                var template = _templateFactory.CreateTemplate(tournament.Type);
-                template.Generate(doc, pdfdoc, s, tournament, round, scores);
-            }
-            catch (ArgumentException ex)
-            {
-                // Handle invalid tournament type
-                Console.WriteLine(ex.Message);
-            }
-
+            var template = _templateFactory.CreateTemplate(tournament.Sport, tournament.Type);
+            template.Generate(doc, pdfdoc,  tournament, round, scores);
         }
-        else
+        catch (ArgumentException ex)
         {
-            //TODO: Another class that
-            //prints the defult teams round robbin.
-
+            // Handle invalid tournament type
+            Console.WriteLine(ex.Message);
         }
 
 

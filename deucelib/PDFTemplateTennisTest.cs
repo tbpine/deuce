@@ -11,14 +11,20 @@ using deuce.ext;
 
 namespace deuce;
 
-public class TemplateTennisTest : ITemplate
+public class PDFTemplateTennisTest : IPDFTemplate
 {
-    public TemplateTennisTest()
+    public ILayoutManager LayoutManager { get; private set; }
+    public PDFTemplateTennisTest()
     {
-
+        LayoutManager = new LayoutManagerDefault(
+            595f, 842f, // A4 size
+            36f, 36f, 36f, 36f, // Margins
+            5f, 5f, // Padding
+            5f, 5f // Table padding
+        );
     }
 
-    public void Generate(Document doc, PdfDocument pdfdoc, Schedule s, Tournament tournament, int roundNo,
+    public void Generate(Document doc, PdfDocument pdfdoc,  Tournament tournament, int roundNo,
     List<Score>? scores = null)
     {
         // Set the page to be landscape

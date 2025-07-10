@@ -15,13 +15,23 @@ namespace deuce;
 /// A class containing methods to layout elements in a PDF document
 /// for tennis matches.
 /// </summary>
-public class TemplateTennis : ITemplate
+public class PDFTemplateTennisRR : IPDFTemplate
 {
+    public ILayoutManager LayoutManager { get; private set; }
+
     /// <summary>
     /// Empty constructor
     /// </summary>
-    public TemplateTennis()
+    public PDFTemplateTennisRR()
     {
+        //Because, Round Robin layout is stright down ,
+        //we don't need to use a layout manager.(ignore below)
+        LayoutManager = new LayoutManagerTennisRR(
+            595f, 842f, // A4 size
+            36f, 36f, 36f, 36f, // Margins
+            5f, 5f, // Padding
+            5f, 5f // Table padding
+        );
 
     }
 
@@ -29,13 +39,13 @@ public class TemplateTennis : ITemplate
     /// Prints details of matches in a round and provides space to record scores.
     /// </summary>
     /// <param name="doc">iText document object</param>
-    /// <param name="s">Collection of matches by rounds</param>
     /// <param name="tournament">Tournament details</param>
     /// <param name="roundNo">The round to print</param>
     /// <param name="scores">Optionally, a list of scores to print</param>
-    public void Generate(Document doc, PdfDocument pdfdoc, Schedule s, Tournament tournament, int roundNo,
+    public void Generate(Document doc, PdfDocument pdfdoc, Tournament tournament, int roundNo,
     List<Score>? scores = null)
     {
+        Schedule s = tournament.Schedule??throw new ArgumentNullException(nameof(tournament.Schedule), "Tournament schedule cannot be null");
         // Layout : A grid for each match. Player names in the first column,
         // scores after.
         //Strategy : Use a grid for layout (easier).

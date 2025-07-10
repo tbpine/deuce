@@ -58,7 +58,7 @@ public class UnitsPdfWriter
         var results = mm.Run(teams);
 
         FileStream fs = new FileStream($"{tournament.Label}.pdf", FileMode.Create, FileAccess.Write);
-        PdfPrinter printer = new(results, new TemplateFactory());
+        PdfPrinter printer = new(results, new PDFTemplateFactory());
         printer.Print(fs, tournament, results, 0);
         
         
