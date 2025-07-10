@@ -14,11 +14,14 @@ public class TournamentKOTests
     }
 
     [TestMethod]
-    public void CreatePlayersAndTeams()
+    [DataRow(8)]
+    [DataRow(16)]
+    [DataRow(32)]
+    public void print_ko_tournament(int noPlayers)
     {
         // Create 8 random players
         var players = new List<Player>();
-        for (int i = 0; i < 8; i++)
+        for (int i = 0; i < noPlayers; i++)
         {
             var nameParts = RandomUtil.GetPlayer().Split(' ');
             players.Add(new Player
@@ -31,7 +34,7 @@ public class TournamentKOTests
 
         // Create 8 teams and assign one player to each team
         var teams = new List<Team>();
-        for (int i = 0; i < 8; i++)
+        for (int i = 0; i < noPlayers; i++)
         {
             var team = new Team
             {
@@ -64,7 +67,7 @@ public class TournamentKOTests
         //Schedule should not be null
         Assert.IsNotNull(tournament.Schedule, "Schedule should not be null");
         // Print schedule to PDF
-        
+
         string filename = $"{tournament.Label}_Round.pdf";
         using FileStream pdfFile = new FileStream(filename, FileMode.Create, FileAccess.Write);
         PdfPrinter printer = new PdfPrinter(tournament.Schedule, new PDFTemplateFactory());
