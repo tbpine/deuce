@@ -9,6 +9,9 @@ using iText.Layout.Element;
 using iText.Layout.Properties;
 using deuce.ext;
 using System.Diagnostics;
+using DocumentFormat.OpenXml.Office.Excel;
+using DocumentFormat.OpenXml.Drawing.Charts;
+using System.Drawing;
 
 namespace deuce;
 
@@ -16,6 +19,17 @@ public class TemplateTennisKO : ITemplate
 {
     private int _rows = 8;
     private int _cols = 4;
+
+    private float _page_top_margin = 10f;
+    private float _page_bottom_margin = 10f;
+    private float _page_left_margin = 10f;
+    private float _page_right_margin = 10f;
+
+    private float _table_padding_top = 5f;
+    private float _table_padding_bottom = 5f;
+    private float _table_padding_left = 5f;
+    private float _table_padding_right = 5f;
+
     public TemplateTennisKO()
     {
 
@@ -24,96 +38,66 @@ public class TemplateTennisKO : ITemplate
     public void Generate(Document doc, PdfDocument pdfdoc, Schedule s, Tournament tournament, int roundNo,
     List<Score>? scores = null)
     {
-
         //Set the page to be landscape
         pdfdoc.SetDefaultPageSize(PageSize.A4.Rotate());
-        //Get document height
-        float docHeight = pdfdoc.GetDefaultPageSize().GetHeight();
-        //Work out dimensions
-        //Get width of each match table
-        float tableWidth = pdfdoc.GetDefaultPageSize().GetWidth() / _cols;
-        //Get height of each match table
-        float tableHeight = docHeight / _rows;
+        //Get document height minus padding
+        LayoutManager lm = new LayoutManager(pdfdoc.GetDefaultPageSize().GetWidth(),
+            pdfdoc.GetDefaultPageSize().GetHeight(), _page_top_margin, _page_left_margin, _page_right_margin,
+            _page_bottom_margin, _table_padding_top, _table_padding_bottom, _table_padding_left, _table_padding_right);
 
-        double drawAreaWidth = pdfdoc.GetDefaultPageSize().GetWidth() / _cols;
-        // Create tables for each match in all rounds
-        foreach (var round in s.Rounds)
+        var layout = lm.Calculate(_rows);
+        //Get table widths
+        List<float> widths = new List<float>();
+        for (int c = 0 ; c < tournament.Details.Sets; c++) widths.Add(c== 0 ? 2f : 1f);
+
+        foreach (Round round in s.Rounds)
         {
-            double drawAreaHeight = docHeight / _rows / Math.Pow(2, round.Index); // Adjust height based on round index
-            int matchInRow = 0;
-            foreach (var permutation in round.Permutations)
+            //Get layout for this round
+            var roundLayout = layout.Where(x => x.Item1 == round.Index).ToList();
+            int matchIndex = 0;
+
+            foreach (Permutation permutation in round.Permutations)
             {
-                foreach (var match in permutation.Matches)
+                foreach (Match match in permutation.Matches)
                 {
-                    // Get all scores for the match
-                    var matchScores = scores?.Where(s => s.Match == match.Id).ToList();
-
-                    int numColumns = tournament.Details?.Sets  ?? 0 + 1; // Number of scores + 1, multiplied by 2
-                    //Make a column width array
-                    List<float> colWidths = new List<float>();
-                    // Calculate the number of columns based on the number of scores
-                    //first column is twice the size of the others
-                    for (int i = 0; i < numColumns; i++) colWidths.Add(i == 0? 2f : 1f);
-
-                    //Number of rows equals total number of columns divided by columns per row        
-                    Table matchTable = new Table(colWidths.ToArray());
-                    //Set table fixed layout
+                    RectangleF recMatch = roundLayout[matchIndex].Item2;
+                    //Add a table for the match
+                    Table matchTable = new Table(widths.ToArray());
                     matchTable.SetFixedLayout();
-                    matchTable.SetWidth(tableWidth);
-                    matchTable.SetHeight(tableHeight);
+                    matchTable.SetWidth(recMatch.Width);
+                    matchTable.SetHeight(recMatch.Height);
+                    //Location , pdf starts at button left corner and expands upwards
+                    matchTable.SetFixedPosition(recMatch.Left, pdfdoc.GetDefaultPageSize().GetHeight() - recMatch.Top  - recMatch.Height, recMatch.Width);
 
-                    // Calculate horizontal position based on round and match index
-                    double xPosition = (round.Index-1) * drawAreaWidth;
-                    //Adjust hortizontal alignment to the center of the drawAreaWidth
-                    xPosition +=  (drawAreaWidth - tableWidth) / 2;
-
-                    double yPosition = docHeight -  matchInRow * drawAreaHeight;
-                    //Debug out the x and y positions
-                    Debug.WriteLine($"Match: {match.Id}, Round: {round.Index}, X: {xPosition}, Y: {yPosition}");
-
-                    // Adjust vertical position aligment to the center of the drawAreaHeight
-
-                    matchTable.SetFixedPosition((float)xPosition, (float)yPosition, tableWidth);
-
-                    // Add padding around the table
-                    matchTable.SetPadding(5);
-
-                    // Add a cell for the home team's CSV player
-                    Cell homeTeamCell = new Cell().Add(new Paragraph(match.Home.FirstOrDefault()?.Team?.GetPlayerCSV()));
+                    //Get a list of scores
+                    List<Score> matchScores = scores?.Where(x => x.Id == match.Id).ToList() ?? new List<Score>();
+                    //Add a cell for the home team's CSV player
+                    Cell homeTeamCell = new Cell().Add(new Paragraph(match.Home?.FirstOrDefault()?.Team?.GetPlayerCSV()));
                     matchTable.AddCell(homeTeamCell);
-
-                    // Add numColumns - 1 number of cells
-                    for (int col = 0; col < (numColumns - 2) / 2; col++)
+                    //For each set, add a score cell
+                    for (int i = 0; i < tournament.Details.Sets; i++)
                     {
-                        var score = col < matchScores?.Count ? matchScores[col] : null;
-
-                        Cell scoreCell = new Cell();
-                        if (score != null) scoreCell.Add(new Paragraph(score.Home.ToString()));
+                        Cell scoreCell = new Cell().Add(new Paragraph(matchScores.Count > i ? matchScores[i].Home.ToString() : ""));
                         matchTable.AddCell(scoreCell);
                     }
 
-                    // Add a cell for the home team's CSV player
-                    Cell awayTeamCell = new Cell().Add(new Paragraph(match.Away.FirstOrDefault()?.Team?.GetPlayerCSV()));
+                    // Add a cell for the away team's CSV player
+                    Cell awayTeamCell = new Cell().Add(new Paragraph(match.Away?.FirstOrDefault()?.Team?.GetPlayerCSV()));
                     matchTable.AddCell(awayTeamCell);
-
-                    // Add numColumns - 1 number of cells
-                    for (int col = 0; col < (numColumns - 2) / 2; col++)
+                    //For each set, add a score cell
+                    for (int i = 0; i < tournament.Details.Sets; i++)
                     {
-                        var score = col < matchScores?.Count ? matchScores[col] : null;
-
-                        Cell scoreCell = new Cell();
-                        if (score != null) scoreCell.Add(new Paragraph(score.Away.ToString()));
-
+                        Cell scoreCell = new Cell().Add(new Paragraph(matchScores.Count > i ? matchScores[i].Away.ToString() : ""));
                         matchTable.AddCell(scoreCell);
                     }
-
-                    // Add the table to the document
+                    //Add table to the document
                     doc.Add(matchTable);
-                    matchInRow++;
+                    matchIndex++;
                 }
             }
         }
+                
     }
 
-  
+
 }

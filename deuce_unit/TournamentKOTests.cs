@@ -61,14 +61,14 @@ public class TournamentKOTests
 
         );
 
+        //Schedule should not be null
+        Assert.IsNotNull(tournament.Schedule, "Schedule should not be null");
         // Print schedule to PDF
-        for (int i = 0; i < tournament.Schedule?.NoRounds; i++)
-        {
-            string filename = $"{tournament.Label}_Round_{i + 1}.pdf";
-            using FileStream pdfFile = new FileStream(filename, FileMode.Create, FileAccess.Write);
-            PdfPrinter printer = new PdfPrinter(tournament.Schedule, new TemplateFactory());
-            printer.Print(pdfFile, tournament, tournament.Schedule, i);
-        }
+        
+        string filename = $"{tournament.Label}_Round.pdf";
+        using FileStream pdfFile = new FileStream(filename, FileMode.Create, FileAccess.Write);
+        PdfPrinter printer = new PdfPrinter(tournament.Schedule, new TemplateFactory());
+        printer.Print(pdfFile, tournament, tournament.Schedule, 1);
 
 
     }
