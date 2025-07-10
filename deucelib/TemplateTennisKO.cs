@@ -17,9 +17,7 @@ namespace deuce;
 
 public class TemplateTennisKO : ITemplate
 {
-    private int _rows = 8;
-    private int _cols = 4;
-
+    private int _max_rows = 8;
     private float _page_top_margin = 10f;
     private float _page_bottom_margin = 10f;
     private float _page_left_margin = 10f;
@@ -45,7 +43,11 @@ public class TemplateTennisKO : ITemplate
             pdfdoc.GetDefaultPageSize().GetHeight(), _page_top_margin, _page_left_margin, _page_right_margin,
             _page_bottom_margin, _table_padding_top, _table_padding_bottom, _table_padding_left, _table_padding_right);
 
-        var layout = lm.Calculate(_rows);
+        //Get the number of matches in the first round
+        int roundOneMatches = s.Rounds.FirstOrDefault(x=>x.Index == 1)?.Permutations.Sum(x => x.Matches.Count) ?? 0;
+        roundOneMatches = roundOneMatches <= _max_rows ? roundOneMatches : _max_rows;
+
+        var layout = lm.Calculate(roundOneMatches);
         //Get table widths
         List<float> widths = new List<float>();
         for (int c = 0 ; c < tournament.Details.Sets; c++) widths.Add(c== 0 ? 2f : 1f);

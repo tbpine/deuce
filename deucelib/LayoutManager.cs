@@ -10,8 +10,6 @@ class LayoutManager
     private readonly float _page_bottom_margin;
     private readonly float _page_left_margin;
     private readonly float _page_right_margin;
-    private readonly int _rows;
-    private readonly int _cols;
     private readonly float _table_padding_top;
     private readonly float _table_padding_bottom;
     private readonly float _table_padding_left;
