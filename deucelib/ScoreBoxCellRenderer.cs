@@ -9,35 +9,41 @@ using iText.Layout.Renderer;
 
 namespace deuce;
 
-public class ScoreBoxCellRenderer : CellRenderer
+
+public class FixedSizeCellRenderer : CellRenderer
 {
     private string? _text;
-    public ScoreBoxCellRenderer(Cell cell, string? text = "") : base(cell)
+    private float _boxWidth;
+    private float _boxHeight;
+    private float _lineWidth = 2f;
+
+
+
+    public FixedSizeCellRenderer(Cell cell, string? text = "", float boxWidth = 10f, float boxHeight = 15f,
+    float lineWidth = 2f) : base(cell)
     {
         _text = text;
+        _boxWidth = boxWidth;
+        _boxHeight = boxHeight;
+        _lineWidth = lineWidth;
     }
 
     public override void DrawBorder(DrawContext drawContext)
     {
         Rectangle rectangle = this.GetOccupiedAreaBBox();
 
-        float boxWidth = 10f;
-        float boxHeight = 15f;
-
         PdfCanvas canvas = drawContext.GetCanvas();
 
-
-        float x = (rectangle.GetX() + (rectangle.GetWidth() - boxWidth) / 2f);
-        float y = (rectangle.GetY() + (rectangle.GetHeight() - boxHeight) / 2f);
-        Rectangle score = new Rectangle(x, y, boxWidth, boxHeight);
+        float x = (rectangle.GetX() + (rectangle.GetWidth() - _boxWidth) / 2f);
+        float y = (rectangle.GetY() + (rectangle.GetHeight() - _boxHeight) / 2f);
+        Rectangle score = new Rectangle(x, y, _boxWidth, _boxHeight);
 
         canvas.SetStrokeColor(ColorConstants.BLACK);
-        canvas.SetLineWidth(2);
+        canvas.SetLineWidth(_lineWidth);
         canvas.Rectangle(score);
         canvas.Stroke();
 
         base.DrawBorder(drawContext);
-
     }
 
 

@@ -191,7 +191,7 @@ public class PDFTemplateTennisRR : IPDFTemplate
     private Cell MakeScoreCell(float padding, string? text = "")
     {
         var scell = new Cell();
-        scell.SetNextRenderer(new ScoreBoxCellRenderer(scell, text));
+        scell.SetNextRenderer(new FixedSizeCellRenderer(scell, text));
         scell.SetPadding(padding);
 
         return scell;

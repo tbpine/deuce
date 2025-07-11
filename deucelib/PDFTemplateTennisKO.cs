@@ -117,9 +117,16 @@ public class PDFTemplateTennisKO : IPDFTemplate
     private Cell MakeScoreCell(float padding, string? text = "", float fontSZizePt = 16f)
     {
         var scell = new Cell();
-        scell.SetNextRenderer(new SizableCellRenderer(scell, [0.2f, 0.1f, 0.2f, 0.1f]));
-        scell.SetFontSize(fontSZizePt);
+        // Measure text size to set width/height
 
+        // Always use 1 character width/height for the cell, regardless of text length
+        float charWidth = fontSZizePt * 0.6f; // rough estimate: 0.6em per char
+        float cellWidth = charWidth + 2 * padding;
+        float cellHeight = fontSZizePt * 1.6f + 2 * padding; // 1.6em for height
+
+        // Use ScoreBoxCellRenderer instead of SizableCellRenderer
+        scell.SetNextRenderer(new FixedSizeCellRenderer(scell, text, cellWidth, cellHeight, 1f));
+        scell.SetFontSize(fontSZizePt);
         return scell;
     }
 

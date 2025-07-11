@@ -31,7 +31,7 @@ class SizableCellRenderer : CellRenderer
         //Take pading
         canvas.Rectangle(rect.GetX() + paddingLeft,
          rect.GetY() + paddingTop,
-          rect.GetWidth() - paddingRight, rect.GetHeight() - paddingBottom);
+          rect.GetWidth() - paddingRight - paddingLeft, rect.GetHeight() - paddingBottom - paddingTop);
         canvas.Stroke();
         canvas.RestoreState();
 
