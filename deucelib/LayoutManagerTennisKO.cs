@@ -24,11 +24,12 @@ public class LayoutManagerTennisKO : LayoutManagerDefault
     public override object ArrangeLayout(Tournament tournament)
     {
         //Define "steps" as the number of matches in the first round
-        int steps = tournament.Schedule?.Rounds.FirstOrDefault(e => e.Index == 1)?.Permutations.Sum(e =>e.Matches.Count) ?? 0;
+        int steps = tournament.Schedule?.Rounds.FirstOrDefault(e => e.Index == 1)?.Permutations.Sum(e => e.Matches.Count) ?? 0;
 
         //the ladder algo
         //Work out the number of steps
-        int totalCols = (int)Math.Ceiling((double)steps / 2) + 1;
+        int totalCols = (int) Math.Log2(steps) + 1; // Total columns = log2(steps) + 1 for the first column
+         //(int)Math.Ceiling((double)steps / 2) + 1;
 
         //Work out the visible area of the page
         float visibleHeight = _pageHeight - _pageTopMargin - _pageBottomMargin;
@@ -52,21 +53,24 @@ public class LayoutManagerTennisKO : LayoutManagerDefault
         for (int r = 2; r <= totalCols; r++)
         {
             int stepHeight = steps / (int)Math.Pow(2, r - 1);
-            //The next set of rectangles are vertically in the middle
-            //of the previous column rectangles starting at the top
             var prevSteps = layout.FindAll(x => x.Item1 == (r - 1));
 
             for (int j = 0; j < stepHeight; j++)
             {
-                //Get all rectangle from the first column
-                if (j * 2 < prevSteps?.Count)
+                int idx1 = j * 2;
+                int idx2 = idx1 + 1;
+                if (prevSteps != null && idx2 < prevSteps.Count)
                 {
-                    var previousStep = prevSteps[j * 2].Item2;
-                    float top = previousStep.Top + (previousStep.Height / 2f);
-                    RectangleF rect = new RectangleF(_pageLeftMargin + (r - 1) * (recWidth + _tablePaddingLeft),
-                                                     top,
-                                                     recWidth,
-                                                     recHeight);
+                    var prevRect1 = prevSteps[idx1].Item2;
+                    var prevRect2 = prevSteps[idx2].Item2;
+                    float mid1 = prevRect1.Top + prevRect1.Height / 2f;
+                    float mid2 = prevRect2.Top + prevRect2.Height / 2f;
+                    float center = (mid1 + mid2) / 2f;
+                    RectangleF rect = new RectangleF(
+                        _pageLeftMargin + (r - 1) * (recWidth + _tablePaddingLeft),
+                        center - recHeight / 2f,
+                        recWidth,
+                        recHeight);
                     layout.Add((r, rect));
                 }
             }

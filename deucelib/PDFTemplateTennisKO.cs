@@ -12,6 +12,7 @@ using System.Diagnostics;
 using DocumentFormat.OpenXml.Office.Excel;
 using DocumentFormat.OpenXml.Drawing.Charts;
 using System.Drawing;
+using iText.Layout.Borders;
 
 namespace deuce;
 
@@ -39,7 +40,7 @@ public class PDFTemplateTennisKO : IPDFTemplate
         );
     }
 
-    public void Generate(Document doc, PdfDocument pdfdoc,  Tournament tournament, int roundNo,
+    public void Generate(Document doc, PdfDocument pdfdoc, Tournament tournament, int roundNo,
     List<Score>? scores = null)
     {
         Schedule s = tournament.Schedule ?? throw new ArgumentException("Schedule cannot be null for PDF generation.");
@@ -81,7 +82,8 @@ public class PDFTemplateTennisKO : IPDFTemplate
                     for (int i = 0; i < tournament.Details.Sets; i++)
                     {
                         string scoreText = matchScores.Count > i ? matchScores[i].Home.ToString() : "";
-                        Cell scoreCell = new Cell().Add(new Paragraph(scoreText).SetFontSize(fontSizePt));
+                        //Cell scoreCell = new Cell().Add(new Paragraph(scoreText).SetFontSize(fontSizePt));
+                        Cell scoreCell = MakeScoreCell(2f, scoreText,fontSizePt );
                         matchTable.AddCell(scoreCell);
                     }
 
@@ -92,7 +94,8 @@ public class PDFTemplateTennisKO : IPDFTemplate
                     for (int i = 0; i < tournament.Details.Sets; i++)
                     {
                         string scoreText = matchScores.Count > i ? matchScores[i].Away.ToString() : "";
-                        Cell scoreCell = new Cell().Add(new Paragraph(scoreText).SetFontSize(fontSizePt));
+                        //Cell scoreCell = new Cell().Add(new Paragraph(scoreText).SetFontSize(fontSizePt));
+                        Cell scoreCell = MakeScoreCell(2f, scoreText,fontSizePt );
                         matchTable.AddCell(scoreCell);
                     }
                     doc.Add(matchTable);
@@ -101,4 +104,23 @@ public class PDFTemplateTennisKO : IPDFTemplate
             }
         }
     }
+
+    /// <summary>
+    ///A cell with an empty bordered paragraph 
+    ///and padding to look like a rectangle
+    ///score box.
+    /// </summary>
+    /// <param name="borderSize">How thick the score box is</param>
+    /// <param name="padding">Size of margin around the score box container</param>
+    /// <param name="text">Optionally, text to display</param>
+    /// <returns></returns>
+    private Cell MakeScoreCell(float padding, string? text = "", float fontSZizePt = 16f)
+    {
+        var scell = new Cell();
+        scell.SetNextRenderer(new SizableCellRenderer(scell, [0.2f, 0.1f, 0.2f, 0.1f]));
+        scell.SetFontSize(fontSZizePt);
+
+        return scell;
+    }
+
 }

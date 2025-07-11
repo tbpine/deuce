@@ -130,7 +130,7 @@ public class PDFTemplateTennisRR : IPDFTemplate
                     //If no score, then add a blank cell.
                     //If score, then add the score.
                     var score = scores?.Find(x => x.Match == match.Id && x.Set == i+1 && x.Round == roundNo);
-                    var cellHomeScore = new Cell(); //MakeScoreCell(2f, score?.Away.ToString() ?? "");
+                    var cellHomeScore = MakeScoreCell(2f, score?.Away.ToString() ?? "");
 
                     if (score is not null)
                     {
@@ -154,7 +154,7 @@ public class PDFTemplateTennisRR : IPDFTemplate
                     //If no score, then add a blank cell.
                     //If score, then add the score.
                     var score = scores?.Find(x => x.Match == match.Id && x.Set == i+1 && x.Round == roundNo);
-                    var cellAwayScore = new Cell(); //MakeScoreCell(2f, score?.Away.ToString() ?? "");
+                    var cellAwayScore = MakeScoreCell(2f, score?.Away.ToString() ?? "");
                     if (score is not null)
                     {
                         var scoreParagraph = new Paragraph(score.Away.ToString());
@@ -178,7 +178,6 @@ public class PDFTemplateTennisRR : IPDFTemplate
 
 
     }
-
 
     /// <summary>
     ///A cell with an empty bordered paragraph 

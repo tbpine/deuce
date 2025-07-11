@@ -1,5 +1,5 @@
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using deuce;
+using System.Linq;
 namespace deuce_unit;
 
 [TestClass]
@@ -26,7 +26,7 @@ public class TournamentKOTests
             var nameParts = RandomUtil.GetPlayer().Split(' ');
             players.Add(new Player
             {
-                Id = i,
+                Id = i + 1,
                 First = nameParts[0],
                 Last = nameParts.Length > 1 ? nameParts[1] : "Unknown"
             });
@@ -38,7 +38,7 @@ public class TournamentKOTests
         {
             var team = new Team
             {
-                Id = i,
+                Id = i + 1,
                 Label = RandomUtil.GetTeam()
             };
             team.AddPlayer(players[i]);
@@ -66,12 +66,46 @@ public class TournamentKOTests
 
         //Schedule should not be null
         Assert.IsNotNull(tournament.Schedule, "Schedule should not be null");
+
+        //Assig ids to matches, permutations and rounds so scoring can
+        //be linked to them
+        int matchId = 1, permId = 1;
+        //Store a list of scores
+        List<Score> scores = new List<Score>();
+        foreach (Round round in tournament.Schedule.Rounds)
+        {
+            foreach (Permutation permutation in round.Permutations)
+            {
+                permutation.Id = permId++;
+                foreach (Match match in permutation.Matches)
+                {
+                    match.Id = matchId++;
+
+                    //A a random score for each set in the match
+                    for (int i = 0; i < tournament.Details.Sets; i++)
+                    {
+                        Score score = new Score
+                        {
+                            Id = match.Id,
+                            Home = RandomUtil.GetInt(6),
+                            Away = RandomUtil.GetInt(6),
+                            Permutation = permutation.Id,
+                            Match = match.Id,
+                            Round = round.Index
+                        };
+
+                        scores.Add(score);
+
+                    }
+                }
+            }
+        }
         // Print schedule to PDF
 
         string filename = $"{tournament.Label}_Round.pdf";
         using FileStream pdfFile = new FileStream(filename, FileMode.Create, FileAccess.Write);
         PdfPrinter printer = new PdfPrinter(tournament.Schedule, new PDFTemplateFactory());
-        printer.Print(pdfFile, tournament, tournament.Schedule, 1);
+        printer.Print(pdfFile, tournament, tournament.Schedule, 1, scores);
 
 
     }
@@ -126,7 +160,7 @@ public class TournamentKOTests
 
         // Print schedule to PDF
         Assert.IsNotNull(tournament.Schedule, "Schedule should not be null");
-        
+
         string filename = $"{tournament.Label}_Round_.pdf";
         using FileStream pdfFile = new FileStream(filename, FileMode.Create, FileAccess.Write);
         PdfPrinter printer = new PdfPrinter(tournament.Schedule, new PDFTemplateFactory());
