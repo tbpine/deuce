@@ -47,4 +47,5 @@ and represent the appropreite view. Makes navigation easier.
 - ~~[X] Make groups of 1 for individual tournament~~
 - [] Scoring for KO tournament type
 - [] Draws for KO tournament type
+    -[] Print pages for large entries
 - [] RR ranking
