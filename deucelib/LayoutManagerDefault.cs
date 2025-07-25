@@ -18,6 +18,12 @@ public class LayoutManagerDefault : ILayoutManager
     protected float _pageWidth;
     protected float _pageHeight;
 
+    protected int _maxCols = 2; // Default maximum columns
+    protected int _maxRows = 4; // Default maximum rows (max matches)
+
+    public int Cols => _maxCols;
+    public int Rows => _maxRows;
+
     public LayoutManagerDefault(float pageWidth, float pageHeight, float pageTopMargin,
         float pageLeftMargin, float pageRightMargin, float pageBottomMargin, float tablePaddingTop, float tablePaddingBottom,
         float tablePaddingLeft = 5f, float tablePaddingRight = 5f)

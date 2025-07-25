@@ -10,4 +10,7 @@ public interface ILayoutManager
     void Initialize();
     object ArrangeLayout(Tournament tournament);
     // Add more methods/properties as needed
+
+    public int Cols { get; }
+    public int Rows { get; }
 }

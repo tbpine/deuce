@@ -1,6 +1,7 @@
 namespace deuce;
 
 using System.Drawing;
+using DocumentFormat.OpenXml.Drawing.Diagrams;
 
 /// <summary>
 /// Layout manager for Tennis Knockout tournaments.
@@ -12,7 +13,6 @@ using System.Drawing;
 public class LayoutManagerTennisKO : LayoutManagerDefault
 {
     // Use base class margin and padding members instead of redefining them here
-
     public LayoutManagerTennisKO(float pageWidth, float pageHeight, float pageTopMargin,
         float pageLeftMargin, float pageRightMargin, float pageBottomMargin, float tablePaddingTop, float tablePaddingBottom,
         float tablePaddingLeft = 5f, float tablePaddingRight = 5f)
@@ -21,6 +21,14 @@ public class LayoutManagerTennisKO : LayoutManagerDefault
         // No need to assign margins/paddings here, use base class members
     }
 
+    /// <summary>
+    /// Arranges the layout for a Tennis Knockout tournament.
+    /// This method calculates the layout based on the number of matches in the first round,
+    /// determines the number of pages needed, and arranges the matches in a knockout format.
+    /// It returns a list of PagenationInfo objects that contain the layout information for each match rectangle.
+    /// </summary>
+    /// <param name="tournament"> The tournament object containing the schedule and match information.</param>
+    /// <returns> A list of PagenationInfo objects representing the layout of the tournament matches.</returns>
     public override object ArrangeLayout(Tournament tournament)
     {
         //Define "steps" as the number of matches in the first round
@@ -28,32 +36,73 @@ public class LayoutManagerTennisKO : LayoutManagerDefault
 
         //the ladder algo
         //Work out the number of steps
-        int totalCols = (int) Math.Log2(steps) + 1; // Total columns = log2(steps) + 1 for the first column
-         //(int)Math.Ceiling((double)steps / 2) + 1;
+        int totalCols = (int)Math.Log2(steps) + 1;
 
+        //Calculate number of pages in the x direction
+        int pagesX = totalCols / _maxCols + (totalCols % _maxCols > 0 ? 1 : 0);
+        int pagesY = steps / _maxRows + (steps % _maxRows > 0 ? 1 : 0);
+
+
+        //Go through each page from left to right,
+        //Work out the matches on that page
+        //Layout 
+        //Then, go through each page from top to bottom
+        //Find matches on that page
+        //Layout the matches on that page
+        List<PagenationInfo> layout = new List<PagenationInfo>();
+        for (int i = 0; i < pagesX; i++)
+        {
+            for (int j = 0; j < pagesY; j++)
+            {
+                ArrangePageLayout(layout, i, j);
+            }
+        }
+
+        //Set the pagesX and pagesY for each PagenationInfo object
+        //This is useful for pagination purposes, especially when rendering the PDF
+        foreach (PagenationInfo e in layout)
+        {
+            e.PagesX = pagesX;
+            e.PagesY = pagesY;
+        }
+
+        //Return the rectangles
+        return layout;
+    }
+
+    /// <summary>
+    /// Arranges the layout for a specific page in the tournament bracket.
+    /// </summary>
+    /// <param name="layout"> The list to which the layout information will be added.</param>
+    /// <param name="pageXIndex"> The index of the page in the X direction.</param>
+    /// <param name="pageYIndex">  The index of the page in the Y direction.</param>
+    private void ArrangePageLayout(List<PagenationInfo> layout, int pageXIndex, int pageYIndex)
+    {
         //Work out the visible area of the page
-        float visibleHeight = _pageHeight - _pageTopMargin - _pageBottomMargin;
-        float visibleWidth = _pageWidth - _pageLeftMargin - _pageRightMargin;
+        //Create a RectangleF for the draw area per page
+        RectangleF drawArea = new RectangleF(_pageLeftMargin, _pageTopMargin,
+            _pageWidth - _pageLeftMargin - _pageRightMargin,
+            _pageHeight - _pageTopMargin - _pageBottomMargin);
+
         //Space evenly vertically
-        float recHeight = (visibleHeight - steps * (_tablePaddingTop + _tablePaddingBottom)) / steps;
+        float recHeight = (drawArea.Height - _maxRows * (_tablePaddingTop + _tablePaddingBottom)) / _maxRows;
         //Space evenly horizontally
-        float recWidth = (visibleWidth - totalCols * (_tablePaddingLeft + _tablePaddingRight)) / totalCols;
-        //Set locations of 
-        List<(int, RectangleF)> layout = new List<(int, RectangleF)>();
+        float recWidth = (drawArea.Width - _maxCols * (_tablePaddingLeft + _tablePaddingRight)) / _maxCols;
+
         //Column 1
-        for (int i = 0; i < steps; i++)
+        for (int i = 0; i < _maxRows; i++)
         {
             RectangleF rect = new RectangleF(_pageLeftMargin,
                                              _pageTopMargin + i * (recHeight + _tablePaddingTop + _tablePaddingBottom),
                                               recWidth,
                                               recHeight);
-            layout.Add((1, rect));
+            layout.Add(new PagenationInfo(pageXIndex, pageYIndex, 1, rect, i));
         }
 
-        for (int r = 2; r <= totalCols; r++)
+        for (int r = 2; r <= _maxCols; r++)
         {
-            int stepHeight = steps / (int)Math.Pow(2, r - 1);
-            var prevSteps = layout.FindAll(x => x.Item1 == (r - 1));
+            int stepHeight = _maxCols / (int)Math.Pow(2, r - 1);
+            var prevSteps = layout.FindAll(x => x.Round == (r - 1));
 
             for (int j = 0; j < stepHeight; j++)
             {
@@ -61,8 +110,8 @@ public class LayoutManagerTennisKO : LayoutManagerDefault
                 int idx2 = idx1 + 1;
                 if (prevSteps != null && idx2 < prevSteps.Count)
                 {
-                    var prevRect1 = prevSteps[idx1].Item2;
-                    var prevRect2 = prevSteps[idx2].Item2;
+                    var prevRect1 = prevSteps[idx1].Rectangle;
+                    var prevRect2 = prevSteps[idx2].Rectangle;
                     float mid1 = prevRect1.Top + prevRect1.Height / 2f;
                     float mid2 = prevRect2.Top + prevRect2.Height / 2f;
                     float center = (mid1 + mid2) / 2f;
@@ -71,12 +120,11 @@ public class LayoutManagerTennisKO : LayoutManagerDefault
                         center - recHeight / 2f,
                         recWidth,
                         recHeight);
-                    layout.Add((r, rect));
+                    layout.Add(new PagenationInfo(pageXIndex,  pageYIndex,  r, rect, j));
                 }
             }
         }
 
-        //Return the rectangles
-        return layout;
+        
     }
 }
