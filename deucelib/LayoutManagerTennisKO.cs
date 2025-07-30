@@ -89,38 +89,48 @@ public class LayoutManagerTennisKO : LayoutManagerDefault
         //Space evenly horizontally
         float recWidth = (drawArea.Width - _maxCols * (_tablePaddingLeft + _tablePaddingRight)) / _maxCols;
 
-        //Column 1
+        //Column 1. Round starts at 1.
         for (int i = 0; i < _maxRows; i++)
         {
             RectangleF rect = new RectangleF(_pageLeftMargin,
                                              _pageTopMargin + i * (recHeight + _tablePaddingTop + _tablePaddingBottom),
                                               recWidth,
                                               recHeight);
-            layout.Add(new PagenationInfo(pageXIndex, pageYIndex, 1, rect, i));
+            layout.Add(new PagenationInfo(pageXIndex, pageYIndex, pageYIndex*_maxCols+1, rect, i));
         }
-
+        //r is local page iterator.
         for (int r = 2; r <= _maxCols; r++)
         {
-            int stepHeight = _maxCols / (int)Math.Pow(2, r - 1);
-            var prevSteps = layout.FindAll(x => x.Round == (r - 1));
+            int stepHeight = _maxRows / (int)Math.Pow(2, r - 1);
+            //Find the previous round
+            int prevRound = pageYIndex * _maxCols + r -1;
+            var prevSteps = layout.FindAll(x => x.Round == prevRound);
 
+            //Number of rows per page
             for (int j = 0; j < stepHeight; j++)
             {
+                //The rectangle location is between the previous two rectangles
+                //in the previous round.
                 int idx1 = j * 2;
                 int idx2 = idx1 + 1;
                 if (prevSteps != null && idx2 < prevSteps.Count)
                 {
+                    //Calculate the rectangle position based on the previous rectangles
+                    //and the current round's rectangle width and height.
+
                     var prevRect1 = prevSteps[idx1].Rectangle;
                     var prevRect2 = prevSteps[idx2].Rectangle;
                     float mid1 = prevRect1.Top + prevRect1.Height / 2f;
                     float mid2 = prevRect2.Top + prevRect2.Height / 2f;
+                    //Calculate the center position for the new rectangle
                     float center = (mid1 + mid2) / 2f;
+                    //Create the new rectangle for the current match
                     RectangleF rect = new RectangleF(
                         _pageLeftMargin + (r - 1) * (recWidth + _tablePaddingLeft),
                         center - recHeight / 2f,
                         recWidth,
                         recHeight);
-                    layout.Add(new PagenationInfo(pageXIndex,  pageYIndex,  r, rect, j));
+                    layout.Add(new PagenationInfo(pageXIndex, pageYIndex, pageYIndex * _maxCols + r, rect, j));
                 }
             }
         }
