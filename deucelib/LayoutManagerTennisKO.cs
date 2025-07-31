@@ -95,9 +95,6 @@ public class LayoutManagerTennisKO : LayoutManagerDefault
             _pageWidth - _pageLeftMargin - _pageRightMargin,
             _pageHeight - _pageTopMargin - _pageBottomMargin);
 
-        // Calculate page offsets for current page position
-        float pageOffsetX = pageXIndex * _pageWidth;
-        float pageOffsetY = pageYIndex * _pageHeight;
 
         //Space evenly vertically
         float recHeight = (drawArea.Height - _maxRows * (_tablePaddingTop + _tablePaddingBottom)) / _maxRows;
@@ -109,8 +106,8 @@ public class LayoutManagerTennisKO : LayoutManagerDefault
         
         for (int i = 0; i < rowsInFirstColumn; i++)
         {
-            RectangleF rect = new RectangleF(pageOffsetX + _pageLeftMargin,
-                                             pageOffsetY + _pageTopMargin + i * (recHeight + _tablePaddingTop + _tablePaddingBottom)  + startY,
+            RectangleF rect = new RectangleF(_pageLeftMargin,
+                                             _pageTopMargin + i * (recHeight + _tablePaddingTop + _tablePaddingBottom)  + startY,
                                               recWidth,
                                               recHeight);
             //startRound is zero indexed, so we add 1 to it
@@ -149,7 +146,7 @@ public class LayoutManagerTennisKO : LayoutManagerDefault
                     float center = (mid1 + mid2) / 2f;
                     //Create the new rectangle for the current match
                     RectangleF rect = new RectangleF(
-                        pageOffsetX + _pageLeftMargin + r  * (recWidth + _tablePaddingLeft),
+                         _pageLeftMargin + r  * (recWidth + _tablePaddingLeft),
                         center - recHeight / 2f,
                         recWidth,
                         recHeight);

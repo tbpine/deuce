@@ -66,17 +66,22 @@ public class PDFTemplateTennisKO : IPDFTemplate
         // The first column is wider for team names, the rest are equal for scores
         List<float> widths = new List<float>();
         for (int c = 0; c < (tournament.Details.Sets + 1); c++) widths.Add(c == 0 ? 2f : 1f);
+        //Store the page number
+        int pageNo = 1;
         //Do the first page first
         //Draw page left to right, top to bottom
-        for (int pagey = 0; pagey < (layout.FirstOrDefault()?.PagesY??0); pagey++)
+        for (int pagey = 0; pagey < (layout.FirstOrDefault()?.PagesY ?? 0); pagey++)
         {
-            for (int pagex = 0; pagex < (layout.FirstOrDefault()?.PagesX??0);    pagex++)
+            for (int pagex = 0; pagex < (layout.FirstOrDefault()?.PagesX ?? 0); pagex++)
             {
                 //Add page if not the first one
-                 pdfdoc.AddNewPage();
+                if (pagex > 0 || pagey > 0) {
+                    pdfdoc.AddNewPage();
+                    pageNo++;
+                }
                 //Print the first page
                 var layouts = layout.Where(x => x.PageXIndex == pagex && x.PageYIndex == pagey).ToList();
-                PrintPage(layouts, s, tournament, scores ?? new(), pdfdoc, doc, widths);
+                PrintPage(layouts, s, tournament, scores ?? new(), pdfdoc, doc, widths, pageNo);
             }
         }
 
@@ -162,7 +167,7 @@ public class PDFTemplateTennisKO : IPDFTemplate
     }
 
     private void PrintPage(List<PagenationInfo> layout, Schedule s, Tournament tournament, List<Score> scores, PdfDocument pdfdoc, Document doc,
-    List<float> widths)
+    List<float> widths, int pageNo = 1)
     {
 
         //Get all PagenationInfo info where pageXIndex is 0 and pageYIndex is 0
@@ -180,7 +185,7 @@ public class PDFTemplateTennisKO : IPDFTemplate
             matchTable.SetFixedLayout();
             matchTable.SetWidth(pi.Rectangle.Width);
             matchTable.SetHeight(pi.Rectangle.Height);
-            matchTable.SetFixedPosition(pi.Rectangle.Left,  pdfdoc.GetDefaultPageSize().GetHeight() - pi.Rectangle.Top - pi.Rectangle.Height, pi.Rectangle.Width);
+            matchTable.SetFixedPosition(pageNo, pi.Rectangle.Left,  pdfdoc.GetDefaultPageSize().GetHeight() - pi.Rectangle.Top - pi.Rectangle.Height, pi.Rectangle.Width);
 
             // Calculate font size in points from pixels, and scale down for better fit
             float fontSizePx = pi.Rectangle.Height / 4.2f; // reduce divisor for smaller font
