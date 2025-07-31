@@ -27,7 +27,7 @@ public class Round
         if (!_perms.Contains(obj)) _perms.Add(obj);
     } 
 
-    public Permutation GetAtIndex(int index)=>_perms[index];
+    public Permutation? GetAtIndex(int index)=>_perms.ElementAtOrDefault(index);
 
     public void AddRange(IEnumerable<Permutation> range) =>_perms.AddRange(range);
 
