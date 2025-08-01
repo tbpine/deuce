@@ -62,83 +62,128 @@ public class PDFTemplateTennisKO : IPDFTemplate
         pdfdoc.SetDefaultPageSize(PageSize.A4.Rotate());
 
         List<PagenationInfo> layout = (LayoutManager.ArrangeLayout(tournament) as List<PagenationInfo>) ?? new();
+
         // table widths for each match
         // The first column is wider for team names, the rest are equal for scores
         List<float> widths = new List<float>();
         for (int c = 0; c < (tournament.Details.Sets + 1); c++) widths.Add(c == 0 ? 2f : 1f);
         //Store the page number
-        int pageNo = 1;
-        //Do the first page first
-        //Draw page left to right, top to bottom
-        for (int pagey = 0; pagey < (layout.FirstOrDefault()?.PagesY ?? 0); pagey++)
+        //LINQ to group by page index
+        var groupedLayout = from p in layout
+                            group p by p.PageIndex into g
+                            select new { PageIndex = g.Key, Layouts = g.ToList() };
+        foreach (var group in groupedLayout)
         {
-            for (int pagex = 0; pagex < (layout.FirstOrDefault()?.PagesX ?? 0); pagex++)
-            {
-                //Add page if not the first one
-                if (pagex > 0 || pagey > 0) {
-                    pdfdoc.AddNewPage();
-                    pageNo++;
-                }
-                //Print the first page
-                var layouts = layout.Where(x => x.PageXIndex == pagex && x.PageYIndex == pagey).ToList();
-                PrintPage(layouts, s, tournament, scores ?? new(), pdfdoc, doc, widths, pageNo);
-            }
+            //Add a new page for each group
+            pdfdoc.AddNewPage();
+            //Print the matches on this page
+            //Find ind matches associated with this layout
+            
+            PrintPage(group.Layouts, s, tournament, scores??new(), pdfdoc, doc, widths, group.PageIndex);
         }
 
 
+    }
 
+    /// <summary>
+    /// Prints the matches on a specific page of the PDF document.
+    /// This method iterates through the layout information,    
+    /// creating a table for each match.
+    /// It retrieves match details, including home and away teams,
+    /// and their scores.
+    /// The table is styled with fixed positions and font sizes.
+    /// It handles exceptions for each match to ensure that
+    /// the PDF generation continues even if some matches have issues.
+    /// </summary>
+    /// <param name="layout"> The layout information containing match rectangles and indices.</param>
+    /// <param name="s">The schedule object containing match details.</param>
+    /// <param name="tournament">The tournament object containing tournament details.</param>
+    /// <param name="scores">The list of scores for the matches.</param>
+    /// <param name="pdfdoc">The PDF document to add the matches to.</param>
+    /// <param name="doc">The document object for layout and styling.</param>
+    /// <param name="widths">The column widths for the match tables.</param>
+    /// <param name="pageNo"> The page number for the current layout.</param>
+    private void PrintPage(List<PagenationInfo> layout, Schedule s, Tournament tournament, List<Score> scores, PdfDocument pdfdoc, Document doc,
+    List<float> widths, int pageNo)
+    {
 
-        // foreach (Round round in s.Rounds)
-        // {
-        //     var roundLayout = layout.Where(x => x.Item1 == round.Index).ToList();
-        //     int matchIndex = 0;
+        //Get all PagenationInfo info where pageXIndex is 0 and pageYIndex is 0
+        if (layout.Count == 0) return;
 
-        //     foreach (Permutation permutation in round.Permutations)
-        //     {
-        //         foreach (Match match in permutation.Matches)
-        //         {
-        //             RectangleF recMatch = roundLayout[matchIndex].Item2;
-        //             Table matchTable = new Table(widths.ToArray());
-        //             matchTable.SetFixedLayout();
-        //             matchTable.SetWidth(recMatch.Width);
-        //             matchTable.SetHeight(recMatch.Height);
-        //             matchTable.SetFixedPosition(recMatch.Left, pdfdoc.GetDefaultPageSize().GetHeight() - recMatch.Top - recMatch.Height, recMatch.Width);
+        for (int i = 0; i < layout.Count; i++)
+        {
+            try
+            {
+                PagenationInfo pi = layout[i];
+                
+                // Handle header elements differently from match elements
+                if (pi.ElementType == PageElementType.RoundHeader)
+                {
+                    // Create a simple paragraph for the header
+                    float headerFontSize = 14f; // Fixed font size for headers
+                    Paragraph headerParagraph = new Paragraph(pi.Text)
+                        .SetFontSize(headerFontSize)
+                        .SetTextAlignment(iText.Layout.Properties.TextAlignment.CENTER);
+                    
+                    headerParagraph.SetFixedPosition(pageNo, pi.Rectangle.Left, 
+                        pdfdoc.GetDefaultPageSize().GetHeight() - pi.Rectangle.Top - pi.Rectangle.Height, 
+                        pi.Rectangle.Width);
+                    
+                    doc.Add(headerParagraph);
+                }
+                else // Handle match elements
+                {
+                    //Find how many rows (matches) are in the round
 
-        //             // Calculate font size in points from pixels, and scale down for better fit
-        //             float fontSizePx = recMatch.Height / 4.2f; // reduce divisor for smaller font
-        //             float fontSizePt = fontSizePx * 72f / 96f;
-        //             Debug.WriteLine($"Match {matchIndex} font size: {fontSizePx}px, {fontSizePt}pt");
-        //             //Get a list of scores
-        //             List<Score> matchScores = scores?.Where(x => x.Id == match.Id).ToList() ?? new List<Score>();
-        //             //Add a cell for the home team's CSV player
-        //             var homeText = match.Home?.FirstOrDefault()?.Team?.GetPlayerCSV();
-        //             Cell homeTeamCell = new Cell().Add(new Paragraph(homeText).SetFontSize(fontSizePt));
+                    
+                    Match? match = s.Rounds.FirstOrDefault(e => e.Index == pi.Round)?.GetAtIndex(pi.RowOffset)?.Matches.FirstOrDefault();
 
-        //             matchTable.AddCell(homeTeamCell);
-        //             for (int i = 0; i < tournament.Details.Sets; i++)
-        //             {
-        //                 string scoreText = matchScores.Count > i ? matchScores[i].Home.ToString() : "";
-        //                 //Cell scoreCell = new Cell().Add(new Paragraph(scoreText).SetFontSize(fontSizePt));
-        //                 Cell scoreCell = MakeScoreCell(2f, scoreText, fontSizePt);
-        //                 matchTable.AddCell(scoreCell);
-        //             }
+                    var matchScores = scores?.Where(x => x.Id == match?.Id).ToList() ?? new List<Score>();
 
-        //             // Add a cell for the away team's CSV player
-        //             var awayText = match.Away?.FirstOrDefault()?.Team?.GetPlayerCSV();
-        //             Cell awayTeamCell = new Cell().Add(new Paragraph(awayText).SetFontSize(fontSizePt));
-        //             matchTable.AddCell(awayTeamCell);
-        //             for (int i = 0; i < tournament.Details.Sets; i++)
-        //             {
-        //                 string scoreText = matchScores.Count > i ? matchScores[i].Away.ToString() : "";
-        //                 //Cell scoreCell = new Cell().Add(new Paragraph(scoreText).SetFontSize(fontSizePt));
-        //                 Cell scoreCell = MakeScoreCell(2f, scoreText, fontSizePt);
-        //                 matchTable.AddCell(scoreCell);
-        //             }
-        //             doc.Add(matchTable);
-        //             matchIndex++;
-        //         }
-        //     }
-        // }
+                    Table matchTable = new Table(widths.ToArray());
+                    matchTable.SetFixedLayout();
+                    matchTable.SetWidth(pi.Rectangle.Width);
+                    matchTable.SetHeight(pi.Rectangle.Height);
+                    matchTable.SetFixedPosition(pageNo, pi.Rectangle.Left, pdfdoc.GetDefaultPageSize().GetHeight() - pi.Rectangle.Top - pi.Rectangle.Height, pi.Rectangle.Width);
+
+                    // Calculate font size in points from pixels, and scale down for better fit
+                    float fontSizePx = pi.Rectangle.Height / 4.2f; // reduce divisor for smaller font
+                    float fontSizePt = fontSizePx * 72f / 96f;
+                    //Add a cell for the home team's CSV player
+                    var homeText = match?.Home?.FirstOrDefault()?.Team?.GetPlayerCSV();
+                    Cell homeTeamCell = new Cell().Add(new Paragraph(homeText).SetFontSize(fontSizePt));
+
+                    matchTable.AddCell(homeTeamCell);
+                    for (int j = 0; j < tournament.Details.Sets; j++)
+                    {
+                        string scoreText = matchScores.Count > j ? matchScores[j].Home.ToString() : "";
+                        //Cell scoreCell = new Cell().Add(new Paragraph(scoreText).SetFontSize(fontSizePt));
+                        Cell scoreCell = MakeScoreCell(2f, scoreText, fontSizePt);
+                        matchTable.AddCell(scoreCell);
+                    }
+
+                    // Add a cell for the away team's CSV player
+                    var awayText = match?.Away?.FirstOrDefault()?.Team?.GetPlayerCSV();
+                    Cell awayTeamCell = new Cell().Add(new Paragraph(awayText).SetFontSize(fontSizePt));
+                    matchTable.AddCell(awayTeamCell);
+                    for (int j = 0; j < tournament.Details.Sets; j++)
+                    {
+                        string scoreText = matchScores.Count > j ? matchScores[j].Away.ToString() : "";
+                        //Cell scoreCell = new Cell().Add(new Paragraph(scoreText).SetFontSize(fontSizePt));
+                        Cell scoreCell = MakeScoreCell(2f, scoreText, fontSizePt);
+                        matchTable.AddCell(scoreCell);
+                    }
+                    doc.Add(matchTable);
+                }
+            }
+            catch (Exception ex)
+            {
+                // Log the error and continue with the next match
+                Console.WriteLine($"Error printing match {i + 1} on page {pageNo}: {ex.Message}");
+            }
+
+        }
+
     }
 
     /// <summary>
@@ -166,57 +211,4 @@ public class PDFTemplateTennisKO : IPDFTemplate
         return scell;
     }
 
-    private void PrintPage(List<PagenationInfo> layout, Schedule s, Tournament tournament, List<Score> scores, PdfDocument pdfdoc, Document doc,
-    List<float> widths, int pageNo = 1)
-    {
-
-        //Get all PagenationInfo info where pageXIndex is 0 and pageYIndex is 0
-        if (layout.Count == 0) return;
-
-        for (int i = 0; i < layout.Count; i++)
-        {
-            PagenationInfo pi = layout[i];
-            int matchIndex = pi.PageYIndex * LayoutManager.Rows + pi.RowOffset;
-            Match? match = s.Rounds.FirstOrDefault(e=>e.Index == pi.Round)?.GetAtIndex(matchIndex)?.Matches.FirstOrDefault();
-
-            var matchScores = scores?.Where(x => x.Id == match?.Id).ToList() ?? new List<Score>();
-
-            Table matchTable = new Table(widths.ToArray());
-            matchTable.SetFixedLayout();
-            matchTable.SetWidth(pi.Rectangle.Width);
-            matchTable.SetHeight(pi.Rectangle.Height);
-            matchTable.SetFixedPosition(pageNo, pi.Rectangle.Left,  pdfdoc.GetDefaultPageSize().GetHeight() - pi.Rectangle.Top - pi.Rectangle.Height, pi.Rectangle.Width);
-
-            // Calculate font size in points from pixels, and scale down for better fit
-            float fontSizePx = pi.Rectangle.Height / 4.2f; // reduce divisor for smaller font
-            float fontSizePt = fontSizePx * 72f / 96f;
-            //Add a cell for the home team's CSV player
-            var homeText = match?.Home?.FirstOrDefault()?.Team?.GetPlayerCSV();
-            Cell homeTeamCell = new Cell().Add(new Paragraph(homeText).SetFontSize(fontSizePt));
-
-            matchTable.AddCell(homeTeamCell);
-            for (int j = 0; j < tournament.Details.Sets; j++)
-            {
-                string scoreText = matchScores.Count > j ? matchScores[j].Home.ToString() : "";
-                //Cell scoreCell = new Cell().Add(new Paragraph(scoreText).SetFontSize(fontSizePt));
-                Cell scoreCell = MakeScoreCell(2f, scoreText, fontSizePt);
-                matchTable.AddCell(scoreCell);
-            }
-
-            // Add a cell for the away team's CSV player
-            var awayText = match?.Away?.FirstOrDefault()?.Team?.GetPlayerCSV();
-            Cell awayTeamCell = new Cell().Add(new Paragraph(awayText).SetFontSize(fontSizePt));
-            matchTable.AddCell(awayTeamCell);
-            for (int j = 0; j < tournament.Details.Sets; j++)
-            {
-                string scoreText = matchScores.Count > j ? matchScores[j].Away.ToString() : "";
-                //Cell scoreCell = new Cell().Add(new Paragraph(scoreText).SetFontSize(fontSizePt));
-                Cell scoreCell = MakeScoreCell(2f, scoreText, fontSizePt);
-                matchTable.AddCell(scoreCell);
-            }
-            doc.Add(matchTable);
-
-        }
-
-    }
 }

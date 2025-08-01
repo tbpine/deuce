@@ -17,6 +17,8 @@ public class TournamentKOTests
     [DataRow(8)]
     [DataRow(16)]
     [DataRow(32)]
+    [DataRow(128)]
+
     public void print_ko_tournament(int noPlayers)
     {
         // Create 8 random players

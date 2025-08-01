@@ -2,13 +2,25 @@
 using System.Drawing;
 namespace deuce;
 
+/// <summary>
+/// Enum to specify the type of element this PagenationInfo represents
+/// </summary>
+public enum PageElementType
+{
+    Match,
+    RoundHeader
+}
+
 public class PagenationInfo
 {
     // Protected fields
     protected int _pageXIndex;
     protected int _pageYIndex;
     protected int _round;
+    protected int _pageIndex;
     protected RectangleF _rectangle = new RectangleF();
+    protected PageElementType _elementType = PageElementType.Match;
+    protected string _text = "";
 
     protected int _pagesX;
     protected int _pagesY;
@@ -19,10 +31,14 @@ public class PagenationInfo
     public int PageYIndex { get => _pageYIndex; set => _pageYIndex = value; }
     public int Round { get => _round; set => _round = value; }
     public RectangleF Rectangle { get => _rectangle; set => _rectangle = value; }
+    public PageElementType ElementType { get => _elementType; set => _elementType = value; }
+    public string Text { get => _text; set => _text = value; }
 
     public int PagesX { get => _pagesX; set => _pagesX = value; }
     public int PagesY { get => _pagesY; set => _pagesY = value; }
     public int RowOffset { get => _rowOffset; set => _rowOffset = value; }
+
+    public int PageIndex { get => _pageIndex; set => _pageIndex = value; }
 
     /// <summary>
     /// Default constructor for PagenationInfo.
@@ -39,7 +55,9 @@ public class PagenationInfo
     /// <param name="round">The round number.</param>
     /// <param name="rectangle">The rectangle representing the layout area.</param>
     /// <param name="rowOffset">The row offset for the layout.</param>
-    public PagenationInfo(int pageXIndex, int pageYIndex, int round, RectangleF rectangle, int rowOffset)
+    /// <param name="pageIndex"> The index of the page.</param>
+    public PagenationInfo(int pageXIndex, int pageYIndex, int round, RectangleF rectangle, int rowOffset,
+    int pageIndex = 1)
         : this()
     {
         _pageXIndex = pageXIndex;
@@ -47,5 +65,31 @@ public class PagenationInfo
         _round = round;
         _rectangle = rectangle;
         _rowOffset = rowOffset;
+        _pageIndex = pageIndex;
+        _elementType = PageElementType.Match;
+    }
+
+    /// <summary>
+    /// Constructor for header elements.
+    /// </summary>
+    /// <param name="pageXIndex">The X index of the page.</param>
+    /// <param name="pageYIndex">The Y index of the page.</param>
+    /// <param name="round">The round number.</param>
+    /// <param name="rectangle">The rectangle representing the layout area.</param>
+    /// <param name="text">The text to display in the header.</param>
+    /// <param name="pageIndex">The index of the page.</param>
+    /// <param name="elementType">The type of element this represents.</param>
+    public PagenationInfo(int pageXIndex, int pageYIndex, int round, RectangleF rectangle, string text,
+    int pageIndex = 1, PageElementType elementType = PageElementType.RoundHeader)
+        : this()
+    {
+        _pageXIndex = pageXIndex;
+        _pageYIndex = pageYIndex;
+        _round = round;
+        _rectangle = rectangle;
+        _text = text;
+        _pageIndex = pageIndex;
+        _elementType = elementType;
+        _rowOffset = 0; // Not relevant for headers
     }
 }
