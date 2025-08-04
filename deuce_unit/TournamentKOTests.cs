@@ -22,11 +22,22 @@ public class TournamentKOTests
 
     public void print_ko_tournament(int noPlayers)
     {
-        // Create 8 random players
+        // Create unique random players by shuffling indices
         var players = new List<Player>();
+        var availableIndices = Enumerable.Range(0, RandomUtil.GetNameCount()).ToList();
+        
+        // Shuffle the indices to ensure random selection without duplicates
+        Random random = new Random();
+        for (int i = availableIndices.Count - 1; i > 0; i--)
+        {
+            int j = random.Next(i + 1);
+            (availableIndices[i], availableIndices[j]) = (availableIndices[j], availableIndices[i]);
+        }
+        
+        // Take the first noPlayers indices and create players
         for (int i = 0; i < noPlayers; i++)
         {
-            var nameParts = RandomUtil.GetPlayer().Split(' ');
+            var nameParts = RandomUtil.GetNameAtIndex(availableIndices[i]).Split(' ');
             players.Add(new Player
             {
                 Id = i + 1,
@@ -122,11 +133,22 @@ public class TournamentKOTests
     [DataRow(128)]
     public void print_ko_tournament_with_advancement(int noPlayers)
     {
-        // Create 8 random players
+        // Create unique random players by shuffling indices
         var players = new List<Player>();
+        var availableIndices = Enumerable.Range(0, RandomUtil.GetNameCount()).ToList();
+        
+        // Shuffle the indices to ensure random selection without duplicates
+        Random random = new Random();
+        for (int i = availableIndices.Count - 1; i > 0; i--)
+        {
+            int j = random.Next(i + 1);
+            (availableIndices[i], availableIndices[j]) = (availableIndices[j], availableIndices[i]);
+        }
+        
+        // Take the first noPlayers indices and create players
         for (int i = 0; i < noPlayers; i++)
         {
-            var nameParts = RandomUtil.GetPlayer().Split(' ');
+            var nameParts = RandomUtil.GetNameAtIndex(availableIndices[i]).Split(' ');
             players.Add(new Player
             {
                 Id = i + 1,
@@ -231,11 +253,22 @@ public class TournamentKOTests
     [TestMethod]
     public void TestTemplate()
     {
-        // Create 8 random players
+        // Create unique random players by shuffling indices
         var players = new List<Player>();
+        var availableIndices = Enumerable.Range(0, RandomUtil.GetNameCount()).ToList();
+        
+        // Shuffle the indices to ensure random selection without duplicates
+        Random random = new Random();
+        for (int i = availableIndices.Count - 1; i > 0; i--)
+        {
+            int j = random.Next(i + 1);
+            (availableIndices[i], availableIndices[j]) = (availableIndices[j], availableIndices[i]);
+        }
+        
+        // Take the first 8 indices and create players
         for (int i = 0; i < 8; i++)
         {
-            var nameParts = RandomUtil.GetPlayer().Split(' ');
+            var nameParts = RandomUtil.GetNameAtIndex(availableIndices[i]).Split(' ');
             players.Add(new Player
             {
                 Id = i,
