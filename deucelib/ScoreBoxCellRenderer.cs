@@ -46,5 +46,53 @@ public class FixedSizeCellRenderer : CellRenderer
         base.DrawBorder(drawContext);
     }
 
+    public override void Draw(DrawContext drawContext)
+    {
+        base.Draw(drawContext);
+        
+        if (!string.IsNullOrEmpty(_text))
+        {
+            Rectangle rectangle = this.GetOccupiedAreaBBox();
+            PdfCanvas canvas = drawContext.GetCanvas();
+            
+            // Calculate the center of the drawn box
+            float boxX = (rectangle.GetX() + (rectangle.GetWidth() - _boxWidth) / 2f);
+            float boxY = (rectangle.GetY() + (rectangle.GetHeight() - _boxHeight) / 2f);
+            float centerX = boxX + _boxWidth / 2f;
+            float centerY = boxY + _boxHeight / 2f;
+            
+            // Create font and calculate appropriate font size based on box dimensions
+            PdfFont font = PdfFontFactory.CreateFont(StandardFonts.HELVETICA);
+            
+            // Calculate font size based on box height (with some padding)
+            float maxFontSize = _boxHeight * 0.6f; // Use 60% of box height
+            float fontSize = Math.Min(maxFontSize, 12f); // Cap at 12pt
+            
+            // Adjust font size to fit text width if necessary
+            float textWidth = font.GetWidth(_text, fontSize);
+            float maxTextWidth = _boxWidth * 0.8f; // Use 80% of box width
+            
+            if (textWidth > maxTextWidth)
+            {
+                fontSize = fontSize * (maxTextWidth / textWidth);
+            }
+            
+            // Ensure minimum readable font size
+            fontSize = Math.Max(fontSize, 4f);
+            
+            // Recalculate text dimensions with final font size
+            textWidth = font.GetWidth(_text, fontSize);
+            
+            // Position text in center of the box
+            float textX = centerX - textWidth / 2f;
+            float textY = centerY - fontSize / 4f; // Adjust for baseline
+            
+            canvas.BeginText()
+                  .SetFontAndSize(font, fontSize)
+                  .SetTextMatrix(textX, textY)
+                  .ShowText(_text)
+                  .EndText();
+        }
+    }
 
 }

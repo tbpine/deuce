@@ -137,8 +137,8 @@ public class PDFTemplateTennisKO : IPDFTemplate
 
                     
                     Match? match = s.Rounds.FirstOrDefault(e => e.Index == pi.Round)?.GetAtIndex(pi.RowOffset)?.Matches.FirstOrDefault();
-
-                    var matchScores = scores?.Where(x => x.Id == match?.Id).ToList() ?? new List<Score>();
+                    //Find a list of scores because of multiple sets.
+                    //Match is unique accross the tournament.
 
                     Table matchTable = new Table(widths.ToArray());
                     matchTable.SetFixedLayout();
@@ -156,8 +156,7 @@ public class PDFTemplateTennisKO : IPDFTemplate
                     matchTable.AddCell(homeTeamCell);
                     for (int j = 0; j < tournament.Details.Sets; j++)
                     {
-                        string scoreText = matchScores.Count > j ? matchScores[j].Home.ToString() : "";
-                        //Cell scoreCell = new Cell().Add(new Paragraph(scoreText).SetFontSize(fontSizePt));
+                        string scoreText = scores?.FirstOrDefault(x => x.Match == match?.Id && x.Set == j + 1)?.Home.ToString() ?? "";
                         Cell scoreCell = MakeScoreCell(2f, scoreText, fontSizePt);
                         matchTable.AddCell(scoreCell);
                     }
@@ -168,8 +167,7 @@ public class PDFTemplateTennisKO : IPDFTemplate
                     matchTable.AddCell(awayTeamCell);
                     for (int j = 0; j < tournament.Details.Sets; j++)
                     {
-                        string scoreText = matchScores.Count > j ? matchScores[j].Away.ToString() : "";
-                        //Cell scoreCell = new Cell().Add(new Paragraph(scoreText).SetFontSize(fontSizePt));
+                        string scoreText = scores?.FirstOrDefault(x => x.Match == match?.Id && x.Set == j + 1)?.Away.ToString() ?? "";
                         Cell scoreCell = MakeScoreCell(2f, scoreText, fontSizePt);
                         matchTable.AddCell(scoreCell);
                     }

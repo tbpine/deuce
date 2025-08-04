@@ -83,4 +83,29 @@ public class Match
         if (!_away.Contains(player)) _away.Add(player);
     }
 
+    /// <summary>
+    /// Clear all players from both home and away teams
+    /// </summary>
+    public void ClearPlayers()
+    {
+        _home.Clear();
+        _away.Clear();
+    }
+
+    /// <summary>
+    /// Clear only home team players
+    /// </summary>
+    public void ClearHomePlayers()
+    {
+        _home.Clear();
+    }
+
+    /// <summary>
+    /// Clear only away team players
+    /// </summary>
+    public void ClearAwayPlayers()
+    {
+        _away.Clear();
+    }
+
 }

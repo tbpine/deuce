@@ -140,8 +140,8 @@ public class LayoutManagerTennisKO : LayoutManagerDefault
         // Add round headers at the top of the page
         for (int r = 0; r <= (endRound - startRound); r++)
         {
-            int currentRound = startRound + r + 1; // Convert to 1-indexed round
-            int matchesInRound = totalMatches / (int)Math.Pow(2, r);
+            int currentRound = startRound + r ; // Convert to 1-indexed round
+            int matchesInRound = totalMatches / (int)Math.Pow(2, currentRound);
             //Calculate number of players
             int noPlayers = matchesInRound * 2; // Each match has two players
             string headerText = $"Round of {noPlayers}"; // Number of matches times 2
@@ -206,7 +206,10 @@ public class LayoutManagerTennisKO : LayoutManagerDefault
                         center - recHeight / 2f,
                         recWidth,
                         recHeight);
-                    int rowOffset = pageInRound * _maxRows + j;
+                    //For the round , work out the number of matches per page
+                    int matchesPerPage = (int)Math.Ceiling((float)rowsInFirstColumn / (float)Math.Pow(2, r));
+                    matchesPerPage = Math.Min(matchesPerPage, _maxRows);
+                    int rowOffset = pageInRound * matchesPerPage + j;
                     layout.Add(new PagenationInfo(0, 0, startRound + r + 1, rect, rowOffset,
                         pageIndex));
                 }

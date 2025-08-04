@@ -15,6 +15,7 @@ public class Permutation
     // public int RoundIndex { get => _index; }
     public int NoMatches { get => _matches.Count; }
     public int NoTeams { get => _teams.Count; }
+
     public Round? Round { get => _round; set => _round = value; }
 
     public IEnumerable<Team> Teams { get => _teams; }
@@ -52,6 +53,19 @@ public class Permutation
     public void AddTeam(Team team)
     {
         if (!_teams.Contains(team)) _teams.Add(team);
+    }
+
+    /// <summary>
+    /// Replace the team at the specified index
+    /// </summary>
+    /// <param name="index">Index of the team to replace</param>
+    /// <param name="team">New team</param>
+    public void ReplaceTeamAtIndex(int index, Team team)
+    {
+        if (index >= 0 && index < _teams.Count)
+        {
+            _teams[index] = team;
+        }
     }
 
 }
