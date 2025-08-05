@@ -958,6 +958,29 @@ select 1 "IsValid";
 
 END//
 
+DROP PROCEDURE IF EXISTS `sp_set_bracket`//
+
+-- Set or update a bracket for a tournament.
+-- A bracket is a tournament embedded in a tournament.
+-- The upper tournament is the parent tournament.
+
+CREATE PROCEDURE `sp_set_bracket`(
+	IN p_id INT,
+	IN p_upper INT,
+	IN p_tournament INT
+)
+BEGIN
+	INSERT INTO `bracket`(`id`,`upper`,`tournament`,`updated_datetime`,`created_datetime`)
+	VALUES (p_id, p_upper, p_tournament, NOW(), NOW())
+	ON DUPLICATE KEY UPDATE `upper` = p_upper, `tournament` = p_tournament, `updated_datetime` = NOW();
+
+	IF ISNULL(p_id) THEN
+		SELECT LAST_INSERT_ID() 'id';
+	ELSE
+		SELECT p_id 'id';
+	END IF;
+END//
+
 
 DELIMITER ;
 

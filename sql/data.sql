@@ -9,9 +9,10 @@ DELETE FROM `settings` WHERE `id` in (1);
 insert into `settings` values (1, "fee", "10.00");
 
 TRUNCATE `tournament_type`;
-INSERT INTO `tournament_type` VALUES (0, "Unknown", "category","unknown","");
-INSERT INTO `tournament_type` VALUES (1, "Round Robin", "category","rr","");
-INSERT INTO `tournament_type` VALUES (2, "KnockOut", "category","ko","");
+INSERT INTO `tournament_type` VALUES (0, "Unknown", "Unknown","unknown","");
+INSERT INTO `tournament_type` VALUES (1, "Round Robin", "Round Robin","rr","");
+INSERT INTO `tournament_type` VALUES (2, "KnockOut", "KnockOut","ko","");
+INSERT INTO `tournament_type` VALUES (3 , "Brackets", "Brackets","brackets","");
 
 TRUNCATE `interval`;
 INSERT INTO `interval` VALUES (0, "Unknown");

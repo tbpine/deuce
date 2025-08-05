@@ -1,6 +1,8 @@
+using System.Xml.Serialization;
+
 namespace deuce;
 
-public class Tournament
+public class Tournament : ICloneable
 {
     private int _id;
     private string _label = "";
@@ -21,6 +23,11 @@ public class Tournament
 
     private List<Team> _teams = new();
 
+    /// <summary>
+    /// A list of brackets for the tournament.
+    /// </summary>
+    private List<Bracket> _brackets = new();
+
     private Schedule? _schedule;
 
     private int _interval;
@@ -32,11 +39,11 @@ public class Tournament
 
     [Display("Start Date", "dd/MM/yyyy")]
     public DateTime Start { get { return _start; } set { _start = value; } }
-    
+
     [Display("Finish Date", "dd/MM/yyyy")]
     public DateTime End { get { return _end; } set { _end = value; } }
 
-    [Display("Repeats every", null, typeof(Interval) )]
+    [Display("Repeats every", null, typeof(Interval))]
     public int Interval { get { return _interval; } set { _interval = value; } }
     // public int TeamSize { get { return _TeamSize; } set { _TeamSize = value; } }
     public int Steps { get { return _steps; } set { _steps = value; } }
@@ -58,8 +65,46 @@ public class Tournament
     public List<Team> Teams { get => _teams; set => _teams = value; }
     public Organization Organization { get => _organization; set => _organization = value; }
 
+    public IEnumerable<Bracket> Brackets { get => _brackets; }
+
     /// <summary>
     /// A flag indicating the state of the tournament
     /// </summary>
-    public TournamentStatus Status { get=>_status ; set=>_status = value; }
+    public TournamentStatus Status { get => _status; set => _status = value; }
+
+    /// <summary>
+    /// Add a bracket to the tournament.
+    /// This is used to link the bracket to the tournament.
+    /// </summary>
+    /// <param name="bracket"> The bracket to add to the tournament.</param>
+    public void AddBracket(Bracket bracket)
+    {
+        if (bracket != null)
+        {
+            _brackets.Add(bracket);
+        }
+    }
+
+    /// <summary>
+    /// Clear all brackets from the tournament.
+    /// This is used to reset the tournament and remove all brackets.
+    /// </summary>
+    public void ClearBrackets()
+    {
+        _brackets.Clear();
+    }
+
+    /// <summary>
+    /// Creates a shallow copy of the tournament.
+    /// This is used to create a new instance of the tournament with the same properties.
+    /// </summary>
+    /// <returns> A new instance of the tournament with the same properties.</returns>
+    public object Clone()
+    {
+        //Shallow copy of the tournament
+        Tournament clone = (Tournament)this.MemberwiseClone();
+        //Clone the details
+        clone._detail = (TournamentDetail)this.Details.Clone();
+        return clone;
+    }
 }

@@ -1,6 +1,6 @@
 namespace deuce;
 
-public class TournamentDetail
+public class TournamentDetail : ICloneable
 {
     private int _tournamentId;
     private int _noEntries;
@@ -41,4 +41,7 @@ public class TournamentDetail
         _noDoubles = 2;
         _sets = noSets;
     }
+
+    public object Clone() =>MemberwiseClone();
+
 }

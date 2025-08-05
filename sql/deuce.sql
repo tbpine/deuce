@@ -251,5 +251,14 @@ CREATE TABLE IF NOT EXISTS `match_player` (
     `created_datetime` 	TIMESTAMP
 );
 
+-- bracket is a tournament embedded in a tournament.
+-- upper is the top tournament (parent tournament)
+CREATE TABLE IF NOT EXISTS `bracket` (
+    `id` 				INT PRIMARY KEY AUTO_INCREMENT,
+    `upper` 			INT,
+    `tournament` 		INT,
+    `updated_datetime` 	TIMESTAMP,
+    `created_datetime` 	TIMESTAMP
+);
 
 

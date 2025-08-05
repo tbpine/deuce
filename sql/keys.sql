@@ -175,6 +175,22 @@ PREPARE stmt FROM @stat;
 EXECUTE stmt;
 DEALLOCATE PREPARE stmt;
 
+-- add a foreign key constraint for the table bracket and the column upper references table tournament
+SET @n = "fk_bracket_upper";
+SELECT COUNT(constraint_name) INTO @b FROM information_schema.key_column_usage WHERE table_schema = DATABASE() AND constraint_name = @n;
+SET @stat = IF(@b = 0, "ALTER TABLE `bracket` ADD CONSTRAINT `fk_bracket_upper` FOREIGN KEY (`upper`) REFERENCES `tournament` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;", "SELECT 1 WHERE 1 = 0;");
+PREPARE stmt FROM @stat;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+-- add a foreign key constraint for the table bracket and the column tournament references table tournament
+SET @n = "fk_bracket_tournament";
+SELECT COUNT(constraint_name) INTO @b FROM information_schema.key_column_usage WHERE table_schema = DATABASE() AND constraint_name = @n;
+SET @stat = IF(@b = 0, "ALTER TABLE `bracket` ADD   CONSTRAINT `fk_bracket_tournament` FOREIGN KEY (`tournament`) REFERENCES `tournament` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;", "SELECT 1 WHERE 1 = 0;");
+PREPARE stmt FROM @stat;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
 -- turn on foreign key checks again
 SET FOREIGN_KEY_CHECKS=1;
 

@@ -1,4 +1,5 @@
 using System.Diagnostics;
+using deuce.ext;
 
 namespace deuce;
 
@@ -18,6 +19,14 @@ class SchedulerKnockOut : SchedulerBase, IScheduler
     /// The game maker instance used to create matches and permutations for the tournament.
     /// </summary>
     private readonly IGameMaker _gameMaker;
+
+    //Keep a record of the last round winners and losers
+    private List<Team> _winners = new();
+    private List<Team> _losers = new();
+
+    //Accessors for winners and losers
+    public List<Team> Winners => _winners;
+    public List<Team> Losers => _losers;
 
     /// <summary>
     /// Initializes a new instance of the SchedulerKnockOut class.
@@ -213,6 +222,10 @@ class SchedulerKnockOut : SchedulerBase, IScheduler
     /// </remarks>
     public void NextRound(Schedule schedule, int round, int previousRound, List<Score> scores)
     {
+        //Clear previous winners and losers
+        _winners.Clear();
+        _losers.Clear();
+
         // Get the previous round
         Round? prevRound = schedule.Rounds.FirstOrDefault(r => r.Index == previousRound);
         if (prevRound == null) return;
@@ -245,9 +258,14 @@ class SchedulerKnockOut : SchedulerBase, IScheduler
                     
                     if (winner != null)
                     {
+                        //Store winner and loser
+                        _winners.Add(winner);
+                        var losingTeam = match.GetLosingSide(winner);
+                        if (losingTeam != null) _losers.Add(losingTeam);
+
                         // Calculate which permutation in the current round this winner should go to
                         // Adjacent matches in previous round feed into the same match in current round
-                        
+
                         int currentRoundPermIndex = i % 2 > 0 ? (i - 1) / 2 : i / 2;
 
                         // Find the permutation in the current round

@@ -93,4 +93,25 @@ public static class MatchExt
         return (match.Home.FirstOrDefault()?.Bye ?? false) || (match.Away.FirstOrDefault()?.Bye ?? false);
 
     }
+
+    /// <summary>
+    /// Returns the losing side of a match given the winning team.
+    /// If the winning team is not found in the match, returns null.    
+    /// </summary>
+    /// <param name="match">Match object containing the teams</param>
+    /// <param name="winner">The winning team</param>
+    /// <returns>The losing team, or null if not found</returns>
+    public static Team? GetLosingSide(this Match match, Team? winner)
+    {
+        if (match.Home.FirstOrDefault()?.Team == winner)
+        {
+            return match.Away.FirstOrDefault()?.Team;
+        }
+        else if (match.Away.FirstOrDefault()?.Team == winner)
+        {
+            return match.Home.FirstOrDefault()?.Team;
+        }
+
+        return null;
+    }
 }
