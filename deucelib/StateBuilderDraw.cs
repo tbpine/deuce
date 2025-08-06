@@ -3,7 +3,7 @@ namespace deuce;
 /// <summary>
 /// Used when constructing the schedule of a tournament.
 /// </summary>
-class StateBuilderSchedule
+class StateBuilderDraw
 {
 
     //Ensure to set initial value to negatives
@@ -18,7 +18,7 @@ class StateBuilderSchedule
     /// <summary>
     /// Empry constructor
     /// </summary>
-    public StateBuilderSchedule()
+    public StateBuilderDraw()
     {
         
     }

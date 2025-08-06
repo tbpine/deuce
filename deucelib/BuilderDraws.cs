@@ -7,7 +7,7 @@ namespace deuce;
 /// <summary>
 /// Build a schedule
 /// </summary>
-public class BuilderSchedule
+public class BuilderDraws
 {
     private readonly List<RecordSchedule>? _records;
     private readonly List<Player>? _players;
@@ -21,7 +21,7 @@ public class BuilderSchedule
     /// <param name="records">List of RecordSchedule objects</param>
     /// <param name="players">List of players</param>
     /// <param name="teams">List of teams</param>
-    public BuilderSchedule(List<RecordSchedule> records, List<Player> players, List<Team> teams,
+    public BuilderDraws(List<RecordSchedule> records, List<Player> players, List<Team> teams,
     Tournament tournament, DbConnection dbconn)
     {
         _records = records;
@@ -35,7 +35,7 @@ public class BuilderSchedule
     /// Re-create a persisted tourament schedule
     /// </summary>
     /// <returns>Schedule object</returns>
-    public Schedule Create()
+    public Draw Create()
     {
         Debug.Assert(_players?.Count > 0);
         Debug.Assert(_teams?.Count > 0);
@@ -43,8 +43,8 @@ public class BuilderSchedule
         Debug.Assert(_dbconn is not null);
 
         //Keep state and iterate through each match
-        StateBuilderSchedule state = new();
-        Schedule schedule = new(_tournament!);
+        StateBuilderDraw state = new();
+        Draw schedule = new(_tournament!);
 
         for (int i = 0; i < _records?.Count; i++)
         {

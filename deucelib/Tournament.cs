@@ -28,7 +28,7 @@ public class Tournament : ICloneable
     /// </summary>
     private List<Bracket> _brackets = new();
 
-    private Schedule? _schedule;
+    private Draw? _draw;
 
     private int _interval;
     private Organization _organization = new();
@@ -60,7 +60,7 @@ public class Tournament : ICloneable
     public double Prize { get { return _prize; } set { _prize = value; } }
     public bool UseRanking { get { return _useRankings; } set { _useRankings = value; } }
 
-    public Schedule? Schedule { get => _schedule; set => _schedule = value; }
+    public Draw? Draw { get => _draw; set => _draw = value; }
 
     public List<Team> Teams { get => _teams; set => _teams = value; }
     public Organization Organization { get => _organization; set => _organization = value; }

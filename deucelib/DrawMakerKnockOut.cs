@@ -13,7 +13,7 @@ namespace deuce;
 /// is not a power of 2, ensuring proper bracket structure. Teams are ranked and
 /// paired such that the highest-ranked team plays the lowest-ranked team in the first round.
 /// </remarks>
-class SchedulerKnockOut : SchedulerBase, IScheduler
+class DrawMakerKnockOut : DrawMakerBase, IDrawMaker
 {
     /// <summary>
     /// The game maker instance used to create matches and permutations for the tournament.
@@ -33,7 +33,7 @@ class SchedulerKnockOut : SchedulerBase, IScheduler
     /// </summary>
     /// <param name="t">The tournament for which to create the knockout schedule.</param>
     /// <param name="gameMaker">The game maker instance used to create matches.</param>
-    public SchedulerKnockOut(Tournament t, IGameMaker gameMaker) : base(t)
+    public DrawMakerKnockOut(Tournament t, IGameMaker gameMaker) : base(t)
     {
         _gameMaker = gameMaker;
     }
@@ -51,10 +51,10 @@ class SchedulerKnockOut : SchedulerBase, IScheduler
     /// 4. Creates subsequent rounds with placeholder teams that will be filled as winners advance
     /// 5. Calculates appropriate round labels (Final, Semi Final, Quarter Final)
     /// </remarks>
-    public Schedule Run(List<Team> teams)
+    public Draw Run(List<Team> teams)
     {
         //The result
-        Schedule schedule = new Schedule(_tournament);
+        Draw draw = new Draw(_tournament);
 
         //Assigns
         _teams = teams;
@@ -66,7 +66,12 @@ class SchedulerKnockOut : SchedulerBase, IScheduler
         int noByes = (int)Math.Pow(2, exponent) - teams.Count;
 
         // Add noByes to the teams list
-        for (int i = 0; i < noByes; i++) _teams.Add(new Team(0, "BYE", _tournament.Details.TeamSize));
+        for (int i = 0; i < noByes; i++)
+        {
+            Team emptyTeam = new Team();
+            emptyTeam.CreateBye(_tournament.Details.TeamSize, _tournament.Organization, _teams.Count + i);
+            _teams.Add(emptyTeam);
+        }
 
         //Sort teams by ranking decending
         _teams.Sort((x, y) => (int)(y.Ranking - x.Ranking));
@@ -96,7 +101,7 @@ class SchedulerKnockOut : SchedulerBase, IScheduler
             {
                 var permutation = _gameMaker.Create(_tournament, home, away, 1);
                 permutation.Id = i;
-                schedule.AddPermutation(permutation, 1);
+                draw.AddPermutation(permutation, 1);
             }
         }
 
@@ -140,7 +145,7 @@ class SchedulerKnockOut : SchedulerBase, IScheduler
                     var permutation = _gameMaker.Create(_tournament, home, away, r);
                     permutation.Id = p;
                     // Add round labels for finals, semi-finals, etc.
-                    schedule.AddPermutation(permutation, r, GetRoundLabel(noRounds, r));
+                    draw.AddPermutation(permutation, r, GetRoundLabel(noRounds, r));
                 }
             }
 
@@ -150,7 +155,7 @@ class SchedulerKnockOut : SchedulerBase, IScheduler
 
 
 
-        return schedule;
+        return draw;
     }
 
     /// <summary>
@@ -197,7 +202,7 @@ class SchedulerKnockOut : SchedulerBase, IScheduler
     /// This method is part of the IScheduler interface but knockout tournaments
     /// don't require any special processing before a round ends.
     /// </remarks>
-    public void BeforeEndRound(Schedule schedule, int round, List<Score> scores)
+    public void BeforeEndRound(Draw schedule, int round, List<Score> scores)
     {
         //Nothing to do here
     }
@@ -220,7 +225,7 @@ class SchedulerKnockOut : SchedulerBase, IScheduler
     /// The positioning logic ensures that winners from adjacent matches in the previous round
     /// are placed to face each other in the current round.
     /// </remarks>
-    public void NextRound(Schedule schedule, int round, int previousRound, List<Score> scores)
+    public void NextRound(Draw schedule, int round, int previousRound, List<Score> scores)
     {
         //Clear previous winners and losers
         _winners.Clear();

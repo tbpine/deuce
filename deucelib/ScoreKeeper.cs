@@ -62,7 +62,7 @@ public class ScoreKeeper : IScoreKeeper
     /// <param name="schedule">The schedule containing rounds and matches.</param>
     /// <param name="scores"> A list of scores for the matches in the schedule.</param>
     /// <returns></returns>
-    public Dictionary<Team, ScoringStats> GetRanking(Schedule schedule, List<Score> scores)
+    public Dictionary<Team, ScoringStats> GetRanking(Draw schedule, List<Score> scores)
     {
         //Create a dictionary to hold the team stats
         Dictionary<Team, ScoringStats> teamStats = new();

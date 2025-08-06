@@ -3,7 +3,7 @@ namespace deuce;
 /// <summary>
 /// Defines when, where and who should play matches.
 /// </summary>
-public class Schedule
+public class Draw
 {
     //------------------------------------
     //| Internals                        |
@@ -28,7 +28,7 @@ public class Schedule
     /// Construct with dependencies
     /// </summary>
     /// <param name="t">Tournament reference</param>
-    public Schedule(Tournament t)
+    public Draw(Tournament t)
     {
         Tournament = t;
     }

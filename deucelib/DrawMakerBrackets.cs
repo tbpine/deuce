@@ -4,21 +4,21 @@ using Newtonsoft.Json.Serialization;
 
 namespace deuce;
 
-class SchedulerBrackets : SchedulerBase, IScheduler
+class DrawMakerBrackets : DrawMakerBase, IDrawMaker
 {
     private readonly IGameMaker _gameMaker;
 
-    public SchedulerBrackets(Tournament t, IGameMaker gameMaker) : base(t)
+    public DrawMakerBrackets(Tournament t, IGameMaker gameMaker) : base(t)
     {
         _gameMaker = gameMaker;
 
     }
 
-    public Schedule Run(List<Team> teams)
+    public Draw Run(List<Team> teams)
     {
         //Losers fall to a second bracket which
         //The result
-        Schedule schedule = new Schedule(_tournament);
+        Draw schedule = new Draw(_tournament);
 
         //Assigns
         _teams = teams;
@@ -36,7 +36,7 @@ class SchedulerBrackets : SchedulerBase, IScheduler
             _teams.Add(byeTeam);
         }
 
-        var upperfactoryScheduler = new FactorySchedulers();
+        var upperfactoryScheduler = new FactoryDrawMaker();
         var upperScheduler = upperfactoryScheduler.Create(_tournament, _gameMaker);
         upperScheduler.Run(_teams);
 
@@ -56,7 +56,7 @@ class SchedulerBrackets : SchedulerBase, IScheduler
             losersBracket.Teams.Add(byeTeam);
         }
 
-        var factoryScheduler = new FactorySchedulers();
+        var factoryScheduler = new FactoryDrawMaker();
         var loserBracketScheduler = factoryScheduler.Create(losersBracket, _gameMaker);
         loserBracketScheduler.Run(losersBracket.Teams);
 
@@ -72,95 +72,56 @@ class SchedulerBrackets : SchedulerBase, IScheduler
 
 
 
-    public void BeforeEndRound(Schedule schedule, int round, List<Score> scores)
+    public void BeforeEndRound(Draw schedule, int round, List<Score> scores)
     {
 
     }
 
 
-    public void NextRound(Schedule schedule, int round, int previousRound, List<Score> scores)
+    public void NextRound(Draw schedule, int round, int previousRound, List<Score> scores)
     {
-        //IN the schedule , get the previous round permutations
-        var previousPermutations = schedule.Rounds.FirstOrDefault(r => r.Index == previousRound)?.Permutations;
-        if (previousPermutations == null)
+        //Use the ko scheduler to find winners and losers in the main tournament
+        var facKOScheduler = new FactoryDrawMaker();
+        var mainKOScheduler = facKOScheduler.Create(new TournamentType(2, "ko", "ko", "", ""), _tournament, _gameMaker);
+
+        //Advance the main tournament using the main KO scheduler
+        mainKOScheduler.NextRound(schedule, round, previousRound, scores);
+
+        //Get the losers's tournament
+        var losertournament = _tournament.Brackets.First().Tournament;
+
+        //check if there's a round for the previous round
+        var loserPreviousRound = losertournament?.Draw?.Rounds.FirstOrDefault(r => r.Index == previousRound);
+        var loserCurrentRound = losertournament?.Draw?.Rounds.FirstOrDefault(r => r.Index == round);
+        if (loserPreviousRound is not null)
         {
-            Debug.WriteLine($"No previous permutations found for round {previousRound}");
-            return;
-        }
-        //Store list of winners and losers
-        List<Team> _winners = new();
-        List<Team> _losers = new();
-
-        //Each permutation has exactly one match for knockout tournaments.
-        foreach (var permutation in previousPermutations)
-        {
-            var match = permutation.Matches.FirstOrDefault();
-            if (match == null)
+            //Find the winners in the losers previous round, one match per permutation
+            loserPreviousRound.Permutations.All(p =>
             {
-                Debug.WriteLine($"No match found for permutation {permutation.Id} in round {previousRound}");
-                continue;
-            }
-
-            //Determine the winner of the match
-            var winner = DetermineMatchWinner(scores, match);
-            if (winner is not null)
-            {
-                //Store the winner and loser
-
-                _winners.Add(winner);
-                var losingTeam = match.GetLosingSide(winner);
-                if (losingTeam != null) _losers.Add(losingTeam);
-                //0,2,4,6 , even permutations goto the home side of the next round match
-                //1,3,5,7 , odd permutations goto the away side of the next round match
-                int nextPermIndex = permutation.Id % 2 == 0 ? permutation.Id / 2 : (permutation.Id - 1) / 2;
-                var nextRoundMatch = schedule.Rounds.FirstOrDefault(r => r.Index == round)?.Permutations[nextPermIndex].Matches.FirstOrDefault();
-                if (nextRoundMatch != null)
+                //Get the match for the permutation
+                Match match = p.Matches.First();
+                //Get scors if they exist
+                var matchScores = scores.Where(s => s.Match == match.Id).ToList();
+                //Find the winner of the match
+                var winner = DetermineMatchWinner(matchScores, match);
+                if (winner is not null)
                 {
-                    nextRoundMatch.ClearHomePlayers();
-                    permutation.AddTeam(winner);
-                    foreach (Player winningPlayer in winner.Players) nextRoundMatch.AddHome(winningPlayer);
+                    //Find the match for the winner in the next round of the losers bracket
+                    int currentRoundPermIdx = p.Id % 2 > 0 ? (p.Id - 1) / 2 : p.Id / 2;
+                    var loserCurrentRoundMatch = loserCurrentRound?.Permutations.FirstOrDefault(prp => prp.Id == currentRoundPermIdx)?.Matches.FirstOrDefault();
+                    if (loserCurrentRoundMatch is not null)
+                    {
+                        //Found the match that the winner advances to in the losers bracket
+                    }
                 }
-                else
-                {
-                    //Creat  a match for this permutation
-                    var nextPerm = _gameMaker.Create(_tournament, winner, new Team(), round);
-                    nextPerm.Id = nextPermIndex;
-                    //Add it to the round
-                    schedule.Rounds.FirstOrDefault(r => r.Index == round)?.AddPerm(nextPerm);
-                }
+               
+                return true;
+            });
 
-            }
-
-
-        }
-
-        var losersTournament = _tournament.Brackets.FirstOrDefault()?.Tournament;
-        //Get winners from the previous round
-        if (losersTournament != null)
-        {
-            //Get the previous round
-            var losersPreviousRound = losersTournament.Schedule?.Rounds.FirstOrDefault(r => r.Index == previousRound);
-            //if there's no previous round, then 
-            if (losersPreviousRound != null)
-            {
-                //Get the permutations from the previous round
-                var losersPermutations = losersPreviousRound.Permutations;
-                //For each permutation, add the losing team to the next round
-                foreach (var permutation in losersPermutations)
-                {
-                    var match = permutation.Matches.FirstOrDefault();
-                    if (match == null) continue;
-                    var winner = DetermineMatchWinner(scores, match);
-                    //
-                }
-            }
         }
 
     }
 
-
-    /// <summary>
-    /// Determines the winner of a tennis match based on sets won.
     /// In tennis, the winner is the team that wins the most sets.
     /// If sets are tied, the winner is determined by total games won.
     /// </summary>

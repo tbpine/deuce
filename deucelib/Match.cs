@@ -12,8 +12,6 @@ public class Match
     //------------------------------------
     private List<Player> _home = new();
     private List<Player> _away = new();
-    private string? _score;
-    public string? Score { get=>_score; set=>_score = value; }
     private int _round;
 
     private Permutation? _perm;
@@ -44,9 +42,8 @@ public class Match
     /// <param name="score">Resulting statistics</param>
     /// <param name="round">If in a round robin format, the current iteration.</param>
     /// <param name="players">Who's playing in the match</param>
-    public Match(string score, int round)
+    public Match(int round)
     {
-        _score = score;
         _round = round;
     }
 

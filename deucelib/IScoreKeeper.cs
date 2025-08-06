@@ -18,6 +18,6 @@ public interface IScoreKeeper
   //calling the stored procedure "sp_clear_score" with the tournament id as a parameter
   void ClearScores(int tournamentId, int roundIdx, DbConnection dbconn);
 
-  Dictionary<Team, ScoringStats> GetRanking(Schedule schedule,  List<Score> scores);
+  Dictionary<Team, ScoringStats> GetRanking(Draw schedule,  List<Score> scores);
 
 }

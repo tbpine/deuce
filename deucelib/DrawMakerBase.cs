@@ -3,7 +3,7 @@ namespace deuce;
 /// <summary>
 /// Common attributes amongst classes that produce matches.
 /// </summary>
-public class SchedulerBase
+public class DrawMakerBase
 {
     //------------------------------------
     // Internals
@@ -16,7 +16,7 @@ public class SchedulerBase
     /// Constuct with dependencies.
     /// </summary>
     /// <param name="tournament">Tournament details</param>
-    public SchedulerBase(Tournament tournament)
+    public DrawMakerBase(Tournament tournament)
     {
         _tournament = tournament;
     }

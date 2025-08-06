@@ -45,7 +45,7 @@ public class PDFTemplateTennisRR : IPDFTemplate
     public void Generate(Document doc, PdfDocument pdfdoc, Tournament tournament, int roundNo,
     List<Score>? scores = null)
     {
-        Schedule s = tournament.Schedule??throw new ArgumentNullException(nameof(tournament.Schedule), "Tournament schedule cannot be null");
+        Draw s = tournament.Draw??throw new ArgumentNullException(nameof(tournament.Draw), "Tournament schedule cannot be null");
         // Layout : A grid for each match. Player names in the first column,
         // scores after.
         //Strategy : Use a grid for layout (easier).

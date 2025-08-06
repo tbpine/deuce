@@ -1,0 +1,13 @@
+namespace deuce;
+
+/// <summary>
+/// Defines an entity that can generate matches.
+/// </summary>
+public interface IDrawMaker
+{
+    Draw Run(List<Team> team);
+    //Execute every round of the schedule
+    void BeforeEndRound(Draw schedule,  int round, List<Score> scores);
+    //Progress to the next round of the schedule
+    void NextRound(Draw schedule, int round, int previousRound, List<Score> scores);
+}

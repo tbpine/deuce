@@ -56,7 +56,7 @@ public class LayoutManagerTennisKO : LayoutManagerDefault
         //Assumption: every thing is a multiple of 2.
 
         //Define "totalMatches" as the number of matches in the first round
-        int totalMatches = tournament.Schedule?.Rounds.FirstOrDefault(e => e.Index == 1)?.Permutations.Sum(e => e.Matches.Count) ?? 0;
+        int totalMatches = tournament.Draw?.Rounds.FirstOrDefault(e => e.Index == 1)?.Permutations.Sum(e => e.Matches.Count) ?? 0;
 
         //the ladder algo
         //Work out the number of steps

@@ -12,14 +12,14 @@ public class PdfPrinter
     //| Internals                         |
     //------------------------------------
 
-    private readonly Schedule _schedule;
+    private readonly Draw _schedule;
     private readonly IPDFTemplateFactory _templateFactory;
     /// <summary>
     /// Set schedule to print
     /// </summary>
     /// <param name="s">Schedule to print</param>
     /// <param name="scores">Optionally, a list of scores</param>
-    public PdfPrinter(Schedule s, IPDFTemplateFactory templateFactory)
+    public PdfPrinter(Draw s, IPDFTemplateFactory templateFactory)
     {
         _schedule = s;
         _templateFactory = templateFactory;
@@ -33,7 +33,7 @@ public class PdfPrinter
     /// <param name="s">Schedule</param>
     /// <param name="round">Print only matches for this round</param>
     /// <param name="scores">Optionally, a list of scores to print</param>
-    public async Task Print(Stream output, Tournament tournament, Schedule s, int round, List<Score>? scores = null)
+    public async Task Print(Stream output, Tournament tournament, Draw s, int round, List<Score>? scores = null)
     {
 
         //iText set up

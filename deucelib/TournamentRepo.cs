@@ -53,9 +53,9 @@ public class TournamentRepo
         //Save matches
         var dbrepo = new DbRepoMatch(_dbconn);
 
-        for (int i = 0; i < _tournament.Schedule!.NoRounds; i++)
+        for (int i = 0; i < _tournament.Draw!.NoRounds; i++)
         {
-            Round round = _tournament.Schedule.GetRoundAtIndex(i);
+            Round round = _tournament.Draw.GetRoundAtIndex(i);
             foreach (Permutation p in round.Permutations)
             {
                 foreach (Match match in p.Matches)
@@ -79,9 +79,9 @@ public class TournamentRepo
         //Save matches
         var dbrepo = new DbRepoMatch(_dbconn);
 
-        for (int i = 0; i < _tournament.Schedule!.NoRounds; i++)
+        for (int i = 0; i < _tournament.Draw!.NoRounds; i++)
         {
-            Round round = _tournament.Schedule.GetRoundAtIndex(i);
+            Round round = _tournament.Draw.GetRoundAtIndex(i);
             foreach (Permutation p in round.Permutations)
             {
                 foreach (Match match in p.Matches)

@@ -57,7 +57,7 @@ public class PDFTemplateTennisKO : IPDFTemplate
     public void Generate(Document doc, PdfDocument pdfdoc, Tournament tournament, int roundNo,
     List<Score>? scores = null)
     {
-        Schedule s = tournament.Schedule ?? throw new ArgumentException("Schedule cannot be null for PDF generation.");
+        Draw s = tournament.Draw ?? throw new ArgumentException("Schedule cannot be null for PDF generation.");
 
         pdfdoc.SetDefaultPageSize(PageSize.A4.Rotate());
 
@@ -103,7 +103,7 @@ public class PDFTemplateTennisKO : IPDFTemplate
     /// <param name="doc">The document object for layout and styling.</param>
     /// <param name="widths">The column widths for the match tables.</param>
     /// <param name="pageNo"> The page number for the current layout.</param>
-    private void PrintPage(List<PagenationInfo> layout, Schedule s, Tournament tournament, List<Score> scores, PdfDocument pdfdoc, Document doc,
+    private void PrintPage(List<PagenationInfo> layout, Draw s, Tournament tournament, List<Score> scores, PdfDocument pdfdoc, Document doc,
     List<float> widths, int pageNo)
     {
 

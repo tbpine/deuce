@@ -14,7 +14,7 @@ public static class ScheduleExt
     /// <param name="schedule"> The schedule to search within.</param>
     /// <param name="score"> The score containing the round, permutation, and match identifiers.</param>
     /// <returns></returns>
-    public static Match? FindMatch(this Schedule schedule, Score score) =>
+    public static Match? FindMatch(this Draw schedule, Score score) =>
         //Get the score's round, permutation, and match
         schedule.Rounds.FirstOrDefault(r => r.Index == score.Round)?.Permutations.FirstOrDefault(p => p.Id == score.Permutation)?.Matches.FirstOrDefault(m => m.Id == score.Match);
     //If the round is not null, return the match

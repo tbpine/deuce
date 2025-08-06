@@ -58,7 +58,7 @@ public class TournamentOrganizer
         IGameMaker gameMaker = factoryGameMaker.Create(sport);
 
         //Get the scheduler 
-        FactorySchedulers factorySchedulers = new();
+        FactoryDrawMaker factorySchedulers = new();
         var scheduler = factorySchedulers.Create(_tournament, gameMaker);
         scheduler.Run(listOfTeams);
 

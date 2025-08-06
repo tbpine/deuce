@@ -5,18 +5,18 @@ namespace deuce;
 /// <summary>
 /// Round robin format
 /// </summary>
-class SchedulerRR : SchedulerBase, IScheduler
+class DrawMakerRR : DrawMakerBase, IDrawMaker
 {
     private readonly IGameMaker _gameMaker;
-    public SchedulerRR(Tournament t, IGameMaker gameMaker) : base(t)
+    public DrawMakerRR(Tournament t, IGameMaker gameMaker) : base(t)
     {
         _gameMaker = gameMaker;
     }
 
-    public Schedule Run(List<Team> teams)
+    public Draw Run(List<Team> teams)
     {
         //The result
-        Schedule schedule = new Schedule(_tournament);
+        Draw draw = new Draw(_tournament);
 
         //Assigns
         _teams = teams;
@@ -46,7 +46,7 @@ class SchedulerRR : SchedulerBase, IScheduler
                 {
                     var permutation = _gameMaker.Create(_tournament, home, away, r);
                     permutation.Id = p;
-                    schedule.AddPermutation(permutation, r);
+                    draw.AddPermutation(permutation, r);
                 }
 
             }
@@ -59,7 +59,7 @@ class SchedulerRR : SchedulerBase, IScheduler
 
 
 
-        return schedule;
+        return draw;
     }
 
     /// <summary>
@@ -68,7 +68,7 @@ class SchedulerRR : SchedulerBase, IScheduler
     /// </summary>
     /// <param name="schedule"> The current schedule</param>
     /// <param name="round"> The current round number</param>
-    public void BeforeEndRound(Schedule schedule, int round, List<Score> scores)
+    public void BeforeEndRound(Draw schedule, int round, List<Score> scores)
     {
         //Nothing to do here
     }
@@ -78,7 +78,7 @@ class SchedulerRR : SchedulerBase, IScheduler
     /// </summary>
     /// <param name="schedule" > The current schedule</param>
     /// <param name="round"> The current round number</param>
-    public void NextRound(Schedule schedule, int round, int previousRound, List<Score> scores)
+    public void NextRound(Draw schedule, int round, int previousRound, List<Score> scores)
     {
         //Nothing to do here
     }
