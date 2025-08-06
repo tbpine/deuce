@@ -54,21 +54,21 @@ public class UnitTestsBuilderSchedule
             List<Team> teams = teamRepo.ExtractFromRecordTeamPlayer();
             tournament.Teams = teams;
 
-            BuilderSchedule builderSchedule = new BuilderSchedule(recordsSched, players, teams, tournament, conn);
-            Schedule schedule = builderSchedule.Create();
+            BuilderDraws builderDraws = new BuilderDraws(recordsSched, players, teams, tournament, conn);
+            Draw draw = builderDraws.Create();
 
-            Assert.IsNotNull(schedule, "schedule was null");
+            Assert.IsNotNull(draw, "schedule was null");
 
-            for (int i = 0; i < schedule.NoRounds; i++)
+            for (int i = 0; i < draw.NoRounds; i++)
             {
                 string filename = tournament.Label + "_round_" + (i + 1).ToString() + ".pdf";
                 FileStream pdffile = new FileStream(filename, FileMode.Create, FileAccess.ReadWrite);
-                PdfPrinter printer = new PdfPrinter(schedule, new PDFTemplateFactory());
-                await printer.Print(pdffile, tournament, schedule, i);
+                PdfPrinter printer = new PdfPrinter(draw, new PDFTemplateFactory());
+                await printer.Print(pdffile, tournament, draw, i);
                 pdffile.Close();
             }
 
-            Assert.IsTrue(schedule.NoRounds > 0, $"schedule was null");
+            Assert.IsTrue(draw.NoRounds > 0, $"schedule was null");
         }
         catch (Exception ex)
         {
@@ -128,13 +128,13 @@ public class UnitTestsBuilderSchedule
             List<Team> teams = teamRepo.ExtractFromRecordTeamPlayer();
             tournament.Teams = teams;
 
-            BuilderSchedule builderSchedule = new BuilderSchedule(recordsSched, players, teams, tournament, conn);
-            Schedule schedule = builderSchedule.Create();
-            Assert.IsNotNull(schedule, "schedule was null");
+            BuilderDraws builderDraws = new BuilderDraws(recordsSched, players, teams, tournament, conn);
+            Draw draw = builderDraws.Create();
+            Assert.IsNotNull(draw, "draw was null");
 
-            Assert.IsNotNull(schedule, "schedule was null");
-            Assert.IsTrue(schedule.NoRounds > 0, $"schedule was null");
-            
+            Assert.IsNotNull(draw, "draw was null");
+            Assert.IsTrue(draw.NoRounds > 0, $"draw was null");
+
         }
         catch (Exception ex)
         {

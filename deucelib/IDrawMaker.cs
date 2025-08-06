@@ -5,9 +5,9 @@ namespace deuce;
 /// </summary>
 public interface IDrawMaker
 {
-    Draw Run(List<Team> team);
+    Draw Create(List<Team> team);
     //Execute every round of the schedule
-    void BeforeEndRound(Draw schedule,  int round, List<Score> scores);
+    
     //Progress to the next round of the schedule
-    void NextRound(Draw schedule, int round, int previousRound, List<Score> scores);
+    void OnChange(Draw schedule, int round, int previousRound, List<Score> scores);
 }

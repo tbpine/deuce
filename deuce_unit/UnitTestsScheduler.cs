@@ -45,9 +45,9 @@ public class UnitTestsScheduler
 
         //Action
         //Assert
-        FactorySchedulers fac = new();
+        FactoryDrawMaker fac = new();
         var mm = fac.Create(tournament, gm);
-        var results = mm.Run(teams);
+        var results = mm.Create(teams);
 
         Assert.IsNotNull(results, "Null result");
         Assert.AreEqual<int>(results.NoRounds, noPlayers - 1, "Incorrect rounds");
@@ -95,9 +95,9 @@ public class UnitTestsScheduler
 
         //Action
         //Assert
-        FactorySchedulers fac = new();
+        FactoryDrawMaker fac = new();
         var mm = fac.Create(tournament, gm);
-        var results = mm.Run(teams);
+        var results = mm.Create(teams);
 
         Assert.IsNotNull(results, "Null result");
         Assert.AreEqual<int>(results.NoRounds, noTeams - 1, "Incorrect rounds");

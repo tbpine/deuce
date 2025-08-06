@@ -53,9 +53,9 @@ public class UnitsPdfWriter
 
         //Action
         //Assert
-        FactorySchedulers fac = new();
+        FactoryDrawMaker fac = new();
         var mm = fac.Create(tournament, gm);
-        var results = mm.Run(teams);
+        var results = mm.Create(teams);
 
         FileStream fs = new FileStream($"{tournament.Label}.pdf", FileMode.Create, FileAccess.Write);
         PdfPrinter printer = new(results, new PDFTemplateFactory());

@@ -26,7 +26,7 @@ public class UnitTestsTournament
             AssignTournament tourRepo = new();
             Tournament tour =  tourRepo.MakeRandom(1, "test_tournament", 8, 1, 2, 2, 1, 2, entries);
             tour.Id = tournamentId;
-            Schedule? schedule = tour.Schedule;
+            Draw? draw = tour.Draw;
 
             //Action
             //What is needed to save the tournament for recreation ?
@@ -42,9 +42,9 @@ public class UnitTestsTournament
             //Save matches
             var dbrepo = new DbRepoMatch(conn);
 
-            for (int i = 0; i < tour.Schedule!.NoRounds; i++)
+            for (int i = 0; i < tour.Draw!.NoRounds; i++)
             {
-                Round round = tour.Schedule.GetRoundAtIndex(i);
+                Round round = tour.Draw.GetRoundAtIndex(i);
                 foreach (Permutation p in round.Permutations)
                 {
                     foreach (Match match in p.Matches)

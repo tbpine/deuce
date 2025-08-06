@@ -14,7 +14,7 @@ class DrawMakerBrackets : DrawMakerBase, IDrawMaker
 
     }
 
-    public Draw Run(List<Team> teams)
+    public Draw Create(List<Team> teams)
     {
         //Losers fall to a second bracket which
         //The result
@@ -38,7 +38,7 @@ class DrawMakerBrackets : DrawMakerBase, IDrawMaker
 
         var upperfactoryScheduler = new FactoryDrawMaker();
         var upperScheduler = upperfactoryScheduler.Create(_tournament, _gameMaker);
-        upperScheduler.Run(_teams);
+        upperScheduler.Create(_teams);
 
         //is a tournament in itself.
         //Losers bracket is equivalent to the second round of the main tournament.
@@ -58,7 +58,7 @@ class DrawMakerBrackets : DrawMakerBase, IDrawMaker
 
         var factoryScheduler = new FactoryDrawMaker();
         var loserBracketScheduler = factoryScheduler.Create(losersBracket, _gameMaker);
-        loserBracketScheduler.Run(losersBracket.Teams);
+        loserBracketScheduler.Create(losersBracket.Teams);
 
         //link the losers bracket to the main tournament
         _tournament.AddBracket(new Bracket()
@@ -70,22 +70,14 @@ class DrawMakerBrackets : DrawMakerBase, IDrawMaker
         return schedule;
     }
 
-
-
-    public void BeforeEndRound(Draw schedule, int round, List<Score> scores)
-    {
-
-    }
-
-
-    public void NextRound(Draw schedule, int round, int previousRound, List<Score> scores)
+    public void OnChange(Draw schedule, int round, int previousRound, List<Score> scores)
     {
         //Use the ko scheduler to find winners and losers in the main tournament
         var facKOScheduler = new FactoryDrawMaker();
         var mainKOScheduler = facKOScheduler.Create(new TournamentType(2, "ko", "ko", "", ""), _tournament, _gameMaker);
 
         //Advance the main tournament using the main KO scheduler
-        mainKOScheduler.NextRound(schedule, round, previousRound, scores);
+        mainKOScheduler.OnChange(schedule, round, previousRound, scores);
 
         //Get the losers's tournament
         var losertournament = _tournament.Brackets.First().Tournament;

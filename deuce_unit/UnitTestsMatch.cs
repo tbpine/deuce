@@ -25,10 +25,10 @@ public class UnitTestsMatch
             //Create tournament
             AssignTournament tourRepo = new();
             Tournament tour = tourRepo.MakeRandom(1, "UnitTestsMatch test tour", 8, 1, 1, 0,1, 1, entries);
-            Schedule? schedule = tour.Schedule;
+            Draw? draw = tour.Draw;
 
-            Assert.IsNotNull(schedule, "Tournment has no schedule");
-            Debug.WriteLine($"No of rounds = {schedule.NoRounds}");
+            Assert.IsNotNull(draw, "Tournment has no draw");
+            Debug.WriteLine($"No of rounds = {draw.NoRounds}");
             //Save tournament, but not details and teams
             Organization org = new() { Id = 1, Name = "test org"};
             DbRepoTournament dbRepoTournament = new(conn, org);
@@ -37,9 +37,9 @@ public class UnitTestsMatch
             //Data storage
             var dbrepo = new DbRepoMatch(conn);
 
-            for (int i = 0; i < schedule.NoRounds; i++)
+            for (int i = 0; i < draw.NoRounds; i++)
             {
-                Round round =  schedule.GetRoundAtIndex(i);
+                Round round =  draw.GetRoundAtIndex(i);
                 foreach(Permutation p in round.Permutations)
                 {
                     foreach(Match match in p.Matches)
@@ -51,9 +51,9 @@ public class UnitTestsMatch
             }
 
             //Assert
-            for (int i = 0; i < schedule.NoRounds; i++)
+            for (int i = 0; i < draw.NoRounds; i++)
             {
-                Round round =  schedule.GetRoundAtIndex(i);
+                Round round =  draw.GetRoundAtIndex(i);
                 foreach(Permutation p in round.Permutations)
                 {
                     foreach(Match match in p.Matches)

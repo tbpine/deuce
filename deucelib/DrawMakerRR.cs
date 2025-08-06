@@ -13,7 +13,7 @@ class DrawMakerRR : DrawMakerBase, IDrawMaker
         _gameMaker = gameMaker;
     }
 
-    public Draw Run(List<Team> teams)
+    public Draw Create(List<Team> teams)
     {
         //The result
         Draw draw = new Draw(_tournament);
@@ -63,22 +63,11 @@ class DrawMakerRR : DrawMakerBase, IDrawMaker
     }
 
     /// <summary>
-    /// Executed before the end of a round.
-    /// This is where you can do any pre-round end processing, such as updating scores or checking
-    /// </summary>
-    /// <param name="schedule"> The current schedule</param>
-    /// <param name="round"> The current round number</param>
-    public void BeforeEndRound(Draw schedule, int round, List<Score> scores)
-    {
-        //Nothing to do here
-    }
-
-    /// <summary>
     /// Progress to the next round of the schedule.
     /// </summary>
     /// <param name="schedule" > The current schedule</param>
     /// <param name="round"> The current round number</param>
-    public void NextRound(Draw schedule, int round, int previousRound, List<Score> scores)
+    public void OnChange(Draw schedule, int round, int previousRound, List<Score> scores)
     {
         //Nothing to do here
     }

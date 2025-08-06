@@ -78,15 +78,15 @@ public class TournamentKOTests
 
         );
 
-        //Schedule should not be null
-        Assert.IsNotNull(tournament.Schedule, "Schedule should not be null");
+        //Draw should not be null
+        Assert.IsNotNull(tournament.Draw, "Draw should not be null");
 
         //Assig ids to matches, permutations and rounds so scoring can
         //be linked to them
         int matchId = 1, permId = 1;
         //Store a list of scores
         List<Score> scores = new List<Score>();
-        foreach (Round round in tournament.Schedule.Rounds)
+        foreach (Round round in tournament.Draw.Rounds)
         {
             foreach (Permutation permutation in round.Permutations)
             {
@@ -119,8 +119,8 @@ public class TournamentKOTests
 
         string filename = $"{tournament.Label}_Round.pdf";
         using FileStream pdfFile = new FileStream(filename, FileMode.Create, FileAccess.Write);
-        PdfPrinter printer = new PdfPrinter(tournament.Schedule, new PDFTemplateFactory());
-        printer.Print(pdfFile, tournament, tournament.Schedule, 1, scores);
+        PdfPrinter printer = new PdfPrinter(tournament.Draw, new PDFTemplateFactory());
+        printer.Print(pdfFile, tournament, tournament.Draw, 1, scores);
 
 
     }
@@ -189,15 +189,15 @@ public class TournamentKOTests
 
         );
 
-        //Schedule should not be null
-        Assert.IsNotNull(tournament.Schedule, "Schedule should not be null");
+        //Draw should not be null
+        Assert.IsNotNull(tournament.Draw, "Draw should not be null");
 
         //Assig ids to matches, permutations and rounds so scoring can
         //be linked to them
         int matchId = 1, permId = 1;
         //Store a list of scores
         List<Score> scores = new List<Score>();
-        foreach (Round round in tournament.Schedule.Rounds)
+        foreach (Round round in tournament.Draw.Rounds)
         {
             foreach (Permutation permutation in round.Permutations)
             {
@@ -230,21 +230,21 @@ public class TournamentKOTests
             }
         }
 
-        //Schedule advancement for the tournament
-        FactorySchedulers fac = new FactorySchedulers();
+        //Draw advancement for the tournament
+        FactoryDrawMaker fac = new FactoryDrawMaker();
         IGameMaker gm = new GameMakerTennis();
-        IScheduler scheduler = fac.Create(tournament, gm);
-        for (int t = 2; t <= tournament.Schedule.Rounds.Count; t++)
+        IDrawMaker scheduler = fac.Create(tournament, gm);
+        for (int t = 2; t <= tournament.Draw.Rounds.Count; t++)
         {
             //Advance tournament
-            scheduler.NextRound(tournament.Schedule, t, t - 1, scores);
+            scheduler.OnChange(tournament.Draw, t, t - 1, scores);
         }
 
         // Print schedule to PDF
         string filename = $"{tournament.Label}_Round.pdf";
         using FileStream pdfFile = new FileStream(filename, FileMode.Create, FileAccess.Write);
-        PdfPrinter printer = new PdfPrinter(tournament.Schedule, new PDFTemplateFactory());
-        printer.Print(pdfFile, tournament, tournament.Schedule, 1, scores);
+        PdfPrinter printer = new PdfPrinter(tournament.Draw, new PDFTemplateFactory());
+        printer.Print(pdfFile, tournament, tournament.Draw, 1, scores);
 
 
     }
@@ -308,13 +308,13 @@ public class TournamentKOTests
 
         );
 
-        // Print schedule to PDF
-        Assert.IsNotNull(tournament.Schedule, "Schedule should not be null");
+        // Print draw to PDF
+        Assert.IsNotNull(tournament.Draw, "Draw should not be null");
 
         string filename = $"{tournament.Label}_Round_.pdf";
         using FileStream pdfFile = new FileStream(filename, FileMode.Create, FileAccess.Write);
-        PdfPrinter printer = new PdfPrinter(tournament.Schedule, new PDFTemplateFactory());
-        printer.Print(pdfFile, tournament, tournament.Schedule, 1);
+        PdfPrinter printer = new PdfPrinter(tournament.Draw, new PDFTemplateFactory());
+        printer.Print(pdfFile, tournament, tournament.Draw, 1);
     }
 
 }

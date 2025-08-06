@@ -60,7 +60,7 @@ public class TournamentOrganizer
         //Get the scheduler 
         FactoryDrawMaker factorySchedulers = new();
         var scheduler = factorySchedulers.Create(_tournament, gameMaker);
-        scheduler.Run(listOfTeams);
+        scheduler.Create(listOfTeams);
 
         //Save to db
         TournamentRepo tournamentRepo = new(_dbConnection, _tournament, _organization);

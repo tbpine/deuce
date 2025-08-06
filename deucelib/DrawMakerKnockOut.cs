@@ -51,7 +51,7 @@ class DrawMakerKnockOut : DrawMakerBase, IDrawMaker
     /// 4. Creates subsequent rounds with placeholder teams that will be filled as winners advance
     /// 5. Calculates appropriate round labels (Final, Semi Final, Quarter Final)
     /// </remarks>
-    public Draw Run(List<Team> teams)
+    public Draw Create(List<Team> teams)
     {
         //The result
         Draw draw = new Draw(_tournament);
@@ -193,22 +193,6 @@ class DrawMakerKnockOut : DrawMakerBase, IDrawMaker
     }
 
     /// <summary>
-    /// Called before a round ends. Currently has no implementation for knockout tournaments.
-    /// </summary>
-    /// <param name="schedule">The tournament schedule.</param>
-    /// <param name="round">The round number that is ending.</param>
-    /// <param name="scores">The scores recorded for the round.</param>
-    /// <remarks>
-    /// This method is part of the IScheduler interface but knockout tournaments
-    /// don't require any special processing before a round ends.
-    /// </remarks>
-    public void BeforeEndRound(Draw schedule, int round, List<Score> scores)
-    {
-        //Nothing to do here
-    }
-
-
-    /// <summary>
     /// Advances winners from the previous round to the next round in the knockout tournament.
     /// </summary>
     /// <param name="schedule">The tournament schedule containing all rounds and matches.</param>
@@ -225,7 +209,7 @@ class DrawMakerKnockOut : DrawMakerBase, IDrawMaker
     /// The positioning logic ensures that winners from adjacent matches in the previous round
     /// are placed to face each other in the current round.
     /// </remarks>
-    public void NextRound(Draw schedule, int round, int previousRound, List<Score> scores)
+    public void OnChange(Draw schedule, int round, int previousRound, List<Score> scores)
     {
         //Clear previous winners and losers
         _winners.Clear();

@@ -53,10 +53,10 @@ class AssignTournament
 
         //Action
         //Assert
-        FactorySchedulers fac = new();
+        FactoryDrawMaker fac = new();
         var mm = fac.Create(tournament, gm);
-        var schedule = mm.Run(selected);
-        tournament.Schedule = schedule;
+        var draw = mm.Create(selected);
+        tournament.Draw = draw;
         tournament.Teams = selected;
         return tournament;
 
