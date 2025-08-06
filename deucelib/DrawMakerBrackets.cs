@@ -1,5 +1,6 @@
 using System.Diagnostics;
 using deuce.ext;
+using DocumentFormat.OpenXml.Spreadsheet;
 using Newtonsoft.Json.Serialization;
 
 namespace deuce;
@@ -72,44 +73,76 @@ class DrawMakerBrackets : DrawMakerBase, IDrawMaker
 
     public void OnChange(Draw schedule, int round, int previousRound, List<Score> scores)
     {
-        //Use the ko scheduler to find winners and losers in the main tournament
-        var facKOScheduler = new FactoryDrawMaker();
-        var mainKOScheduler = facKOScheduler.Create(new TournamentType(2, "ko", "ko", "", ""), _tournament, _gameMaker);
+        Draw? winnersDraw = _tournament.Draw;
+        Draw? losersDraw = _tournament.Brackets.FirstOrDefault()?.Tournament?.Draw;
+        //Nothing to be done if no draws are available
+        if (winnersDraw == null || losersDraw == null) return;
 
-        //Advance the main tournament using the main KO scheduler
-        mainKOScheduler.OnChange(schedule, round, previousRound, scores);
+        //Use LINQ to group scores by match where the key is the match identifier.
+        //This will allow us to process all scores for each match in one go.
+        //This is useful for processing scores that may come from different sources
+        //or for matches that have multiple scores (e.g., sets in tennis).
+        //Group scores by match
+        var groupedScores = from score in scores
+                             group score by new { score.Match } into g
+                             select new { MatchKey = g.Key, Scores = g.ToList() };
 
-        //Get the losers's tournament
-        var losertournament = _tournament.Brackets.First().Tournament;
-
-        //check if there's a round for the previous round
-        var loserPreviousRound = losertournament?.Draw?.Rounds.FirstOrDefault(r => r.Index == previousRound);
-        var loserCurrentRound = losertournament?.Draw?.Rounds.FirstOrDefault(r => r.Index == round);
-        if (loserPreviousRound is not null)
+        //For all scores
+        foreach (var sets in groupedScores)
         {
-            //Find the winners in the losers previous round, one match per permutation
-            loserPreviousRound.Permutations.All(p =>
+            var winnersMatch = winnersDraw.FindMatch(sets.MatchKey.Match);
+            if (winnersMatch is not null)
             {
-                //Get the match for the permutation
-                Match match = p.Matches.First();
-                //Get scors if they exist
-                var matchScores = scores.Where(s => s.Match == match.Id).ToList();
-                //Find the winner of the match
-                var winner = DetermineMatchWinner(matchScores, match);
-                if (winner is not null)
-                {
-                    //Find the match for the winner in the next round of the losers bracket
-                    int currentRoundPermIdx = p.Id % 2 > 0 ? (p.Id - 1) / 2 : p.Id / 2;
-                    var loserCurrentRoundMatch = loserCurrentRound?.Permutations.FirstOrDefault(prp => prp.Id == currentRoundPermIdx)?.Matches.FirstOrDefault();
-                    if (loserCurrentRoundMatch is not null)
-                    {
-                        //Found the match that the winner advances to in the losers bracket
-                    }
-                }
-               
-                return true;
-            });
+                var winner = DetermineMatchWinner(sets.Scores, winnersMatch);
+                if (winner is null) continue;
+                //Get all scores from the match
+                AdvancePlayer(winnersDraw, sets.Scores, true, winner);
 
+                var loser  = winnersMatch.GetLosingSide(winner);
+
+                if (loser is null) continue;
+
+                AdvancePlayer(losersDraw, sets.Scores, true, loser);
+            }
+            else
+            {
+
+                var losersWinningMatch = losersDraw.FindMatch(sets.MatchKey.Match);
+                var loserBracketWinner = DetermineMatchWinner(sets.Scores, losersWinningMatch!);
+                AdvancePlayer(losersDraw, sets.Scores, false, loserBracketWinner!);
+            }
+
+        }
+
+    }
+
+    private void AdvancePlayer(Draw draw, List<Score> scoreForMatch, bool winnerToHome, Team winner)
+    {
+        //Score from the losers bracket
+        var match = draw.FindMatch(scoreForMatch.First());
+        if (match?.Permutation is null) return;
+
+        int nextRoundIndex = match.Round + 1;
+        //Range check for next round
+        if (nextRoundIndex < 1 || nextRoundIndex > draw.Rounds.Count) return;
+
+        bool isOdd = (match.Permutation.Id % 2) > 0;
+        int nextPermIdx = match.Permutation.Id - (isOdd ? 1 : 0) / 2;
+        //Find the next match in the next round
+        var nextRound = draw.Rounds.First(r => r.Index == nextRoundIndex);
+        var nextMatch = nextRound.Permutations.FirstOrDefault(p => p.Id == nextPermIdx)?.Matches.First();
+        match?.Permutation.AddTeam(winner);
+
+        if (winnerToHome)
+        {
+            nextMatch?.ClearHomePlayers();
+            foreach (Player player in winner.Players) nextMatch?.AddHome(player);
+        }
+
+        else
+        {
+            nextMatch?.ClearAwayPlayers();
+            foreach (Player player in winner.Players) nextMatch?.AddAway(player);
         }
 
     }

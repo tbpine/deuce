@@ -19,4 +19,27 @@ public static class ScheduleExt
         schedule.Rounds.FirstOrDefault(r => r.Index == score.Round)?.Permutations.FirstOrDefault(p => p.Id == score.Permutation)?.Matches.FirstOrDefault(m => m.Id == score.Match);
     //If the round is not null, return the match
 
+    /// <summary>
+    /// Find a match in the schedule by its ID.
+    /// This method searches through all rounds and permutations to find the match with the specified ID.
+    /// </summary>
+    /// <param name="schedule">
+    /// The schedule to search within.
+    /// </param>
+    /// <param name="matchId">
+    /// The ID of the match to find.
+    /// </param>
+    /// <returns></returns>
+    public static Match? FindMatch(this Draw schedule, int matchId)
+    {
+        foreach (var round in schedule.Rounds)
+        {
+            foreach (var permutation in round.Permutations)
+            {
+                var match = permutation.Matches.FirstOrDefault(m => m.Id == matchId);
+                if (match != null) return match;
+            }
+        }
+        return null;
+    }
 }
