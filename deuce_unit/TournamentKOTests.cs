@@ -234,7 +234,7 @@ public class TournamentKOTests
         FactoryDrawMaker fac = new FactoryDrawMaker();
         IGameMaker gm = new GameMakerTennis();
         IDrawMaker scheduler = fac.Create(tournament, gm);
-        for (int t = 2; t <= tournament.Draw.Rounds.Count; t++)
+        for (int t = 2; t <= tournament.Draw.Rounds.Count(); t++)
         {
             //Advance tournament
             scheduler.OnChange(tournament.Draw, t, t - 1, scores);

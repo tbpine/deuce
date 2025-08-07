@@ -15,6 +15,7 @@ public class FactoryDrawMaker
     {
         switch (t.Type)
         {
+            case 3: { return new DrawMakerBrackets(t, gm); }
             case 2: { return new DrawMakerKnockOut(t, gm); }
         }
 

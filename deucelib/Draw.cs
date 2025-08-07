@@ -22,7 +22,7 @@ public class Draw
 
     public Round GetRoundAtIndex(int index) => _rounds[index];
 
-    public IReadOnlyList<Round> Rounds => _rounds;
+    public IEnumerable<Round> Rounds => _rounds;
 
     /// <summary>
     /// Construct with dependencies
