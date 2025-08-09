@@ -13,16 +13,17 @@ public class RouteFinderLeftToRight : IRouteFinder
     /// </summary>
     /// <param name="draw">The tournament draw to search within.</param>
     /// <param name="start">The starting match from which to find the destination match.</param>
+    /// <param name="advanceRound">Indicates whether to advance to the next round when finding the destination match.</param>
     /// <returns>The destination Match object if found; otherwise, null.</returns>
-    public Match? FindDestMatch(Draw draw, Match start)
+    public Match? FindDestMatch(Draw draw, Match start, bool advanceRound = true)
     {
         // Must have a permutation to find a match
         if (start?.Permutation is null) return null;
 
-        int nextRoundIndex = start.Round + 1;
+        int nextRoundIndex = start.Round + (advanceRound ? 1 : 0);
 
         // Range check for next round
-        if (nextRoundIndex < 1 || nextRoundIndex > draw.Rounds.Count()) return null;
+        if (nextRoundIndex < 1 || nextRoundIndex > draw.Rounds.Max(r => r.Index)) return null;
 
         // For left-to-right navigation, the calculation differs from right-to-left
         // Determine if the match are mapped up (odd positions advance differently)

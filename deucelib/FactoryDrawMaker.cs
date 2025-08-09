@@ -15,6 +15,7 @@ public class FactoryDrawMaker
     {
         switch (t.Type)
         {
+            case 4: { return new DrawMakerKnockOutPlayoff(t, gm); }
             case 3: { return new DrawMakerBrackets(t, gm); }
             case 2: { return new DrawMakerKnockOut(t, gm); }
         }
@@ -33,6 +34,7 @@ public class FactoryDrawMaker
     {
         switch (tType.Id)
         {
+            case 4: { return new DrawMakerKnockOutPlayoff(t, gm); }
             case 3: { return new DrawMakerBrackets(t, gm); }
             case 2: { return new DrawMakerKnockOut(t, gm); }
             default: { return new DrawMakerRR(t, gm); }

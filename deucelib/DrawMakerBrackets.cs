@@ -179,8 +179,8 @@ class DrawMakerBrackets : DrawMakerBase, IDrawMaker
                 if (loser is null) continue;
                 //Careful here, the "winnersMatch" is in the winners draw
                 //but they share the same permutation index.
-
-                AdvancePlayer(losersDraw,  true, loser, winnersMatch);
+                //Put the loser in the same round in the losers draw
+                AdvancePlayer(losersDraw,  winnersMatch.Id % 2 > 0, loser, winnersMatch, false);
             }
             else
             {
@@ -206,6 +206,7 @@ class DrawMakerBrackets : DrawMakerBase, IDrawMaker
     /// if false, places them as the away team.</param>
     /// <param name="winner">The team that won the match and needs to be advanced.</param>
     /// <param name="match">The completed match from which the team is advancing.</param>
+    /// <param name="advanceRound">If true, advances to the next round when finding the destination match;
     /// <remarks>
     /// This method uses the route finder to determine the destination match for the winning team.
     /// The method handles team placement by either clearing and setting home players or 
@@ -216,10 +217,11 @@ class DrawMakerBrackets : DrawMakerBase, IDrawMaker
     private void AdvancePlayer(Draw draw,
                                bool winnerToHome,
                                Team winner,
-                               Match match)
+                               Match match,
+                               bool advanceRound = true)
     {
         //use the route finder to find the next match
-        var nextMatch = _routeFinder?.FindDestMatch(draw, match);
+        var nextMatch = _routeFinder?.FindDestMatch(draw, match, advanceRound);
 
         if (nextMatch is null) return;
         
@@ -237,7 +239,7 @@ class DrawMakerBrackets : DrawMakerBase, IDrawMaker
         }
 
     }
-
+    
     /// <summary>
     /// Determines the winner of a tennis match based on sets won and games won as a tiebreaker.
     /// In tennis, the winner is the team that wins the most sets.

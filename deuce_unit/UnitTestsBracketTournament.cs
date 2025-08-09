@@ -76,7 +76,7 @@ public class UnitTestsBracketTournament
         IDrawMaker scheduler = fac.Create(tournament, gm);
 
         // Assign IDs to matches, permutations and rounds for both brackets
-        int matchId = 1, permId = 1;
+        int matchId = 1;
 
         // Process winners bracket
         var winnersDraw = tournament.Draw;
@@ -86,7 +86,6 @@ public class UnitTestsBracketTournament
         {
             foreach (Permutation permutation in round.Permutations)
             {
-                permutation.Id = permId++;
                 foreach (Match match in permutation.Matches)
                 {
                     match.Id = matchId++;
@@ -97,12 +96,10 @@ public class UnitTestsBracketTournament
         // Process losers bracket
         var losersDraw = losersBracket.Draw;
         //Reset permulation
-        permId = 1;
         foreach (Round round in losersDraw.Rounds)
         {
             foreach (Permutation permutation in round.Permutations)
             {
-                permutation.Id = permId++;
                 foreach (Match match in permutation.Matches)
                 {
                     match.Id = matchId++;
