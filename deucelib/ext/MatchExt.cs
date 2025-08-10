@@ -114,4 +114,27 @@ public static class MatchExt
 
         return null;
     }
+
+    /// <summary>
+    /// Sets the home side of the match.
+    /// </summary>
+    /// <param name="match"></param>
+    /// <param name="homeSide"></param> 
+    public static void SetHomeSide(this Match match, Team? homeSide)
+    {
+        match.ClearHomePlayers();
+        foreach (var player in homeSide?.Players ?? Enumerable.Empty<Player>()) match.AddHome(player);
+    }
+
+    /// <summary>
+    /// Sets the away side of the match.
+    /// </summary>
+    /// <param name="match"></param>
+    /// <param name="awaySide"></param>
+    public static void SetAwaySide(this Match match, Team? awaySide)
+    {
+        match.ClearAwayPlayers();
+        foreach (var player in awaySide?.Players ?? Enumerable.Empty<Player>()) match.AddAway(player);
+    }
+
 }

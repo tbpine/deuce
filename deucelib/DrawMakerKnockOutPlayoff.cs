@@ -64,7 +64,7 @@ class DrawMakerKnockOutPlayoff : DrawMakerBase, IDrawMaker
 
         //Assigns
         _teams = teams;
-        
+
         // Add a byes for number of teams that is not a power of 2.
         // Work out the number of byes needed.
         // For example: 6 teams needs 2 byes to make 8 (next power of 2)
@@ -88,15 +88,15 @@ class DrawMakerKnockOutPlayoff : DrawMakerBase, IDrawMaker
         // The number of rounds is log2(teams)
         // For example, 8 teams = 3 rounds, 16 teams = 4 rounds, etc.
         int noRounds = (int)Math.Log2(_teams.Count);
-        
+
         // First round has half the number of permutations as the number of teams.
         int noPermutations = _teams.Count / 2;
-        
+
         // For each permutation, an element in the top half of "_teams" 
         // plays against an element in the bottom half of "_teams".
         // This ensures highest ranked plays lowest ranked, etc.
         Debug.WriteLine($"ex:{exponent}|byes:{noByes}|teams:{_teams.Count}|r:{noRounds}|perms:{noPermutations}");
-        
+
         // Create first round matches for main tournament
         for (int i = 0; i < noPermutations; i++)
         {
@@ -123,10 +123,10 @@ class DrawMakerKnockOutPlayoff : DrawMakerBase, IDrawMaker
             // For example, 8 teams = 4 matches in the first round, 2 matches in the second round, and 1 match in the final.
             Debug.Write($"Round {r}:");
             noPermutations = (int)(_teams.Count / Math.Pow(2, r));
-            
+
             // Create main tournament round
             CreateMainTournamentRound(draw, r, noPermutations, noRounds);
-            
+
             // Create playoff field round (duplicate of main round)
             CreatePlayoffRound(draw, r, noPermutations, GetPlayoffRoundLabel(noRounds, r));
 
@@ -152,7 +152,7 @@ class DrawMakerKnockOutPlayoff : DrawMakerBase, IDrawMaker
         {
             var home = new Team(0, "") { Index = i };
             var away = new Team(0, "") { Index = i + 1 };
-            
+
             // Add placeholder players to maintain team structure
             for (int j = 0; j < _tournament.Details.TeamSize; j++)
             {
@@ -192,7 +192,7 @@ class DrawMakerKnockOutPlayoff : DrawMakerBase, IDrawMaker
     {
         // Create the playoff round by duplicating the structure of the main round
         // but with different teams (could be losers from previous rounds or additional teams)
-        
+
         // Find the corresponding main round
         var mainRound = draw.Rounds.FirstOrDefault(r => r.Index == roundNumber);
         if (mainRound == null) return;
@@ -205,7 +205,7 @@ class DrawMakerKnockOutPlayoff : DrawMakerBase, IDrawMaker
 
         // Make a list of empty teams as placeholders for playoff participants
         List<Team> playoffTeams = new List<Team>();
-        
+
         // Create empty placeholder teams for this playoff round
         for (int i = 0; i < noPermutations * 2; i++)
         {
@@ -280,236 +280,62 @@ class DrawMakerKnockOutPlayoff : DrawMakerBase, IDrawMaker
         return String.Empty;
     }
 
-    /// <summary>
-    /// Advances winners from the previous round to the next round in both the main tournament and playoff field.
-    /// </summary>
-    /// <param name="schedule">The tournament schedule containing all rounds and matches.</param>
-    /// <param name="round">The current round number to populate with winners.</param>
-    /// <param name="previousRound">The previous round number from which to determine winners.</param>
-    /// <param name="scores">The scores used to determine match winners.</param>
-    /// <remarks>
-    /// This method:
-    /// 1. Determines the winner of each match in the previous round based on scores
-    /// 2. Places winners in the appropriate positions in the current round (both main and playoff)
-    /// 3. Updates match participants with the advancing teams
-    /// 4. Uses tennis scoring rules (sets won, then total games) to determine winners
-    /// 5. Handles both main tournament advancement and playoff field progression
-    /// 
-    /// The positioning logic ensures that winners from adjacent matches in the previous round
-    /// are placed to face each other in the current round, and also manages playoff bracket advancement.
-    /// </remarks>
-    public void OnChange(Draw schedule, int round, int previousRound, List<Score> scores)
+    public void OnChange(Draw draw, int round, int previousRound, List<Score> scores)
     {
-        //Clear previous winners and losers
-        _winners.Clear();
-        _losers.Clear();
-
-        // Get the previous round
-        Round? prevRound = schedule.Rounds.FirstOrDefault(r => r.Index == previousRound);
-        if (prevRound == null) return;
-
-        // Calculate expected number of permutations for current round (half of previous round)
-        int previousRoundPermutations = prevRound.Permutations.Count;
-        int expectedCurrentRoundPermutations = previousRoundPermutations / 2;
-        
-        // Get current round or create if it doesn't exist
-        Round? currentRound = schedule.Rounds.FirstOrDefault(r => r.Index == round);
-        
-        // Count current permutations in the round
-        int currentRoundPermutations = currentRound?.Permutations.Count ?? 0;
-
-        // Process main tournament matches
-        ProcessMainTournamentMatches(schedule, round, previousRound, scores, prevRound, currentRound);
-        
-        // Process playoff field matches
-        ProcessPlayoffMatches(schedule, round, previousRound, scores);
-    }
-
-    /// <summary>
-    /// Processes main tournament match advancement.
-    /// </summary>
-    private void ProcessMainTournamentMatches(Draw schedule, int round, int previousRound, List<Score> scores, Round prevRound, Round? currentRound)
-    {
-        // Determine winners from previous round based on scores and update current round
-        // Since we can't use ID offset anymore, we'll identify main tournament permutations by their round labels
-        // Main tournament permutations don't have "Playoff" in their round label
-        var mainTournamentPermutations = prevRound.Permutations.Where(p => 
-            string.IsNullOrEmpty(prevRound.Label) || !prevRound.Label.Contains("Playoff")).ToList();
-        
-        for(int i = 0; i < mainTournamentPermutations.Count; i++) 
+        //for all scores
+        foreach (var score in scores)
         {
-            var permutation = mainTournamentPermutations[i];
-            // In knockout tournaments, each permutation has exactly one match
-            var match = permutation?.Matches.FirstOrDefault();
-            if (match != null)
+            Round? mainRound = draw.Rounds.FirstOrDefault(r => r.Index == round);
+            Round? playoffRound = mainRound?.Playoff;
+            // Process each score
+            //Find the match and round the score belongs to
+            var matchRound = mainRound?.FindMatch(score.Home, score.Away) ?? new(null, null);
+            Match? match = matchRound.Item1;
+            Round? roundForMatch = matchRound.Item2;
+
+            //Continue if either values is null
+            if (match == null || roundForMatch == null) continue;
+            //Check which round it is
+            bool isPlayoff = roundForMatch?.Equals(playoffRound) ?? false;
+            //winners in the mainRound progress to the next main round
+            var winner = DetermineMatchWinner(scores, match);
+            var loser = match.GetLosingSide(winner);
+
+            if ((round + 1) > draw.Rounds.Count()) continue;
+
+            var nextRound = isPlayoff ? null : draw.Rounds.FirstOrDefault(r => r.Index == round + 1);
+            nextRound ??= draw.Rounds.FirstOrDefault(r => r.Index == round + 1 && r.Playoff != null)?.Playoff;
+            int nextPermutationIndex = match.Permutation?.Id ?? 0 - ((match.Permutation?.Id ?? 0) % 2 > 0 ? 1 : 0) / 2;
+
+            var winnersMatch = nextRound?.Permutations.FirstOrDefault(p => p.Id == nextPermutationIndex)?.Matches.FirstOrDefault();
+            //winners goto home side in the main round away side in the playoff round
+            if (isPlayoff) winnersMatch?.SetAwaySide(winner);
+            else winnersMatch?.SetHomeSide(winner);
+
+            //special case for the first round, all losers  from the main round
+            //goto the playoff round
+            var losingMatch = playoffRound?.Permutations.FirstOrDefault(p => p.Id == nextPermutationIndex)?.Matches.FirstOrDefault();
+
+            if (round == 1)
             {
-                // Find all scores for this match across all sets
-                var matchScores = scores.Where(s => s.Match == match.Id && s.Round == previousRound).ToList();
-                
-                if (matchScores.Any())
-                {
-                    // Determine winner based on sets won (tennis scoring)
-                    Team? winner = DetermineMatchWinner(matchScores, match);
-                    
-                    if (winner != null)
-                    {
-                        //Store winner and loser
-                        _winners.Add(winner);
-                        var losingTeam = match.GetLosingSide(winner);
-                        if (losingTeam != null) _losers.Add(losingTeam);
-
-                        // Calculate which permutation in the current round this winner should go to
-                        // Adjacent matches in previous round feed into the same match in current round
-                        int currentRoundPermIndex = i % 2 > 0 ? (i - 1) / 2 : i / 2;
-
-                        // Find the permutation in the current round (main tournament only)
-                        var currentRoundPerm = currentRound?.Permutations.Where(p => 
-                            string.IsNullOrEmpty(currentRound.Label) || !currentRound.Label.Contains("Playoff")).ElementAtOrDefault(currentRoundPermIndex);
-                        if (currentRoundPerm != null)
-                        {
-                            // Update the appropriate team based on previous round index
-                            // Even indices (0,2,4...) go to home team, odd indices (1,3,5...) go to away team
-                            var nextMatch = currentRoundPerm.Matches.FirstOrDefault();
-                            if (i % 2 == 0)
-                            {
-                                // No remainder - update home team (index 0)
-                                currentRoundPerm.ReplaceTeamAtIndex(0, winner);
-                                //There should always be a match here
-                                nextMatch?.ClearHomePlayers();
-                                //Add winners to the next match home team
-                                foreach (var player in winner.Players) nextMatch?.AddHome(player);
-                            }
-                            else
-                            {
-                                // Remainder - update away team (index 1)
-                                currentRoundPerm.ReplaceTeamAtIndex(1, winner);
-                                //There should always be a match here
-                                nextMatch?.ClearAwayPlayers();
-                                //Add winners to the next match away team
-                                foreach (var player in winner.Players) nextMatch?.AddAway(player);
-                            }
-                        }
-                    }
-                }
-                else
-                {
-                    // If no score available, we can't determine winners yet
-                    // This could happen if the previous round isn't complete
-                    return;
-                }
+                bool isOdd = (match.Permutation?.Id ?? 0) % 2 > 0;
+                if (isOdd) losingMatch?.SetAwaySide(isOdd ? loser : null);
+                else losingMatch?.SetHomeSide(isOdd ? null : loser);
             }
+            else
+            {
+                //losers from the main round goto the home  side in the playoff round
+
+                losingMatch?.SetHomeSide(loser);
+                //The away side comes from the winners of the previous play off round.
+
+            }
+
+
         }
     }
 
-    /// <summary>
-    /// Processes playoff field match advancement.
-    /// </summary>
-    private void ProcessPlayoffMatches(Draw schedule, int round, int previousRound, List<Score> scores)
-    {
-        // Get the previous round to access its playoff round
-        Round? prevRound = schedule.Rounds.FirstOrDefault(r => r.Index == previousRound);
-        if (prevRound?.Playoff == null) return;
 
-        var playoffRound = prevRound.Playoff;
-        
-        // Get the current round to access its playoff round for advancement
-        Round? currentRound = schedule.Rounds.FirstOrDefault(r => r.Index == round);
-        if (currentRound?.Playoff == null) return;
-
-        var nextPlayoffRound = currentRound.Playoff;
-
-        // Process playoff permutations from the previous playoff round
-        for(int i = 0; i < playoffRound.Permutations.Count; i++)
-        {
-            var permutation = playoffRound.Permutations[i];
-            var match = permutation?.Matches.FirstOrDefault();
-            if (match != null)
-            {
-                // Find all scores for this playoff match
-                // Note: We need to distinguish playoff match scores from main tournament scores
-                // This might require extending the Score class to identify playoff matches
-                // For now, we'll use a simple approach based on match ID ranges or other identifiers
-                
-                var matchScores = scores.Where(s => 
-                    s.Match == match.Id && 
-                    s.Round == previousRound &&
-                    IsPlayoffScore(s) // This method would need to be implemented
-                ).ToList();
-                
-                if (matchScores.Any())
-                {
-                    Team? winner = DetermineMatchWinner(matchScores, match);
-                    
-                    if (winner != null)
-                    {
-                        // Calculate which permutation in the next playoff round this winner should go to
-                        int nextPlayoffPermIndex = i % 2 > 0 ? (i - 1) / 2 : i / 2;
-
-                        // Find the permutation in the next playoff round
-                        var nextPlayoffPerm = nextPlayoffRound.Permutations.ElementAtOrDefault(nextPlayoffPermIndex);
-                        if (nextPlayoffPerm != null)
-                        {
-                            // Update the appropriate team based on previous round index
-                            var nextMatch = nextPlayoffPerm.Matches.FirstOrDefault();
-                            if (i % 2 == 0)
-                            {
-                                // Even indices go to home team
-                                nextPlayoffPerm.ReplaceTeamAtIndex(0, winner);
-                                nextMatch?.ClearHomePlayers();
-                                foreach (var player in winner.Players) nextMatch?.AddHome(player);
-                            }
-                            else
-                            {
-                                // Odd indices go to away team
-                                nextPlayoffPerm.ReplaceTeamAtIndex(1, winner);
-                                nextMatch?.ClearAwayPlayers();
-                                foreach (var player in winner.Players) nextMatch?.AddAway(player);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    /// <summary>
-    /// Determines if a score belongs to a playoff match.
-    /// This is a placeholder method that would need to be implemented based on 
-    /// how playoff matches are identified in the scoring system.
-    /// </summary>
-    /// <param name="score">The score to check</param>
-    /// <returns>True if this score is for a playoff match, false otherwise</returns>
-    private bool IsPlayoffScore(Score score)
-    {
-        // This is a placeholder implementation
-        // In a real system, you might:
-        // 1. Use a different match ID range for playoff matches
-        // 2. Add a property to the Score class to identify playoff matches
-        // 3. Use match metadata to distinguish playoff vs main tournament
-        // For now, return false to avoid processing until proper identification is implemented
-        return false;
-    }
-
-    /// <summary>
-    /// Determines the winner of a tennis match based on sets won.
-    /// In tennis, the winner is the team that wins the most sets.
-    /// If sets are tied, the winner is determined by total games won.
-    /// </summary>
-    /// <param name="matchScores">List of scores for all sets in the match. Each score represents one set.</param>
-    /// <param name="match">The match containing the teams competing in the match.</param>
-    /// <returns>
-    /// The winning team from the match, or null if the match is completely tied.
-    /// Returns the team at index 0 (home) or index 1 (away) from the match.
-    /// </returns>
-    /// <remarks>
-    /// The winner determination follows standard tennis rules:
-    /// 1. Primary criterion: Team that wins the most sets
-    /// 2. Tiebreaker: If sets are equal, team with most total games won
-    /// 3. If both sets and games are equal, returns null (complete tie)
-    /// 
-    /// Each Score object in matchScores represents one set, with Home and Away
-    /// properties indicating games won by each team in that set.
-    /// </remarks>
     private Team? DetermineMatchWinner(List<Score> matchScores, Match match)
     {
         if (!matchScores.Any()) return null;
@@ -525,7 +351,7 @@ class DrawMakerKnockOutPlayoff : DrawMakerBase, IDrawMaker
             // Add games to total count
             homeTotalGames += score.Home;
             awayTotalGames += score.Away;
-            
+
             // Count sets won
             if (score.Home > score.Away)
             {
@@ -559,7 +385,7 @@ class DrawMakerKnockOutPlayoff : DrawMakerBase, IDrawMaker
                 return match.Away.FirstOrDefault()?.Team; // Away team wins on games
             }
         }
-        
+
         // If completely tied (sets and games), return null
         return null;
     }
