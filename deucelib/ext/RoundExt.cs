@@ -21,17 +21,17 @@ public static class RoundEx
     /// <summary>
     /// Find a match in the round by home and away team IDs.
     /// </summary>
-    /// <param name="homeId">Home team ID</param>
-    /// <param name="awayId">Away team ID</param>
+    /// <param name="round">Round to search</param>
+    /// <param name="matchId">Match ID to find</param>
     /// <returns>A tuple containing the found match and the round it belongs to, or null if not found.</returns>
-    public static (Match?, Round?) FindMatch(this Round round, int homeId, int awayId)
+    public static (Match?, Round?) FindMatch(this Round round, int matchId)
     {
         //check the main round
         foreach (var p in round.Permutations)
         {
             foreach (Match m in p.Matches)
             {
-                if (m.Home.Any(e => e.Id == homeId) && m.Away.Any(e => e.Id == awayId))
+                if (m.Id == matchId)
                     return (m, round);
             }
         }
@@ -44,7 +44,7 @@ public static class RoundEx
             {
                 foreach (Match m in p.Matches)
                 {
-                    if (m.Home.Any(e => e.Id == homeId) && m.Away.Any(e => e.Id == awayId))
+                    if (m.Id == matchId)
                         return (m, round.Playoff);
                 }
             }
@@ -53,5 +53,7 @@ public static class RoundEx
 
         return (null, null); // Not found
     }
+
+    
 
 }

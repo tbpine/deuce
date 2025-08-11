@@ -289,7 +289,7 @@ class DrawMakerKnockOutPlayoff : DrawMakerBase, IDrawMaker
             Round? playoffRound = mainRound?.Playoff;
             // Process each score
             //Find the match and round the score belongs to
-            var matchRound = mainRound?.FindMatch(score.Home, score.Away) ?? new(null, null);
+            var matchRound = mainRound?.FindMatch(score.Match) ?? new(null, null);
             Match? match = matchRound.Item1;
             Round? roundForMatch = matchRound.Item2;
 
@@ -305,32 +305,32 @@ class DrawMakerKnockOutPlayoff : DrawMakerBase, IDrawMaker
 
             var nextRound = isPlayoff ? null : draw.Rounds.FirstOrDefault(r => r.Index == round + 1);
             nextRound ??= draw.Rounds.FirstOrDefault(r => r.Index == round + 1 && r.Playoff != null)?.Playoff;
-            int nextPermutationIndex = match.Permutation?.Id ?? 0 - ((match.Permutation?.Id ?? 0) % 2 > 0 ? 1 : 0) / 2;
-
+            // 0 goes to 0 in the next round, 1 goes to 0 in the next round, 2 goes to 1 in the next round
+            // 3 goes to 1 in the next round
+            bool isOdd = (match.Permutation?.Id ?? 0) % 2 > 0;
+            //Permutation starts Id (it's meant to be index ) starts at 1
+            int nextPermutationIndex = isOdd ? ((match.Permutation?.Id ?? 0) - 1) / 2  : (match.Permutation?.Id ?? 0) / 2;
+            //For the first match
+            nextPermutationIndex  = nextPermutationIndex < 0 ? 0 : nextPermutationIndex;
             var winnersMatch = nextRound?.Permutations.FirstOrDefault(p => p.Id == nextPermutationIndex)?.Matches.FirstOrDefault();
-            //winners goto home side in the main round away side in the playoff round
+
+            //winners goto the next round
             if (isPlayoff) winnersMatch?.SetAwaySide(winner);
-            else winnersMatch?.SetHomeSide(winner);
-
-            //special case for the first round, all losers  from the main round
-            //goto the playoff round
-            var losingMatch = playoffRound?.Permutations.FirstOrDefault(p => p.Id == nextPermutationIndex)?.Matches.FirstOrDefault();
-
-            if (round == 1)
-            {
-                bool isOdd = (match.Permutation?.Id ?? 0) % 2 > 0;
-                if (isOdd) losingMatch?.SetAwaySide(isOdd ? loser : null);
-                else losingMatch?.SetHomeSide(isOdd ? null : loser);
-            }
             else
             {
-                //losers from the main round goto the home  side in the playoff round
+                if (isOdd) winnersMatch?.SetHomeSide(winner);
+                else winnersMatch?.SetAwaySide(winner);
+            }   
 
-                losingMatch?.SetHomeSide(loser);
-                //The away side comes from the winners of the previous play off round.
 
+            if (round == 1 && !isPlayoff)
+            {
+                //special case for the first round, all losers  from the main round
+                //goto the playoff round
+                var losingMatch = playoffRound?.Permutations.FirstOrDefault(p => p.Id == nextPermutationIndex)?.Matches.FirstOrDefault();
+                if (isOdd) losingMatch?.SetHomeSide(isOdd ? loser : null);
+                else losingMatch?.SetAwaySide(isOdd ? null : loser);
             }
-
 
         }
     }
