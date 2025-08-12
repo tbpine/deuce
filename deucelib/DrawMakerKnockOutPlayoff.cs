@@ -4,18 +4,18 @@ using deuce.ext;
 namespace deuce;
 
 /// <summary>
-/// Implements a knockout tournament scheduler with playoff field duplication.
+/// Implements a knockout tournament scheduler with playoff and loser bracket creation.
 /// Similar to the knockout tournament structure, but for each round, creates 
-/// the same round in a separate playoff field/bracket.
+/// a playoff round (with half the matches) and a loser round (with half the matches).
 /// In this tournament structure, teams are eliminated after losing a single match,
 /// with winners advancing to the next round until only one team remains, but
-/// each round is replicated in a playoff structure.
+/// each round includes additional playoff and loser brackets for continued competition.
 /// </summary>
 /// <remarks>
 /// The scheduler automatically adds "BYE" teams if the number of participating teams
 /// is not a power of 2, ensuring proper bracket structure. Teams are ranked and
 /// paired such that the highest-ranked team plays the lowest-ranked team in the first round.
-/// Each round is duplicated in both the main tournament and the playoff field.
+/// Each round creates three brackets: main (full matches), playoff (half matches), and loser (half matches).
 /// </remarks>
 class DrawMakerKnockOutPlayoff : DrawMakerBase, IDrawMaker
 {
@@ -43,18 +43,18 @@ class DrawMakerKnockOutPlayoff : DrawMakerBase, IDrawMaker
     }
 
     /// <summary>
-    /// Creates a complete knockout tournament schedule with playoff field duplication.
-    /// For each round in the main tournament, creates an identical round in the playoff field.
+    /// Creates a complete knockout tournament schedule with playoff and loser bracket creation.
+    /// For each round in the main tournament, creates a playoff round (half matches) and loser round (half matches).
     /// </summary>
     /// <param name="teams">The list of teams participating in the tournament.</param>
-    /// <returns>A complete Draw object containing all rounds and matches for both the main knockout tournament and playoff field.</returns>
+    /// <returns>A complete Draw object containing all rounds and matches for the main knockout tournament, playoff rounds, and loser rounds.</returns>
     /// <remarks>
     /// The method performs the following steps:
     /// 1. Adds BYE teams if needed to make the total number a power of 2
     /// 2. Sorts teams by ranking in descending order
     /// 3. Creates the first round by pairing highest vs lowest ranked teams
     /// 4. Creates subsequent rounds with placeholder teams that will be filled as winners advance
-    /// 5. For each round, creates an identical playoff round with the same structure
+    /// 5. For each round, creates a playoff round with half the matches and a loser round with half the matches
     /// 6. Calculates appropriate round labels (Final, Semi Final, Quarter Final)
     /// </remarks>
     public Draw Create(List<Team> teams)
@@ -112,8 +112,11 @@ class DrawMakerKnockOutPlayoff : DrawMakerBase, IDrawMaker
             }
         }
 
-        // Create first round matches for playoff field (duplicate of main round)
-        CreatePlayoffRound(draw, 1, noPermutations, "Playoff");
+        // Create first round matches for playoff field (half the matches of main round)
+        CreatePlayoffRound(draw, 1, noPermutations / 2, "Playoff");
+
+        // Create first round matches for loser bracket (half the matches of main round)
+        CreateLoserRound(draw, 1, noPermutations / 2, "Loser");
 
         // From round 2 to the final round
         // Create placeholder matches with empty teams that will be populated as winners advance
@@ -127,8 +130,11 @@ class DrawMakerKnockOutPlayoff : DrawMakerBase, IDrawMaker
             // Create main tournament round
             CreateMainTournamentRound(draw, r, noPermutations, noRounds);
 
-            // Create playoff field round (duplicate of main round)
-            CreatePlayoffRound(draw, r, noPermutations, GetPlayoffRoundLabel(noRounds, r));
+            // Create playoff field round (half the matches of main round)
+            CreatePlayoffRound(draw, r, noPermutations / 2, GetPlayoffRoundLabel(noRounds, r));
+
+            // Create loser bracket round (half the matches of main round)
+            CreateLoserRound(draw, r, noPermutations / 2, GetLoserRoundLabel(noRounds, r));
 
             Debug.Write($"\n");
         }
@@ -182,20 +188,23 @@ class DrawMakerKnockOutPlayoff : DrawMakerBase, IDrawMaker
     }
 
     /// <summary>
-    /// Creates a playoff round that duplicates the structure of the main tournament round.
+    /// Creates a playoff round with half the matches of the main tournament round.
     /// </summary>
     /// <param name="draw">The tournament draw to add playoff matches to.</param>
     /// <param name="roundNumber">The round number being duplicated.</param>
-    /// <param name="noPermutations">Number of matches/permutations in this round.</param>
+    /// <param name="noPermutations">Number of matches/permutations in this playoff round (half of main round).</param>
     /// <param name="playoffLabel">Label for the playoff round.</param>
     private void CreatePlayoffRound(Draw draw, int roundNumber, int noPermutations, string playoffLabel)
     {
-        // Create the playoff round by duplicating the structure of the main round
+        // Create the playoff round with half the matches of the main round
         // but with different teams (could be losers from previous rounds or additional teams)
 
         // Find the corresponding main round
         var mainRound = draw.Rounds.FirstOrDefault(r => r.Index == roundNumber);
         if (mainRound == null) return;
+
+        // Ensure we have at least one match in the playoff round
+        if (noPermutations < 1) noPermutations = 1;
 
         // Create a separate playoff round
         mainRound.Playoff = new Round(roundNumber)
@@ -235,6 +244,62 @@ class DrawMakerKnockOutPlayoff : DrawMakerBase, IDrawMaker
     }
 
     /// <summary>
+    /// Creates a loser round with half the matches of the main tournament round.
+    /// </summary>
+    /// <param name="draw">The tournament draw to add loser matches to.</param>
+    /// <param name="roundNumber">The round number being duplicated.</param>
+    /// <param name="noPermutations">Number of matches/permutations in this loser round (half of main round).</param>
+    /// <param name="loserLabel">Label for the loser round.</param>
+    private void CreateLoserRound(Draw draw, int roundNumber, int noPermutations, string loserLabel)
+    {
+        // Create the loser round with half the matches of the main round
+        // but with different teams (losers from previous rounds)
+
+        // Find the corresponding main round
+        var mainRound = draw.Rounds.FirstOrDefault(r => r.Index == roundNumber);
+        if (mainRound == null) return;
+
+        // Ensure we have at least one match in the loser round
+        if (noPermutations < 1) noPermutations = 1;
+
+        // Create a separate loser round
+        mainRound.Loser = new Round(roundNumber)
+        {
+            Tournament = _tournament
+        };
+
+        // Make a list of empty teams as placeholders for loser participants
+        List<Team> loserTeams = new List<Team>();
+
+        // Create empty placeholder teams for this loser round
+        for (int i = 0; i < noPermutations * 2; i++)
+        {
+            var loserTeam = new Team(); // Offset index to avoid conflicts
+            loserTeam.CreateBye(_tournament.Details.TeamSize, _tournament.Organization, i + 2000); // Offset by 2000 to avoid conflicts
+            loserTeams.Add(loserTeam);
+        }
+
+        // Create loser matches for this round
+        for (int p = 0; p < noPermutations; p++)
+        {
+            var home = loserTeams[p];
+            var away = loserTeams[loserTeams.Count - p - 1];
+            Debug.Write($"Loser ({home.Index},{away.Index})");
+
+            // Schedule loser matches (only for tennis tournaments)
+            if (_tournament.Sport == 1)
+            {
+                var permutation = _gameMaker.Create(_tournament, home, away, roundNumber);
+                permutation.Id = p; // Start at 0 for loser round
+                // Link the permutation to the loser round
+                permutation.Round = mainRound.Loser;
+                mainRound.Loser.AddPerm(permutation);
+            }
+        }
+
+    }
+
+    /// <summary>
     /// Gets playoff-specific round labels.
     /// </summary>
     /// <param name="totalRounds">The total number of rounds in the tournament.</param>
@@ -244,6 +309,18 @@ class DrawMakerKnockOutPlayoff : DrawMakerBase, IDrawMaker
     {
         string baseLabel = GetRoundLabel(totalRounds, currentRound);
         return !string.IsNullOrEmpty(baseLabel) ? $"Playoff {baseLabel}" : "Playoff";
+    }
+
+    /// <summary>
+    /// Gets loser-specific round labels.
+    /// </summary>
+    /// <param name="totalRounds">The total number of rounds in the tournament.</param>
+    /// <param name="currentRound">The current round number for which to get the loser label.</param>
+    /// <returns>A string label for the loser round.</returns>
+    private string GetLoserRoundLabel(int totalRounds, int currentRound)
+    {
+        string baseLabel = GetRoundLabel(totalRounds, currentRound);
+        return !string.IsNullOrEmpty(baseLabel) ? $"Loser {baseLabel}" : "Loser";
     }
 
     /// <summary>
@@ -287,6 +364,8 @@ class DrawMakerKnockOutPlayoff : DrawMakerBase, IDrawMaker
         {
             Round? mainRound = draw.Rounds.FirstOrDefault(r => r.Index == round);
             Round? playoffRound = mainRound?.Playoff;
+            Round? loserRound = mainRound?.Loser;
+            
             // Process each score
             //Find the match and round the score belongs to
             var matchRound = mainRound?.FindMatch(score.Match) ?? new(null, null);
@@ -295,8 +374,11 @@ class DrawMakerKnockOutPlayoff : DrawMakerBase, IDrawMaker
 
             //Continue if either values is null
             if (match == null || roundForMatch == null) continue;
+            
             //Check which round it is
             bool isPlayoff = roundForMatch?.Equals(playoffRound) ?? false;
+            bool isLoser = roundForMatch?.Equals(loserRound) ?? false;
+            
             //winners in the mainRound progress to the next main round
             var winner = DetermineMatchWinner(scores, match);
             var loser = match.GetLosingSide(winner);
@@ -305,6 +387,7 @@ class DrawMakerKnockOutPlayoff : DrawMakerBase, IDrawMaker
 
             var nextRound = isPlayoff ? null : draw.Rounds.FirstOrDefault(r => r.Index == round + 1);
             nextRound ??= draw.Rounds.FirstOrDefault(r => r.Index == round + 1 && r.Playoff != null)?.Playoff;
+            
             // 0 goes to 0 in the next round, 1 goes to 0 in the next round, 2 goes to 1 in the next round
             // 3 goes to 1 in the next round
             bool isOdd = (match.Permutation?.Id ?? 0) % 2 > 0;
@@ -316,20 +399,38 @@ class DrawMakerKnockOutPlayoff : DrawMakerBase, IDrawMaker
 
             //winners goto the next round
             if (isPlayoff) winnersMatch?.SetAwaySide(winner);
+            else if (isLoser)
+            {
+                // Winners from loser round stay in loser bracket
+                if (isOdd) winnersMatch?.SetHomeSide(winner);
+                else winnersMatch?.SetAwaySide(winner);
+            }
             else
             {
+                // Main round winners advance to next main round
                 if (isOdd) winnersMatch?.SetHomeSide(winner);
                 else winnersMatch?.SetAwaySide(winner);
             }   
 
-
-            if (round == 1 && !isPlayoff)
+            if (round == 1 && !isPlayoff && !isLoser)
             {
-                //special case for the first round, all losers  from the main round
+                //special case for the first round, all losers from the main round
                 //goto the playoff round
                 var losingMatch = playoffRound?.Permutations.FirstOrDefault(p => p.Id == nextPermutationIndex)?.Matches.FirstOrDefault();
                 if (isOdd) losingMatch?.SetHomeSide(isOdd ? loser : null);
                 else losingMatch?.SetAwaySide(isOdd ? null : loser);
+                
+                // Also send losers to loser bracket
+                var loserMatch = loserRound?.Permutations.FirstOrDefault(p => p.Id == nextPermutationIndex / 2)?.Matches.FirstOrDefault();
+                if (nextPermutationIndex % 2 == 0) loserMatch?.SetHomeSide(loser);
+                else loserMatch?.SetAwaySide(loser);
+            }
+            else if (!isPlayoff && !isLoser)
+            {
+                // For subsequent rounds, losers from main rounds go to loser bracket
+                var loserMatch = loserRound?.Permutations.FirstOrDefault(p => p.Id == nextPermutationIndex / 2)?.Matches.FirstOrDefault();
+                if (nextPermutationIndex % 2 == 0) loserMatch?.SetHomeSide(loser);
+                else loserMatch?.SetAwaySide(loser);
             }
 
         }

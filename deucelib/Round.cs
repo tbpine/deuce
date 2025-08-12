@@ -8,6 +8,9 @@ public class Round
 {
     private List<Permutation> _perms = new();
     private Tournament? _tournament;
+
+    /// Gets or sets the loser round associated with this round, if applicable.
+    private Round? _loser;
     private Round? _playoff;
 
     private int _idx;
@@ -46,7 +49,12 @@ public class Round
     /// </summary>
     /// <value>A <see cref="Round"/> object representing a playoff or tiebreaker round, or null if none exists.</value>
     public Round? Playoff { get => _playoff; set => _playoff = value; }
-    
+
+    /// <summary>
+    /// Gets or sets the loser round associated with this round, if applicable.
+    /// </summary>
+    /// <value>A <see cref="Round"/> object representing a loser round, or null if none exists.</value>
+    public Round? Loser { get => _loser; set => _loser = value; }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="Round"/> class with the specified index.
