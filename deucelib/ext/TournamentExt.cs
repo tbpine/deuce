@@ -44,7 +44,7 @@ public static class TournamentExt
     private static TournamentDetail CreateDetailsForTennis(int entryType)
     {
         //For round robin, set specific values
-        if (entryType  == 1) // Assuming 1 is the ID for round robin
+        if (entryType == 1) // Assuming 1 is the ID for round robin
         {
             return new TournamentDetail
             {
@@ -66,4 +66,24 @@ public static class TournamentExt
             TeamSize = 1
         };
     }
+
+    public static void DebugOut(this Tournament t)
+    {
+
+        foreach(Round round in t.Draw?.Rounds ?? Enumerable.Empty<Round>())
+        {
+            Console.WriteLine($"Round Index: {round.Index}, Label: {round.Label}");
+            foreach (var perm in round.Permutations)
+            {
+                Console.WriteLine($"  Permutation ID: {perm.Id}");
+                foreach (var match in perm.Matches)
+                {
+                    Console.WriteLine($"Match ID: {match.Id}, Home Team: {match.GetHomeTeam()}, Away Team: {match.GetAwayTeam()}");
+                }
+            }
+        }
+
+    }
+   
+
 }

@@ -40,5 +40,31 @@ public static class DrawExt
         return null;
     }
 
+  public static (Match?, Round?) FindMatchEx(this Draw draw, int matchId)
+    {
+        //Check the main draw 
+        foreach (var round in draw.Rounds)
+        {
+            foreach (var permutation in round.Permutations)
+            {
+                var match = permutation.Matches.FirstOrDefault(m => m.Id == matchId);
+                if (match != null) return (match, round);
+            }
+
+            // Check the playoff rounds
+            if (round.Playoff != null)
+            {
+                foreach (var playoffPermutation in round.Playoff.Permutations)
+                {
+                    var match = playoffPermutation.Matches.FirstOrDefault(m => m.Id == matchId);
+                    if (match != null) return (match, round.Playoff);
+                }
+            }
+        }
+
+        //nothing found
+
+        return (null, null);
+    }
 
 }

@@ -1,4 +1,5 @@
 using deuce;
+using deuce.ext;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Linq;
 
@@ -35,7 +36,7 @@ namespace deuce_unit
             // Create unique random players by shuffling indices
             var players = new List<Player>();
             var availableIndices = Enumerable.Range(0, RandomUtil.GetNameCount()).ToList();
-            
+
             // Shuffle the indices to ensure random selection without duplicates
             Random random = new Random();
             for (int i = availableIndices.Count - 1; i > 0; i--)
@@ -43,7 +44,7 @@ namespace deuce_unit
                 int j = random.Next(i + 1);
                 (availableIndices[i], availableIndices[j]) = (availableIndices[j], availableIndices[i]);
             }
-            
+
             // Take the first noPlayers indices and create players
             for (int i = 0; i < noPlayers; i++)
             {
@@ -83,13 +84,12 @@ namespace deuce_unit
             IDrawMaker scheduler = factory.Create(tournament, gm);
 
             // Assign IDs to matches, permutations and rounds so scoring can be linked to them
-            int matchId = 1, permId = 1;
+            int matchId = 1;
             var roundsList = tournament.Draw.Rounds.ToList();
             foreach (var round in roundsList)
             {
                 foreach (var permutation in round.Permutations)
                 {
-                   // permutation.Id = permId++;
                     foreach (var match in permutation.Matches)
                     {
                         match.Id = matchId++;
@@ -101,26 +101,27 @@ namespace deuce_unit
                 {
                     foreach (var permutation in round.Playoff.Permutations)
                     {
-                       // permutation.Id = permId++;
                         foreach (var match in permutation.Matches)
                         {
                             match.Id = matchId++;
                         }
                     }
                 }
-            }
+           
 
+            }
+            int scoreId = 0;
             // Generate random scores for all rounds and progress the tournament
             List<Score> allScores = new List<Score>();
             for (int roundNumber = 1; roundNumber <= roundsList.Count; roundNumber++)
             {
+                //Main round !!!
                 var currentRound = roundsList.FirstOrDefault(r => r.Index == roundNumber);
-                if (currentRound == null) continue;
 
                 TestContext?.WriteLine($"Processing Round {roundNumber}");
 
                 // Generate scores for main round
-                foreach (var permutation in currentRound.Permutations)
+                foreach (var permutation in currentRound?.Permutations ?? Enumerable.Empty<Permutation>())
                 {
                     foreach (var match in permutation.Matches)
                     {
@@ -129,7 +130,7 @@ namespace deuce_unit
                             bool homeWins = RandomUtil.GetInt(2) == 0;
                             var score = new Score
                             {
-                                Id = match.Id,
+                                Id = scoreId++,
                                 Home = homeWins ? 6 : RandomUtil.GetInt(4),
                                 Away = !homeWins ? 6 : RandomUtil.GetInt(4),
                                 Permutation = permutation.Id,
@@ -144,35 +145,36 @@ namespace deuce_unit
 
                 scheduler.OnChange(tournament.Draw, roundNumber, roundNumber - 1, allScores);
                 allScores.Clear();
+                tournament.DebugOut();
 
-                // Generate scores for playoff round if it exists
-                if (currentRound.Playoff != null)
+
+                // Generate scores for Loser round if it exists
+                foreach (var permutation in currentRound?.Playoff?.Permutations ?? Enumerable.Empty<Permutation>())
                 {
-                    foreach (var permutation in currentRound.Playoff.Permutations)
+                    foreach (var match in permutation.Matches)
                     {
-                        foreach (var match in permutation.Matches)
+                        for (int set = 0; set < tournament.Details.Sets; set++)
                         {
-                            for (int set = 0; set < tournament.Details.Sets; set++)
+                            bool homeWins = RandomUtil.GetInt(2) == 0;
+                            var score = new Score
                             {
-                                bool homeWins = RandomUtil.GetInt(2) == 0;
-                                var score = new Score
-                                {
-                                    Id = match.Id,
-                                    Home = homeWins ? 6 : RandomUtil.GetInt(4),
-                                    Away = !homeWins ? 6 : RandomUtil.GetInt(4),
-                                    Permutation = permutation.Id,
-                                    Match = match.Id,
-                                    Round = roundNumber,
-                                    Set = set + 1
-                                };
-                                allScores.Add(score);
-                            }
+                                Id = scoreId++,
+                                Home = homeWins ? 6 : RandomUtil.GetInt(4),
+                                Away = !homeWins ? 6 : RandomUtil.GetInt(4),
+                                Permutation = permutation.Id,
+                                Match = match.Id,
+                                Round = roundNumber,
+                                Set = set + 1
+                            };
+                            allScores.Add(score);
                         }
                     }
                 }
 
                 // Advance the tournament for this round
                 scheduler.OnChange(tournament.Draw, roundNumber, roundNumber - 1, allScores);
+                tournament.DebugOut();
+
             }
 
             // Verify final state
@@ -274,7 +276,7 @@ namespace deuce_unit
             {
                 var round = roundsList[i];
                 TestContext?.WriteLine($"Round {round.Index}: Main={round.Permutations.Count()} matches, Playoff={round.Playoff?.Permutations.Count() ?? 0} matches");
-                
+
                 Assert.IsTrue(round.Permutations.Any(), $"Round {round.Index} should have main matches");
                 Assert.IsNotNull(round.Playoff, $"Round {round.Index} should have a playoff component");
                 Assert.IsTrue(round.Playoff.Permutations.Any(), $"Round {round.Index} playoff should have matches");

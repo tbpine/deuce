@@ -50,22 +50,6 @@ public static class RoundEx
             }
 
         }
-
-        //If the match is not in the playoff round, check the loser round
-
-        if (round.Loser is not null)
-        {
-            foreach (var p in round.Loser.Permutations)
-            {
-                foreach (Match m in p.Matches)
-                {
-                    if (m.Id == matchId)
-                        return (m, round.Loser);
-                }
-            }
-
-        }
-
         return (null, null); // Not found
     }
 
