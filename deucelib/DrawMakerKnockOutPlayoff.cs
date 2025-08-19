@@ -39,7 +39,7 @@ class DrawMakerKnockOutPlayoff : DrawMakerBase, IDrawMaker
         _teams.Sort((x, y) => (int)(y.Ranking - x.Ranking));
         for (int i = 0; i < _teams.Count; i++) _teams[i].Index = i + 1;
 
-        int noRounds = (int)Math.Log2(_teams.Count);
+        int noRounds = (int)Math.Log2(_teams.Count) + 1;
 
         int noPermutations = _teams.Count / 2;
 
@@ -65,9 +65,12 @@ class DrawMakerKnockOutPlayoff : DrawMakerBase, IDrawMaker
             Debug.Write($"Round {r}:");
             noPermutations = (int)(_teams.Count / Math.Pow(2, r));
 
+            if (r == noRounds) noPermutations = 1; // Last round always has one match
+
             CreateMainTournamentRound(draw, r, noPermutations, noRounds);
 
-            CreatePlayoffRound(draw, r, noPermutations, GetPlayoffRoundLabel(noRounds, r));
+            if (r < noRounds)
+                CreatePlayoffRound(draw, r, noPermutations, GetPlayoffRoundLabel(noRounds, r));
 
             Debug.Write($"\n");
         }
@@ -204,11 +207,13 @@ class DrawMakerKnockOutPlayoff : DrawMakerBase, IDrawMaker
             Round? roundForMatch = matchRound.Item2;
 
             //Continue if either values is null
-            if (match == null || roundForMatch == null || mainRound is null || playoffRound is null )
+            if (match == null || roundForMatch == null || mainRound is null )
                 continue;
 
+            if (round < draw.Rounds.Count() && playoffRound is null) continue;
+            
             //Check which round it is
-            bool isPlayoff = roundForMatch?.Equals(playoffRound) ?? false;
+                bool isPlayoff = roundForMatch?.Equals(playoffRound) ?? false;
 
             //winners in the mainRound progress to the next main round
             //Get a list of set scores for the match
@@ -259,8 +264,9 @@ class DrawMakerKnockOutPlayoff : DrawMakerBase, IDrawMaker
 
         //Losers goto the losers round for the first round. Else, they goto the playoff
         //round
+        int nextPermIdxPlayoff = round.Index == 1 ?  nextPermutationIndex:  match.Permutation?.Id ?? 0;
         SendPlayerToMatch(draw, round.Playoff ?? throw new InvalidOperationException("Missing playoff round"),
-        nextPermutationIndex, loser, round.Index == 1 ? isOdd : false);
+        nextPermIdxPlayoff, loser, round.Index == 1 ? isOdd : false);
 
 
     }
@@ -271,8 +277,11 @@ class DrawMakerKnockOutPlayoff : DrawMakerBase, IDrawMaker
         //Get the next round
         var nextRound = draw.Rounds.FirstOrDefault(r => r.Index == round.Index + 1)?.Playoff;
         //If the next round is missing, return
-        if (nextRound == null) return;
-
+        if (nextRound == null)
+        {
+            nextRound = draw.Rounds.FirstOrDefault(r => r.Index == round.Index + 1);
+        }
+        
         //Go straight across
         int nextPermutationIndex = match.Permutation?.Id ?? 0;
         //Find the next match in the losers round of the next round

@@ -145,8 +145,6 @@ namespace deuce_unit
 
                 scheduler.OnChange(tournament.Draw, roundNumber, roundNumber - 1, allScores);
                 allScores.Clear();
-                tournament.DebugOut();
-
 
                 // Generate scores for Loser round if it exists
                 foreach (var permutation in currentRound?.Playoff?.Permutations ?? Enumerable.Empty<Permutation>())
@@ -173,7 +171,7 @@ namespace deuce_unit
 
                 // Advance the tournament for this round
                 scheduler.OnChange(tournament.Draw, roundNumber, roundNumber - 1, allScores);
-                tournament.DebugOut();
+                allScores.Clear();
 
             }
 
