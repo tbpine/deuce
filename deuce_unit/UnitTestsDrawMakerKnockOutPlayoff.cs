@@ -97,22 +97,19 @@ namespace deuce_unit
                 }
 
                 // Also assign IDs to playoff round if it exists
-                if (round.Playoff != null)
+                foreach (var permutation in round.Playoff?.Permutations ?? Enumerable.Empty<Permutation>())
                 {
-                    foreach (var permutation in round.Playoff.Permutations)
+                    foreach (var match in permutation.Matches)
                     {
-                        foreach (var match in permutation.Matches)
-                        {
-                            match.Id = matchId++;
-                        }
+                        match.Id = matchId++;
                     }
                 }
-           
+
 
             }
             int scoreId = 0;
             // Generate random scores for all rounds and progress the tournament
-            List<Score> allScores = new List<Score>();
+            List<Score> scores = new List<Score>();
             for (int roundNumber = 1; roundNumber <= roundsList.Count; roundNumber++)
             {
                 //Main round !!!
@@ -120,7 +117,7 @@ namespace deuce_unit
 
                 TestContext?.WriteLine($"Processing Round {roundNumber}");
 
-                // Generate scores for main round
+                // Create random scores for the main round
                 foreach (var permutation in currentRound?.Permutations ?? Enumerable.Empty<Permutation>())
                 {
                     foreach (var match in permutation.Matches)
@@ -138,13 +135,25 @@ namespace deuce_unit
                                 Round = roundNumber,
                                 Set = set + 1
                             };
-                            allScores.Add(score);
+                            scores.Add(score);
                         }
                     }
                 }
 
-                scheduler.OnChange(tournament.Draw, roundNumber, roundNumber - 1, allScores);
-                allScores.Clear();
+                scheduler.OnChange(tournament.Draw, roundNumber, roundNumber - 1, scores);
+                //Assert that winners have progressed to the next round
+                var nextRound = roundsList.FirstOrDefault(r => r.Index == roundNumber + 1);
+                //Matches in the next round have participants
+                if (nextRound != null)
+                    Assert.IsTrue(nextRound?.Permutations?.All(p=>p.Matches.All(m=>!(m.Home.FirstOrDefault()?.Bye??true)  && !(m.Away.FirstOrDefault()?.Bye??true))), "There are empty teams in the next round");
+                //if it's the first round, then matches in the loser round have participants
+                if (roundNumber == 1)
+                    Assert.IsTrue(currentRound?.Playoff?.Permutations?.All(p => p.Matches.All(m => !(m.Home.FirstOrDefault()?.Bye ?? true) && !(m.Away.FirstOrDefault()?.Bye ?? true))), "Losers not in the playoff round");
+                else if  (currentRound?.Playoff is not null)
+                    //Losers are in the home side playoff round
+                    Assert.IsTrue(currentRound?.Playoff?.Permutations?.All(p => p.Matches.All(m => !(m.Home.FirstOrDefault()?.Bye ?? true))), "Losers not in the playoff round");
+
+                scores.Clear();
 
                 // Generate scores for Loser round if it exists
                 foreach (var permutation in currentRound?.Playoff?.Permutations ?? Enumerable.Empty<Permutation>())
@@ -164,20 +173,26 @@ namespace deuce_unit
                                 Round = roundNumber,
                                 Set = set + 1
                             };
-                            allScores.Add(score);
+                            scores.Add(score);
                         }
                     }
                 }
 
                 // Advance the tournament for this round
-                scheduler.OnChange(tournament.Draw, roundNumber, roundNumber - 1, allScores);
-                allScores.Clear();
+                scheduler.OnChange(tournament.Draw, roundNumber, roundNumber - 1, scores);
+                //Winners in the playoff round progress to the away side of the next round
+                //playoff matches.
+                if (roundNumber < roundsList.Count-1)
+                    Assert.IsTrue(nextRound?.Playoff?.Permutations?.All(p => p.Matches.All(m => !(m.Away.FirstOrDefault()?.Bye ?? true))), "Losers did not progress to the playoff round in the next round");
+                else
+                    Assert.IsTrue(currentRound?.Permutations?.All(p => p.Matches.All(m => !(m.Away.FirstOrDefault()?.Bye ?? true))), "Losers did not progress to the playoff round in the next round");
+                scores.Clear();
 
             }
 
             // Verify final state
             TestContext?.WriteLine($"Total rounds: {tournament.Draw.Rounds.Count()}");
-            TestContext?.WriteLine($"Total scores generated: {allScores.Count}");
+            TestContext?.WriteLine($"Total scores generated: {scores.Count}");
             TestContext?.WriteLine("Tournament progression completed successfully");
 
             Assert.IsTrue(true, "Tournament should complete without errors");

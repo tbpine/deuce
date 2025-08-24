@@ -26,6 +26,8 @@ public class PagenationInfo
     protected int _pagesY;
     protected int _rowOffset;
 
+    protected bool _isPlayoffRound;
+
     // Properties (single line)
     public int PageXIndex { get => _pageXIndex; set => _pageXIndex = value; }
     public int PageYIndex { get => _pageYIndex; set => _pageYIndex = value; }
@@ -57,7 +59,7 @@ public class PagenationInfo
     /// <param name="rowOffset">The row offset for the layout.</param>
     /// <param name="pageIndex"> The index of the page.</param>
     public PagenationInfo(int pageXIndex, int pageYIndex, int round, RectangleF rectangle, int rowOffset,
-    int pageIndex = 1)
+    int pageIndex = 1, bool isPlayoffRound = false)
         : this()
     {
         _pageXIndex = pageXIndex;
@@ -67,6 +69,7 @@ public class PagenationInfo
         _rowOffset = rowOffset;
         _pageIndex = pageIndex;
         _elementType = PageElementType.Match;
+        _isPlayoffRound = isPlayoffRound;
     }
 
     /// <summary>
@@ -80,7 +83,7 @@ public class PagenationInfo
     /// <param name="pageIndex">The index of the page.</param>
     /// <param name="elementType">The type of element this represents.</param>
     public PagenationInfo(int pageXIndex, int pageYIndex, int round, RectangleF rectangle, string text,
-    int pageIndex = 1, PageElementType elementType = PageElementType.RoundHeader)
+    int pageIndex = 1, PageElementType elementType = PageElementType.RoundHeader, bool isPlayoffRound = false)
         : this()
     {
         _pageXIndex = pageXIndex;
@@ -91,5 +94,6 @@ public class PagenationInfo
         _pageIndex = pageIndex;
         _elementType = elementType;
         _rowOffset = 0; // Not relevant for headers
+        _isPlayoffRound = isPlayoffRound;
     }
 }
