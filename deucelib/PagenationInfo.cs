@@ -1,5 +1,6 @@
 //Create a pagenation info class to manage pagination details
 using System.Drawing;
+using iText.Commons.Actions.Producer;
 namespace deuce;
 
 /// <summary>
@@ -41,6 +42,7 @@ public class PagenationInfo
     public int RowOffset { get => _rowOffset; set => _rowOffset = value; }
 
     public int PageIndex { get => _pageIndex; set => _pageIndex = value; }
+    public bool IsPlayoffRound { get => _isPlayoffRound;}
 
     /// <summary>
     /// Default constructor for PagenationInfo.
