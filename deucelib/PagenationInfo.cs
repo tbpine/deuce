@@ -9,7 +9,8 @@ namespace deuce;
 public enum PageElementType
 {
     Match,
-    RoundHeader
+    RoundHeader,
+    RoundLabel
 }
 
 public class PagenationInfo
@@ -84,6 +85,7 @@ public class PagenationInfo
     /// <param name="text">The text to display in the header.</param>
     /// <param name="pageIndex">The index of the page.</param>
     /// <param name="elementType">The type of element this represents.</param>
+    /// <param name="isPlayoffRound">Whether this is part of a playoff round.</param>
     public PagenationInfo(int pageXIndex, int pageYIndex, int round, RectangleF rectangle, string text,
     int pageIndex = 1, PageElementType elementType = PageElementType.RoundHeader, bool isPlayoffRound = false)
         : this()

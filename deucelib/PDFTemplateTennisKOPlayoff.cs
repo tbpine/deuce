@@ -3,7 +3,6 @@ using iText.Kernel.Pdf;
 using iText.Layout;
 using iText.Layout.Element;
 using deuce.ext;
-using DocumentFormat.OpenXml.Spreadsheet;
 
 namespace deuce;
 
@@ -79,7 +78,7 @@ public class PDFTemplateTennisKOPlayoff : IPDFTemplate
                             where p.IsPlayoffRound 
                             group p by p.PageIndex into g
                             select new { PageIndex = g.Key, Layouts = g.ToList() };
-        foreach (var group in groupedLayout)
+        foreach (var group in groupedLayoutPlayoff)
         {
             //Add a new page for each group
             pdfdoc.AddNewPage();
@@ -122,7 +121,7 @@ public class PDFTemplateTennisKOPlayoff : IPDFTemplate
             {
                 PagenationInfo pi = layout[i];
                 
-                // Handle header elements differently from match elements
+                // Handle header and label elements differently from match elements
                 if (pi.ElementType == PageElementType.RoundHeader)
                 {
                     // Create a simple paragraph for the header
@@ -136,6 +135,20 @@ public class PDFTemplateTennisKOPlayoff : IPDFTemplate
                         pi.Rectangle.Width);
                     
                     doc.Add(headerParagraph);
+                }
+                else if (pi.ElementType == PageElementType.RoundLabel)
+                {
+                    // Create a paragraph for the round label (Main/Playoff)
+                    float labelFontSize = 16f; // Slightly larger font size for labels
+                    Paragraph labelParagraph = new Paragraph(pi.Text)
+                        .SetFontSize(labelFontSize)
+                        .SetTextAlignment(iText.Layout.Properties.TextAlignment.CENTER);
+                    
+                    labelParagraph.SetFixedPosition(pageNo, pi.Rectangle.Left, 
+                        pdfdoc.GetDefaultPageSize().GetHeight() - pi.Rectangle.Top - pi.Rectangle.Height, 
+                        pi.Rectangle.Width);
+                    
+                    doc.Add(labelParagraph);
                 }
                 else // Handle match elements
                 {

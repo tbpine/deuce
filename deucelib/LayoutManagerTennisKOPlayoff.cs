@@ -53,39 +53,42 @@ public class LayoutManagerTennisKOPlayoff : LayoutManagerDefault
     /// </remarks>
     public override object ArrangeLayout(Tournament tournament)
     {
+        //2 columns per page and  4 matches per page
+        _maxCols = 2;
+        //2 rows for the main round, and 2 for the playoff round
+        _maxRows = 4;
+
         //Assumption: every thing is a multiple of 2.
 
         //Define "totalMatches" as the number of matches in the first round
         int totalMatches = tournament.Draw?.Rounds.FirstOrDefault(e => e.Index == 1)?.Permutations.Sum(e => e.Matches.Count) ?? 0;
 
         //the ladder algo
-        //Work out the number of steps
+        //1 column for each round, 
         int totalCols = (int)Math.Log2(totalMatches) + 1;
         //Work out how many pages are needed with blocks of rounds
-        int blocksOfCols = (int)Math.Ceiling((double)totalCols / _maxCols);
+        //But, make each page fit one round
+        int roundsPerPage = totalCols;
         //Save page index
         int pageIndex = 1;
         //Debug out
-        Console.WriteLine($"Total Matches: {totalMatches}, Total Columns: {totalCols}, Blocks of Columns: {blocksOfCols}");
+        Console.WriteLine($"Total Matches: {totalMatches}, Total Columns: {totalCols}, Blocks of Columns: {roundsPerPage}");
 
         List<PagenationInfo> layout = new List<PagenationInfo>();
 
-        for (int i = 0; i < blocksOfCols; i++)
+        for (int i = 0; i < roundsPerPage ; i++)
         {
-            //find the round range for this block
-            int startRound = i * _maxCols; // zero indexed
-            int endRound = Math.Min(startRound + _maxCols - 1, totalCols - 1);
-            //Find the number of matches for the start round of this block
-            int matchesInStartRound = (int)(totalMatches / Math.Pow(2, startRound));
+            //Find the number of matches in the round
+            int matchesInRound = (int)(totalMatches / Math.Pow(2, i));
             //Work out how many pages needed for this block
-            int totalPages = (int)Math.Ceiling((double)matchesInStartRound / _maxRows);
-            int matchesPerPage = Math.Min(matchesInStartRound, _maxRows);
+            int totalPages = (int)Math.Ceiling((double)matchesInRound / _maxRows);
+            int matchesPerPage = Math.Min(matchesInRound, _maxRows);
 
             for (int j = 0; j < totalPages; j++)
             {
                 //call "ArrangePageLayout" to arrange the layout for this page
                 //Pass the layout, start round, end round, and page index
-                ArrangePageLayout(layout, startRound, endRound, pageIndex, matchesPerPage, totalMatches, j);
+                ArrangePageLayout(layout, i, i, pageIndex, matchesPerPage, totalMatches, j);
                 pageIndex++;
             }
         }
@@ -97,9 +100,9 @@ public class LayoutManagerTennisKOPlayoff : LayoutManagerDefault
         //Work out the number of steps
          totalCols = (int)Math.Log2(totalMatches) + 1;
         //Work out how many pages are needed with blocks of rounds
-         blocksOfCols = (int)Math.Ceiling((double)totalCols / _maxCols);
+         roundsPerPage = (int)Math.Ceiling((double)totalCols / _maxCols);
 
-        for (int i = 0; i < blocksOfCols; i++)
+        for (int i = 0; i < roundsPerPage; i++)
         {
             //find the round range for this block
             int startRound = i * _maxCols; // zero indexed
@@ -166,17 +169,28 @@ public class LayoutManagerTennisKOPlayoff : LayoutManagerDefault
         //Space evenly horizontally
         float recWidth = (drawArea.Width - _maxCols * (_tablePaddingLeft + _tablePaddingRight)) / _maxCols;
 
+        // Add round label rectangle in the middle of the header
+        float labelWidth = 120f;
+        float labelHeight = headerHeight; // Use the same height as the header
+        string labelText = isPlayoffRound ? "Loser" : "Winners";
+        RectangleF labelRect = new RectangleF(
+            (_pageWidth - labelWidth) / 2f, // Center horizontally
+            _pageTopMargin, // Position at the top margin (same as headers)
+            labelWidth,
+            labelHeight);
+        layout.Add(new PagenationInfo(0, 0, 0, labelRect, labelText, pageIndex, PageElementType.RoundLabel, isPlayoffRound));
+
         // Add round headers at the top of the page
-        for (int r = 0; r <= (endRound - startRound); r++)
+        for (int r = 0; r <= 1; r++)
         {
-            int currentRound = startRound + r ; // Convert to 1-indexed round
-            int matchesInRound = totalMatches / (int)Math.Pow(2, currentRound);
+            int currentRound = startRound  ; // Convert to 1-indexed round
+            int matchesInRound = totalMatches / (int)Math.Pow(2, startRound);
             //Calculate number of players
             int noPlayers = matchesInRound * 2; // Each match has two players
-            string headerText = $"Round of {noPlayers}"; // Number of matches times 2
-            if (noPlayers == 2) headerText = "Final"; // Special case for final round
-            else if (noPlayers == 4) headerText = "Semi-Final"; // Special case for semi-finals
-            else if (noPlayers == 8) headerText = "Quarter-Final"; // Special case for quarter-finals
+            string headerText = r == 0 ? $"Round #{startRound}" : ""; // Number of matches times 2
+            // if (noPlayers == 2) headerText = "Final"; // Special case for final round
+            // else if (noPlayers == 4) headerText = "Semi-Final"; // Special case for semi-finals
+            // else if (noPlayers == 8) headerText = "Quarter-Final"; // Special case for quarter-finals
 
             RectangleF headerRect = new RectangleF(
                 _pageLeftMargin + r * (recWidth + _tablePaddingLeft),
@@ -201,8 +215,8 @@ public class LayoutManagerTennisKOPlayoff : LayoutManagerDefault
             layout.Add(new PagenationInfo(0, 0, startRound + 1, rect, rowOffset, pageIndex, isPlayoffRound));
         }
 
-        //first round on the page is zero, so we start at 1
-        for (int r = 1; r <= (endRound - startRound); r++)
+        //Columns passed the first
+        for (int r = 1; r <= 1; r++)
         {
             int rows = rowsInFirstColumn / (int)Math.Pow(2, r);
             //Find the previous round
@@ -249,19 +263,25 @@ public class LayoutManagerTennisKOPlayoff : LayoutManagerDefault
     }
 
     /// <summary>
-    /// Debug method to verify that round headers are being created correctly.
-    /// This method demonstrates the new header functionality.
+    /// Debug method to verify that round headers and labels are being created correctly.
+    /// This method demonstrates the new header and label functionality.
     /// </summary>
     /// <param name="layout">The layout list to inspect</param>
-    /// <returns>String describing the headers found</returns>
+    /// <returns>String describing the headers and labels found</returns>
     public static string DebugHeaders(List<PagenationInfo> layout)
     {
         var headers = layout.Where(p => p.ElementType == PageElementType.RoundHeader).ToList();
-        var result = $"Found {headers.Count} round headers:\n";
+        var labels = layout.Where(p => p.ElementType == PageElementType.RoundLabel).ToList();
+        var result = $"Found {headers.Count} round headers and {labels.Count} round labels:\n";
         
         foreach (var header in headers)
         {
-            result += $"Round {header.Round}: '{header.Text}' at ({header.Rectangle.X}, {header.Rectangle.Y})\n";
+            result += $"Round Header {header.Round}: '{header.Text}' at ({header.Rectangle.X}, {header.Rectangle.Y})\n";
+        }
+        
+        foreach (var label in labels)
+        {
+            result += $"Round Label on Page {label.PageIndex}: '{label.Text}' at ({label.Rectangle.X}, {label.Rectangle.Y})\n";
         }
         
         return result;

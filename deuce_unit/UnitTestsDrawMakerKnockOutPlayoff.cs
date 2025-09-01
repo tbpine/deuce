@@ -110,6 +110,7 @@ namespace deuce_unit
             int scoreId = 0;
             // Generate random scores for all rounds and progress the tournament
             List<Score> scores = new List<Score>();
+            List<Score> allScores = new List<Score>();
             for (int roundNumber = 1; roundNumber <= roundsList.Count; roundNumber++)
             {
                 //Main round !!!
@@ -139,17 +140,18 @@ namespace deuce_unit
                         }
                     }
                 }
-
+                allScores.AddRange(scores);
                 scheduler.OnChange(tournament.Draw, roundNumber, roundNumber - 1, scores);
+
                 //Assert that winners have progressed to the next round
                 var nextRound = roundsList.FirstOrDefault(r => r.Index == roundNumber + 1);
                 //Matches in the next round have participants
                 if (nextRound != null)
-                    Assert.IsTrue(nextRound?.Permutations?.All(p=>p.Matches.All(m=>!(m.Home.FirstOrDefault()?.Bye??true)  && !(m.Away.FirstOrDefault()?.Bye??true))), "There are empty teams in the next round");
+                    Assert.IsTrue(nextRound?.Permutations?.All(p => p.Matches.All(m => !(m.Home.FirstOrDefault()?.Bye ?? true) && !(m.Away.FirstOrDefault()?.Bye ?? true))), "There are empty teams in the next round");
                 //if it's the first round, then matches in the loser round have participants
                 if (roundNumber == 1)
                     Assert.IsTrue(currentRound?.Playoff?.Permutations?.All(p => p.Matches.All(m => !(m.Home.FirstOrDefault()?.Bye ?? true) && !(m.Away.FirstOrDefault()?.Bye ?? true))), "Losers not in the playoff round");
-                else if  (currentRound?.Playoff is not null)
+                else if (currentRound?.Playoff is not null)
                     //Losers are in the home side playoff round
                     Assert.IsTrue(currentRound?.Playoff?.Permutations?.All(p => p.Matches.All(m => !(m.Home.FirstOrDefault()?.Bye ?? true))), "Losers not in the playoff round");
 
@@ -177,12 +179,13 @@ namespace deuce_unit
                         }
                     }
                 }
-
+                allScores.AddRange(scores);
                 // Advance the tournament for this round
                 scheduler.OnChange(tournament.Draw, roundNumber, roundNumber - 1, scores);
+
                 //Winners in the playoff round progress to the away side of the next round
                 //playoff matches.
-                if (roundNumber < roundsList.Count-1)
+                if (roundNumber < roundsList.Count - 1)
                     Assert.IsTrue(nextRound?.Playoff?.Permutations?.All(p => p.Matches.All(m => !(m.Away.FirstOrDefault()?.Bye ?? true))), "Losers did not progress to the playoff round in the next round");
                 else
                     Assert.IsTrue(currentRound?.Permutations?.All(p => p.Matches.All(m => !(m.Away.FirstOrDefault()?.Bye ?? true))), "Losers did not progress to the playoff round in the next round");
@@ -196,6 +199,12 @@ namespace deuce_unit
             TestContext?.WriteLine("Tournament progression completed successfully");
 
             Assert.IsTrue(true, "Tournament should complete without errors");
+
+
+            string filename = $"{tournament.Label}.pdf";
+            using FileStream pdfFile = new FileStream(filename, FileMode.Create, FileAccess.Write);
+            PdfPrinter printer = new PdfPrinter(tournament.Draw, new PDFTemplateFactory());
+            printer.Print(pdfFile, tournament, tournament.Draw, 1, allScores);
         }
 
         [TestMethod]
@@ -297,6 +306,35 @@ namespace deuce_unit
 
             TestContext?.WriteLine("Tournament structure verification completed successfully");
             Assert.IsTrue(true, "Tournament structure should be valid");
+        }
+
+       
+        /// <summary>
+        /// Helper method to display team information
+        /// </summary>
+        /// <param name="team">The team to display</param>
+        /// <returns>String representation of the team</returns>
+        private string GetTeamDisplay(IEnumerable<Player> team)
+        {
+            if (team == null || !team.Any())
+                return "[Empty]";
+            
+            var players = team.ToList();
+            if (players.Count == 1)
+            {
+                var player = players[0];
+                // Check if this is a BYE player (you may need to adjust this logic based on your BYE implementation)
+                if (string.IsNullOrEmpty(player.First) && string.IsNullOrEmpty(player.Last))
+                    return "[BYE]";
+                return $"{player.First ?? "Unknown"} {player.Last ?? ""}".Trim();
+            }
+            
+            // For doubles or team play
+            var playerNames = players.Where(p => !string.IsNullOrEmpty(p.First) || !string.IsNullOrEmpty(p.Last))
+                                   .Select(p => $"{p.First} {p.Last}".Trim())
+                                   .ToList();
+            
+            return playerNames.Any() ? string.Join(" & ", playerNames) : "[BYE]";
         }
     }
 }
