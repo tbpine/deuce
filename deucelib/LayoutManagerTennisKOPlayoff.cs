@@ -38,25 +38,21 @@ public class LayoutManagerTennisKOPlayoff : LayoutManagerDefault
     }
 
     /// <summary>
-    /// Arranges the layout for a Tennis Knockout tournament bracket.
-    /// Creates a ladder-style tournament layout with automatic pagination based on the number of matches.
+    /// Arrange the draw into pages. 
     /// </summary>
-    /// <param name="tournament">The tournament object containing schedule and match information</param>
-    /// <returns>A list of PagenationInfo objects representing the layout of all tournament pages</returns>
-    /// <remarks>
-    /// The algorithm works by:
-    /// 1. Calculating the total number of rounds based on first round matches
-    /// 2. Grouping rounds into column blocks that fit within page constraints
-    /// 3. Creating pages for each block with appropriate match positioning
-    /// 
-    /// Assumes the tournament structure follows powers of 2 (8, 16, 32 players, etc.)
-    /// </remarks>
+    /// <param name="tournament">Tournament object containing the draw information</param>
+    /// <returns>List of PagenationInfo objects representing the layout of all tournament pages</returns>
     public override object ArrangeLayout(Tournament tournament)
     {
-        //2 columns per page and  4 matches per page
-        _maxCols = 2;
-        //2 rows for the main round, and 2 for the playoff round
-        _maxRows = 4;
+        //Define the rules for each page:
+        //Has max _maxcols number of columns
+        //has max _maxrows of games
+        //Reserve room at the top for headers
+
+        //Work out how many blocks of columns are required
+        //For each block, create pages for the main round
+        //and the playoff round
+
 
         //Assumption: every thing is a multiple of 2.
 
@@ -68,14 +64,14 @@ public class LayoutManagerTennisKOPlayoff : LayoutManagerDefault
         int totalCols = (int)Math.Log2(totalMatches) + 1;
         //Work out how many pages are needed with blocks of rounds
         //But, make each page fit one round
-        int roundsPerPage = totalCols;
+        int roundsPerPage = (int)Math.Ceiling((double)totalCols / _maxCols);
         //Save page index
         int pageIndex = 1;
         //Debug out
         Console.WriteLine($"Total Matches: {totalMatches}, Total Columns: {totalCols}, Blocks of Columns: {roundsPerPage}");
 
         List<PagenationInfo> layout = new List<PagenationInfo>();
-
+        //Blocks of cols 
         for (int i = 0; i < roundsPerPage ; i++)
         {
             //Find the number of matches in the round
