@@ -30,23 +30,13 @@ public class PDFTemplateTennisKOPlayoff : IPDFTemplate
         );
     }
 
-    /// <summary>
-    /// Generates a PDF document for a tennis knockout tournament.
-    /// This method arranges matches in a knockout format,
-    /// displaying home and away teams along with their scores.
-    /// The layout is determined by the provided tournament schedule.
-    /// The scores are optional and can be provided to display match results.
-    /// </summary>
-    /// <param name="doc"> </param>
-    /// <param name="pdfdoc"></param>
-    /// <param name="tournament">
-    /// The tournament object containing details and schedule.
-    /// <param name="roundNo">The round number to generate the PDF for. (not used in this implementation)
-    /// <param name="scores"> Optional list of scores for the matches.
-    /// <exception cref="ArgumentException"></exception>
     public void Generate(Document doc, PdfDocument pdfdoc, Tournament tournament, int roundNo,
     List<Score>? scores = null)
     {
+        //What inputs from the layout have i got ?
+        //Can i find the match that i'm meant to be printing ?
+        // If i can't, then should i change the layout manager.
+
         Draw s = tournament.Draw ?? throw new ArgumentException("Schedule cannot be null for PDF generation.");
 
         pdfdoc.SetDefaultPageSize(PageSize.A4.Rotate());
@@ -57,10 +47,12 @@ public class PDFTemplateTennisKOPlayoff : IPDFTemplate
         // The first column is wider for team names, the rest are equal for scores
         List<float> widths = new List<float>();
         for (int c = 0; c < (tournament.Details.Sets + 1); c++) widths.Add(c == 0 ? 2f : 1f);
-        //Store the page number
-        //LINQ to group by page index
+
+        //Seperate printing for  playoff rounds from the main rounds
+        //Print the main round first.
+        //Group by page
         var groupedLayout = from p in layout
-                            where !p.IsPlayoffRound 
+                            where !p.IsPlayoffRound && !p.IsFinalMatch
                             group p by p.PageIndex into g
                             select new { PageIndex = g.Key, Layouts = g.ToList() };
         foreach (var group in groupedLayout)
@@ -69,45 +61,40 @@ public class PDFTemplateTennisKOPlayoff : IPDFTemplate
             pdfdoc.AddNewPage();
             //Print the matches on this page
             //Find ind matches associated with this layout
-            
-            PrintPage(group.Layouts, s, tournament, scores??new(), pdfdoc, doc, widths, group.PageIndex);
+
+            PrintPage(group.Layouts, s, tournament, scores ?? new(), pdfdoc, doc, widths, group.PageIndex);
         }
 
         //Print the playoff rounds
         var groupedLayoutPlayoff = from p in layout
-                            where p.IsPlayoffRound 
-                            group p by p.PageIndex into g
-                            select new { PageIndex = g.Key, Layouts = g.ToList() };
+                                   where p.IsPlayoffRound && !p.IsFinalMatch
+                                   group p by p.PageIndex into g
+                                   select new { PageIndex = g.Key, Layouts = g.ToList() };
         foreach (var group in groupedLayoutPlayoff)
         {
             //Add a new page for each group
             pdfdoc.AddNewPage();
             //Print the matches on this page
             //Find ind matches associated with this layout
-            
-            PrintPage(group.Layouts, s, tournament, scores??new(), pdfdoc, doc, widths, group.PageIndex);
+
+            PrintPage(group.Layouts, s, tournament, scores ?? new(), pdfdoc, doc, widths, group.PageIndex);
+        }
+
+        //Print the final match page
+       
+        //Print the playoff rounds
+        var groupFinalMatch = from p in layout
+                                   where p.IsFinalMatch
+                                   group p by p.PageIndex into g
+                                   select new { PageIndex = g.Key, Layouts = g.ToList() };
+        if (groupFinalMatch.FirstOrDefault() != null)
+        {
+            pdfdoc.AddNewPage();
+            PrintPage(groupFinalMatch.First().Layouts, s, tournament, scores ?? new(), pdfdoc, doc, widths, groupFinalMatch.First().PageIndex);
         }
 
     }
 
-    /// <summary>
-    /// Prints the matches on a specific page of the PDF document.
-    /// This method iterates through the layout information,    
-    /// creating a table for each match.
-    /// It retrieves match details, including home and away teams,
-    /// and their scores.
-    /// The table is styled with fixed positions and font sizes.
-    /// It handles exceptions for each match to ensure that
-    /// the PDF generation continues even if some matches have issues.
-    /// </summary>
-    /// <param name="layout"> The layout information containing match rectangles and indices.</param>
-    /// <param name="draw">The schedule object containing match details.</param>
-    /// <param name="tournament">The tournament object containing tournament details.</param>
-    /// <param name="scores">The list of scores for the matches.</param>
-    /// <param name="pdfdoc">The PDF document to add the matches to.</param>
-    /// <param name="doc">The document object for layout and styling.</param>
-    /// <param name="widths">The column widths for the match tables.</param>
-    /// <param name="pageNo"> The page number for the current layout.</param>
     private void PrintPage(List<PagenationInfo> layout, Draw draw, Tournament tournament, List<Score> scores, PdfDocument pdfdoc, Document doc,
     List<float> widths, int pageNo)
     {
@@ -154,9 +141,11 @@ public class PDFTemplateTennisKOPlayoff : IPDFTemplate
                 {
                     //Find how many rows (matches) are in the round
 
-                    
-                    Match? match = pi.IsPlayoffRound ?   draw.Rounds.FirstOrDefault(e => e.Index == pi.Round)?.Playoff?.GetAtIndex(pi.RowOffset)?.Matches.FirstOrDefault() :
-                      draw.Rounds.FirstOrDefault(e => e.Index == pi.Round)?.GetAtIndex(pi.RowOffset)?.Matches.FirstOrDefault();
+                    var round = pi.IsPlayoffRound ? draw.Rounds.FirstOrDefault(e => e.Index == pi.Round)?.Playoff :
+                             draw.Rounds.FirstOrDefault(e => e.Index == pi.Round);
+
+                    Match? match = round?.Permutations.FirstOrDefault(p => p.Id == pi.RowOffset)?.Matches.FirstOrDefault(); 
+
                     //Find a list of scores because of multiple sets.
                     //Match is unique accross the tournament.
 
@@ -170,7 +159,7 @@ public class PDFTemplateTennisKOPlayoff : IPDFTemplate
                     float fontSizePx = pi.Rectangle.Height / 4.2f; // reduce divisor for smaller font
                     float fontSizePt = fontSizePx * 72f / 96f;
                     //Add a cell for the home team's CSV player
-                    var homeText = match?.Home?.FirstOrDefault()?.Team?.GetPlayerCSV();
+                    var homeText = match?.Home?.FirstOrDefault()?.Team?.GetPlayerCSV() ?? "";
                     Cell homeTeamCell = new Cell().Add(new Paragraph(homeText).SetFontSize(fontSizePt));
 
                     matchTable.AddCell(homeTeamCell);

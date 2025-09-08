@@ -38,7 +38,7 @@ class DrawMakerKnockOutPlayoff : DrawMakerBase, IDrawMaker
 
         _teams.Sort((x, y) => (int)(y.Ranking - x.Ranking));
         for (int i = 0; i < _teams.Count; i++) _teams[i].Index = i + 1;
-
+        //The extra round is beteween winners of the main round and playoff round
         int noRounds = (int)Math.Log2(_teams.Count) + 1;
 
         int noPermutations = _teams.Count / 2;

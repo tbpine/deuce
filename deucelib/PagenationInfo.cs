@@ -29,6 +29,7 @@ public class PagenationInfo
     protected int _rowOffset;
 
     protected bool _isPlayoffRound;
+    protected bool _isFinalMatch;
 
     // Properties (single line)
     public int PageXIndex { get => _pageXIndex; set => _pageXIndex = value; }
@@ -44,6 +45,7 @@ public class PagenationInfo
 
     public int PageIndex { get => _pageIndex; set => _pageIndex = value; }
     public bool IsPlayoffRound { get => _isPlayoffRound;}
+    public bool IsFinalMatch { get => _isFinalMatch; set => _isFinalMatch = value; }
 
     /// <summary>
     /// Default constructor for PagenationInfo.
