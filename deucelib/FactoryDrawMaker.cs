@@ -17,6 +17,7 @@ public class FactoryDrawMaker
         {
             case 3: { return new DrawMakerKnockOutPlayoff(t, gm); }
             case 2: { return new DrawMakerKnockOut(t, gm); }
+            
         }
 
         return new DrawMakerRR(t, gm);

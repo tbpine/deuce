@@ -18,10 +18,13 @@ public class Team
     private int _index;
     private string _label = "";
     private Organization? _club;
+
+    private Group? _group;
     public int Id { get { return _id; } set { _id = value; } }
     public int Index { get { return _index; } set { _index = value; } }
     public string Label { get { return _label; } set { _label = value; } }
     public Organization? Club { get { return _club; } set { _club = value; } }
+    public Group? Group { get { return _group; } set { _group = value; } }
 
     public IEnumerable<Player> Players { get => _players; }
 
