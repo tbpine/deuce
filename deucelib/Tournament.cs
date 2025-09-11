@@ -22,6 +22,7 @@ public class Tournament : ICloneable
     TournamentStatus _status;
 
     private List<Team> _teams = new();
+    private List<Group> _groups = new();
 
     /// <summary>
     /// A list of brackets for the tournament.
@@ -66,6 +67,7 @@ public class Tournament : ICloneable
     public Organization Organization { get => _organization; set => _organization = value; }
 
     public IEnumerable<Bracket> Brackets { get => _brackets; }
+    public IEnumerable<Group> Groups { get => _groups;  }
 
     /// <summary>
     /// A flag indicating the state of the tournament
@@ -92,6 +94,19 @@ public class Tournament : ICloneable
     public void ClearBrackets()
     {
         _brackets.Clear();
+    }
+
+    public void AddGroup(Group group)
+    {
+        if (group != null)
+        {
+            _groups.Add(group);
+        }
+    }   
+
+    public void ClearGroups()
+    {
+        _groups.Clear();
     }
 
     /// <summary>

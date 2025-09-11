@@ -3,6 +3,11 @@ using deuce.ext;
 
 namespace deuce;
 
+/// <summary>
+/// Teams are divided into groups of a specified size.
+/// Each group has a main round and knockout rounds within the group.
+/// Winner of the main round and knockout round advance.
+/// </summary>
 class DrawMakerGroups : DrawMakerBase, IDrawMaker
 {
     /// <summary>
@@ -17,12 +22,14 @@ class DrawMakerGroups : DrawMakerBase, IDrawMaker
     //Accessors for winners and losers
     public List<Team> Winners => _winners;
     public List<Team> Losers => _losers;
+    private IOrganizerGroup _organizerGroup;
 
     private int _groupSize = 4;
     public DrawMakerGroups(Tournament t, IGameMaker gameMaker, int groupSize) : base(t)
     {
         _gameMaker = gameMaker;
         _groupSize = groupSize;
+        _organizerGroup = new OrganizerGroupDefault();
     }
 
     public Draw Create(List<Team> teams)
@@ -32,7 +39,7 @@ class DrawMakerGroups : DrawMakerBase, IDrawMaker
 
         //Assigns
         _teams = teams;
-        
+
         // Add a byes for number of teams that is not a power of 2.
         // Work out the number of byes needed.
         // For example: 6 teams needs 2 byes to make 8 (next power of 2)
@@ -53,32 +60,37 @@ class DrawMakerGroups : DrawMakerBase, IDrawMaker
         for (int i = 0; i < _teams.Count; i++) _teams[i].Index = i + 1;
 
         //Create groups
-        int noGroups = (int)Math.Ceiling((double)_teams.Count / _groupSize);
-        for (int i = 0; i < noGroups; i++)
+        _organizerGroup.Assign(_tournament, _teams, _groupSize);
+        //Create draws for each round
+        IDrawMaker drawMakerKOPlayoff = new DrawMakerKnockOutPlayoff(_tournament, _gameMaker);
+        foreach (Group group in _tournament.Groups)
         {
-            Group group = new Group();
-            //Start from A, B, C, ...
-            group.Label = ((char)('A' + i)).ToString();
-            //Split teams into groups
+            //Create a draw for this group
+            group.CreateDraw(drawMakerKOPlayoff);
         }
 
-        // Work out rounds in a knockout tournament
-        // The number of rounds is log2(teams)
-        // For example, 8 teams = 3 rounds, 16 teams = 4 rounds, etc.
-        int noRounds = (int)Math.Log2(_teams.Count);
-        
+        //The last winning teams of main and playoff rounds
+        //goes in the main tournament playoffs
+
+        int noOfTeams = 2 * _tournament.Groups.Count();
+        //Continue on with the main tournament 
+
+        //Round is not group size
+        int noRounds = (int)Math.Log2(noOfTeams);
+
         // First round has half the number of permutations as the number of teams.
-        int noPermutations = _teams.Count / 2;
-        
-        // For each permutation, an element in the top half of "_teams" 
-        // plays against an element in the bottom half of "_teams".
-        // This ensures highest ranked plays lowest ranked, etc.
+        int noPermutations = _tournament.Groups.Count();
+
         Debug.WriteLine($"ex:{exponent}|byes:{noByes}|teams:{_teams.Count}|r:{noRounds}|perms:{noPermutations}");
         // Create first round matches
+        int teamIndex = 0;
         for (int i = 0; i < noPermutations; i++)
         {
-            var home = _teams[i];
-            var away = _teams[_teams.Count - i - 1];
+            var home = new Team();
+            var away = new Team();
+
+            home.CreateBye(_tournament.Details.TeamSize, _tournament.Organization, teamIndex++);
+            away.CreateBye(_tournament.Details.TeamSize, _tournament.Organization, teamIndex++);
 
             // Only create matches for tennis tournaments (Sport == 1)
             if (_tournament.Sport == 1)
@@ -97,31 +109,15 @@ class DrawMakerGroups : DrawMakerBase, IDrawMaker
             // For example, 8 teams = 4 matches in the first round, 2 matches in the second round, and 1 match in the final.
             Debug.Write($"Round {r}:");
             noPermutations = (int)(_teams.Count / Math.Pow(2, r));
-            
-            // Make a list of empty teams as placeholders for winners
-            List<Team> emptyTeams = new List<Team>();
-            // Create empty placeholder teams for this round
-            for (int i = 0; i < noPermutations; i++)
-            {
-                var home = new Team(0, "") { Index = i };
-                var away = new Team(0, "") { Index = i + 1 };
-                
-                // Add placeholder players to maintain team structure
-                for (int j = 0; j < _tournament.Details.TeamSize; j++)
-                {
-                    home.AddPlayer(new Player() { Index = j });
-                    away.AddPlayer(new Player() { Index = j });
-                }
-                emptyTeams.Add(home);
-                emptyTeams.Add(away);
-            }
 
             // Create matches for this round using placeholder teams
             for (int p = 0; p < noPermutations; p++)
             {
-                var home = emptyTeams[p];
-                var away = emptyTeams[emptyTeams.Count - p - 1];
-                Debug.Write("(" + home.Index + "," + away.Index + ")");
+                var home = new Team();
+                var away = new Team();
+                home.CreateBye(_tournament.Details.TeamSize, _tournament.Organization, teamIndex++);
+                away.CreateBye(_tournament.Details.TeamSize, _tournament.Organization, teamIndex++);
+
 
                 // Schedule matches between each team (only for tennis tournaments)
                 if (_tournament.Sport == 1)
@@ -137,12 +133,35 @@ class DrawMakerGroups : DrawMakerBase, IDrawMaker
         }
 
 
-
-
         return draw;
     }
+
+    private string GetRoundLabel(int totalRounds, int currentRound)
+    {
+        if (totalRounds <= 3)
+        {
+            if (currentRound == totalRounds) return "Final";
+            else
+                return String.Empty;
+        }
+        else
+        {
+            if (currentRound == totalRounds) return "Final";
+            else if (currentRound == totalRounds - 1) return "Semi Final";
+            else if (currentRound == totalRounds - 2) return "Quarter Final";
+        }
+
+        return String.Empty;
+    }
+
     public void OnChange(Draw schedule, int round, int previousRound, List<Score> scores)
     {
+        //Progress groups
+        foreach (Group group in _tournament.Groups)
+        {
+            group.ProgressDraw(this, round, previousRound, scores);
+        }
+        
         //Clear previous winners and losers
         _winners.Clear();
         _losers.Clear();
@@ -154,15 +173,15 @@ class DrawMakerGroups : DrawMakerBase, IDrawMaker
         // Calculate expected number of permutations for current round (half of previous round)
         int previousRoundPermutations = prevRound.Permutations.Count;
         int expectedCurrentRoundPermutations = previousRoundPermutations / 2;
-        
+
         // Get current round or create if it doesn't exist
         Round? currentRound = schedule.Rounds.FirstOrDefault(r => r.Index == round);
-        
+
         // Count current permutations in the round
         int currentRoundPermutations = currentRound?.Permutations.Count ?? 0;
 
         // Determine winners from previous round based on scores and update current round
-        for(int i = 0; i < prevRound.Permutations.Count; i++) 
+        for (int i = 0; i < prevRound.Permutations.Count; i++)
         {
             var permutation = prevRound.GetAtIndex(i);
             // In knockout tournaments, each permutation has exactly one match
@@ -171,12 +190,12 @@ class DrawMakerGroups : DrawMakerBase, IDrawMaker
             {
                 // Find all scores for this match across all sets
                 var matchScores = scores.Where(s => s.Match == match.Id && s.Round == previousRound).ToList();
-                
+
                 if (matchScores.Any())
                 {
                     // Determine winner based on sets won (tennis scoring)
                     Team? winner = DetermineMatchWinner(matchScores, match);
-                    
+
                     if (winner != null)
                     {
                         //Store winner and loser
@@ -243,7 +262,7 @@ class DrawMakerGroups : DrawMakerBase, IDrawMaker
             // Add games to total count
             homeTotalGames += score.Home;
             awayTotalGames += score.Away;
-            
+
             // Count sets won
             if (score.Home > score.Away)
             {
@@ -277,7 +296,7 @@ class DrawMakerGroups : DrawMakerBase, IDrawMaker
                 return match.Away.FirstOrDefault()?.Team; // Away team wins on games
             }
         }
-        
+
         // If completely tied (sets and games), return null
         return null;
     }
