@@ -17,6 +17,7 @@ public class FactoryDrawMaker
         {
             case 3: { return new DrawMakerKnockOutPlayoff(t, gm); }
             case 2: { return new DrawMakerKnockOut(t, gm); }
+            case 4: { return new DrawMakerGroups(t, gm); }
             
         }
 
@@ -36,6 +37,8 @@ public class FactoryDrawMaker
         {
             case 3: { return new DrawMakerKnockOutPlayoff(t, gm); }
             case 2: { return new DrawMakerKnockOut(t, gm); }
+            case 4: { return new DrawMakerGroups(t, gm); }
+
             default: { return new DrawMakerRR(t, gm); }
         }
 

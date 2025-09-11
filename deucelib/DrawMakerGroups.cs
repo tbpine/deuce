@@ -25,11 +25,18 @@ class DrawMakerGroups : DrawMakerBase, IDrawMaker
     private IOrganizerGroup _organizerGroup;
 
     private int _groupSize = 4;
+
+    public int GroupSize {  get => _groupSize;  set { _groupSize = value; } 
+    }
     public DrawMakerGroups(Tournament t, IGameMaker gameMaker, int groupSize) : base(t)
     {
         _gameMaker = gameMaker;
         _groupSize = groupSize;
         _organizerGroup = new OrganizerGroupDefault();
+    }
+
+    public DrawMakerGroups(Tournament t, IGameMaker gameMaker) : this(t, gameMaker, 4)
+    {
     }
 
     public Draw Create(List<Team> teams)
