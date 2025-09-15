@@ -63,7 +63,32 @@ namespace deuce_unit
                 players: players
             );
 
-            //Assert the tournament draw.
+            //Assert each group draw
+            foreach (var group in tournament.Groups)
+            {
+                Assert.IsNotNull(group.Draw, "Draw was null");
+                //Check that the correct number of rounds were created
+                //For 8 players in groups of 4 teams, we expect 3 rounds 2 , 1 and the playoff final
+
+                Assert.IsTrue(group.Draw.NoRounds == Math.Log2(noPlayers), "Not enough rounds in group draw");
+                //Check playoff rounds
+                foreach (var round in group.Draw.Rounds)
+                {
+                    //Ignore the last round
+                    if (round.Index == group.Draw.NoRounds - 1) break;
+                    //Calculuate the number of matches expected in this round
+                    //For round 0 (first round) with 8 players we expect 4 matches
+                    int expectedMatches = group.Teams.Count() / (int)Math.Pow(2, round.Index);
+                    Assert.AreEqual<int>(expectedMatches, round.Permutations.Count, "Not enough matches in round");
+                    //Check perms
+                    Assert.IsNotNull(round.Playoff, "Playoff was null");
+                    //Check the number of playoff matches
+                    int expectedPlayoffMatches = round.Index == 1 ? expectedMatches / 2 : expectedMatches;
+                    Assert.AreEqual<int>(expectedPlayoffMatches, round.Playoff.Permutations.Count, "Not enough playoff matches");
+                }
+
+            }
+
 
         }
 

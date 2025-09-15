@@ -107,7 +107,7 @@ class DrawMakerGroups : DrawMakerBase, IDrawMaker
                 draw.AddPermutation(permutation, 1);
             }
         }
-
+        //Passed group stages
         // From round 2 to the final round
         // Create placeholder matches with empty teams that will be populated as winners advance
         for (int r = 2; r <= noRounds; r++)
