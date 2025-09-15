@@ -19,6 +19,7 @@ namespace deuce_unit
 
         [TestMethod]
         [DataRow(8)]
+        [DataRow(16)]
         public void create_tournament_with_teams(int noPlayers)
         {
             TestContext?.WriteLine($"Testing DrawMakerGroup with {noPlayers} players");
