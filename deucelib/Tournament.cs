@@ -18,6 +18,7 @@ public class Tournament : ICloneable
     private double _fee;
     private bool _useRankings;
     private double _prize;
+    private int? _groupSize;
 
     TournamentStatus _status;
 
@@ -53,6 +54,7 @@ public class Tournament : ICloneable
     public TournamentDetail Details { get { return _detail; } set { _detail = value; } }
     public int Type { get { return _type; } set { _type = value; } }
     public int EntryType { get { return _entryType; } set { _entryType = value; } }
+    public int? GroupSize { get { return _groupSize; } set { _groupSize = value; } }
 
     [Display("Entry Fee", "c2")]
     public double Fee { get { return _fee; } set { _fee = value; } }
@@ -68,6 +70,8 @@ public class Tournament : ICloneable
 
     public IEnumerable<Bracket> Brackets { get => _brackets; }
     public IEnumerable<Group> Groups { get => _groups;  }
+
+    
 
     /// <summary>
     /// A flag indicating the state of the tournament

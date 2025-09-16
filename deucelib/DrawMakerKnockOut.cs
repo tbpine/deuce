@@ -13,7 +13,7 @@ namespace deuce;
 /// is not a power of 2, ensuring proper bracket structure. Teams are ranked and
 /// paired such that the highest-ranked team plays the lowest-ranked team in the first round.
 /// </remarks>
-class DrawMakerKnockOut : DrawMakerBase, IDrawMaker
+class DrawMakerKnockOut : DrawMakerBase
 {
     /// <summary>
     /// The game maker instance used to create matches and permutations for the tournament.
@@ -51,7 +51,7 @@ class DrawMakerKnockOut : DrawMakerBase, IDrawMaker
     /// 4. Creates subsequent rounds with placeholder teams that will be filled as winners advance
     /// 5. Calculates appropriate round labels (Final, Semi Final, Quarter Final)
     /// </remarks>
-    public Draw Create(List<Team> teams)
+    public override Draw Create(List<Team> teams)
     {
         //The result
         Draw draw = new Draw(_tournament);
@@ -209,7 +209,7 @@ class DrawMakerKnockOut : DrawMakerBase, IDrawMaker
     /// The positioning logic ensures that winners from adjacent matches in the previous round
     /// are placed to face each other in the current round.
     /// </remarks>
-    public void OnChange(Draw schedule, int round, int previousRound, List<Score> scores)
+    public override void OnChange(Draw schedule, int round, int previousRound, List<Score> scores)
     {
         //Clear previous winners and losers
         _winners.Clear();

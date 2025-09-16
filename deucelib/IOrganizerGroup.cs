@@ -3,5 +3,5 @@ namespace deuce;
 
 interface IOrganizerGroup
 {
-    void Assign(Tournament tournament, List<Team> teams, int groupSize);
+    void Assign(Tournament tournament, List<Team> teams);
 }

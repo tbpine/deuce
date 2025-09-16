@@ -9,7 +9,7 @@ class AssignTournament
     /// </summary>
     /// <returns>A tournamnet object</returns>
     public Tournament MakeRandom(int tournamentType, string label, int noPlayers, int sport,
-    int noSingle, int noDouble, int sets, int teamSize, List<Player> players)
+    int noSingle, int noDouble, int sets, int teamSize, List<Player> players,  int groupSize = 4)
     {
 
         Organization organization = new Organization() { Id = 1, Name = "Test Org" };

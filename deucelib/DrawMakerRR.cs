@@ -13,7 +13,7 @@ class DrawMakerRR : DrawMakerBase, IDrawMaker
         _gameMaker = gameMaker;
     }
 
-    public Draw Create(List<Team> teams)
+    public override Draw Create(List<Team> teams)
     {
         //The result
         Draw draw = new Draw(_tournament);
@@ -67,7 +67,7 @@ class DrawMakerRR : DrawMakerBase, IDrawMaker
     /// </summary>
     /// <param name="schedule" > The current schedule</param>
     /// <param name="round"> The current round number</param>
-    public void OnChange(Draw schedule, int round, int previousRound, List<Score> scores)
+    public override void OnChange(Draw schedule, int round, int previousRound, List<Score> scores)
     {
         //Nothing to do here
     }

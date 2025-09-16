@@ -22,7 +22,7 @@ namespace deuce;
 /// The tournament follows standard double-elimination rules where teams must lose twice
 /// to be eliminated from the tournament completely.
 /// </remarks>
-class DrawMakerBrackets : DrawMakerBase, IDrawMaker
+class DrawMakerBrackets : DrawMakerBase
 {
     /// <summary>
     /// The game maker responsible for creating individual matches and games within the tournament.
@@ -70,7 +70,7 @@ class DrawMakerBrackets : DrawMakerBase, IDrawMaker
     /// The losers bracket is initialized with bye teams that will be replaced as teams
     /// are eliminated from the winners bracket during tournament play.
     /// </remarks>
-    public Draw Create(List<Team> teams)
+    public override Draw Create(List<Team> teams)
     {
         //Losers fall to a second bracket which
         //The result
@@ -145,7 +145,7 @@ class DrawMakerBrackets : DrawMakerBase, IDrawMaker
     /// The method processes both winners bracket matches (where losers fall to the losers bracket)
     /// and losers bracket matches (where winners continue in the losers bracket).
     /// </remarks>
-    public void OnChange(Draw schedule, int round, int previousRound, List<Score> scores)
+    public override void OnChange(Draw schedule, int round, int previousRound, List<Score> scores)
     {
         Draw? winnersDraw = _tournament.Draw;
         Draw? losersDraw = _tournament.Brackets?.FirstOrDefault()?.Tournament?.Draw;

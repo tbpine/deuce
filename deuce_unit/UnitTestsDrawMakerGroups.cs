@@ -63,6 +63,8 @@ namespace deuce_unit
                 players: players
             );
 
+
+            
             //Assert each group draw
             foreach (var group in tournament.Groups)
             {
@@ -70,7 +72,7 @@ namespace deuce_unit
                 //Check that the correct number of rounds were created
                 //For 8 players in groups of 4 teams, we expect 3 rounds 2 , 1 and the playoff final
 
-                Assert.IsTrue(group.Draw.NoRounds == Math.Log2(noPlayers), "Not enough rounds in group draw");
+                Assert.IsTrue(group.Draw.NoRounds == (Math.Log2(group.Size) + 1), "Not enough rounds in group draw");
                 //Check playoff rounds
                 foreach (var round in group.Draw.Rounds)
                 {

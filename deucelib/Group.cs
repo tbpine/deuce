@@ -11,9 +11,11 @@ public class Group
     private List<Team> _teams = new();
 
     private int _id;
+    private int _size;
     private string _label = "";
 
     public int Id { get { return _id; } set { _id = value; } }
+    public int Size { get { return _size; } set { _size = value; } }
     public string Label { get { return _label; } set { _label = value; } }
 
     public Draw? Draw { get { return _draw; } set { _draw = value; } }

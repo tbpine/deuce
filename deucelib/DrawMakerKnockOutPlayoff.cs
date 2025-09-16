@@ -4,7 +4,7 @@ using DocumentFormat.OpenXml.Wordprocessing;
 
 namespace deuce;
 
-class DrawMakerKnockOutPlayoff : DrawMakerBase, IDrawMaker
+class DrawMakerKnockOutPlayoff : DrawMakerBase
 {
     private readonly IGameMaker _gameMaker;
 
@@ -19,7 +19,7 @@ class DrawMakerKnockOutPlayoff : DrawMakerBase, IDrawMaker
         _gameMaker = gameMaker;
     }
 
-    public Draw Create(List<Team> teams)
+    public override Draw Create(List<Team> teams)
     {
         //The result
         Draw draw = new Draw(_tournament);
@@ -189,7 +189,7 @@ class DrawMakerKnockOutPlayoff : DrawMakerBase, IDrawMaker
         return String.Empty;
     }
 
-    public void OnChange(Draw draw, int round, int previousRound, List<Score> scores)
+    public override void OnChange(Draw draw, int round, int previousRound, List<Score> scores)
     {
         //for all scores
         foreach (var score in scores)

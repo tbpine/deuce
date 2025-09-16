@@ -8,7 +8,7 @@ namespace deuce;
 /// Each group has a main round and knockout rounds within the group.
 /// Winner of the main round and knockout round advance.
 /// </summary>
-class DrawMakerGroups : DrawMakerBase, IDrawMaker
+class DrawMakerGroups : DrawMakerBase
 {
     /// <summary>
     /// The game maker instance used to create matches and permutations for the tournament.
@@ -24,22 +24,14 @@ class DrawMakerGroups : DrawMakerBase, IDrawMaker
     public List<Team> Losers => _losers;
     private IOrganizerGroup _organizerGroup;
 
-    private int _groupSize = 4;
 
-    public int GroupSize {  get => _groupSize;  set { _groupSize = value; } 
-    }
-    public DrawMakerGroups(Tournament t, IGameMaker gameMaker, int groupSize) : base(t)
+    public DrawMakerGroups(Tournament t, IGameMaker gameMaker) : base(t)
     {
         _gameMaker = gameMaker;
-        _groupSize = groupSize;
         _organizerGroup = new OrganizerGroupDefault();
     }
 
-    public DrawMakerGroups(Tournament t, IGameMaker gameMaker) : this(t, gameMaker, 4)
-    {
-    }
-
-    public Draw Create(List<Team> teams)
+    public override Draw Create(List<Team> teams)
     {
         //The result
         Draw draw = new Draw(_tournament);
@@ -67,7 +59,7 @@ class DrawMakerGroups : DrawMakerBase, IDrawMaker
         for (int i = 0; i < _teams.Count; i++) _teams[i].Index = i + 1;
 
         //Create groups
-        _organizerGroup.Assign(_tournament, _teams, _groupSize);
+        _organizerGroup.Assign(_tournament, _teams);
         //Create draws for each round
         IDrawMaker drawMakerKOPlayoff = new DrawMakerKnockOutPlayoff(_tournament, _gameMaker);
         foreach (Group group in _tournament.Groups)
@@ -161,7 +153,7 @@ class DrawMakerGroups : DrawMakerBase, IDrawMaker
         return String.Empty;
     }
 
-    public void OnChange(Draw schedule, int round, int previousRound, List<Score> scores)
+    public override void OnChange(Draw schedule, int round, int previousRound, List<Score> scores)
     {
         //Progress groups
         foreach (Group group in _tournament.Groups)
