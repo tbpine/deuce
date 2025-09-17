@@ -24,7 +24,8 @@ class AssignTournament
         tournament.Sport = sport;
         tournament.Details = new TournamentDetail(noSingle, noDouble, sets);
         tournament.Details.TeamSize = teamSize;
-
+        tournament.Details.GroupSize = groupSize;   
+        
         IGameMaker gm = new GameMakerTennis();
 
         List<Team> selected = new();

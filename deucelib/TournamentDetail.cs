@@ -10,6 +10,7 @@ public class TournamentDetail : ICloneable
     private int _noSingles;
     private int _noDoubles;
     private int _teamSize;
+    private int? _groupSize;
 
     public int TournamentId { get { return _tournamentId; } set { _tournamentId = value; } }
     public int NoEntries { get { return _noEntries; } set { _noEntries = value; } }
@@ -23,6 +24,9 @@ public class TournamentDetail : ICloneable
 
     [Display("Team size", null)]
     public int TeamSize { get { return _teamSize; } set { _teamSize = value; } }
+
+    public int? GroupSize { get { return _groupSize; } set { _groupSize = value; } }
+
 
     public TournamentDetail()
     {

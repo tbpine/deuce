@@ -36,6 +36,7 @@ public class DbRepoTournamentDetail : DbRepoBase<TournamentDetail>
             int noSingles = reader.Parse<int>("no_singles");
             int noDoubles = reader.Parse<int>("no_doubles");
             int teamSize = reader.Parse<int>("team_size");
+            int groupSize = reader.Parse<int>("group_size");
 
             list.Add(new TournamentDetail
             {
@@ -46,7 +47,8 @@ public class DbRepoTournamentDetail : DbRepoBase<TournamentDetail>
                 CustomGames = customGames,
                 NoSingles = noSingles,
                 NoDoubles = noDoubles,
-                TeamSize = teamSize
+                TeamSize = teamSize,
+                GroupSize = groupSize
 
             });
 
@@ -63,8 +65,8 @@ public class DbRepoTournamentDetail : DbRepoBase<TournamentDetail>
 
         var localTran = _dbconn.BeginTransaction();
         DbCommand cmd = _dbconn.CreateCommandStoreProc("sp_set_tournament_detail",
-        ["p_tournament","p_no_entries", "p_sets", "p_games", "p_custom_games","p_no_singles", "p_no_doubles", "p_team_size"],
-        [obj.TournamentId,obj.NoEntries, obj.Sets,obj.Games, obj.CustomGames, obj.NoSingles,obj.NoDoubles,obj.TeamSize],
+        ["p_tournament","p_no_entries", "p_sets", "p_games", "p_custom_games","p_no_singles", "p_no_doubles", "p_team_size", "p_group_size"],
+        [obj.TournamentId,obj.NoEntries, obj.Sets,obj.Games, obj.CustomGames, obj.NoSingles,obj.NoDoubles,obj.TeamSize, obj.GroupSize],
         localTran);
 
         try

@@ -18,7 +18,7 @@ class OrganizerGroupDefault : IOrganizerGroup
     {
         
         //Assign groups top to bottom
-        int groupSize = tournament.GroupSize ?? 4;
+        int groupSize = tournament.Details?.GroupSize ?? 4;
         if (groupSize < 2) groupSize = 2;   
 
          //Create groups

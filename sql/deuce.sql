@@ -101,6 +101,7 @@ CREATE TABLE IF NOT EXISTS `tournament_detail` (
     `team_size`			INT,
     `no_singles`		INT,
     `no_doubles`		INT,
+    `group_size`		INT,
     `updated_datetime`	TIMESTAMP,
     `created_datetime`	TIMESTAMP
 );

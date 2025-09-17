@@ -24,11 +24,14 @@ class DrawMakerGroups : DrawMakerBase
     public List<Team> Losers => _losers;
     private IOrganizerGroup _organizerGroup;
 
+    private IDrawMaker _drawMakerKOPlayoff;
+
 
     public DrawMakerGroups(Tournament t, IGameMaker gameMaker) : base(t)
     {
         _gameMaker = gameMaker;
         _organizerGroup = new OrganizerGroupDefault();
+        _drawMakerKOPlayoff = new DrawMakerKnockOutPlayoff(t, gameMaker);
     }
 
     public override Draw Create(List<Team> teams)
@@ -107,9 +110,9 @@ class DrawMakerGroups : DrawMakerBase
             // In a knockout tournament, each round has half the number of matches as the previous round.
             // For example, 8 teams = 4 matches in the first round, 2 matches in the second round, and 1 match in the final.
             Debug.Write($"Round {r}:");
-            noPermutations = (int)(_teams.Count / Math.Pow(2, r));
+            noPermutations = (int)(noOfTeams / Math.Pow(2, r));
 
-            // Create matches for this round using placeholder teams
+            // Create matches for this round  using placeholder teams
             for (int p = 0; p < noPermutations; p++)
             {
                 var home = new Team();
@@ -153,20 +156,36 @@ class DrawMakerGroups : DrawMakerBase
         return String.Empty;
     }
 
-    public override void OnChange(Draw schedule, int round, int previousRound, List<Score> scores)
+    public override void OnChange(Draw draw, int round, int previousRound, List<Score> scores)
     {
-        //Progress groups
-        foreach (Group group in _tournament.Groups)
+        //If rounds in the draw has playoff rounds, then pass
+        //it to a OnChange handler that deals with playoff rounds
+        if (draw.Rounds.Any(r => r.Playoff != null))
         {
-            group.ProgressDraw(this, round, previousRound, scores);
+            _drawMakerKOPlayoff.OnChange(draw, round, previousRound, scores);
+            return;
         }
-        
+        //Transfer winners from groups into the main playoff draw
+
+        //Check that all groups have completed their rounds
+        _tournament.Groups.ToList().ForEach(g =>
+        {
+            //Get the last round in the group draw
+            var lastRound = g.Draw?.Rounds.OrderByDescending(r => r.Index).FirstOrDefault();
+            var lastMatch = lastRound?.Permutations.FirstOrDefault()?.Matches.FirstOrDefault();
+            //get the score for last match
+            var matchScores = scores.Where(s => s.Match == lastMatch?.Id).ToList();
+
+            if (matchScores == null) return;
+
+        });
+
         //Clear previous winners and losers
         _winners.Clear();
         _losers.Clear();
 
         // Get the previous round
-        Round? prevRound = schedule.Rounds.FirstOrDefault(r => r.Index == previousRound);
+        Round? prevRound = draw.Rounds.FirstOrDefault(r => r.Index == previousRound);
         if (prevRound == null) return;
 
         // Calculate expected number of permutations for current round (half of previous round)
@@ -174,7 +193,7 @@ class DrawMakerGroups : DrawMakerBase
         int expectedCurrentRoundPermutations = previousRoundPermutations / 2;
 
         // Get current round or create if it doesn't exist
-        Round? currentRound = schedule.Rounds.FirstOrDefault(r => r.Index == round);
+        Round? currentRound = draw.Rounds.FirstOrDefault(r => r.Index == round);
 
         // Count current permutations in the round
         int currentRoundPermutations = currentRound?.Permutations.Count ?? 0;
@@ -185,64 +204,57 @@ class DrawMakerGroups : DrawMakerBase
             var permutation = prevRound.GetAtIndex(i);
             // In knockout tournaments, each permutation has exactly one match
             var match = permutation?.Matches.FirstOrDefault();
-            if (match != null)
+            if (match == null) continue;
+            // Find all scores for this match across all sets
+            var matchScores = scores.Where(s => s.Match == match.Id && s.Round == previousRound).ToList();
+
+            // Determine winner based on sets won (tennis scoring)
+            Team? winner = DetermineMatchWinner(matchScores, match);
+            var losingTeam = match.GetLosingSide(winner);
+
+            if (matchScores.Any() && winner != null)
             {
-                // Find all scores for this match across all sets
-                var matchScores = scores.Where(s => s.Match == match.Id && s.Round == previousRound).ToList();
 
-                if (matchScores.Any())
+                //Store winner and loser
+                _winners.Add(winner);
+                if (losingTeam != null) _losers.Add(losingTeam);
+
+                // Calculate which permutation in the current round this winner should go to
+                // Adjacent matches in previous round feed into the same match in current round
+                // Split by ODDs and EVENs
+                int currentRoundPermIndex = i % 2 > 0 ? (i - 1) / 2 : i / 2;
+
+                // Find the permutation in the current round
+                var currentRoundPerm = currentRound?.GetAtIndex(currentRoundPermIndex);
+                if (currentRoundPerm != null)
                 {
-                    // Determine winner based on sets won (tennis scoring)
-                    Team? winner = DetermineMatchWinner(matchScores, match);
-
-                    if (winner != null)
+                    // Update the appropriate team based on previous round index
+                    // Even indices (0,2,4...) go to home team, odd indices (1,3,5...) go to away team
+                    var nextMatch = currentRoundPerm.Matches.FirstOrDefault();
+                    if (i % 2 == 0)
                     {
-                        //Store winner and loser
-                        _winners.Add(winner);
-                        var losingTeam = match.GetLosingSide(winner);
-                        if (losingTeam != null) _losers.Add(losingTeam);
-
-                        // Calculate which permutation in the current round this winner should go to
-                        // Adjacent matches in previous round feed into the same match in current round
-
-                        int currentRoundPermIndex = i % 2 > 0 ? (i - 1) / 2 : i / 2;
-
-                        // Find the permutation in the current round
-                        var currentRoundPerm = currentRound?.GetAtIndex(currentRoundPermIndex);
-                        if (currentRoundPerm != null)
-                        {
-                            // Update the appropriate team based on previous round index
-                            // Even indices (0,2,4...) go to home team, odd indices (1,3,5...) go to away team
-                            var nextMatch = currentRoundPerm.Matches.FirstOrDefault();
-                            if (i % 2 == 0)
-                            {
-                                // No remainder - update home team (index 0)
-                                currentRoundPerm.ReplaceTeamAtIndex(0, winner);
-                                //There should alwaye be a match here
-                                nextMatch?.ClearHomePlayers();
-                                //Add winners to the next match home team
-                                foreach (var player in winner.Players) nextMatch?.AddHome(player);
-                            }
-                            else
-                            {
-                                // Remainder - update away team (index 1)
-                                currentRoundPerm.ReplaceTeamAtIndex(1, winner);
-                                //There should alwaye be a match here
-                                nextMatch?.ClearAwayPlayers();
-                                //Add winners to the next match away team
-                                foreach (var player in winner.Players) nextMatch?.AddAway(player);
-                            }
-
-                        }
+                        // No remainder - update home team (index 0)
+                        currentRoundPerm.ReplaceTeamAtIndex(0, winner);
+                        //There should alwaye be a match here
+                        nextMatch?.ClearHomePlayers();
+                        //Add winners to the next match home team
+                        foreach (var player in winner.Players) nextMatch?.AddHome(player);
                     }
+                    else
+                    {
+                        // Remainder - update away team (index 1)
+                        currentRoundPerm.ReplaceTeamAtIndex(1, winner);
+                        //There should alwaye be a match here
+                        nextMatch?.ClearAwayPlayers();
+                        //Add winners to the next match away team
+                        foreach (var player in winner.Players) nextMatch?.AddAway(player);
+                    }
+
                 }
-                else
-                {
-                    // If no score available, we can't determine winners yet
-                    // This could happen if the previous round isn't complete
-                    return;
-                }
+
             }
+
+
         }
     }
 
