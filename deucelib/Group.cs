@@ -11,16 +11,21 @@ public class Group
     private List<Team> _teams = new();
 
     private int _id;
+    private int _index;
     private int _size;
     private string _label = "";
 
     public int Id { get { return _id; } set { _id = value; } }
+    /// <summary>
+    /// Index of the group in the competition (0 based).
+    /// </summary>
+    public int Index { get { return _index; } set { _index = value; } }
     public int Size { get { return _size; } set { _size = value; } }
     public string Label { get { return _label; } set { _label = value; } }
 
     public Draw? Draw { get { return _draw; } set { _draw = value; } }
     public IEnumerable<Team> Teams { get { return _teams; } }
-
+    
     /// <summary>
     /// Construct an empty group
     /// </summary>
@@ -37,6 +42,8 @@ public class Group
         if (_teams.Count < 2) throw new ArgumentException("At least two teams are required to create a draw.");
 
         _draw = drawMaker.Create(_teams);
+        //Link group
+        _draw.Group = this;
     }
 
     public void ProgressDraw(IDrawMaker drawMaker, int round, int previousRound, List<Score> scores)

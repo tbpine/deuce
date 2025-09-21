@@ -11,7 +11,8 @@ public class Draw
 
     private List<Round> _rounds = new();
     private Tournament Tournament { get; init; }
-
+    //Keep a soft link to the group if any
+    private Group? _group;
 
     //------------------------------------
     //| Props                            |
@@ -23,6 +24,8 @@ public class Draw
     public Round GetRoundAtIndex(int index) => _rounds[index];
 
     public IEnumerable<Round> Rounds => _rounds;
+
+    public Group? Group { get => _group; set => _group = value; }
 
     /// <summary>
     /// Construct with dependencies

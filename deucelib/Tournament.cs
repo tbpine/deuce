@@ -18,7 +18,7 @@ public class Tournament : ICloneable
     private double _fee;
     private bool _useRankings;
     private double _prize;
-    
+
     TournamentStatus _status;
 
     private List<Team> _teams = new();
@@ -67,9 +67,9 @@ public class Tournament : ICloneable
     public Organization Organization { get => _organization; set => _organization = value; }
 
     public IEnumerable<Bracket> Brackets { get => _brackets; }
-    public IEnumerable<Group> Groups { get => _groups;  }
+    public IEnumerable<Group> Groups { get => _groups; }
 
-    
+
 
     /// <summary>
     /// A flag indicating the state of the tournament
@@ -104,7 +104,7 @@ public class Tournament : ICloneable
         {
             _groups.Add(group);
         }
-    }   
+    }
 
     public void ClearGroups()
     {
@@ -123,5 +123,10 @@ public class Tournament : ICloneable
         //Clone the details
         clone._detail = (TournamentDetail)this.Details.Clone();
         return clone;
+    }
+    
+    public void SortGroups()
+    {
+        _groups = _groups.OrderBy(g => g.Index).ToList();
     }
 }

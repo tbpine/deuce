@@ -125,7 +125,7 @@ namespace deuce_unit
         [TestMethod]
         [DataRow(8)]
         [DataRow(16)]
-        public void test_tournament_progression_with_groups(int noPlayers)
+        public void progression_with_groups(int noPlayers)
         {
             TestContext?.WriteLine($"Testing basic tournament progression with groups for {noPlayers} players");
 
@@ -190,7 +190,7 @@ namespace deuce_unit
                 foreach (var round in group.Draw.Rounds)
                 {
 
-                    int rPermId = 1;
+                    int rPermId = 0;
                     foreach (var permutation in round.Permutations)
                     {
                         permutation.Id = rPermId++;
@@ -202,7 +202,7 @@ namespace deuce_unit
                     // Also assign IDs to playoff rounds within groups
                     if (round.Playoff != null)
                     {
-                        rPermId = 1;
+                        rPermId = 0;
                         foreach (var permutation in round.Playoff.Permutations)
                         {
                             permutation.Id = rPermId++;
@@ -215,10 +215,10 @@ namespace deuce_unit
                 }
             }
 
-            int permId = 1;
             // Assign IDs to main draw matches
             foreach (var round in tournament.Draw.Rounds)
             {
+                int permId = 0;
                 foreach (var permutation in round.Permutations)
                 {
                     permutation.Id = permId++;
@@ -282,14 +282,22 @@ namespace deuce_unit
             List<Score> allScores = new List<Score>();
             int scoreId = 1;
 
-            // Progress each group
+            ///----------------------------------------------------------
+            ///Scores
+            /// 1. For main draw in each group
+            /// 2. For playoff in each group
+            /// 3. For main tournament draw
+            ///----------------------------------------------------------
+            /// 
+            
+
             foreach (var group in tournament.Groups)
             {
                 TestContext?.WriteLine($"Progressing Group {group.Label}");
                 Assert.IsNotNull(group.Draw, $"Group {group.Label} should have a draw");
                 var groupRounds = group.Draw.Rounds.ToList();
 
-                for (int roundIndex = 0; roundIndex < groupRounds.Count; roundIndex++)
+                for (int roundIndex = 0; roundIndex < groupRounds.Count-1; roundIndex++)
                 {
                     var currentRound = groupRounds[roundIndex];
                     List<Score> roundScores = new List<Score>();
@@ -318,8 +326,11 @@ namespace deuce_unit
                             }
                         }
                     }
-
+                    //Progress before playoff
                     // Generate scores for playoff matches if they exist
+                    scheduler.OnChange(group.Draw, currentRound.Index, currentRound.Index - 1, roundScores);
+                    //clear scores
+                    roundScores.Clear();
                     if (currentRound.Playoff != null)
                     {
                         foreach (var permutation in currentRound.Playoff.Permutations)
@@ -357,6 +368,9 @@ namespace deuce_unit
 
             // Progress the main tournament draw
             TestContext?.WriteLine("Progressing Main Tournament Draw");
+            //Group stage to main stage
+            scheduler.OnChange(tournament.Draw, 1, 1, new List<Score>());
+
             var mainRounds = tournament.Draw.Rounds.ToList();
 
             for (int roundIndex = 0; roundIndex < mainRounds.Count; roundIndex++)
@@ -394,7 +408,7 @@ namespace deuce_unit
                 // Progress the main draw after this round
                 if (roundScores.Any())
                 {
-                    scheduler.OnChange(tournament.Draw, currentRound.Index, currentRound.Index - 1, roundScores);
+                    scheduler.OnChange(tournament.Draw, currentRound.Index+1, currentRound.Index, roundScores);
                 }
             }
 

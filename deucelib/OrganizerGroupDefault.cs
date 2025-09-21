@@ -14,19 +14,20 @@ class OrganizerGroupDefault : IOrganizerGroup
     /// </summary>
     /// <param name="tournament">The tournament object to which groups will be added.</param>
     /// <param name="teams">The list of teams to be assigned to groups.</param>
-    public virtual void Assign(Tournament tournament,List<Team> teams )
+    public virtual void Assign(Tournament tournament, List<Team> teams)
     {
-        
+
         //Assign groups top to bottom
         int groupSize = tournament.Details?.GroupSize ?? 4;
-        if (groupSize < 2) groupSize = 2;   
+        if (groupSize < 2) groupSize = 2;
 
-         //Create groups
+        //Create groups
         int noGroups = (int)Math.Ceiling((double)teams.Count / groupSize);
         for (int i = 0; i < noGroups; i++)
         {
             Group group = new Group();
             group.Size = groupSize;
+            group.Index = i;
             //Start from A, B, C, ...
             group.Label = ((char)('A' + i)).ToString();
             //Split teams into groups
@@ -39,6 +40,9 @@ class OrganizerGroupDefault : IOrganizerGroup
             //Add it to the tournament
             tournament.AddGroup(group);
         }
+
+        //Sort by group by index
+        tournament.SortGroups();
 
     }
 }

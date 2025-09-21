@@ -80,29 +80,14 @@ class DrawMakerKnockOutPlayoff : DrawMakerBase
 
     private void CreateMainTournamentRound(Draw draw, int roundNumber, int noPermutations, int totalRounds)
     {
-        // Make a list of empty teams as placeholders for winners
-        List<Team> emptyTeams = new List<Team>();
-        // Create empty placeholder teams for this round
-        for (int i = 0; i < noPermutations; i++)
-        {
-            var home = new Team(0, "") { Index = i };
-            var away = new Team(0, "") { Index = i + 1 };
-
-            // Add placeholder players to maintain team structure
-            for (int j = 0; j < _tournament.Details.TeamSize; j++)
-            {
-                home.AddPlayer(new Player() { Index = j });
-                away.AddPlayer(new Player() { Index = j });
-            }
-            emptyTeams.Add(home);
-            emptyTeams.Add(away);
-        }
 
         // Create matches for this round using placeholder teams
         for (int p = 0; p < noPermutations; p++)
         {
-            var home = emptyTeams[p];
-            var away = emptyTeams[emptyTeams.Count - p - 1];
+            var home = new Team(); 
+            home.CreateBye(_tournament.Details.TeamSize, _tournament.Organization, p);
+            var away = new Team();
+            away.CreateBye(_tournament.Details.TeamSize, _tournament.Organization, p + 1);
             Debug.Write("(" + home.Index + "," + away.Index + ")");
 
             // Schedule matches between each team (only for tennis tournaments)
