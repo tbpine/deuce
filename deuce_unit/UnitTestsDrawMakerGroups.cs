@@ -289,7 +289,7 @@ namespace deuce_unit
             /// 3. For main tournament draw
             ///----------------------------------------------------------
             /// 
-            
+
 
             foreach (var group in tournament.Groups)
             {
@@ -297,7 +297,7 @@ namespace deuce_unit
                 Assert.IsNotNull(group.Draw, $"Group {group.Label} should have a draw");
                 var groupRounds = group.Draw.Rounds.ToList();
 
-                for (int roundIndex = 0; roundIndex < groupRounds.Count-1; roundIndex++)
+                for (int roundIndex = 0; roundIndex < groupRounds.Count - 1; roundIndex++)
                 {
                     var currentRound = groupRounds[roundIndex];
                     List<Score> roundScores = new List<Score>();
@@ -323,9 +323,11 @@ namespace deuce_unit
                                     Set = set + 1
                                 };
                                 roundScores.Add(score);
+                                allScores.Add(score);   
                             }
                         }
                     }
+                    
                     //Progress before playoff
                     // Generate scores for playoff matches if they exist
                     scheduler.OnChange(group.Draw, currentRound.Index, currentRound.Index - 1, roundScores);
@@ -351,12 +353,11 @@ namespace deuce_unit
                                         Set = set + 1
                                     };
                                     roundScores.Add(score);
+                                    allScores.Add(score);
                                 }
                             }
                         }
                     }
-
-                    allScores.AddRange(roundScores);
 
                     // Progress the group after this round
                     if (roundScores.Any())
@@ -399,21 +400,27 @@ namespace deuce_unit
                                 Set = set + 1
                             };
                             roundScores.Add(score);
+                            allScores.Add(score);
                         }
                     }
                 }
 
-                allScores.AddRange(roundScores);
-
                 // Progress the main draw after this round
                 if (roundScores.Any())
                 {
-                    scheduler.OnChange(tournament.Draw, currentRound.Index+1, currentRound.Index, roundScores);
+                    scheduler.OnChange(tournament.Draw, currentRound.Index + 1, currentRound.Index, roundScores);
                 }
             }
 
             TestContext?.WriteLine($"Generated {allScores.Count} total scores");
             TestContext?.WriteLine("Tournament progression with random scores completed successfully");
+         
+            //Print to PDF
+
+            string filename = $"{tournament.Label}.pdf";
+            using FileStream pdfFile = new FileStream(filename, FileMode.Create, FileAccess.Write);
+            PdfPrinter printer = new PdfPrinter(tournament.Draw, new PDFTemplateFactory());
+            printer.Print(pdfFile, tournament, tournament.Draw, 1, allScores); 
         }
 
     }

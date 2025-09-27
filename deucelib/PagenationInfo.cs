@@ -30,6 +30,7 @@ public class PagenationInfo
 
     protected bool _isPlayoffRound;
     protected bool _isFinalMatch;
+    protected Group? _group;
 
     // Properties (single line)
     public int PageXIndex { get => _pageXIndex; set => _pageXIndex = value; }
@@ -46,6 +47,7 @@ public class PagenationInfo
     public int PageIndex { get => _pageIndex; set => _pageIndex = value; }
     public bool IsPlayoffRound { get => _isPlayoffRound;}
     public bool IsFinalMatch { get => _isFinalMatch; set => _isFinalMatch = value; }
+    public Group? Group { get => _group; set => _group = value; }
 
     /// <summary>
     /// Default constructor for PagenationInfo.

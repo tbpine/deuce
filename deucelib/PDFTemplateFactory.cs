@@ -23,6 +23,7 @@ public class PDFTemplateFactory : IPDFTemplateFactory
                         1 => new PDFTemplateTennisRR(),
                         2 => new PDFTemplateTennisKO(),
                         3 => new PDFTemplateTennisKOPlayoff(),
+                        4 => new PDFTemplateGroup(),
                         _ => new PDFTemplateTennisTest()
                     };
                 }
