@@ -49,6 +49,7 @@ public class PDFTemplateGroup : IPDFTemplate
     /// Generates a PDF document for a group tournament format.
     /// This method arranges matches by groups, displaying each group's matches
     /// in a structured layout with proper headers and group identification.
+    /// After printing all group draws, it also prints the main tournament draw.
     /// The layout is determined by the provided tournament and its groups.
     /// </summary>
     /// <param name="doc">The iText Document object for layout and styling.</param>
@@ -81,14 +82,19 @@ public class PDFTemplateGroup : IPDFTemplate
                            group p by p.PageIndex into g
                            select new { PageIndex = g.Key, Layouts = g.ToList() };
 
+        int totalGroupPages = 0;
         foreach (var group in groupedLayout)
         {
             // Add a new page for each group
             pdfdoc.AddNewPage();
+            totalGroupPages++;
             
             // Print the matches on this page
             PrintPage(group.Layouts, tournament, scores ?? new(), pdfdoc, doc, widths, group.PageIndex);
         }
+
+        // After printing all group draws, print the main tournament draw
+        PrintMainTournamentDraw(doc, pdfdoc, tournament, scores ?? new(), widths, totalGroupPages);
     }
 
     /// <summary>
@@ -238,5 +244,165 @@ public class PDFTemplateGroup : IPDFTemplate
         scell.SetFontSize(fontSizePt);
         
         return scell;
+    }
+
+    /// <summary>
+    /// Prints the main tournament draw that occurs after the group stage.
+    /// This method handles the knockout format for winners from the group stage.
+    /// </summary>
+    /// <param name="doc">The iText Document object for layout and styling.</param>
+    /// <param name="pdfdoc">The PDF document to add the main draw to.</param>
+    /// <param name="tournament">The tournament object containing the main draw.</param>
+    /// <param name="scores">The list of scores for the matches.</param>
+    /// <param name="widths">The column widths for the match tables.</param>
+    /// <param name="startingPageNumber">The page number to start the main draw from (after group pages).</param>
+    private void PrintMainTournamentDraw(Document doc, PdfDocument pdfdoc, Tournament tournament, 
+        List<Score> scores, List<float> widths, int startingPageNumber)
+    {
+        // Check if the tournament has a main draw (after groups)
+        if (tournament.Draw == null || tournament.Draw.Rounds == null || !tournament.Draw.Rounds.Any())
+        {
+            return; // No main draw to print
+        }
+
+        // Use the tennis knockout layout manager for the main draw
+        var koLayoutManager = new LayoutManagerTennisKO(
+            PageSize.A4.Rotate().GetWidth(),
+            PageSize.A4.Rotate().GetHeight(),
+            _page_top_margin, _page_left_margin, _page_right_margin, _page_bottom_margin,
+            _table_padding_top, _table_padding_bottom, _table_padding_left, _table_padding_right
+        );
+
+        // Create a temporary tournament with just the main draw for layout purposes
+        var mainDrawTournament = new Tournament
+        {
+            Draw = tournament.Draw,
+            Details = tournament.Details
+        };
+
+        List<PagenationInfo> mainDrawLayout = (koLayoutManager.ArrangeLayout(mainDrawTournament) as List<PagenationInfo>) ?? new();
+
+        if (!mainDrawLayout.Any()) return;
+
+        // Group layout by page index
+        var groupedMainLayout = from p in mainDrawLayout
+                               group p by p.PageIndex into g
+                               select new { PageIndex = g.Key, Layouts = g.ToList() };
+
+        int currentMainDrawPage = startingPageNumber;
+        foreach (var group in groupedMainLayout)
+        {
+            // Add a new page for each page of the main draw
+            pdfdoc.AddNewPage();
+            currentMainDrawPage++;
+            
+            // Print the main tournament matches on this page using the correct page number
+            PrintMainDrawPage(group.Layouts, tournament.Draw, tournament, scores, pdfdoc, doc, widths, currentMainDrawPage);
+        }
+    }
+
+    /// <summary>
+    /// Prints the matches and headers for a specific page of the main tournament draw.
+    /// This method handles round headers and match tables for the knockout format after groups.
+    /// </summary>
+    /// <param name="layout">The layout information containing rectangles and match indices.</param>
+    /// <param name="mainDraw">The main tournament draw containing match details.</param>
+    /// <param name="tournament">The tournament object containing tournament details.</param>
+    /// <param name="scores">The list of scores for the matches.</param>
+    /// <param name="pdfdoc">The PDF document to add the elements to.</param>
+    /// <param name="doc">The document object for layout and styling.</param>
+    /// <param name="widths">The column widths for the match tables.</param>
+    /// <param name="pageNo">The page number for the current layout.</param>
+    private void PrintMainDrawPage(List<PagenationInfo> layout, Draw mainDraw, Tournament tournament, List<Score> scores, 
+        PdfDocument pdfdoc, Document doc, List<float> widths, int pageNo)
+    {
+        if (layout.Count == 0) return;
+
+        for (int i = 0; i < layout.Count; i++)
+        {
+            try
+            {
+                PagenationInfo pi = layout[i];
+                
+                // Handle round headers
+                if (pi.ElementType == PageElementType.RoundHeader)
+                {
+                    // Create a header for the main tournament round
+                    float headerFontSize = 16f; // Slightly larger for main tournament
+                    PdfFont boldFont = PdfFontFactory.CreateFont(StandardFonts.HELVETICA_BOLD);
+                    string headerText = pi.Text.StartsWith("Main Tournament") ? pi.Text : $"Main Tournament - {pi.Text}";
+                    
+                    Paragraph headerParagraph = new Paragraph(headerText)
+                        .SetFont(boldFont)
+                        .SetFontSize(headerFontSize)
+                        .SetTextAlignment(TextAlignment.CENTER);
+                    
+                    headerParagraph.SetFixedPosition(pageNo, pi.Rectangle.Left, 
+                        pdfdoc.GetDefaultPageSize().GetHeight() - pi.Rectangle.Top - pi.Rectangle.Height, 
+                        pi.Rectangle.Width);
+                    
+                    doc.Add(headerParagraph);
+                }
+                else // Handle match elements
+                {
+                    // Find the match in the main draw
+                    Match? match = mainDraw.Rounds
+                        .FirstOrDefault(e => e.Index == pi.Round)?
+                        .GetAtIndex(pi.RowOffset)?
+                        .Matches.FirstOrDefault();
+
+                    if (match == null) continue;
+
+                    // Create match table
+                    Table matchTable = new Table(widths.ToArray());
+                    matchTable.SetFixedLayout();
+                    matchTable.SetWidth(pi.Rectangle.Width);
+                    matchTable.SetHeight(pi.Rectangle.Height);
+                    matchTable.SetFixedPosition(pageNo, pi.Rectangle.Left, 
+                        pdfdoc.GetDefaultPageSize().GetHeight() - pi.Rectangle.Top - pi.Rectangle.Height, 
+                        pi.Rectangle.Width);
+
+                    // Calculate appropriate font size
+                    float fontSizePx = pi.Rectangle.Height / 4.2f;
+                    float fontSizePt = fontSizePx * 72f / 96f;
+
+                    // Add home team cell
+                    var homeText = match.Home?.FirstOrDefault()?.Team?.GetPlayerCSV() ?? "TBD";
+                    Cell homeTeamCell = new Cell().Add(new Paragraph(homeText).SetFontSize(fontSizePt));
+                    matchTable.AddCell(homeTeamCell);
+
+                    // Add home team score cells
+                    int sets = tournament.Details?.Sets ?? 1;
+                    for (int j = 0; j < sets; j++)
+                    {
+                        string scoreText = scores?.FirstOrDefault(x => 
+                            x.Match == match.Id && x.Set == j + 1)?.Home.ToString() ?? "";
+                        Cell scoreCell = MakeScoreCell(2f, scoreText, fontSizePt);
+                        matchTable.AddCell(scoreCell);
+                    }
+
+                    // Add away team cell
+                    var awayText = match.Away?.FirstOrDefault()?.Team?.GetPlayerCSV() ?? "TBD";
+                    Cell awayTeamCell = new Cell().Add(new Paragraph(awayText).SetFontSize(fontSizePt));
+                    matchTable.AddCell(awayTeamCell);
+
+                    // Add away team score cells
+                    for (int j = 0; j < sets; j++)
+                    {
+                        string scoreText = scores?.FirstOrDefault(x => 
+                            x.Match == match.Id && x.Set == j + 1)?.Away.ToString() ?? "";
+                        Cell scoreCell = MakeScoreCell(2f, scoreText, fontSizePt);
+                        matchTable.AddCell(scoreCell);
+                    }
+
+                    doc.Add(matchTable);
+                }
+            }
+            catch (Exception ex)
+            {
+                // Log the error and continue with the next element
+                Console.WriteLine($"Error printing main draw element {i + 1} on page {pageNo}: {ex.Message}");
+            }
+        }
     }
 }
