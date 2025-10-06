@@ -74,13 +74,13 @@ public class PDFTemplateGroup : IPDFTemplate
         // Table widths for each match
         // The first column is wider for team names, the rest are equal for scores
         List<float> widths = new List<float>();
-        for (int c = 0; c < (tournament.Details?.Sets ?? 1) + 1; c++) 
+        for (int c = 0; c < (tournament.Details?.Sets ?? 1) + 1; c++)
             widths.Add(c == 0 ? 2f : 1f);
 
         // Group layout by page index using LINQ
         var groupedLayout = from p in layout
-                           group p by p.PageIndex into g
-                           select new { PageIndex = g.Key, Layouts = g.ToList() };
+                            group p by p.PageIndex into g
+                            select new { PageIndex = g.Key, Layouts = g.ToList() };
 
         int totalGroupPages = 0;
         foreach (var group in groupedLayout)
@@ -88,7 +88,7 @@ public class PDFTemplateGroup : IPDFTemplate
             // Add a new page for each group
             pdfdoc.AddNewPage();
             totalGroupPages++;
-            
+
             // Print the matches on this page
             PrintPage(group.Layouts, tournament, scores ?? new(), pdfdoc, doc, widths, group.PageIndex);
         }
@@ -110,7 +110,7 @@ public class PDFTemplateGroup : IPDFTemplate
     /// <param name="doc">The document object for layout and styling.</param>
     /// <param name="widths">The column widths for the match tables.</param>
     /// <param name="pageNo">The page number for the current layout.</param>
-    private void PrintPage(List<PagenationInfo> layout, Tournament tournament, List<Score> scores, 
+    private void PrintPage(List<PagenationInfo> layout, Tournament tournament, List<Score> scores,
         PdfDocument pdfdoc, Document doc, List<float> widths, int pageNo)
     {
         if (layout.Count == 0) return;
@@ -120,7 +120,7 @@ public class PDFTemplateGroup : IPDFTemplate
             try
             {
                 PagenationInfo pi = layout[i];
-                
+
                 // Handle different element types
                 if (pi.ElementType == PageElementType.RoundLabel)
                 {
@@ -131,11 +131,11 @@ public class PDFTemplateGroup : IPDFTemplate
                         .SetFont(boldFont)
                         .SetFontSize(labelFontSize)
                         .SetTextAlignment(TextAlignment.CENTER);
-                    
-                    labelParagraph.SetFixedPosition(pageNo, pi.Rectangle.Left, 
-                        pdfdoc.GetDefaultPageSize().GetHeight() - pi.Rectangle.Top - pi.Rectangle.Height, 
+
+                    labelParagraph.SetFixedPosition(pageNo, pi.Rectangle.Left,
+                        pdfdoc.GetDefaultPageSize().GetHeight() - pi.Rectangle.Top - pi.Rectangle.Height,
                         pi.Rectangle.Width);
-                    
+
                     doc.Add(labelParagraph);
                 }
                 else if (pi.ElementType == PageElementType.RoundHeader)
@@ -147,11 +147,11 @@ public class PDFTemplateGroup : IPDFTemplate
                         .SetFont(boldFont)
                         .SetFontSize(headerFontSize)
                         .SetTextAlignment(TextAlignment.CENTER);
-                    
-                    headerParagraph.SetFixedPosition(pageNo, pi.Rectangle.Left, 
-                        pdfdoc.GetDefaultPageSize().GetHeight() - pi.Rectangle.Top - pi.Rectangle.Height, 
+
+                    headerParagraph.SetFixedPosition(pageNo, pi.Rectangle.Left,
+                        pdfdoc.GetDefaultPageSize().GetHeight() - pi.Rectangle.Top - pi.Rectangle.Height,
                         pi.Rectangle.Width);
-                    
+
                     doc.Add(headerParagraph);
                 }
                 else // Handle match elements
@@ -160,11 +160,12 @@ public class PDFTemplateGroup : IPDFTemplate
                     Group? currentGroup = pi.Group;
                     if (currentGroup?.Draw == null) continue;
 
-                    // Find the match in the group's draw
-                    Match? match = currentGroup.Draw.Rounds
-                        .FirstOrDefault(e => e.Index == pi.Round)?
-                        .GetAtIndex(pi.RowOffset)?
-                        .Matches.FirstOrDefault();
+                    // Find the specific round (either main draw or playoff) that contains this match
+                    var round = pi.IsPlayoffRound ? currentGroup.Draw.Rounds.FirstOrDefault(e => e.Index == pi.Round)?.Playoff :
+                             currentGroup.Draw.Rounds.FirstOrDefault(e => e.Index == pi.Round);
+
+                    // Find the specific match within the round using the row offset (permutation ID)
+                    Match? match = round?.Permutations.FirstOrDefault(p => p.Id == pi.RowOffset)?.Matches.FirstOrDefault();
 
                     if (match == null) continue;
 
@@ -173,8 +174,8 @@ public class PDFTemplateGroup : IPDFTemplate
                     matchTable.SetFixedLayout();
                     matchTable.SetWidth(pi.Rectangle.Width);
                     matchTable.SetHeight(pi.Rectangle.Height);
-                    matchTable.SetFixedPosition(pageNo, pi.Rectangle.Left, 
-                        pdfdoc.GetDefaultPageSize().GetHeight() - pi.Rectangle.Top - pi.Rectangle.Height, 
+                    matchTable.SetFixedPosition(pageNo, pi.Rectangle.Left,
+                        pdfdoc.GetDefaultPageSize().GetHeight() - pi.Rectangle.Top - pi.Rectangle.Height,
                         pi.Rectangle.Width);
 
                     // Calculate appropriate font size
@@ -190,7 +191,7 @@ public class PDFTemplateGroup : IPDFTemplate
                     int sets = tournament.Details?.Sets ?? 1;
                     for (int j = 0; j < sets; j++)
                     {
-                        string scoreText = scores?.FirstOrDefault(x => 
+                        string scoreText = scores?.FirstOrDefault(x =>
                             x.Match == match.Id && x.Set == j + 1)?.Home.ToString() ?? "";
                         Cell scoreCell = MakeScoreCell(2f, scoreText, fontSizePt);
                         matchTable.AddCell(scoreCell);
@@ -204,7 +205,7 @@ public class PDFTemplateGroup : IPDFTemplate
                     // Add away team score cells
                     for (int j = 0; j < sets; j++)
                     {
-                        string scoreText = scores?.FirstOrDefault(x => 
+                        string scoreText = scores?.FirstOrDefault(x =>
                             x.Match == match.Id && x.Set == j + 1)?.Away.ToString() ?? "";
                         Cell scoreCell = MakeScoreCell(2f, scoreText, fontSizePt);
                         matchTable.AddCell(scoreCell);
@@ -233,7 +234,7 @@ public class PDFTemplateGroup : IPDFTemplate
     private Cell MakeScoreCell(float padding, string? text = "", float fontSizePt = 16f)
     {
         var scell = new Cell();
-        
+
         // Calculate appropriate cell dimensions
         float charWidth = fontSizePt * 0.6f; // rough estimate: 0.6em per char
         float cellWidth = charWidth + 2 * padding;
@@ -242,7 +243,7 @@ public class PDFTemplateGroup : IPDFTemplate
         // Use FixedSizeCellRenderer for consistent sizing
         scell.SetNextRenderer(new FixedSizeCellRenderer(scell, text, cellWidth, cellHeight, 1f));
         scell.SetFontSize(fontSizePt);
-        
+
         return scell;
     }
 
@@ -256,7 +257,7 @@ public class PDFTemplateGroup : IPDFTemplate
     /// <param name="scores">The list of scores for the matches.</param>
     /// <param name="widths">The column widths for the match tables.</param>
     /// <param name="startingPageNumber">The page number to start the main draw from (after group pages).</param>
-    private void PrintMainTournamentDraw(Document doc, PdfDocument pdfdoc, Tournament tournament, 
+    private void PrintMainTournamentDraw(Document doc, PdfDocument pdfdoc, Tournament tournament,
         List<Score> scores, List<float> widths, int startingPageNumber)
     {
         // Check if the tournament has a main draw (after groups)
@@ -286,8 +287,8 @@ public class PDFTemplateGroup : IPDFTemplate
 
         // Group layout by page index
         var groupedMainLayout = from p in mainDrawLayout
-                               group p by p.PageIndex into g
-                               select new { PageIndex = g.Key, Layouts = g.ToList() };
+                                group p by p.PageIndex into g
+                                select new { PageIndex = g.Key, Layouts = g.ToList() };
 
         int currentMainDrawPage = startingPageNumber;
         foreach (var group in groupedMainLayout)
@@ -295,7 +296,7 @@ public class PDFTemplateGroup : IPDFTemplate
             // Add a new page for each page of the main draw
             pdfdoc.AddNewPage();
             currentMainDrawPage++;
-            
+
             // Print the main tournament matches on this page using the correct page number
             PrintMainDrawPage(group.Layouts, tournament.Draw, tournament, scores, pdfdoc, doc, widths, currentMainDrawPage);
         }
@@ -313,7 +314,7 @@ public class PDFTemplateGroup : IPDFTemplate
     /// <param name="doc">The document object for layout and styling.</param>
     /// <param name="widths">The column widths for the match tables.</param>
     /// <param name="pageNo">The page number for the current layout.</param>
-    private void PrintMainDrawPage(List<PagenationInfo> layout, Draw mainDraw, Tournament tournament, List<Score> scores, 
+    private void PrintMainDrawPage(List<PagenationInfo> layout, Draw mainDraw, Tournament tournament, List<Score> scores,
         PdfDocument pdfdoc, Document doc, List<float> widths, int pageNo)
     {
         if (layout.Count == 0) return;
@@ -323,7 +324,7 @@ public class PDFTemplateGroup : IPDFTemplate
             try
             {
                 PagenationInfo pi = layout[i];
-                
+
                 // Handle round headers
                 if (pi.ElementType == PageElementType.RoundHeader)
                 {
@@ -331,25 +332,26 @@ public class PDFTemplateGroup : IPDFTemplate
                     float headerFontSize = 16f; // Slightly larger for main tournament
                     PdfFont boldFont = PdfFontFactory.CreateFont(StandardFonts.HELVETICA_BOLD);
                     string headerText = pi.Text.StartsWith("Main Tournament") ? pi.Text : $"Main Tournament - {pi.Text}";
-                    
+
                     Paragraph headerParagraph = new Paragraph(headerText)
                         .SetFont(boldFont)
                         .SetFontSize(headerFontSize)
                         .SetTextAlignment(TextAlignment.CENTER);
-                    
-                    headerParagraph.SetFixedPosition(pageNo, pi.Rectangle.Left, 
-                        pdfdoc.GetDefaultPageSize().GetHeight() - pi.Rectangle.Top - pi.Rectangle.Height, 
+
+                    headerParagraph.SetFixedPosition(pageNo, pi.Rectangle.Left,
+                        pdfdoc.GetDefaultPageSize().GetHeight() - pi.Rectangle.Top - pi.Rectangle.Height,
                         pi.Rectangle.Width);
-                    
+
                     doc.Add(headerParagraph);
                 }
                 else // Handle match elements
                 {
-                    // Find the match in the main draw
-                    Match? match = mainDraw.Rounds
-                        .FirstOrDefault(e => e.Index == pi.Round)?
-                        .GetAtIndex(pi.RowOffset)?
-                        .Matches.FirstOrDefault();
+                    // Find the specific round (either main draw or playoff) that contains this match
+                    var round = pi.IsPlayoffRound ? mainDraw.Rounds.FirstOrDefault(e => e.Index == pi.Round)?.Playoff :
+                             mainDraw.Rounds.FirstOrDefault(e => e.Index == pi.Round);
+
+                    // Find the specific match within the round using the row offset (permutation ID)
+                    Match? match = round?.Permutations.FirstOrDefault(p => p.Id == pi.RowOffset)?.Matches.FirstOrDefault();
 
                     if (match == null) continue;
 
@@ -358,8 +360,8 @@ public class PDFTemplateGroup : IPDFTemplate
                     matchTable.SetFixedLayout();
                     matchTable.SetWidth(pi.Rectangle.Width);
                     matchTable.SetHeight(pi.Rectangle.Height);
-                    matchTable.SetFixedPosition(pageNo, pi.Rectangle.Left, 
-                        pdfdoc.GetDefaultPageSize().GetHeight() - pi.Rectangle.Top - pi.Rectangle.Height, 
+                    matchTable.SetFixedPosition(pageNo, pi.Rectangle.Left,
+                        pdfdoc.GetDefaultPageSize().GetHeight() - pi.Rectangle.Top - pi.Rectangle.Height,
                         pi.Rectangle.Width);
 
                     // Calculate appropriate font size
@@ -375,7 +377,7 @@ public class PDFTemplateGroup : IPDFTemplate
                     int sets = tournament.Details?.Sets ?? 1;
                     for (int j = 0; j < sets; j++)
                     {
-                        string scoreText = scores?.FirstOrDefault(x => 
+                        string scoreText = scores?.FirstOrDefault(x =>
                             x.Match == match.Id && x.Set == j + 1)?.Home.ToString() ?? "";
                         Cell scoreCell = MakeScoreCell(2f, scoreText, fontSizePt);
                         matchTable.AddCell(scoreCell);
@@ -389,7 +391,7 @@ public class PDFTemplateGroup : IPDFTemplate
                     // Add away team score cells
                     for (int j = 0; j < sets; j++)
                     {
-                        string scoreText = scores?.FirstOrDefault(x => 
+                        string scoreText = scores?.FirstOrDefault(x =>
                             x.Match == match.Id && x.Set == j + 1)?.Away.ToString() ?? "";
                         Cell scoreCell = MakeScoreCell(2f, scoreText, fontSizePt);
                         matchTable.AddCell(scoreCell);
