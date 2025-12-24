@@ -41,7 +41,6 @@ class DrawMakerKnockOut : DrawMakerBase
     /// <summary>
     /// Creates a complete knockout tournament schedule with all rounds and matches.
     /// </summary>
-    /// <param name="teams">The list of teams participating in the tournament.</param>
     /// <returns>A complete Schedule object containing all rounds and matches for the knockout tournament.</returns>
     /// <remarks>
     /// The method performs the following steps:
@@ -51,18 +50,18 @@ class DrawMakerKnockOut : DrawMakerBase
     /// 4. Creates subsequent rounds with placeholder teams that will be filled as winners advance
     /// 5. Calculates appropriate round labels (Final, Semi Final, Quarter Final)
     /// </remarks>
-    public override Draw Create(List<Team> teams)
+    public override Draw Create()
     {
         //The result
         Draw draw = new Draw(_tournament);
 
         //Assigns
-        _teams = teams;
+        var teams = _tournament.Teams;
         
         // Add a byes for number of teams that is not a power of 2.
         // Work out the number of byes needed.
         // For example: 6 teams needs 2 byes to make 8 (next power of 2)
-        int exponent = (int)Math.Ceiling(Math.Log2(_teams.Count));
+        int exponent = (int)Math.Ceiling(Math.Log2(teams.Count));
         int noByes = (int)Math.Pow(2, exponent) - teams.Count;
 
         // Add noByes to the teams list
@@ -74,22 +73,22 @@ class DrawMakerKnockOut : DrawMakerBase
         }
 
         //Sort teams by ranking decending
-        _teams.Sort((x, y) => (int)(y.Ranking - x.Ranking));
+        teams.Sort((x, y) => (int)(y.Ranking - x.Ranking));
         //Assign indices to teams for bracket positioning
-        for (int i = 0; i < _teams.Count; i++) _teams[i].Index = i + 1;
+        for (int i = 0; i < teams.Count; i++) teams[i].Index = i + 1;
 
         // Work out rounds in a knockout tournament
         // The number of rounds is log2(teams)
         // For example, 8 teams = 3 rounds, 16 teams = 4 rounds, etc.
-        int noRounds = (int)Math.Log2(_teams.Count);
+        int noRounds = (int)Math.Log2(teams.Count);
         
         // First round has half the number of permutations as the number of teams.
-        int noPermutations = _teams.Count / 2;
+        int noPermutations = teams.Count / 2;
         
         // For each permutation, an element in the top half of "_teams" 
         // plays against an element in the bottom half of "_teams".
         // This ensures highest ranked plays lowest ranked, etc.
-        Debug.WriteLine($"ex:{exponent}|byes:{noByes}|teams:{_teams.Count}|r:{noRounds}|perms:{noPermutations}");
+        Debug.WriteLine($"ex:{exponent}|byes:{noByes}|teams:{teams.Count}|r:{noRounds}|perms:{noPermutations}");
         // Create first round matches
         for (int i = 0; i < noPermutations; i++)
         {

@@ -28,15 +28,17 @@ class AssignTournament
         
         IGameMaker gm = new GameMakerTennis();
 
-        List<Team> selected = new();
+        tournament.Teams = new();
 
         //Teams
 
         int noTeams = noPlayers / teamSize;
+        //Team primary key for draw makers looking for teams
+        int teamIdx = 1;
 
         for (int i = 0; i < noTeams; i++)
         {
-            Team team = new Team() { Id = -1, Label = $"team_{i}", Index = i };
+            Team team = new Team() { Id = teamIdx++, Label = $"team_{i}", Index = i };
 
             for (int j = 0; j < teamSize; j++)
             {
@@ -47,18 +49,17 @@ class AssignTournament
                 //players.Remove(player);
             }
 
-            selected.Add(team);
+            tournament.Teams.Add(team);
 
         }
-
 
         //Action
         //Assert
         FactoryDrawMaker fac = new();
         var mm = fac.Create(tournament, gm);
-        var draw = mm.Create(selected);
+        
+        var draw = mm.Create();
         tournament.Draw = draw;
-        tournament.Teams = selected;
         return tournament;
 
     }

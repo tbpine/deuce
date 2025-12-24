@@ -39,9 +39,8 @@ public class DrawMakerBase : IDrawMaker
     /// Creates a draw for the tournament based on the provided teams.
     /// This method must be implemented by derived classes.
     /// </summary>
-    /// <param name="team">List of teams to include in the draw</param>
     /// <returns>A Draw object representing the tournament schedule</returns>
-    public virtual Draw Create(List<Team> team)
+    public virtual Draw Create()
     {
         throw new NotImplementedException("DrawMakerBase::Create not implemented");
     }

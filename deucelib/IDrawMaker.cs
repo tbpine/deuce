@@ -5,7 +5,7 @@ namespace deuce;
 /// </summary>
 public interface IDrawMaker
 {
-    Draw Create(List<Team> team);
+    Draw Create();
     //Execute every round of the schedule
 
     //Progress to the next round of the schedule

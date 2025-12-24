@@ -13,22 +13,22 @@ class DrawMakerRR : DrawMakerBase, IDrawMaker
         _gameMaker = gameMaker;
     }
 
-    public override Draw Create(List<Team> teams)
+    public override Draw Create()
     {
         //The result
         Draw draw = new Draw(_tournament);
 
         //Assigns
-        _teams = teams;
+        var teams = _tournament.Teams;
         //Add a bye for odd numbers
-        if (_teams.Count % 2 > 0)
-            _teams.Add(new Team(-1, "BYE"));
+        if (teams.Count % 2 > 0)
+            teams.Add(new Team(-1, "BYE"));
 
-        for (int i = 0; i < _teams.Count; i++) _teams[i].Index = i + 1;
+        for (int i = 0; i < teams.Count; i++) teams[i].Index = i + 1;
 
         //It work out this way
-        int noRounds = _teams.Count - 1;
-        int noPermutations = _teams.Count / 2;
+        int noRounds = teams.Count - 1;
+        int noPermutations = teams.Count / 2;
 
         for (int r = 0; r < noRounds; r++)
         {
@@ -36,8 +36,8 @@ class DrawMakerRR : DrawMakerBase, IDrawMaker
 
             for (int p = 0; p < noPermutations; p++)
             {
-                Team home = _teams[p];
-                Team away = _teams[teams.Count - p - 1];
+                Team home = teams[p];
+                Team away = teams[teams.Count - p - 1];
 
                 Debug.Write("(" + home.Index + "," + away.Index + ")");
 
@@ -51,9 +51,9 @@ class DrawMakerRR : DrawMakerBase, IDrawMaker
 
             }
             //Next Round
-            var pop = _teams[0];
-            _teams.RemoveAt(0);
-            _teams.Add(pop);
+            var pop = teams[0];
+            teams.RemoveAt(0);
+            teams.Add(pop);
             Debug.Write($"\n");
         }
 

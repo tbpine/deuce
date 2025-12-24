@@ -19,14 +19,14 @@ class DrawMakerKnockOutPlayoff : DrawMakerBase
         _gameMaker = gameMaker;
     }
 
-    public override Draw Create(List<Team> teams)
+    public override Draw Create()
     {
         //The result
         Draw draw = new Draw(_tournament);
 
-        _teams = teams;
+        var teams = _tournament.Teams;
 
-        int exponent = (int)Math.Ceiling(Math.Log2(_teams.Count));
+        int exponent = (int)Math.Ceiling(Math.Log2(teams.Count));
         int noByes = (int)Math.Pow(2, exponent) - teams.Count;
 
         for (int i = 0; i < noByes; i++)
@@ -36,14 +36,14 @@ class DrawMakerKnockOutPlayoff : DrawMakerBase
             _teams.Add(emptyTeam);
         }
 
-        _teams.Sort((x, y) => (int)(y.Ranking - x.Ranking));
-        for (int i = 0; i < _teams.Count; i++) _teams[i].Index = i + 1;
+        teams.Sort((x, y) => (int)(y.Ranking - x.Ranking));
+        for (int i = 0; i < teams.Count; i++) teams[i].Index = i + 1;
         //The extra round is beteween winners of the main round and playoff round
-        int noRounds = (int)Math.Log2(_teams.Count) + 1;
+        int noRounds = (int)Math.Log2(teams.Count) + 1;
 
-        int noPermutations = _teams.Count / 2;
+        int noPermutations = teams.Count / 2;
 
-        Debug.WriteLine($"ex:{exponent}|byes:{noByes}|teams:{_teams.Count}|r:{noRounds}|perms:{noPermutations}");
+        Debug.WriteLine($"ex:{exponent}|byes:{noByes}|teams:{teams.Count}|r:{noRounds}|perms:{noPermutations}");
 
         for (int i = 0; i < noPermutations; i++)
         {

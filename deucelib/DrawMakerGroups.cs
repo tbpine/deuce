@@ -38,35 +38,35 @@ class DrawMakerGroups : DrawMakerBase
         _drawMakerKO = new DrawMakerKnockOut(t, gameMaker);
     }
 
-    public override Draw Create(List<Team> teams)
+    public override Draw Create()
     {
         //The result
         Draw draw = new Draw(_tournament);
 
         //Assigns
-        _teams = teams;
+        var teams = _tournament.Teams;
 
         // Add a byes for number of teams that is not a power of 2.
         // Work out the number of byes needed.
         // For example: 6 teams needs 2 byes to make 8 (next power of 2)
-        int exponent = (int)Math.Ceiling(Math.Log2(_teams.Count));
+        int exponent = (int)Math.Ceiling(Math.Log2(teams.Count));
         int noByes = (int)Math.Pow(2, exponent) - teams.Count;
 
         // Add noByes to the teams list
         for (int i = 0; i < noByes; i++)
         {
             Team emptyTeam = new Team();
-            emptyTeam.CreateBye(_tournament.Details.TeamSize, _tournament.Organization, _teams.Count + i);
-            _teams.Add(emptyTeam);
+            emptyTeam.CreateBye(_tournament.Details.TeamSize, _tournament.Organization, teams.Count + i);
+            teams.Add(emptyTeam);
         }
 
         //Sort teams by ranking decending
-        _teams.Sort((x, y) => (int)(y.Ranking - x.Ranking));
+        teams.Sort((x, y) => (int)(y.Ranking - x.Ranking));
         //Assign indices to teams for bracket positioning
-        for (int i = 0; i < _teams.Count; i++) _teams[i].Index = i + 1;
+        for (int i = 0; i < teams.Count; i++) teams[i].Index = i + 1;
 
         //Create groups
-        _organizerGroup.Assign(_tournament, _teams);
+        _organizerGroup.Assign(_tournament, teams);
         //Create draws for each round
         IDrawMaker drawMakerKOPlayoff = new DrawMakerKnockOutPlayoff(_tournament, _gameMaker);
         foreach (Group group in _tournament.Groups)
@@ -87,7 +87,7 @@ class DrawMakerGroups : DrawMakerBase
         // First round has half the number of permutations as the number of teams.
         int noPermutations = _tournament.Groups.Count();
 
-        Debug.WriteLine($"ex:{exponent}|byes:{noByes}|teams:{_teams.Count}|r:{noRounds}|perms:{noPermutations}");
+        Debug.WriteLine($"ex:{exponent}|byes:{noByes}|teams:{teams.Count}|r:{noRounds}|perms:{noPermutations}");
         // Create first round matches
         int teamIndex = 0;
         for (int i = 0; i < noPermutations; i++)
@@ -246,57 +246,5 @@ class DrawMakerGroups : DrawMakerBase
 
     }
 
-    private Team? DetermineMatchWinner(List<Score> matchScores, Match match)
-    {
-        if (!matchScores.Any()) return null;
 
-        int homeSetsWon = 0;
-        int awaySetsWon = 0;
-        int homeTotalGames = 0;
-        int awayTotalGames = 0;
-
-        // Count sets won by each team and total games
-        foreach (var score in matchScores)
-        {
-            // Add games to total count
-            homeTotalGames += score.Home;
-            awayTotalGames += score.Away;
-
-            // Count sets won
-            if (score.Home > score.Away)
-            {
-                homeSetsWon++;
-            }
-            else if (score.Away > score.Home)
-            {
-                awaySetsWon++;
-            }
-            // Tied sets don't count toward either team
-        }
-
-        // First, determine winner based on sets won
-        if (homeSetsWon > awaySetsWon)
-        {
-            return match.Home.FirstOrDefault()?.Team;
-        }
-        else if (awaySetsWon > homeSetsWon)
-        {
-            return match.Away.FirstOrDefault()?.Team;
-        }
-        else
-        {
-            // Sets are tied, determine winner by total games won
-            if (homeTotalGames > awayTotalGames)
-            {
-                return match.Home.FirstOrDefault()?.Team; // Home team wins on games
-            }
-            else if (awayTotalGames > homeTotalGames)
-            {
-                return match.Away.FirstOrDefault()?.Team; // Away team wins on games
-            }
-        }
-
-        // If completely tied (sets and games), return null
-        return null;
-    }
 }

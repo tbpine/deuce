@@ -55,7 +55,7 @@ public class UnitsPdfWriter
         //Assert
         FactoryDrawMaker fac = new();
         var mm = fac.Create(tournament, gm);
-        var results = mm.Create(teams);
+        var results = mm.Create();
 
         FileStream fs = new FileStream($"{tournament.Label}.pdf", FileMode.Create, FileAccess.Write);
         PdfPrinter printer = new(results, new PDFTemplateFactory());

@@ -41,7 +41,7 @@ public class Group
         if (_teams == null) throw new ArgumentNullException(nameof(_teams));
         if (_teams.Count < 2) throw new ArgumentException("At least two teams are required to create a draw.");
 
-        _draw = drawMaker.Create(_teams);
+        _draw = drawMaker.Create();
         //Link group
         _draw.Group = this;
     }

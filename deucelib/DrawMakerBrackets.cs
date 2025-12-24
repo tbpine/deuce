@@ -57,7 +57,6 @@ class DrawMakerBrackets : DrawMakerBase
     /// <summary>
     /// Creates a complete double-elimination tournament draw with both winners and losers brackets.
     /// </summary>
-    /// <param name="teams">The list of teams participating in the tournament.</param>
     /// <returns>A Draw object representing the complete tournament structure with both brackets.</returns>
     /// <remarks>
     /// This method performs the following operations:
@@ -70,32 +69,32 @@ class DrawMakerBrackets : DrawMakerBase
     /// The losers bracket is initialized with bye teams that will be replaced as teams
     /// are eliminated from the winners bracket during tournament play.
     /// </remarks>
-    public override Draw Create(List<Team> teams)
+    public override Draw Create()
     {
         //Losers fall to a second bracket which
         //The result
         Draw draw = new Draw(_tournament);
 
         //Assigns
-        _teams = teams;
+        var teams = _tournament.Teams;
 
         //For knockout tournaments, make sure there's an even number of teams
         //by adding bye teams if necessary.
-        int exponent = (int)Math.Ceiling(Math.Log2(_teams.Count));
+        int exponent = (int)Math.Ceiling(Math.Log2(teams.Count));
         int noByes = (int)Math.Pow(2, exponent) - teams.Count;
 
         //If there are any byes needed, add them to the list of teams.
         for (int i = 0; i < noByes; i++)
         {
-            var byeTeam = new Team() { Index = _teams.Count, Label = $"" };
-            byeTeam.CreateBye(_tournament.Details.TeamSize, _tournament.Organization, _teams.Count);
-            _teams.Add(byeTeam);
+            var byeTeam = new Team() { Index = teams.Count, Label = $"" };
+            byeTeam.CreateBye(_tournament.Details.TeamSize, _tournament.Organization, teams.Count);
+            teams.Add(byeTeam);
         }
 
         var winnersFactoryDrawMaker = new FactoryDrawMaker();
         //Create a KO tournament type draw maker
         var winnersDrawMaker = winnersFactoryDrawMaker.Create(new TournamentType(2, "","", "", ""), _tournament, _gameMaker);
-        draw = winnersDrawMaker.Create(_teams);
+        draw = winnersDrawMaker.Create();
 
         //is a tournament in itself.
         //Losers bracket is equivalent to the second round of the main tournament.
@@ -106,7 +105,7 @@ class DrawMakerBrackets : DrawMakerBase
         Tournament losersBracket = (_tournament.Clone() as Tournament) ?? new();
         
         //Make blank teams for the losers bracket
-        for (int i = 0; i < _teams.Count/2; i++)
+        for (int i = 0; i < teams.Count/2; i++)
         {
             var byeTeam = new Team() { Index = i + 1 };
             byeTeam.CreateBye(losersBracket.Details.TeamSize, losersBracket.Organization, losersBracket.Teams.Count + 1);
@@ -115,7 +114,7 @@ class DrawMakerBrackets : DrawMakerBase
 
         var losersFactoryDrawMaker = new FactoryDrawMaker();
         var losersDrawMaker = losersFactoryDrawMaker.Create(new TournamentType(2, "","", "", ""), losersBracket, _gameMaker);
-        losersBracket.Draw = losersDrawMaker.Create(losersBracket.Teams);
+        losersBracket.Draw = losersDrawMaker.Create();
 
         //link the losers bracket to the main tournament
         _tournament.AddBracket(new Bracket()

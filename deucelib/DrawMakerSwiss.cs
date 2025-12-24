@@ -11,25 +11,25 @@ class DrawMakerSwiss : DrawMakerBase, IDrawMaker
         _gameMaker = gameMaker;
     }
 
-    public override Draw Create(List<Team> teams)
+    public override Draw Create()
     {
         //The result
         Draw draw = new Draw(_tournament);
         //Assigns
-        _teams = teams;
+        var teams = _tournament.Teams;
 
         // Sort teams by ranking initially (higher ranked teams first)
-        _teams.Sort((x, y) => (int)(y.Ranking - x.Ranking));
+        teams.Sort((x, y) => (int)(y.Ranking - x.Ranking));
 
         // Add indexes to teams
-        for (int i = 0; i < _teams.Count; i++) 
-            _teams[i].Index = i + 1;
+        for (int i = 0; i < teams.Count; i++) 
+            teams[i].Index = i + 1;
 
         // Calculate number of rounds based on tournament format or default
         // Swiss format typically uses log2(n) rounds, but can be customized
-        int noRounds = CalculateNumberOfRounds(_teams.Count);
+        int noRounds = CalculateNumberOfRounds(teams.Count);
 
-        Debug.WriteLine($"Swiss Tournament: Teams:{_teams.Count}, Rounds:{noRounds}");
+        Debug.WriteLine($"Swiss Tournament: Teams:{teams.Count}, Rounds:{noRounds}");
 
         // Create first round with initial pairings
         CreateInitialRound(draw, 0);
@@ -48,7 +48,7 @@ class DrawMakerSwiss : DrawMakerBase, IDrawMaker
     public override void OnChange(Draw schedule, int round, int previousRound, List<Score> scores)
     {
         // If this is not the first round, create the next round based on current standings
-        if (round > 0 && round < CalculateNumberOfRounds(_teams.Count))
+        if (round > 0 && round < CalculateNumberOfRounds(_tournament.Teams.Count()))
         {
             CreateNextRound(schedule, round, scores);
         }
@@ -80,7 +80,7 @@ class DrawMakerSwiss : DrawMakerBase, IDrawMaker
     private void CreateInitialRound(Draw draw, int roundNumber)
     {
         // Handle odd number of teams by adding bye
-        List<Team> roundTeams = new List<Team>(_teams);
+        List<Team> roundTeams = new List<Team>(_tournament.Teams);
         if (roundTeams.Count % 2 == 1)
         {
             roundTeams.Add(new Team(-1, "BYE"));
@@ -159,7 +159,7 @@ class DrawMakerSwiss : DrawMakerBase, IDrawMaker
     /// <returns>List of team standings</returns>
     private List<TeamStanding> CalculateStandings(List<Score> scores)
     {
-        var standings = _teams.Select(team => new TeamStanding 
+        var standings = _tournament.Teams.Select(team => new TeamStanding 
         { 
             Team = team, 
             Wins = 0, 

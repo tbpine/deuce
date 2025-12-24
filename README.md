@@ -25,4 +25,6 @@ rotating the array every round is how you make games.
 - [X] Refactor library
 - [X] Printing
 - [] Investigate Game makers using null teams
-- [] Rework draw advancement for the knock out tournament with scores as inputs.
+- [X] Rework draw advancement for the knock out tournament with scores as inputs.
+
+- [] All draw makers should use the teams reference inside the tournament, not the from function parameters.

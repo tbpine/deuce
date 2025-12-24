@@ -13,11 +13,13 @@ public class FactoryDrawMaker
     /// <returns>A type defining IMatchFactory </returns>
     public IDrawMaker Create(Tournament t, IGameMaker gm)
     {
-        switch (t.Type)
+
+          switch (t.Type)
         {
             case 3: { return new DrawMakerKnockOutPlayoff(t, gm); }
             case 2: { return new DrawMakerKnockOut(t, gm); }
             case 4: { return new DrawMakerGroups(t, gm); }
+            case 5: { return new DrawMakerSwiss(t, gm); }
             
         }
 
@@ -33,14 +35,16 @@ public class FactoryDrawMaker
     /// <returns>A scheduler for the specified tournament type</returns>
     public IDrawMaker Create(TournamentType tType, Tournament t, IGameMaker gm)
     {
-        switch (tType.Id)
+          switch (tType.Id)
         {
             case 3: { return new DrawMakerKnockOutPlayoff(t, gm); }
             case 2: { return new DrawMakerKnockOut(t, gm); }
             case 4: { return new DrawMakerGroups(t, gm); }
-
-            default: { return new DrawMakerRR(t, gm); }
+            case 5: { return new DrawMakerSwiss(t, gm); }
+            
         }
+
+        return new DrawMakerRR(t, gm);
 
     }
 
