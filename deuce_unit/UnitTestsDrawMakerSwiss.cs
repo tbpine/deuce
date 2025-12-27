@@ -86,22 +86,7 @@ namespace deuce_unit
             IGameMaker gm = new GameMakerTennis();
             IDrawMaker scheduler = factory.Create(tournament, gm);
 
-            
-            // Assign IDs to all matches
-            int matchId = 1;
-            foreach (var round in tournament.Draw.Rounds)
-            {
-                int permId = 0;
-                foreach (var permutation in round.Permutations)
-                {
-                    permutation.Id = permId++;
-                    foreach (var match in permutation.Matches)
-                    {
-                        match.Id = matchId++;
-                    }
-                }
-            }
-
+     
             TestContext?.WriteLine("Starting Swiss tournament progression...");
 
             // Progress through Swiss tournament rounds dynamically
@@ -158,7 +143,7 @@ namespace deuce_unit
                 TestContext?.WriteLine($"  Generated {roundScores.Count} scores for round {currentRoundIndex + 1}");
 
                 // Progress to next round using scores from current round
-                if (currentRoundIndex < maxRounds - 1)
+                if (currentRoundIndex < maxRounds )
                 {
                     int roundsBefore = tournament.Draw.NoRounds;
                     scheduler.OnChange(tournament.Draw, currentRoundIndex + 1, currentRoundIndex, roundScores);

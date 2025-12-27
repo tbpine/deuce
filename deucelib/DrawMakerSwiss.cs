@@ -6,9 +6,12 @@ namespace deuce;
 class DrawMakerSwiss : DrawMakerBase, IDrawMaker
 {
     private readonly IGameMaker _gameMaker;
+    private readonly Dictionary<int, List<TeamStanding>> _standingsHistory;
+    
     public DrawMakerSwiss(Tournament t, IGameMaker gameMaker) : base(t)
     {
         _gameMaker = gameMaker;
+        _standingsHistory = new Dictionary<int, List<TeamStanding>>();
     }
 
     public override Draw Create()
@@ -47,6 +50,12 @@ class DrawMakerSwiss : DrawMakerBase, IDrawMaker
     /// <param name="scores">List of scores from recent matches</param>
     public override void OnChange(Draw schedule, int round, int previousRound, List<Score> scores)
     {
+        // Record standings for the completed round
+        if (previousRound >= 0)
+        {
+            UpdateStandingsForCompletedRound(schedule, previousRound, scores);
+        }
+        
         // If this is not the first round, create the next round based on current standings
         if (round > 0 && round < CalculateNumberOfRounds(_tournament.Teams.Count()))
         {
@@ -113,8 +122,8 @@ class DrawMakerSwiss : DrawMakerBase, IDrawMaker
     /// <param name="scores">Scores from previous rounds</param>
     private void CreateNextRound(Draw draw, int roundNumber, List<Score> scores)
     {
-        // Calculate current standings based on scores
-        var standings = CalculateStandings(scores);
+        // Get current standings from the most recent completed round
+        var standings = GetCurrentStandings();
         
         // Sort teams by current standing (wins, then ranking)
         var sortedTeams = standings.OrderByDescending(s => s.Wins)
@@ -153,21 +162,47 @@ class DrawMakerSwiss : DrawMakerBase, IDrawMaker
     }
 
     /// <summary>
-    /// Calculate current standings based on match results.
+    /// Updates standings by adding results from the just-completed round to previous standings.
     /// </summary>
-    /// <param name="scores">All scores from previous rounds</param>
-    /// <returns>List of team standings</returns>
-    private List<TeamStanding> CalculateStandings(List<Score> scores)
+    /// <param name="draw">The tournament draw</param>
+    /// <param name="completedRound">The round that was just completed</param>
+    /// <param name="scores">All scores from the tournament</param>
+    private void UpdateStandingsForCompletedRound(Draw draw, int completedRound, List<Score> scores)
     {
-        var standings = _tournament.Teams.Select(team => new TeamStanding 
-        { 
-            Team = team, 
-            Wins = 0, 
-            Losses = 0 
-        }).ToList();
+        // Get previous standings (or create initial if this is round 0)
+        List<TeamStanding> currentStandings;
+        if (completedRound == 0)
+        {
+            // Initialize standings for the first round
+            currentStandings = _tournament.Teams.Select(team => new TeamStanding 
+            { 
+                Team = team, 
+                Wins = 0, 
+                Losses = 0,
+                Draws = 0
+            }).ToList();
+        }
+        else
+        {
+            // Copy previous round's standings
+            var previousStandings = GetStandingsForRound(completedRound - 1);
+            if (previousStandings == null)
+            {
+                throw new InvalidOperationException($"Previous round standings not found for round {completedRound - 1}");
+            }
+            
+            currentStandings = previousStandings.Select(s => new TeamStanding
+            {
+                Team = s.Team,
+                Wins = s.Wins,
+                Losses = s.Losses,
+                Draws = s.Draws
+            }).ToList();
+        }
 
-        // Group scores by match and determine winners
-        var matchScores = scores.GroupBy(s => new { s.Round, s.Permutation, s.Match });
+        // Process only the matches from the completed round
+        var completedRoundScores = scores.Where(s => s.Round == completedRound);
+        var matchScores = completedRoundScores.GroupBy(s => new { s.Permutation, s.Match });
 
         foreach (var matchGroup in matchScores)
         {
@@ -177,21 +212,42 @@ class DrawMakerSwiss : DrawMakerBase, IDrawMaker
                 var winner = DetermineMatchWinner(matchScoresList);
                 var loser = DetermineMatchLoser(matchScoresList);
 
-                if (winner != null)
+                // Update standings with results from this match
+                if (winner != null && loser != null)
                 {
-                    var winnerStanding = standings.FirstOrDefault(s => s.Team.Id == winner.Id);
+                    var winnerStanding = currentStandings.FirstOrDefault(s => s.Team.Id == winner.Id);
+                    var loserStanding = currentStandings.FirstOrDefault(s => s.Team.Id == loser.Id);
+                    
                     if (winnerStanding != null) winnerStanding.Wins++;
-                }
-
-                if (loser != null)
-                {
-                    var loserStanding = standings.FirstOrDefault(s => s.Team.Id == loser.Id);
                     if (loserStanding != null) loserStanding.Losses++;
+                }
+                else if (winner == null && loser == null)
+                {
+                    // It's a draw - both teams get a draw
+                    var round = draw.Rounds.FirstOrDefault(r => r.Index == completedRound);
+                    var permutation = round?.Permutations.FirstOrDefault(p => p.Id == matchGroup.Key.Permutation);
+                    var match = permutation?.Matches.FirstOrDefault(m => m.Id == matchGroup.Key.Match);
+                    
+                    if (match != null)
+                    {
+                        var homeTeam = match.Home.FirstOrDefault()?.Team;
+                        var awayTeam = match.Away.FirstOrDefault()?.Team;
+                        
+                        if (homeTeam != null && awayTeam != null)
+                        {
+                            var homeStanding = currentStandings.FirstOrDefault(s => s.Team.Id == homeTeam.Id);
+                            var awayStanding = currentStandings.FirstOrDefault(s => s.Team.Id == awayTeam.Id);
+                            
+                            if (homeStanding != null) homeStanding.Draws++;
+                            if (awayStanding != null) awayStanding.Draws++;
+                        }
+                    }
                 }
             }
         }
 
-        return standings;
+        // Record the updated standings for this round
+        RecordStandingsForRound(completedRound, currentStandings);
     }
 
     /// <summary>
@@ -403,14 +459,83 @@ class DrawMakerSwiss : DrawMakerBase, IDrawMaker
     }
 
     /// <summary>
+    /// Records the standings for a specific round in the tournament history.
+    /// </summary>
+    /// <param name="roundNumber">The round number to record standings for</param>
+    /// <param name="standings">The calculated standings for the round</param>
+    private void RecordStandingsForRound(int roundNumber, List<TeamStanding> standings)
+    {
+        // Sort standings by wins (descending), then by team ranking (descending)
+        var sortedStandings = standings.OrderByDescending(s => s.Wins)
+                                      .ThenByDescending(s => s.Team.Ranking)
+                                      .ToList();
+        
+        // Assign positions based on sorted order
+        for (int i = 0; i < sortedStandings.Count; i++)
+        {
+            sortedStandings[i].Position = i + 1;
+        }
+        
+        // Store a deep copy of the standings for this round
+        var roundStandings = sortedStandings.Select(s => new TeamStanding
+        {
+            Team = s.Team,
+            Wins = s.Wins,
+            Losses = s.Losses,
+            Draws = s.Draws,
+            Position = s.Position
+        }).ToList();
+        
+        _standingsHistory[roundNumber] = roundStandings;
+        
+        Debug.WriteLine($"Standings after Round {roundNumber + 1}:");
+        foreach (var standing in roundStandings)
+        {
+            Debug.WriteLine($"  {standing.Position}. {standing.Team.Label} - W:{standing.Wins} L:{standing.Losses} D:{standing.Draws}");
+        }
+    }
+    
+    /// <summary>
+    /// Gets the standings for a specific round.
+    /// </summary>
+    /// <param name="roundNumber">The round number (0-based)</param>
+    /// <returns>List of team standings for the round, or null if round not found</returns>
+    public List<TeamStanding>? GetStandingsForRound(int roundNumber)
+    {
+        return _standingsHistory.TryGetValue(roundNumber, out var standings) ? standings : null;
+    }
+    
+    /// <summary>
+    /// Gets all historical standings data.
+    /// </summary>
+    /// <returns>Dictionary with round numbers as keys and standings as values</returns>
+    public Dictionary<int, List<TeamStanding>> GetAllStandings()
+    {
+        return new Dictionary<int, List<TeamStanding>>(_standingsHistory);
+    }
+    
+    /// <summary>
+    /// Gets the current standings (most recent round).
+    /// </summary>
+    /// <returns>Current standings or empty list if no rounds completed</returns>
+    public List<TeamStanding> GetCurrentStandings()
+    {
+        if (!_standingsHistory.Any()) return new List<TeamStanding>();
+        
+        var latestRound = _standingsHistory.Keys.Max();
+        return _standingsHistory[latestRound];
+    }
+
+    /// <summary>
     /// Represents a team's current standing in the tournament.
     /// </summary>
-    private class TeamStanding
+    public class TeamStanding
     {
         public Team Team { get; set; } = new Team();
         public int Wins { get; set; }
         public int Losses { get; set; }
         public int Draws { get; set; }
+        public int Position { get; set; }
     }
 
 }
