@@ -3,7 +3,28 @@ using deuce.ext;
 
 namespace deuce;
 
-class DrawMakerSwiss : DrawMakerBase, IDrawMaker
+/// <summary>
+/// For the swiss system. Teams play each round for points with
+/// the winner having the highest points winning. Or, in the event of a tie-break, have configurable
+/// ways to separate them.
+/// 
+/// For each round , standings are calculated : points are awarded for wins and draws.
+/// Then , standings are sorted by points, and teams are paired accordingly for the next round.
+/// Teams on the same points can be paired by:
+/// - ranking
+/// - bottom vs top
+/// - random
+/// - adjacent
+/// 
+/// Issues to consider:
+///  - Repeated matches should be avoided if possible.
+/// - Byes should be assigned fairly (e.g., to lowest-ranked teams that haven't had a bye yet).
+/// 
+///  - If a group has one player it is given a bye
+///  - If a group has add odd number of players, the group has to be adjusted by adding
+///  a lower score player.
+/// </summary>
+public class DrawMakerSwiss : DrawMakerBase, IDrawMaker
 {
     private readonly IGameMaker _gameMaker;
     private readonly Dictionary<int, List<TeamStanding>> _standingsHistory;
@@ -24,7 +45,8 @@ class DrawMakerSwiss : DrawMakerBase, IDrawMaker
         // Sort teams by ranking initially (higher ranked teams first)
         teams.Sort((x, y) => (int)(y.Ranking - x.Ranking));
 
-        // Add indexes to teams
+        // Add indexes to teams (for this tournament).
+        //Different from team primary key.
         for (int i = 0; i < teams.Count; i++) 
             teams[i].Index = i + 1;
 
@@ -75,7 +97,7 @@ class DrawMakerSwiss : DrawMakerBase, IDrawMaker
         
         // Standard Swiss format uses ceil(log2(n)) rounds
         // But we can also use tournament settings if available
-        int standardRounds = (int)Math.Ceiling(Math.Log2(teamCount));
+        int standardRounds = (int)Math.Ceiling(Math.Log2(teamCount)) +1 ;
         
         // Cap at reasonable maximum (typically no more than the number of teams - 1)
         return Math.Min(standardRounds, teamCount - 1);
@@ -89,6 +111,7 @@ class DrawMakerSwiss : DrawMakerBase, IDrawMaker
     private void CreateInitialRound(Draw draw, int roundNumber)
     {
         // Handle odd number of teams by adding bye
+        //Who gets the bye ?
         List<Team> roundTeams = new List<Team>(_tournament.Teams);
         if (roundTeams.Count % 2 == 1)
         {
@@ -98,6 +121,7 @@ class DrawMakerSwiss : DrawMakerBase, IDrawMaker
         int noPermutations = roundTeams.Count / 2;
 
         // For the first round, pair top half vs bottom half
+        //TODO: Configurable. Random, adjacent, etc.    
         for (int p = 0; p < noPermutations; p++)
         {
             Team home = roundTeams[p];
@@ -467,6 +491,7 @@ class DrawMakerSwiss : DrawMakerBase, IDrawMaker
     {
         // Sort standings by wins (descending), then by team ranking (descending)
         var sortedStandings = standings.OrderByDescending(s => s.Wins)
+                                       .ThenByDescending(s => s.Draws)
                                       .ThenByDescending(s => s.Team.Ranking)
                                       .ToList();
         
@@ -538,4 +563,15 @@ class DrawMakerSwiss : DrawMakerBase, IDrawMaker
         public int Position { get; set; }
     }
 
+
+    /// <summary>
+    /// Calculates the expected number of rounds for a Swiss tournament based on team count.
+    /// </summary>
+    /// <param name="teamCount">Number of teams in the tournament</param>
+    /// <returns>Expected number of rounds</returns>
+    public static int ExpectedNumberOfRounds(int teamCount)
+    {
+        if (teamCount <= 1) return 0;
+        return (int)Math.Ceiling(Math.Log2(teamCount)) +1 ;
+    }   
 }

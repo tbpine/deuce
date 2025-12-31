@@ -10,10 +10,22 @@ namespace deuce_unit
     {
         public TestContext? TestContext { get; set; }
 
+        private IDrawMaker _dm;
+        private IGameMaker _gm;
+        
+        private FactoryDrawMaker _fac = new FactoryDrawMaker();
+
+        public UnitTestsDrawMakerSwiss()
+        {
+            // Initialize before each test
+            _gm = new GameMakerTennis();
+
+            _dm = _fac.Create(new Tournament() { Type = 5 , Sport = 1}, _gm);
+
+        }
         [TestInitialize]
         public void Setup()
         {
-            // Initialize before each test
         }
 
         [TestMethod]
@@ -77,7 +89,7 @@ namespace deuce_unit
 
             TestContext?.WriteLine($"Created tournament '{tournament.Label}' with {tournament.Teams.Count()} teams");
             TestContext?.WriteLine($"Tournament draw has {tournament.Draw.NoRounds} rounds");
-            
+
             // Swiss tournaments should start with only 1 round initially
             Assert.AreEqual(1, tournament.Draw.NoRounds, "Swiss tournament should start with only 1 round");
 
@@ -86,7 +98,7 @@ namespace deuce_unit
             IGameMaker gm = new GameMakerTennis();
             IDrawMaker scheduler = factory.Create(tournament, gm);
 
-     
+
             TestContext?.WriteLine("Starting Swiss tournament progression...");
 
             // Progress through Swiss tournament rounds dynamically
@@ -143,12 +155,12 @@ namespace deuce_unit
                 TestContext?.WriteLine($"  Generated {roundScores.Count} scores for round {currentRoundIndex + 1}");
 
                 // Progress to next round using scores from current round
-                if (currentRoundIndex < maxRounds )
+                if (currentRoundIndex < maxRounds)
                 {
                     int roundsBefore = tournament.Draw.NoRounds;
                     scheduler.OnChange(tournament.Draw, currentRoundIndex + 1, currentRoundIndex, roundScores);
                     int roundsAfter = tournament.Draw.NoRounds;
-                    
+
                     TestContext?.WriteLine($"  Draw now has {roundsAfter} rounds (was {roundsBefore})");
 
                     // Check if a new round was created
@@ -158,7 +170,7 @@ namespace deuce_unit
                         if (nextRound != null && nextRound.Permutations.Any())
                         {
                             TestContext?.WriteLine($"  Next round has {nextRound.Permutations.Count()} matches ready");
-                            
+
                             // In Swiss system, verify no player plays the same opponent twice
                             ValidateSwissRoundUniqueness(tournament, currentRoundIndex + 1);
                         }
@@ -168,7 +180,7 @@ namespace deuce_unit
                 {
                     TestContext?.WriteLine($"  Final round completed");
                 }
-                
+
                 currentRoundIndex++;
             }
 
@@ -184,18 +196,214 @@ namespace deuce_unit
             TestContext?.WriteLine("Swiss tournament progression validation completed successfully");
         }
 
+        [TestMethod]
+        public void swiss_tournament_clear_winner_gets_bye_in_next_round()
+        {
+            TestContext?.WriteLine($"Testing Swiss tournament progression with bye scenario");
+
+            // Create unique random players by shuffling indices
+            const int playerCount = 8;
+            var players = RandomUtil.GetRandomPlayers(playerCount); //Get 8 unique players
+              // Create tournament using AssignTournament factory for Swiss format
+            AssignTournament assignTournament = new();
+            Tournament tournament = assignTournament.MakeRandom(
+                tournamentType: 5, // Swiss tournament
+                label: RandomUtil.GetRandomTournamentName(),
+                noPlayers: players.Count,
+                sport: 1, // Tennis
+                noSingle: 1,
+                noDouble: 0,
+                sets: 1,
+                teamSize: 1,
+                players: players,
+                _dm, 
+                _gm
+            );
+
+
+            Assert.IsNotNull(tournament, "Tournament should not be null");
+            Assert.IsNotNull(tournament.Draw, "Tournament draw should not be null");
+            Assert.IsNotNull(tournament.Teams, "Tournament teams should not be null");
+            Assert.AreEqual(playerCount, tournament.Teams.Count(), "Tournament should have correct number of teams");
+            // Verify each team has exactly one player
+            foreach (var team in tournament.Teams)
+            {
+                Assert.AreEqual(1, team.Players.Count(), "Each team should have exactly one player");
+            }
+            TestContext?.WriteLine($"Created tournament '{tournament.Label}' with {tournament.Teams.Count()} teams");
+            TestContext?.WriteLine($"Tournament draw has {tournament.Draw.NoRounds} rounds");
+
+            // Swiss tournaments should start with only 1 round initially
+            Assert.AreEqual(1, tournament.Draw.NoRounds, "Swiss tournament should start with only 1 round");
+
+            TestContext?.WriteLine("Starting Swiss tournament progression...");
+
+            // Progress through Swiss tournament rounds dynamically
+            List<Score> allScores = new List<Score>();
+            List<Score> roundScores = new List<Score>();
+            int scoreId = 1;
+            int currentRoundIndex = 0;
+            int maxRounds = DrawMakerSwiss.ExpectedNumberOfRounds(players.Count);
+
+            // First, assign a clear winner for the first round. The rest is a draw, means
+            //there is a group involving an odd number of players with same score and one clear winner.
+            foreach(Permutation p in tournament.Draw.GetRoundAtIndex(0).Permutations)
+            {
+                foreach(Match m in p.Matches)
+                {
+                    int scoreHome  = 3;
+                    int scoreAway  = 3;
+
+                    if (m.Home.First().Equals(tournament.Teams.First())) { scoreHome = 6 ; scoreAway = 0; }
+                    else if (m.Away.First().Equals(tournament.Teams.First()))  { scoreAway = 6 ; scoreHome = 0; }
+                    // Assign clear winners for first round
+                    var score = new Score
+                    {
+                        Id = scoreId++,
+                        Home = scoreHome,
+                        Away = scoreAway,
+                        Permutation = p.Id,
+                        Match = m.Id,
+                        Round = 0,
+                        Set = 1
+                    };
+
+                    roundScores.Add(score);
+                    allScores.Add(score);   
+                }
+            }
+
+            //Progress to next round
+            _dm.OnChange(tournament.Draw, 1, 0 , roundScores);
+
+            //Validat that outcome of progression round 1.
+
+            //1. Expect the first standing to get a bye
+            //2. Expect an adjusted group for the rest of players
+
+            var secondRound = tournament.Draw.GetRoundAtIndex(1);
+            var winningTeam = tournament.Teams.First();
+
+            //count the number of matches
+            int totalMatches = secondRound.Permutations.Sum(p => p.Matches.Count());
+            Assert.AreEqual(playerCount  / 2, totalMatches, " number of matches should be players /2");
+
+            foreach(Permutation p in secondRound.Permutations) //Get round 2
+            {
+                foreach(Match m in p.Matches)
+                {
+                    if (m.Home.First().Equals(winningTeam) && !m.Away.First().Bye)
+                    {
+                        Assert.Fail("Clear winner from previous round should have received a bye and not be scheduled to play");
+                    }
+                    else if (m.Away.First().Equals(winningTeam) && !m.Home.First().Bye)
+                    {
+                        Assert.Fail("Clear winner from previous round should have received a bye and not be scheduled to play");
+                    }
+                }
+            }
+
+            while (currentRoundIndex < maxRounds && currentRoundIndex > 0)
+            {
+                var currentRound = tournament.Draw.GetRoundAtIndex(currentRoundIndex);
+                TestContext?.WriteLine($"Processing Round {currentRound.Index + 1}:");
+
+                // Validate round structure before playing
+                Assert.IsNotNull(currentRound, $"Round {currentRoundIndex} should not be null");
+                Assert.IsTrue(currentRound.Permutations.Count() > 0, $"Round {currentRoundIndex} should have permutations");
+
+                TestContext?.WriteLine($"  Round has {currentRound.Permutations.Count()} matches");
+
+                roundScores.Clear();
+       
+                foreach (var permutation in currentRound.Permutations)
+                {
+                    foreach (var match in permutation.Matches)
+                    {
+                        // Verify match structure
+                        Assert.IsNotNull(match.Home, $"Match {match.Id} should have home team");
+                        Assert.IsNotNull(match.Away, $"Match {match.Id} should have away team");
+                        Assert.AreNotEqual(match.Home.First()?.Id, match.Away.First()?.Id, $"Match {match.Id} should have different home and away teams");
+
+                        TestContext?.WriteLine($"Match {match.Id}: {match.Home.First()?.ToString()} vs {match.Away.First()?.ToString()}");
+
+                        // Create scores for each set
+                        for (int set = 0; set < tournament.Details.Sets; set++)
+                        {
+                            bool homeWins = RandomUtil.GetInt(2) == 0;
+                            var score = new Score
+                            {
+                                Id = scoreId++,
+                                Home = homeWins ? 6 : RandomUtil.GetInt(4),
+                                Away = !homeWins ? 6 : RandomUtil.GetInt(4),
+                                Permutation = permutation.Id,
+                                Match = match.Id,
+                                Round = currentRound.Index,
+                                Set = set + 1
+                            };
+                            roundScores.Add(score);
+                            allScores.Add(score);
+                        }
+                    }
+                }
+
+                TestContext?.WriteLine($"  Generated {roundScores.Count} scores for round {currentRoundIndex + 1}");
+
+                // Progress to next round using scores from current round
+                if (currentRoundIndex < maxRounds)
+                {
+                    int roundsBefore = tournament.Draw.NoRounds;
+                    _dm.OnChange(tournament.Draw, currentRoundIndex + 1, currentRoundIndex, roundScores);
+                    int roundsAfter = tournament.Draw.NoRounds;
+
+                    TestContext?.WriteLine($"  Draw now has {roundsAfter} rounds (was {roundsBefore})");
+
+                    // Check if a new round was created
+                    if (roundsAfter > roundsBefore)
+                    {
+                        var nextRound = tournament.Draw.GetRoundAtIndex(currentRoundIndex + 1);
+                        if (nextRound != null && nextRound.Permutations.Any())
+                        {
+                            TestContext?.WriteLine($"  Next round has {nextRound.Permutations.Count()} matches ready");
+
+                            // In Swiss system, verify no player plays the same opponent twice
+                            ValidateSwissRoundUniqueness(tournament, currentRoundIndex + 1);
+                        }
+                    }
+                }
+                else
+                {
+                    TestContext?.WriteLine($"  Final round completed");
+                }
+
+                currentRoundIndex++;
+            }
+
+            TestContext?.WriteLine($"Swiss tournament completed with {allScores.Count} total scores");
+
+            // Final validations - Swiss tournament should have created the expected number of rounds
+            Assert.IsTrue(tournament.Draw.NoRounds >= 1, "Tournament should have at least the initial round");
+            Assert.IsTrue(tournament.Draw.NoRounds <= maxRounds, $"Tournament should not exceed {maxRounds} rounds");
+
+            // Verify tournament progression logic worked
+            ValidateSwissTournamentProgression(tournament, allScores, currentRoundIndex);
+
+            TestContext?.WriteLine("Swiss tournament progression validation completed successfully");
+        }
+
+
         private void ValidateSwissTournamentProgression(Tournament tournament, List<Score> allScores, int roundsPlayed)
         {
             // Verify that scores exist for the rounds that were played
             var distinctRounds = allScores.Select(s => s.Round).Distinct().Count();
             Assert.IsTrue(distinctRounds <= roundsPlayed, $"Scores should not exist for more rounds than played");
-            
+
             // Verify each player participated in each played round
             for (int r = 0; r < roundsPlayed && r < tournament?.Draw?.NoRounds; r++)
             {
                 var round = tournament.Draw.GetRoundAtIndex(r);
                 var playersInRound = new HashSet<int>();
-                
+
                 foreach (var perm in round?.Permutations ?? Enumerable.Empty<Permutation>())
                 {
                     foreach (var match in perm.Matches)
@@ -204,7 +412,7 @@ namespace deuce_unit
                         playersInRound.Add(match.Away.First()?.Id ?? 0);
                     }
                 }
-                
+
                 Assert.AreEqual(tournament.Teams.Count(), playersInRound.Count,
                     $"All players should participate in round {r + 1}");
             }
@@ -214,11 +422,11 @@ namespace deuce_unit
         {
             // Get all matches from previous rounds
             var previousMatches = new HashSet<(int, int)>();
-            
+
             for (int r = 0; r < currentRoundIndex; r++)
             {
                 var round = tournament.Draw?.GetRoundAtIndex(r);
-                foreach (var perm in round?.Permutations??Enumerable.Empty<Permutation>())
+                foreach (var perm in round?.Permutations ?? Enumerable.Empty<Permutation>())
                 {
                     foreach (var match in perm.Matches)
                     {
@@ -233,14 +441,14 @@ namespace deuce_unit
 
             // Check current round for duplicate pairings
             var currentRound = tournament.Draw?.GetRoundAtIndex(currentRoundIndex);
-            foreach (var perm in currentRound?.Permutations??Enumerable.Empty<Permutation>())
+            foreach (var perm in currentRound?.Permutations ?? Enumerable.Empty<Permutation>())
             {
                 foreach (var match in perm.Matches)
                 {
                     var homeId = match.Home.First()?.Id ?? 0;
                     var awayId = match.Away.First()?.Id ?? 0;
                     var pairing = (homeId, awayId);
-                    Assert.IsFalse(previousMatches.Contains(pairing), 
+                    Assert.IsFalse(previousMatches.Contains(pairing),
                         $"Teams {match.Home.First()?.ToString()} and {match.Away.First()?.ToString()} have already played each other");
                 }
             }
@@ -250,11 +458,11 @@ namespace deuce_unit
         {
             // In Swiss format, every player should play in every round
             int expectedGamesPerPlayer = tournament.Draw?.NoRounds ?? 0;
-            
+
             var playerGameCounts = new Dictionary<int, int>();
-            
+
             // Count games per player
-            foreach (var round in tournament.Draw?.Rounds??Enumerable.Empty<Round>())
+            foreach (var round in tournament.Draw?.Rounds ?? Enumerable.Empty<Round>())
             {
                 foreach (var perm in round.Permutations)
                 {
@@ -281,7 +489,8 @@ namespace deuce_unit
             // Swiss tournaments typically run for a number of rounds based on player count
             // Common formula: ceil(log2(noPlayers)) rounds for a complete Swiss tournament
             // However, this represents the maximum rounds that could be played, not the initial state
-            return (int)Math.Ceiling(Math.Log2(noPlayers));
+            return (int)Math.Ceiling(Math.Log2(noPlayers)) + 1;
         }
+
     }
 }

@@ -9,7 +9,32 @@ class AssignTournament
     /// </summary>
     /// <returns>A tournamnet object</returns>
     public Tournament MakeRandom(int tournamentType, string label, int noPlayers, int sport,
-    int noSingle, int noDouble, int sets, int teamSize, List<Player> players,  int groupSize = 4)
+    int noSingle, int noDouble, int sets, int teamSize, List<Player> players, int groupSize = 4)
+    {
+
+
+
+        //Assign
+        Tournament tournament = new();
+        //1 for tennis for now.
+        tournament.Sport = sport;
+        tournament.Type = tournamentType;
+        IGameMaker gm = new GameMakerTennis();
+        FactoryDrawMaker fac = new();
+        var dm = fac.Create(tournament, gm);
+
+        tournament.Teams = new();
+
+        return MakeRandom(tournamentType, label, noPlayers, sport,
+        noSingle, noDouble, sets, teamSize, players, dm, gm, groupSize);
+    }
+
+    /// <summary>
+    /// Make a random tournament
+    /// </summary>
+    /// <returns>A tournamnet object</returns>
+    public Tournament MakeRandom(int tournamentType, string label, int noPlayers, int sport,
+    int noSingle, int noDouble, int sets, int teamSize, List<Player> players, IDrawMaker dm, IGameMaker gm, int groupSize = 4)
     {
 
         Organization organization = new Organization() { Id = 1, Name = "Test Org" };
@@ -24,9 +49,7 @@ class AssignTournament
         tournament.Sport = sport;
         tournament.Details = new TournamentDetail(noSingle, noDouble, sets);
         tournament.Details.TeamSize = teamSize;
-        tournament.Details.GroupSize = groupSize;   
-        
-        IGameMaker gm = new GameMakerTennis();
+        tournament.Details.GroupSize = groupSize;
 
         tournament.Teams = new();
 
@@ -43,7 +66,7 @@ class AssignTournament
             for (int j = 0; j < teamSize; j++)
             {
                 Player player = players[i * teamSize + j];
-                player.Tournament = tournament; 
+                player.Tournament = tournament;
                 player.Club = organization;
                 team.AddPlayer(player);
                 //players.Remove(player);
@@ -53,12 +76,7 @@ class AssignTournament
 
         }
 
-        //Action
-        //Assert
-        FactoryDrawMaker fac = new();
-        var mm = fac.Create(tournament, gm);
-        
-        var draw = mm.Create();
+        var draw = dm.Create();
         tournament.Draw = draw;
         return tournament;
 
@@ -69,11 +87,11 @@ class AssignTournament
     {
         MySqlConnection dbconn = new("Server=localhost;Database=deuce;User Id=deuce;Password=deuce;");
         dbconn.Open();
-        Filter filter = new() { TournamentId = tournamentId};
+        Filter filter = new() { TournamentId = tournamentId };
 
 
         DbRepoPlayer dbRepoPlayer = new DbRepoPlayer(dbconn);
-        
+
 
         var players = await dbRepoPlayer.GetList(filter);
 
