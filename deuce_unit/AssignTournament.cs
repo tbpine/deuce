@@ -26,7 +26,7 @@ class AssignTournament
         tournament.Teams = new();
 
         return MakeRandom(tournamentType, label, noPlayers, sport,
-        noSingle, noDouble, sets, teamSize, players, dm, gm, groupSize);
+        noSingle, noDouble, sets, teamSize, players,  gm, groupSize);
     }
 
     /// <summary>
@@ -34,7 +34,7 @@ class AssignTournament
     /// </summary>
     /// <returns>A tournamnet object</returns>
     public Tournament MakeRandom(int tournamentType, string label, int noPlayers, int sport,
-    int noSingle, int noDouble, int sets, int teamSize, List<Player> players, IDrawMaker dm, IGameMaker gm, int groupSize = 4)
+    int noSingle, int noDouble, int sets, int teamSize, List<Player> players,  IGameMaker gm, int groupSize = 4)
     {
 
         Organization organization = new Organization() { Id = 1, Name = "Test Org" };
@@ -75,30 +75,15 @@ class AssignTournament
             tournament.Teams.Add(team);
 
         }
-
-        var draw = dm.Create();
+        var fac = new FactoryDrawMaker();
+        var dm2 = fac.Create(tournament, gm);
+    
+        var draw = dm2.Create();
         tournament.Draw = draw;
         return tournament;
 
     }
 
 
-    private async Task<List<Player>> GetPlayers(int cludId, int tournamentId)
-    {
-        MySqlConnection dbconn = new("Server=localhost;Database=deuce;User Id=deuce;Password=deuce;");
-        dbconn.Open();
-        Filter filter = new() { TournamentId = tournamentId };
-
-
-        DbRepoPlayer dbRepoPlayer = new DbRepoPlayer(dbconn);
-
-
-        var players = await dbRepoPlayer.GetList(filter);
-
-        dbconn.Close();
-
-        return players;
-
-    }
 
 }

@@ -25,6 +25,7 @@ It's named after the **Swiss Chess Federation**, which popularized it in the 189
    - Sort all players by current score (descending).
    - Divide into score groups (e.g., 3 pts, 2.5 pts, etc.).
    - Pair within groups: If even number, pair 1st vs. 2nd, 3rd vs. 4th, etc. (or Dutch pairing: top vs. bottom).
+   - Score groups with 1 player should be sorted by score highest to lowest. The player that hasn't had a bye should be given a bye.
    - Use software (e.g., Swiss-Manager, Lichess, or MTG's Wizards Event Link) for automation.
 3. **End**: Highest score wins; ties broken by tiebreakers like:
    - Buchholz (sum of opponents' scores).
@@ -103,4 +104,17 @@ Swiss keeps tournaments **exciting and fair** for large fields—strong players 
 
 ---
 
-*Generated on December 28, 2025. Copy this content into a file named `swiss_format.md` to use it.*
+**In the standard Swiss system** (as used in chess and defined by FIDE, which is also the basis for most Swiss tournaments worldwide, including in Switzerland), you **assign the bye first** — **before** you do the burrowing (also called "downfloating" or "upfloating" / "Floater"-Bewegungen).
+
+Here's the typical order of operations in FIDE-style Swiss pairing (Dutch system, the most common one):
+
+1. Sort players into score groups (highest to lowest score).
+2. Pair within each score group as much as possible (usually top half vs bottom half).
+3. **Handle the odd player(s) left over** — this is where the **bye** gets assigned (usually to the lowest ranked eligible player in the lowest possible score group who hasn't had a bye yet).
+4. **Then** move remaining unpaired players (floaters/burrowers) to adjacent score groups as needed to complete pairings (downfloaters from higher groups, upfloaters from lower ones).
+
+Most pairing software (Swiss-Manager, Vega, Tournament Pairing Program, etc.) follows this logic: the bye is resolved as part of the initial pairing of the score brackets, **before** the final burrowing adjustments.
+
+So in short: **Bye first → then burrowing** is the normal sequence in the Swiss format.
+
+(If you're using a very exotic non-FIDE variant, the order could theoretically differ — but for anything called "Swiss format" in practice, especially in chess or Swiss-organized events, the above is standard.)

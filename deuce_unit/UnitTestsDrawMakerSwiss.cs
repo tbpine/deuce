@@ -206,6 +206,8 @@ namespace deuce_unit
             var players = RandomUtil.GetRandomPlayers(playerCount); //Get 8 unique players
               // Create tournament using AssignTournament factory for Swiss format
             AssignTournament assignTournament = new();
+
+            
             Tournament tournament = assignTournament.MakeRandom(
                 tournamentType: 5, // Swiss tournament
                 label: RandomUtil.GetRandomTournamentName(),
@@ -215,9 +217,7 @@ namespace deuce_unit
                 noDouble: 0,
                 sets: 1,
                 teamSize: 1,
-                players: players,
-                _dm, 
-                _gm
+                players: players
             );
 
 
@@ -254,8 +254,8 @@ namespace deuce_unit
                     int scoreHome  = 3;
                     int scoreAway  = 3;
 
-                    if (m.Home.First().Equals(tournament.Teams.First())) { scoreHome = 6 ; scoreAway = 0; }
-                    else if (m.Away.First().Equals(tournament.Teams.First()))  { scoreAway = 6 ; scoreHome = 0; }
+                    if (m.Home.First().Id == tournament.Teams.First().Id) { scoreHome = 6 ; scoreAway = 0; }
+                    else if (m.Away.First().Id == tournament.Teams.First().Id)  { scoreAway = 6 ; scoreHome = 0; }
                     // Assign clear winners for first round
                     var score = new Score
                     {
@@ -274,6 +274,8 @@ namespace deuce_unit
             }
 
             //Progress to next round
+            var fac = new FactoryDrawMaker();
+            var _dm = fac.Create(tournament, _gm);
             _dm.OnChange(tournament.Draw, 1, 0 , roundScores);
 
             //Validat that outcome of progression round 1.
