@@ -28,7 +28,7 @@ public class DrawMakerSwiss : DrawMakerBase, IDrawMaker
 {
     private readonly IGameMaker _gameMaker;
     private readonly Dictionary<int, List<TeamStanding>> _standingsHistory;
-    
+
     public DrawMakerSwiss(Tournament t, IGameMaker gameMaker) : base(t)
     {
         _gameMaker = gameMaker;
@@ -47,7 +47,7 @@ public class DrawMakerSwiss : DrawMakerBase, IDrawMaker
 
         // Add indexes to teams (for this tournament).
         //Different from team primary key.
-        for (int i = 0; i < teams.Count; i++) 
+        for (int i = 0; i < teams.Count; i++)
             teams[i].Index = i + 1;
 
         // Calculate number of rounds based on tournament format or default
@@ -77,7 +77,7 @@ public class DrawMakerSwiss : DrawMakerBase, IDrawMaker
         {
             UpdateStandingsForCompletedRound(schedule, previousRound, scores);
         }
-        
+
         // If this is not the first round, create the next round based on current standings
         if (round > 0 && round < CalculateNumberOfRounds(_tournament.Teams.Count()))
         {
@@ -94,11 +94,11 @@ public class DrawMakerSwiss : DrawMakerBase, IDrawMaker
     private int CalculateNumberOfRounds(int teamCount)
     {
         if (teamCount <= 1) return 0;
-        
+
         // Standard Swiss format uses ceil(log2(n)) rounds
         // But we can also use tournament settings if available
-        int standardRounds = (int)Math.Ceiling(Math.Log2(teamCount)) +1 ;
-        
+        int standardRounds = (int)Math.Ceiling(Math.Log2(teamCount)) + 1;
+
         // Cap at reasonable maximum (typically no more than the number of teams - 1)
         return Math.Min(standardRounds, teamCount - 1);
     }
@@ -148,7 +148,7 @@ public class DrawMakerSwiss : DrawMakerBase, IDrawMaker
     {
         // Get current standings from the most recent completed round
         var standings = GetCurrentStandings();
-        
+
         // Group teams by their current points (Swiss format rule: pair teams with similar scores)
         var scoreGroups = standings.GroupBy(s => s.Points)
                                   .OrderByDescending(g => g.Key)
@@ -167,7 +167,7 @@ public class DrawMakerSwiss : DrawMakerBase, IDrawMaker
         for (int p = 0; p < pairings.Count; p++)
         {
             var (home, away) = pairings[p];
-            
+
             Debug.WriteLine($"Round {roundNumber}: ({home.Index},{away.Index}) - {home.Label} vs {away.Label}");
 
             if (_tournament.Sport == 1)
@@ -192,10 +192,10 @@ public class DrawMakerSwiss : DrawMakerBase, IDrawMaker
         if (completedRound == 0)
         {
             // Initialize standings for the first round
-            currentStandings = _tournament.Teams.Select(team => new TeamStanding 
-            { 
-                Team = team, 
-                Wins = 0, 
+            currentStandings = _tournament.Teams.Select(team => new TeamStanding
+            {
+                Team = team,
+                Wins = 0,
                 Losses = 0,
                 Draws = 0,
                 Points = 0
@@ -209,7 +209,7 @@ public class DrawMakerSwiss : DrawMakerBase, IDrawMaker
             {
                 throw new InvalidOperationException($"Previous round standings not found for round {completedRound - 1}");
             }
-            
+
             currentStandings = previousStandings.Select(s => new TeamStanding
             {
                 Team = s.Team,
@@ -237,8 +237,8 @@ public class DrawMakerSwiss : DrawMakerBase, IDrawMaker
                 {
                     var winnerStanding = currentStandings.FirstOrDefault(s => s.Team.Id == winner.Id);
                     var loserStanding = currentStandings.FirstOrDefault(s => s.Team.Id == loser.Id);
-                    
-                    if (winnerStanding != null) 
+
+                    if (winnerStanding != null)
                     {
                         winnerStanding.Wins++;
                         winnerStanding.Points += 1.0; // Winner gets 1 point
@@ -251,17 +251,17 @@ public class DrawMakerSwiss : DrawMakerBase, IDrawMaker
                     var round = draw.Rounds.FirstOrDefault(r => r.Index == completedRound);
                     var permutation = round?.Permutations.FirstOrDefault(p => p.Id == matchGroup.Key.Permutation);
                     var match = permutation?.Matches.FirstOrDefault(m => m.Id == matchGroup.Key.Match);
-                    
+
                     if (match != null)
                     {
                         var homeTeam = match.Home.FirstOrDefault()?.Team;
                         var awayTeam = match.Away.FirstOrDefault()?.Team;
-                        
+
                         if (homeTeam != null && awayTeam != null)
                         {
                             var homeStanding = currentStandings.FirstOrDefault(s => s.Team.Id == homeTeam.Id);
                             var awayStanding = currentStandings.FirstOrDefault(s => s.Team.Id == awayTeam.Id);
-                            
+
                             if (homeStanding != null)
                             {
                                 homeStanding.Draws++;
@@ -297,16 +297,16 @@ public class DrawMakerSwiss : DrawMakerBase, IDrawMaker
 
         // Make a working copy of score groups
         // Sort players into score groups (highest to lowest score).
-        //
+        // key= 
         var copyOfScoreGroups = scoreGroups.ToDictionary(
-            kvp => kvp.Key, 
+            kvp => kvp.Key,
             kvp => kvp.Value.Select(s => s.Team).ToList()
         );
 
         // Handle byes first - find if we have an odd total number of teams
         int totalTeams = copyOfScoreGroups.Values.Sum(g => g.Count);
         Team? byeTeam = null;
-        
+
         if (totalTeams % 2 == 1)
         {
             byeTeam = AssignBye(copyOfScoreGroups, draw);
@@ -330,7 +330,7 @@ public class DrawMakerSwiss : DrawMakerBase, IDrawMaker
             if (teams.Count % 2 == 1)
             {
                 //upfloaters
-                var borrowedTeam = BorrowFromLowerGroup(copyOfScoreGroups, points);
+                var borrowedTeam = BorrowFromLowerGroup(copyOfScoreGroups, points, teams, draw);
                 if (borrowedTeam != null)
                 {
                     teams.Add(borrowedTeam);
@@ -357,19 +357,6 @@ public class DrawMakerSwiss : DrawMakerBase, IDrawMaker
     /// <returns>Team assigned the bye, or null if none needed</returns>
     private Team? AssignBye(Dictionary<double, List<Team>> scoreGroups, Draw draw)
     {
-        // First, check score groups with exactly 1 player, sorted by score highest to lowest
-        var singlePlayerGroups = scoreGroups.Where(kvp => kvp.Value.Count == 1)
-                                             .OrderByDescending(kvp => kvp.Key);
-
-        foreach (var group in singlePlayerGroups)
-        {
-            var team = group.Value.First();
-            if (!HasReceivedBye(team, draw))
-            {
-                group.Value.Remove(team);
-                return team;
-            }
-        }
 
         // If no single-player group has a team without a bye, fall back to original logic
         // Start from lowest score group
@@ -397,11 +384,14 @@ public class DrawMakerSwiss : DrawMakerBase, IDrawMaker
 
     /// <summary>
     /// Borrows a team from the next lower score group to balance odd-sized groups.
+    /// Prioritizes teams that haven't played against any member of the higher group.
     /// </summary>
     /// <param name="workingGroups">Current working groups</param>
     /// <param name="currentPoints">Points of the current group</param>
+    /// <param name="higherGroupTeams">Teams in the higher point group</param>
+    /// <param name="draw">Tournament draw to check match history</param>
     /// <returns>Team borrowed from lower group, or null</returns>
-    private Team? BorrowFromLowerGroup(Dictionary<double, List<Team>> workingGroups, double currentPoints)
+    private Team? BorrowFromLowerGroup(Dictionary<double, List<Team>> workingGroups, double currentPoints, List<Team> higherGroupTeams, Draw draw)
     {
         // Find the next lower score group that has teams
         var lowerGroups = workingGroups.Where(kvp => kvp.Key < currentPoints && kvp.Value.Count > 0)
@@ -412,8 +402,24 @@ public class DrawMakerSwiss : DrawMakerBase, IDrawMaker
             var teams = lowerGroup.Value;
             if (teams.Count > 1 || (teams.Count == 1 && workingGroups.Values.Sum(g => g.Count) % 2 == 0))
             {
-                // Take the highest ranked team from this lower group
-                var teamToBorrow = teams.OrderByDescending(t => t.Ranking).First();
+                // First, try to find a team that hasn't played against any member of the higher group
+                var candidatesWithoutRematches = teams
+                    .Where(lowerTeam => !higherGroupTeams.Any(higherTeam => HaveTeamsPlayed(lowerTeam, higherTeam, draw)))
+                    .OrderByDescending(t => t.Ranking)
+                    .ToList();
+
+                Team teamToBorrow;
+                if (candidatesWithoutRematches.Any())
+                {
+                    // Prefer highest ranked team that hasn't played against higher group
+                    teamToBorrow = candidatesWithoutRematches.First();
+                }
+                else
+                {
+                    // Fall back to highest ranked team if all have played against higher group
+                    teamToBorrow = teams.OrderByDescending(t => t.Ranking).First();
+                }
+
                 teams.Remove(teamToBorrow);
                 return teamToBorrow;
             }
@@ -491,7 +497,7 @@ public class DrawMakerSwiss : DrawMakerBase, IDrawMaker
                 {
                     bool hasTeam1 = teams.Any(t => t.Id == team1.Id);
                     bool hasTeam2 = teams.Any(t => t.Id == team2.Id);
-                    
+
                     if (hasTeam1 && hasTeam2)
                         return true;
                 }
@@ -530,12 +536,12 @@ public class DrawMakerSwiss : DrawMakerBase, IDrawMaker
         if (!matchScores.Any()) return null;
 
         var firstScore = matchScores.First();
-        
+
         // Find the actual match to get the teams
         var round = _tournament.Draw?.Rounds.FirstOrDefault(r => r.Index == firstScore.Round);
         var permutation = round?.Permutations.FirstOrDefault(p => p.Id == firstScore.Permutation);
         var match = permutation?.Matches.FirstOrDefault(m => m.Id == firstScore.Match);
-        
+
         if (match == null) return null;
 
         // For tennis scoring, check sets won
@@ -553,7 +559,7 @@ public class DrawMakerSwiss : DrawMakerBase, IDrawMaker
         {
             int homeSetScore = setGroup.Sum(s => s.Home);
             int awaySetScore = setGroup.Sum(s => s.Away);
-            
+
             if (homeSetScore > awaySetScore)
                 homeSetsWon++;
             else if (awaySetScore > homeSetScore)
@@ -569,7 +575,7 @@ public class DrawMakerSwiss : DrawMakerBase, IDrawMaker
         // In case of tie, use total games
         int homeTotalGames = matchScores.Sum(s => s.Home);
         int awayTotalGames = matchScores.Sum(s => s.Away);
-        
+
         if (homeTotalGames > awayTotalGames)
             return homeTeam;
         else if (awayTotalGames > homeTotalGames)
@@ -588,12 +594,12 @@ public class DrawMakerSwiss : DrawMakerBase, IDrawMaker
         if (!matchScores.Any()) return null;
 
         var firstScore = matchScores.First();
-        
+
         // Find the actual match to get the teams
         var round = _tournament.Draw?.Rounds.FirstOrDefault(r => r.Index == firstScore.Round);
         var permutation = round?.Permutations.FirstOrDefault(p => p.Id == firstScore.Permutation);
         var match = permutation?.Matches.FirstOrDefault(m => m.Id == firstScore.Match);
-        
+
         if (match == null) return null;
 
         var homeTeam = match.Home.FirstOrDefault()?.Team;
@@ -610,7 +616,7 @@ public class DrawMakerSwiss : DrawMakerBase, IDrawMaker
         {
             int homeSetScore = setGroup.Sum(s => s.Home);
             int awaySetScore = setGroup.Sum(s => s.Away);
-            
+
             if (homeSetScore > awaySetScore)
                 homeSetsWon++;
             else if (awaySetScore > homeSetScore)
@@ -626,7 +632,7 @@ public class DrawMakerSwiss : DrawMakerBase, IDrawMaker
         // In case of tie, use total games
         int homeTotalGames = matchScores.Sum(s => s.Home);
         int awayTotalGames = matchScores.Sum(s => s.Away);
-        
+
         if (homeTotalGames < awayTotalGames)
             return homeTeam;
         else if (awayTotalGames < homeTotalGames)
@@ -646,13 +652,13 @@ public class DrawMakerSwiss : DrawMakerBase, IDrawMaker
         var sortedStandings = standings.OrderByDescending(s => s.Points)
                                       .ThenByDescending(s => s.Team.Ranking)
                                       .ToList();
-        
+
         // Assign positions based on sorted order
         for (int i = 0; i < sortedStandings.Count; i++)
         {
             sortedStandings[i].Position = i + 1;
         }
-        
+
         // Store a deep copy of the standings for this round
         var roundStandings = sortedStandings.Select(s => new TeamStanding
         {
@@ -663,16 +669,16 @@ public class DrawMakerSwiss : DrawMakerBase, IDrawMaker
             Points = s.Points,
             Position = s.Position
         }).ToList();
-        
+
         _standingsHistory[roundNumber] = roundStandings;
-        
+
         Debug.WriteLine($"Standings after Round {roundNumber + 1}:");
         foreach (var standing in roundStandings)
         {
             Debug.WriteLine($"  {standing.Position}. {standing.Team.Label} - W:{standing.Wins} L:{standing.Losses} D:{standing.Draws} Pts:{standing.Points}");
         }
     }
-    
+
     /// <summary>
     /// Gets the standings for a specific round.
     /// </summary>
@@ -682,7 +688,7 @@ public class DrawMakerSwiss : DrawMakerBase, IDrawMaker
     {
         return _standingsHistory.TryGetValue(roundNumber, out var standings) ? standings : null;
     }
-    
+
     /// <summary>
     /// Gets all historical standings data.
     /// </summary>
@@ -691,7 +697,7 @@ public class DrawMakerSwiss : DrawMakerBase, IDrawMaker
     {
         return new Dictionary<int, List<TeamStanding>>(_standingsHistory);
     }
-    
+
     /// <summary>
     /// Gets the current standings (most recent round).
     /// </summary>
@@ -699,24 +705,10 @@ public class DrawMakerSwiss : DrawMakerBase, IDrawMaker
     public List<TeamStanding> GetCurrentStandings()
     {
         if (!_standingsHistory.Any()) return new List<TeamStanding>();
-        
+
         var latestRound = _standingsHistory.Keys.Max();
         return _standingsHistory[latestRound];
     }
-
-    /// <summary>
-    /// Represents a team's current standing in the tournament.
-    /// </summary>
-    public class TeamStanding
-    {
-        public Team Team { get; set; } = new Team();
-        public int Wins { get; set; }
-        public int Losses { get; set; }
-        public int Draws { get; set; }
-        public double Points { get; set; }
-        public int Position { get; set; }
-    }
-
 
     /// <summary>
     /// Calculates the expected number of rounds for a Swiss tournament based on team count.
@@ -726,6 +718,6 @@ public class DrawMakerSwiss : DrawMakerBase, IDrawMaker
     public static int ExpectedNumberOfRounds(int teamCount)
     {
         if (teamCount <= 1) return 0;
-        return (int)Math.Ceiling(Math.Log2(teamCount)) +1 ;
-    }   
+        return (int)Math.Ceiling(Math.Log2(teamCount)) + 1;
+    }
 }
