@@ -195,13 +195,18 @@ namespace deuce_unit
         }
 
         [TestMethod]
-        public void swiss_tournament_clear_winner_gets_bye_in_next_round()
+        [DataRow(8)]
+        [DataRow(16)]
+        [DataRow(32)]
+        [DataRow(64)]
+        [DataRow(128)]
+        public void swiss_tournament_clear_winner_gets_bye_in_next_round(int noPlayers)
         {
 
             TestContext?.WriteLine($"Testing Swiss tournament progression with bye scenario");
 
             // Create unique random players by shuffling indices
-            const int playerCount = 8;
+             int playerCount = noPlayers;
             var players = RandomUtil.GetRandomPlayers(playerCount); //Get 8 unique players
               // Create tournament using AssignTournament factory for Swiss format
             AssignTournament assignTournament = new();
