@@ -430,6 +430,7 @@ public class DrawMakerSwiss : DrawMakerBase, IDrawMaker
 
     /// <summary>
     /// Pairs teams within a score group, avoiding rematches when possible.
+    /// Keeps randomizing team order until all pairings are unique (no rematches).
     /// </summary>
     /// <param name="teams">Teams in the same score group</param>
     /// <param name="draw">Tournament draw to check match history</param>
@@ -437,46 +438,86 @@ public class DrawMakerSwiss : DrawMakerBase, IDrawMaker
     /// <returns>List of pairings within the group</returns>
     private List<(Team, Team)> PairWithinGroup(List<Team> teams, Draw draw, int roundNumber)
     {
-        var pairings = new List<(Team, Team)>();
-        var availableTeams = new List<Team>(teams);
+        if (teams.Count < 2) return new List<(Team, Team)>();
 
-        // Sort teams by ranking (highest first) for consistent pairing
-        availableTeams.Sort((x, y) => y.Ranking.CompareTo(x.Ranking));
+        var random = new Random();
+        int maxAttempts = 1000; // Prevent infinite loops
+        int attempt = 0;
 
-        while (availableTeams.Count >= 2)
+        while (attempt < maxAttempts)
         {
-            var team1 = availableTeams[0];
-            availableTeams.RemoveAt(0);
+            attempt++;
+            var pairings = new List<(Team, Team)>();
+            var availableTeams = new List<Team>(teams);
+            bool hasRematch = false;
 
-            Team? opponent = null;
-
-            // Try to find opponent that hasn't played against team1
-            for (int i = 0; i < availableTeams.Count; i++)
+            // Randomize the order using Fisher-Yates shuffle
+            for (int i = availableTeams.Count - 1; i > 0; i--)
             {
-                var candidate = availableTeams[i];
-                if (!HaveTeamsPlayed(team1, candidate, draw))
+                int j = random.Next(i + 1);
+                (availableTeams[i], availableTeams[j]) = (availableTeams[j], availableTeams[i]);
+            }
+
+            Debug.WriteLine($"  Attempt {attempt}: Randomized team order: {string.Join(", ", availableTeams.Select(t => t.Label))}");
+
+            // Try to pair teams sequentially in randomized order
+            while (availableTeams.Count >= 2 && !hasRematch)
+            {
+                var team1 = availableTeams[0];
+                availableTeams.RemoveAt(0);
+
+                if (availableTeams.Count > 0)
                 {
-                    opponent = candidate;
-                    availableTeams.RemoveAt(i);
-                    break;
+                    var team2 = availableTeams[0];
+                    availableTeams.RemoveAt(0);
+
+                    // Check if these teams have played before
+                    if (HaveTeamsPlayed(team1, team2, draw))
+                    {
+                        hasRematch = true;
+                        Debug.WriteLine($"  Rematch detected: {team1.Label} vs {team2.Label}, trying new randomization");
+                        break;
+                    }
+
+                    pairings.Add((team1, team2));
+                    Debug.WriteLine($"  Paired: {team1.Label} vs {team2.Label}");
                 }
             }
 
-            // If no unplayed opponent found, take the next available (closest ranked)
-            if (opponent == null && availableTeams.Count > 0)
+            // If we successfully paired all teams without rematches, return the pairings
+            if (!hasRematch)
             {
-                opponent = availableTeams[0];
-                availableTeams.RemoveAt(0);
-            }
-
-            if (opponent != null)
-            {
-                pairings.Add((team1, opponent));
-                Debug.WriteLine($"  Paired: {team1.Label} vs {opponent.Label}");
+                Debug.WriteLine($"  Success! Found unique pairings after {attempt} attempts");
+                return pairings;
             }
         }
 
-        return pairings;
+        // If we couldn't find unique pairings after max attempts, fall back to allowing rematches
+        Debug.WriteLine($"  Could not find unique pairings after {maxAttempts} attempts, falling back to allowing rematches");
+        
+        var finalPairings = new List<(Team, Team)>();
+        var finalAvailableTeams = new List<Team>(teams);
+        
+        // Final randomization
+        for (int i = finalAvailableTeams.Count - 1; i > 0; i--)
+        {
+            int j = random.Next(i + 1);
+            (finalAvailableTeams[i], finalAvailableTeams[j]) = (finalAvailableTeams[j], finalAvailableTeams[i]);
+        }
+
+        // Pair teams even if they've played before
+        while (finalAvailableTeams.Count >= 2)
+        {
+            var team1 = finalAvailableTeams[0];
+            finalAvailableTeams.RemoveAt(0);
+            var team2 = finalAvailableTeams[0];
+            finalAvailableTeams.RemoveAt(0);
+
+            finalPairings.Add((team1, team2));
+            Debug.WriteLine($"  Final pairing (may include rematches): {team1.Label} vs {team2.Label}");
+        }
+
+        return finalPairings;
     }
 
     /// <summary>
