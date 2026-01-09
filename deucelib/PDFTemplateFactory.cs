@@ -35,4 +35,15 @@ public class PDFTemplateFactory : IPDFTemplateFactory
 
 
     }
+
+    /// <summary>
+    /// Creates a PDF template based on the tournament's sport and type.
+    /// </summary>
+    /// <param name="tournament">The tournament object containing sport and type information.</param>
+    /// <returns>A PDF template suitable for the tournament.</returns>
+     public IPDFTemplate CreateTemplate(Tournament tournament)
+    {
+        return CreateTemplate(tournament.Sport, tournament.Type );
+
+    }
 }
