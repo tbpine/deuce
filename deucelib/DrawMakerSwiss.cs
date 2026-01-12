@@ -1,5 +1,4 @@
 using System.Diagnostics;
-using deuce.ext;
 
 namespace deuce;
 

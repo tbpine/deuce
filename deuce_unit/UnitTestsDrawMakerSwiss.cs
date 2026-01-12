@@ -1,5 +1,6 @@
 using deuce;
 using System.Diagnostics;
+using System.IO;
 
 namespace deuce_unit
 {
@@ -474,6 +475,144 @@ namespace deuce_unit
                 Assert.AreEqual(expectedGamesPerPlayer, playerGameCounts.GetValueOrDefault(team.Id, 0),
                     $"Team {team.Label} should have played {expectedGamesPerPlayer} games");
             }
+        }
+
+        [TestMethod]
+        [DataRow(8)]
+        [DataRow(16)]
+        public void create_swiss_tournament_with_initial_round_and_print_to_pdf(int noPlayers)
+        {
+            TestContext?.WriteLine($"Testing Swiss tournament creation and PDF printing with {noPlayers} players");
+
+            // Create unique random players
+            var players = new List<Player>();
+            var availableIndices = Enumerable.Range(0, RandomUtil.GetNameCount()).ToList();
+
+            // Shuffle the indices to ensure random selection without duplicates
+            Random random = new Random();
+            for (int i = availableIndices.Count - 1; i > 0; i--)
+            {
+                int j = random.Next(i + 1);
+                (availableIndices[i], availableIndices[j]) = (availableIndices[j], availableIndices[i]);
+            }
+
+            // Take the first noPlayers indices and create players
+            for (int i = 0; i < noPlayers; i++)
+            {
+                var nameParts = RandomUtil.GetNameAtIndex(availableIndices[i]).Split(' ');
+                players.Add(new Player
+                {
+                    Id = i + 1,
+                    First = nameParts[0],
+                    Last = nameParts.Length > 1 ? nameParts[1] : "Unknown",
+                    Ranking = random.NextDouble() * 100
+                });
+            }
+
+            // Create tournament using AssignTournament factory for Swiss format
+            AssignTournament assignTournament = new();
+            Tournament tournament = assignTournament.MakeRandom(
+                tournamentType: 5, // Swiss tournament
+                label: $"Swiss_Tournament_PDF_Test_{noPlayers}_Players_{DateTime.Now:yyyyMMdd_HHmmss}",
+                noPlayers: players.Count,
+                sport: 1, // Tennis
+                noSingle: 1,
+                noDouble: 0,
+                sets: 1,
+                teamSize: 1,
+                players: players
+            );
+
+            // Verify tournament structure
+            Assert.IsNotNull(tournament, "Tournament should not be null");
+            Assert.IsNotNull(tournament.Draw, "Tournament draw should not be null");
+            Assert.IsNotNull(tournament.Teams, "Tournament teams should not be null");
+            Assert.AreEqual(noPlayers, tournament.Teams.Count(), "Tournament should have correct number of teams");
+
+            TestContext?.WriteLine($"Created Swiss tournament '{tournament.Label}' with {tournament.Teams.Count()} teams");
+
+            // Create the scheduler using factory pattern
+            FactoryDrawMaker factory = new FactoryDrawMaker();
+            IGameMaker gm = new GameMakerTennis();
+            IDrawMaker scheduler = factory.Create(tournament, gm);
+
+            // Verify the initial round is set properly
+            Assert.AreEqual(1, tournament.Draw.NoRounds, "Swiss tournament should start with exactly 1 round");
+            
+            var initialRound = tournament.Draw.GetRoundAtIndex(0);
+            Assert.IsNotNull(initialRound, "Initial round should not be null");
+            Assert.IsTrue(initialRound.Permutations.Count() > 0, "Initial round should have permutations (matches)");
+
+            TestContext?.WriteLine($"Initial round has {initialRound.Permutations.Count()} match permutations");
+
+            // Display initial round matches
+            foreach (var permutation in initialRound.Permutations)
+            {
+                foreach (var match in permutation.Matches)
+                {
+                    var homePlayer = match.Home.First();
+                    var awayPlayer = match.Away.First();
+                    TestContext?.WriteLine($"  Match {match.Id}: {homePlayer?.First} {homePlayer?.Last} vs {awayPlayer?.First} {awayPlayer?.Last}");
+                }
+            }
+
+            // Generate some initial scores for the first round to make the PDF more interesting
+            List<Score> initialScores = new List<Score>();
+            int scoreId = 1;
+
+            foreach (var permutation in initialRound.Permutations)
+            {
+                foreach (var match in permutation.Matches)
+                {
+                    // Create scores for each set
+                    for (int set = 0; set < tournament.Details.Sets; set++)
+                    {
+                        bool homeWins = RandomUtil.GetInt(2) == 0;
+                        var score = new Score
+                        {
+                            Id = scoreId++,
+                            Home = homeWins ? 6 : RandomUtil.GetInt(4) + 1,
+                            Away = !homeWins ? 6 : RandomUtil.GetInt(4) + 1,
+                            Permutation = permutation.Id,
+                            Match = match.Id,
+                            Round = initialRound.Index,
+                            Set = set + 1
+                        };
+                        initialScores.Add(score);
+                    }
+                }
+            }
+
+            TestContext?.WriteLine($"Generated {initialScores.Count} scores for initial round");
+
+            // Print tournament to PDF
+            string filename = $"{tournament.Label}.pdf";
+            TestContext?.WriteLine($"Printing tournament to PDF: {filename}");
+
+            try
+            {
+                using FileStream pdfFile = new FileStream(filename, FileMode.Create, FileAccess.Write);
+                PdfPrinter printer = new PdfPrinter(tournament.Draw, new PDFTemplateFactory());
+                printer.Print(pdfFile, tournament, tournament.Draw, 1, initialScores);
+                
+                TestContext?.WriteLine($"Successfully created PDF file: {filename}");
+                
+                // Verify the file was created
+                Assert.IsTrue(File.Exists(filename), $"PDF file '{filename}' should exist after printing");
+                
+                // Verify the file has content
+                FileInfo fileInfo = new FileInfo(filename);
+                Assert.IsTrue(fileInfo.Length > 0, "PDF file should not be empty");
+                
+                TestContext?.WriteLine($"PDF file size: {fileInfo.Length} bytes");
+            }
+            catch (Exception ex)
+            {
+                TestContext?.WriteLine($"Error creating PDF: {ex.Message}");
+                throw;
+            }
+
+            TestContext?.WriteLine("Swiss tournament with initial round and PDF printing test completed successfully");
         }
 
         private int GetExpectedSwissRounds(int noPlayers)

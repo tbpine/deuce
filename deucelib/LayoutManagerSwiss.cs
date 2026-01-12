@@ -56,7 +56,7 @@ public class LayoutManagerSwiss : LayoutManagerDefault
     {
         var layouts = new List<(int, Rectangle)>();
         
-        if (tournament?.Draw?.Rounds == null || tournament.Draw.Rounds.Count == 0)
+        if (tournament?.Draw?.Rounds == null || tournament.Draw.Rounds.Count() == 0)
         {
             return layouts;
         }
@@ -72,9 +72,9 @@ public class LayoutManagerSwiss : LayoutManagerDefault
         int pageNumber = 0;
         
         // Process each round in the Swiss tournament
-        for (int roundIndex = 0; roundIndex < tournament.Draw.Rounds.Count; roundIndex++)
+        for (int roundIndex = 0; roundIndex < tournament.Draw.Rounds.Count(); roundIndex++)
         {
-            var round = tournament.Draw.Rounds[roundIndex];
+            var round = tournament.Draw.Rounds.ElementAt(roundIndex);
             var matches = round.Permutations;
             
             if (matches == null || matches.Count == 0)
@@ -100,7 +100,7 @@ public class LayoutManagerSwiss : LayoutManagerDefault
     /// <param name="matchHeight">Height of each match cell</param>
     /// <param name="startingPageNumber">The page number to start layout from</param>
     /// <returns>List of layout positions for the matches</returns>
-    private List<(int, Rectangle)> ArrangeMatchesForRound(List<Permutation> matches, 
+    private List<(int, Rectangle)> ArrangeMatchesForRound(IReadOnlyList<Permutation> matches, 
         float matchWidth, float matchHeight, int startingPageNumber)
     {
         var layouts = new List<(int, Rectangle)>();
@@ -147,12 +147,12 @@ public class LayoutManagerSwiss : LayoutManagerDefault
         
         if (tournament?.Draw?.Rounds == null || 
             roundNumber < 0 || 
-            roundNumber >= tournament.Draw.Rounds.Count)
+            roundNumber >= tournament.Draw.Rounds.Count())
         {
             return layouts;
         }
 
-        var round = tournament.Draw.Rounds[roundNumber];
+        var round = tournament.Draw.Rounds.ElementAt(roundNumber);
         var matches = round.Permutations;
         
         if (matches == null || matches.Count == 0)
