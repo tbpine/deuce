@@ -23,6 +23,7 @@ public class Tournament : ICloneable
 
     private List<Team> _teams = new();
     private List<Group> _groups = new();
+    private Dictionary<int, List<TeamStanding>> _standings = new();
 
     /// <summary>
     /// A list of brackets for the tournament.
@@ -64,6 +65,11 @@ public class Tournament : ICloneable
     public Draw? Draw { get => _draw; set => _draw = value; }
 
     public List<Team> Teams { get => _teams; set => _teams = value; }
+    public List<TeamStanding> Standings 
+    { 
+        get => GetCurrentStandings();
+        set => throw new InvalidOperationException("Use SetStandingsForRound to update standings");
+    }
     public Organization Organization { get => _organization; set => _organization = value; }
 
     public IEnumerable<Bracket> Brackets { get => _brackets; }
@@ -112,6 +118,81 @@ public class Tournament : ICloneable
     }
 
     /// <summary>
+    /// Sets the standings for a specific round.
+    /// </summary>
+    /// <param name="roundNumber">The round number (0-based)</param>
+    /// <param name="standings">The standings to set for this round</param>
+    public void SetStandingsForRound(int roundNumber, List<TeamStanding> standings)
+    {
+        _standings[roundNumber] = standings?.Select(s => new TeamStanding
+        {
+            Team = s.Team,
+            Wins = s.Wins,
+            Losses = s.Losses,
+            Draws = s.Draws,
+            Points = s.Points,
+            Position = s.Position
+        }).ToList() ?? new List<TeamStanding>();
+    }
+
+    /// <summary>
+    /// Gets the standings for a specific round.
+    /// </summary>
+    /// <param name="roundNumber">The round number (0-based)</param>
+    /// <returns>List of team standings for the round, or null if round not found</returns>
+    public List<TeamStanding>? GetStandingsForRound(int roundNumber)
+    {
+        return _standings.TryGetValue(roundNumber, out var standings) ? standings : null;
+    }
+
+    /// <summary>
+    /// Gets all historical standings data.
+    /// </summary>
+    /// <returns>Dictionary with round numbers as keys and standings as values</returns>
+    public Dictionary<int, List<TeamStanding>> GetAllStandings()
+    {
+        return new Dictionary<int, List<TeamStanding>>(_standings);
+    }
+
+    /// <summary>
+    /// Gets the current standings (most recent round).
+    /// </summary>
+    /// <returns>Current standings or empty list if no rounds completed</returns>
+    public List<TeamStanding> GetCurrentStandings()
+    {
+        if (!_standings.Any()) return new List<TeamStanding>();
+        
+        var latestRound = _standings.Keys.Max();
+        return _standings[latestRound];
+    }
+
+    /// <summary>
+    /// Updates the current tournament standings (for backwards compatibility).
+    /// </summary>
+    /// <param name="standings">The new standings to set</param>
+    [Obsolete("Use SetStandingsForRound instead")]
+    public void UpdateStandings(List<TeamStanding> standings)
+    {
+        if (!_standings.Any())
+        {
+            SetStandingsForRound(0, standings);
+        }
+        else
+        {
+            var latestRound = _standings.Keys.Max();
+            SetStandingsForRound(latestRound, standings);
+        }
+    }
+
+    /// <summary>
+    /// Clears all current standings.
+    /// </summary>
+    public void ClearStandings()
+    {
+        _standings.Clear();
+    }
+
+    /// <summary>
     /// Creates a shallow copy of the tournament.
     /// This is used to create a new instance of the tournament with the same properties.
     /// </summary>
@@ -129,4 +210,6 @@ public class Tournament : ICloneable
     {
         _groups = _groups.OrderBy(g => g.Index).ToList();
     }
+
+  
 }

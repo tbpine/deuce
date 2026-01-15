@@ -80,4 +80,5 @@ public class Round
     /// <remarks>This method does not check for duplicates when adding the range.</remarks>
     public void AddRange(IEnumerable<Permutation> range) =>_perms.AddRange(range);
 
+
 }

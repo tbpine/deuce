@@ -26,12 +26,10 @@ namespace deuce;
 public class DrawMakerSwiss : DrawMakerBase, IDrawMaker
 {
     private readonly IGameMaker _gameMaker;
-    private readonly Dictionary<int, List<TeamStanding>> _standingsHistory;
 
     public DrawMakerSwiss(Tournament t, IGameMaker gameMaker) : base(t)
     {
         _gameMaker = gameMaker;
-        _standingsHistory = new Dictionary<int, List<TeamStanding>>();
     }
 
     public override Draw Create()
@@ -279,6 +277,9 @@ public class DrawMakerSwiss : DrawMakerBase, IDrawMaker
 
         // Record the updated standings for this round
         RecordStandingsForRound(completedRound, currentStandings);
+
+        // Copy standings to the tournament (using the new method)
+        _tournament.SetStandingsForRound(completedRound, currentStandings);
     }
 
     /// <summary>
@@ -699,21 +700,11 @@ public class DrawMakerSwiss : DrawMakerBase, IDrawMaker
             sortedStandings[i].Position = i + 1;
         }
 
-        // Store a deep copy of the standings for this round
-        var roundStandings = sortedStandings.Select(s => new TeamStanding
-        {
-            Team = s.Team,
-            Wins = s.Wins,
-            Losses = s.Losses,
-            Draws = s.Draws,
-            Points = s.Points,
-            Position = s.Position
-        }).ToList();
-
-        _standingsHistory[roundNumber] = roundStandings;
+        // Store in tournament (no need for local copy anymore)
+        _tournament.SetStandingsForRound(roundNumber, sortedStandings);
 
         Debug.WriteLine($"Standings after Round {roundNumber + 1}:");
-        foreach (var standing in roundStandings)
+        foreach (var standing in sortedStandings)
         {
             Debug.WriteLine($"  {standing.Position}. {standing.Team.Label} - W:{standing.Wins} L:{standing.Losses} D:{standing.Draws} Pts:{standing.Points}");
         }
@@ -726,7 +717,7 @@ public class DrawMakerSwiss : DrawMakerBase, IDrawMaker
     /// <returns>List of team standings for the round, or null if round not found</returns>
     public List<TeamStanding>? GetStandingsForRound(int roundNumber)
     {
-        return _standingsHistory.TryGetValue(roundNumber, out var standings) ? standings : null;
+        return _tournament.GetStandingsForRound(roundNumber);
     }
 
     /// <summary>
@@ -735,7 +726,7 @@ public class DrawMakerSwiss : DrawMakerBase, IDrawMaker
     /// <returns>Dictionary with round numbers as keys and standings as values</returns>
     public Dictionary<int, List<TeamStanding>> GetAllStandings()
     {
-        return new Dictionary<int, List<TeamStanding>>(_standingsHistory);
+        return _tournament.GetAllStandings();
     }
 
     /// <summary>
@@ -744,10 +735,7 @@ public class DrawMakerSwiss : DrawMakerBase, IDrawMaker
     /// <returns>Current standings or empty list if no rounds completed</returns>
     public List<TeamStanding> GetCurrentStandings()
     {
-        if (!_standingsHistory.Any()) return new List<TeamStanding>();
-
-        var latestRound = _standingsHistory.Keys.Max();
-        return _standingsHistory[latestRound];
+        return _tournament.GetCurrentStandings();
     }
 
     /// <summary>

@@ -591,9 +591,12 @@ namespace deuce_unit
 
             try
             {
+                //Advance the round
+                scheduler.OnChange(tournament.Draw, 1, 0, initialScores);
+
                 using FileStream pdfFile = new FileStream(filename, FileMode.Create, FileAccess.Write);
                 PdfPrinter printer = new PdfPrinter(tournament.Draw, new PDFTemplateFactory());
-                printer.Print(pdfFile, tournament, tournament.Draw, 1, initialScores);
+                printer.Print(pdfFile, tournament, tournament.Draw, 2, initialScores);
                 
                 TestContext?.WriteLine($"Successfully created PDF file: {filename}");
                 

@@ -41,8 +41,8 @@ public class TournamentDetail : ICloneable
      public TournamentDetail(int noSingle, int noDoubles, int noSets)
     {
 
-        _noSingles = 2;
-        _noDoubles = 2;
+        _noSingles = noSingle;
+        _noDoubles = noDoubles;
         _sets = noSets;
     }
 

@@ -24,6 +24,7 @@ public class PDFTemplateFactory : IPDFTemplateFactory
                         2 => new PDFTemplateTennisKO(),
                         3 => new PDFTemplateTennisKOPlayoff(),
                         4 => new PDFTemplateGroup(),
+                        5 => new PDFTemplateTennisSwiss(),
                         _ => new PDFTemplateTennisTest()
                     };
                 }

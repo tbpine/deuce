@@ -5,6 +5,7 @@ using iText.Kernel.Pdf;
 using iText.Layout;
 using iText.Layout.Element;
 using iText.Layout.Properties;
+using iText.Layout.Borders;
 using deuce.ext;
 
 namespace deuce;
@@ -48,8 +49,34 @@ public class PDFTemplateTennisSwiss : IPDFTemplate
 
         MakeHeader(doc, tournament, roundNo);
 
+        // Show current standings before matches (for rounds > 1)
+        if (roundNo > 1)
+        {
+            GenerateStandings(doc, pdfdoc, tournament, roundNo - 1);
+            
+            // Add spacing between standings and matches
+            doc.Add(new Paragraph("\n").SetFontSize(15));
+            
+            // Add a separator
+            var separator = new Paragraph("═".PadRight(80, '═'))
+                .SetFontSize(12)
+                .SetTextAlignment(TextAlignment.CENTER)
+                .SetMarginTop(10)
+                .SetMarginBottom(15);
+            doc.Add(separator);
+            
+            // Add matches header
+            var matchesHeader = new Paragraph($"Round {roundNo} Matches")
+                .SetFontSize(14)
+                .SetFont(PdfFontFactory.CreateFont(StandardFonts.HELVETICA_BOLD))
+                .SetTextAlignment(TextAlignment.CENTER)
+                .SetMarginBottom(15);
+            doc.Add(matchesHeader);
+        }
+
         // Get the specific round for Swiss format
-        IEnumerable<Permutation> perms = s.GetRounds(roundNo).Permutations;
+        // roundNo is not zero-based but the schedule is
+        IEnumerable<Permutation> perms = s.GetRounds(roundNo-1).Permutations;
 
         PdfFont cellFont = PdfFontFactory.CreateFont(StandardFonts.HELVETICA);
 
@@ -97,6 +124,31 @@ public class PDFTemplateTennisSwiss : IPDFTemplate
                 // Create table for matches in this pairing
                 CreateMatchTable(doc, perm, noScores, cellFont, roundNo, scores);
             }
+        }
+
+        // For first round, show initial standings after matches
+        if (roundNo == 1)
+        {
+            // Add spacing
+            doc.Add(new Paragraph("\n").SetFontSize(15));
+            
+            // Add a separator
+            var separator = new Paragraph("═".PadRight(80, '═'))
+                .SetFontSize(12)
+                .SetTextAlignment(TextAlignment.CENTER)
+                .SetMarginTop(10)
+                .SetMarginBottom(15);
+            doc.Add(separator);
+            
+            // Add standings header
+            var standingsHeader = new Paragraph("Initial Tournament Standings")
+                .SetFontSize(14)
+                .SetFont(PdfFontFactory.CreateFont(StandardFonts.HELVETICA_BOLD))
+                .SetTextAlignment(TextAlignment.CENTER)
+                .SetMarginBottom(15);
+            doc.Add(standingsHeader);
+            
+            GenerateStandings(doc, pdfdoc, tournament, roundNo);
         }
     }
 
@@ -208,7 +260,7 @@ public class PDFTemplateTennisSwiss : IPDFTemplate
         var grouped = new Dictionary<string, List<Permutation>>();
 
         // For first round, no grouping needed
-        if (roundNo == 0)
+        if (roundNo == 1)
         {
             grouped[""] = perms.ToList();
             return grouped;
@@ -276,6 +328,272 @@ public class PDFTemplateTennisSwiss : IPDFTemplate
     }
 
     /// <summary>
+    /// Generates a comprehensive PDF showing both the standings and matches for a specific round in a Swiss tournament.
+    /// This method creates a complete tournament report including current standings and round match details.
+    /// </summary>
+    /// <param name="doc">iText document object</param>
+    /// <param name="pdfdoc">PDF document object</param>
+    /// <param name="tournament">Tournament details</param>
+    /// <param name="roundNo">The round for which to show standings and matches (1-based)</param>
+    /// <param name="scores">Optional scores to display in the matches section</param>
+    public void GenerateStandingsWithMatches(Document doc, PdfDocument pdfdoc, Tournament tournament, int roundNo, List<Score>? scores = null)
+    {
+        // First, generate the standings for the previous round (if available)
+        if (roundNo > 1)
+        {
+            GenerateStandings(doc, pdfdoc, tournament, roundNo - 1);
+            
+            // Add page break between standings and matches
+            doc.Add(new AreaBreak(iText.Layout.Properties.AreaBreakType.NEXT_PAGE));
+        }
+        
+        // Then generate the matches for the current round
+        Generate(doc, pdfdoc, tournament, roundNo, scores);
+        
+        // If this is round 1, add standings after matches (initial standings)
+        if (roundNo == 1)
+        {
+            // Add some spacing
+            doc.Add(new Paragraph("\n").SetFontSize(20));
+            
+            // Add a separator
+            var separator = new Paragraph("═".PadRight(80, '═'))
+                .SetFontSize(12)
+                .SetTextAlignment(TextAlignment.CENTER)
+                .SetMarginTop(10)
+                .SetMarginBottom(10);
+            doc.Add(separator);
+            
+            GenerateStandings(doc, pdfdoc, tournament, roundNo);
+        }
+    }
+
+    /// <summary>
+    /// Generates a PDF showing the standings for a specific round in a Swiss tournament.
+    /// This method creates a table displaying team rankings, wins, losses, draws, and points.
+    /// </summary>
+    /// <param name="doc">iText document object</param>
+    /// <param name="pdfdoc">PDF document object</param>
+    /// <param name="tournament">Tournament details</param>
+    /// <param name="roundNo">The round for which to show standings (1-based)</param>
+    public void GenerateStandings(Document doc, PdfDocument pdfdoc, Tournament tournament, int roundNo)
+    {
+        // Get standings for the specified round (convert to 0-based)
+        var standings = tournament.GetStandingsForRound(roundNo - 1);
+        
+        if (standings == null || !standings.Any())
+        {
+            // If no standings available, show message
+            MakeStandingsHeader(doc, tournament, roundNo);
+            
+            var noStandingsMsg = new Paragraph("No standings available for this round.")
+                .SetFontSize(12)
+                .SetTextAlignment(TextAlignment.CENTER)
+                .SetMarginTop(50);
+            doc.Add(noStandingsMsg);
+            return;
+        }
+
+        MakeStandingsHeader(doc, tournament, roundNo);
+
+        // Sort standings by points (descending), then by position
+        var sortedStandings = standings
+            .OrderByDescending(s => s.Points)
+            .ThenBy(s => s.Position)
+            .ToList();
+
+        // Create standings table
+        CreateStandingsTable(doc, sortedStandings, roundNo);
+
+        // Add summary statistics
+        AddStandingsSummary(doc, sortedStandings, roundNo);
+    }
+
+    /// <summary>
+    /// Creates a header for the standings PDF
+    /// </summary>
+    private void MakeStandingsHeader(Document doc, Tournament tournament, int roundNo)
+    {
+        PdfFont boldFont = PdfFontFactory.CreateFont(StandardFonts.HELVETICA_BOLD);
+        PdfFont regularFont = PdfFontFactory.CreateFont(StandardFonts.HELVETICA);
+        
+        string title = $"{tournament.Label} - Swiss System Standings";
+        
+        // Calculate the date for this round
+        Interval interval = new Interval(tournament.Interval, "");
+        DateTime roundDate = tournament.Start.AddDays(roundNo * Utils.GetNoDays(interval));
+        
+        string dates = $"Standings after Round {roundNo} - {roundDate:dd MMM yyyy}";
+        string format = $"Format: {tournament.Details?.NoSingles ?? 1} singles, {tournament.Details?.NoDoubles ?? 1} doubles, sets: {tournament.Details?.Sets ?? 1}";
+
+        // Tournament title
+        var titleParagraph = new Paragraph(title)
+            .SetFont(boldFont)
+            .SetFontSize(16)
+            .SetTextAlignment(TextAlignment.CENTER)
+            .SetMarginBottom(5);
+        doc.Add(titleParagraph);
+
+        // Round and date info
+        var datesParagraph = new Paragraph(dates)
+            .SetFont(regularFont)
+            .SetFontSize(12)
+            .SetTextAlignment(TextAlignment.CENTER)
+            .SetMarginBottom(3);
+        doc.Add(datesParagraph);
+        
+        // Format information
+        var formatParagraph = new Paragraph(format)
+            .SetFont(regularFont)
+            .SetFontSize(10)
+            .SetMarginBottom(20);
+        doc.Add(formatParagraph);
+    }
+
+    /// <summary>
+    /// Creates the standings table showing team positions, names, and statistics
+    /// </summary>
+    private void CreateStandingsTable(Document doc, List<TeamStanding> standings, int roundNo)
+    {
+        // Define column widths: Position, Team Name, Wins, Losses, Draws, Points
+        float[] columnWidths = { 1f, 4f, 1.5f, 1.5f, 1.5f, 2f };
+        
+        Table standingsTable = new Table(columnWidths);
+        standingsTable.SetWidth(UnitValue.CreatePercentValue(100));
+        standingsTable.SetFont(PdfFontFactory.CreateFont(StandardFonts.HELVETICA));
+
+        // Add header row
+        AddStandingsHeaderRow(standingsTable);
+
+        // Add team rows
+        int position = 1;
+        foreach (var standing in standings)
+        {
+            AddStandingsTeamRow(standingsTable, standing, position);
+            position++;
+        }
+
+        doc.Add(standingsTable);
+    }
+
+    /// <summary>
+    /// Adds the header row to the standings table
+    /// </summary>
+    private void AddStandingsHeaderRow(Table table)
+    {
+        PdfFont headerFont = PdfFontFactory.CreateFont(StandardFonts.HELVETICA_BOLD);
+
+        var headers = new[] { "Pos", "Team", "Wins", "Losses", "Draws", "Points" };
+        
+        foreach (var header in headers)
+        {
+            Cell headerCell = new Cell()
+                .Add(new Paragraph(header))
+                .SetFont(headerFont)
+                .SetBackgroundColor(ColorConstants.DARK_GRAY)
+                .SetFontColor(ColorConstants.WHITE)
+                .SetTextAlignment(TextAlignment.CENTER)
+                .SetVerticalAlignment(VerticalAlignment.MIDDLE)
+                .SetPadding(8);
+            
+            table.AddHeaderCell(headerCell);
+        }
+    }
+
+    /// <summary>
+    /// Adds a team row to the standings table
+    /// </summary>
+    private void AddStandingsTeamRow(Table table, TeamStanding standing, int position)
+    {
+        PdfFont cellFont = PdfFontFactory.CreateFont(StandardFonts.HELVETICA);
+        
+        // Alternate row colors for better readability
+        Color backgroundColor = position % 2 == 0 ? ColorConstants.LIGHT_GRAY : ColorConstants.WHITE;
+
+        // Position cell
+        Cell posCell = new Cell()
+            .Add(new Paragraph(position.ToString()))
+            .SetFont(cellFont)
+            .SetBackgroundColor(backgroundColor)
+            .SetTextAlignment(TextAlignment.CENTER)
+            .SetVerticalAlignment(VerticalAlignment.MIDDLE)
+            .SetPadding(6);
+        table.AddCell(posCell);
+
+        // Team name cell (with players if available)
+        string teamInfo = standing.Team.Label;
+        if (!string.IsNullOrEmpty(standing.Team.GetPlayerCSV()))
+        {
+            teamInfo += $"\n({standing.Team.GetPlayerCSV()})";
+        }
+        
+        Cell teamCell = new Cell()
+            .Add(new Paragraph(teamInfo))
+            .SetFont(cellFont)
+            .SetBackgroundColor(backgroundColor)
+            .SetVerticalAlignment(VerticalAlignment.MIDDLE)
+            .SetPadding(6);
+        table.AddCell(teamCell);
+
+        // Statistics cells
+        var stats = new[] { 
+            standing.Wins.ToString(), 
+            standing.Losses.ToString(), 
+            standing.Draws.ToString(), 
+            standing.Points.ToString("F1") 
+        };
+
+        foreach (var stat in stats)
+        {
+            Cell statCell = new Cell()
+                .Add(new Paragraph(stat))
+                .SetFont(cellFont)
+                .SetBackgroundColor(backgroundColor)
+                .SetTextAlignment(TextAlignment.CENTER)
+                .SetVerticalAlignment(VerticalAlignment.MIDDLE)
+                .SetPadding(6);
+            table.AddCell(statCell);
+        }
+    }
+
+    /// <summary>
+    /// Adds summary statistics below the standings table
+    /// </summary>
+    private void AddStandingsSummary(Document doc, List<TeamStanding> standings, int roundNo)
+    {
+        if (!standings.Any()) return;
+
+        // Calculate summary statistics
+        int totalTeams = standings.Count;
+        double totalPoints = standings.Sum(s => s.Points);
+        double averagePoints = totalPoints / totalTeams;
+        var topScore = standings.Max(s => s.Points);
+        int teamsWithTopScore = standings.Count(s => s.Points == topScore);
+
+        // Create summary paragraph
+        var summaryText = $"Tournament Summary after Round {roundNo}:\n" +
+                         $"• Total Teams: {totalTeams}\n" +
+                         $"• Average Points: {averagePoints:F1}\n" +
+                         $"• Leading Score: {topScore:F1} points\n" +
+                         $"• Teams tied for lead: {teamsWithTopScore}";
+
+        if (teamsWithTopScore > 1)
+        {
+            var leadingTeams = standings.Where(s => s.Points == topScore).Select(s => s.Team.Label);
+            summaryText += $"\n• Leading teams: {string.Join(", ", leadingTeams)}";
+        }
+
+        var summaryParagraph = new Paragraph(summaryText)
+            .SetFontSize(10)
+            .SetMarginTop(20)
+            .SetPadding(10)
+            .SetBackgroundColor(ColorConstants.LIGHT_GRAY)
+            .SetBorder(new SolidBorder(ColorConstants.GRAY, 1));
+
+        doc.Add(summaryParagraph);
+    }
+
+    /// <summary>
     /// Creates the header for the Swiss format round
     /// </summary>
     private void MakeHeader(Document doc, Tournament t, int roundNo)
@@ -287,7 +605,7 @@ public class PDFTemplateTennisSwiss : IPDFTemplate
         Interval interval = new Interval(t.Interval, "");
         DateTime roundDate = t.Start.AddDays(roundNo * Utils.GetNoDays(interval));
         
-        string dates = $"{roundDate:dd MMM yyyy} - Round {roundNo + 1}";
+        string dates = $"{roundDate:dd MMM yyyy} - Round {roundNo}";
         string location = "Location:";
         string format = $"Format: {t!.Details?.NoSingles ?? 1} singles, {t.Details?.NoDoubles ?? 1} doubles, sets: {t.Details?.Sets ?? 1}";
         string swissInfo = "Swiss System: Teams paired by current standings";

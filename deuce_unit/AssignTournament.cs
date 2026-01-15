@@ -12,18 +12,7 @@ class AssignTournament
     int noSingle, int noDouble, int sets, int teamSize, List<Player> players, int groupSize = 4)
     {
 
-
-
-        //Assign
-        Tournament tournament = new();
-        //1 for tennis for now.
-        tournament.Sport = sport;
-        tournament.Type = tournamentType;
         IGameMaker gm = new GameMakerTennis();
-        FactoryDrawMaker fac = new();
-        var dm = fac.Create(tournament, gm);
-
-        tournament.Teams = new();
 
         return MakeRandom(tournamentType, label, noPlayers, sport,
         noSingle, noDouble, sets, teamSize, players,  gm, groupSize);
