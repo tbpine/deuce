@@ -11,7 +11,7 @@ namespace deuce_unit
 
         private IDrawMaker _dm;
         private IGameMaker _gm;
-        
+
         private FactoryDrawMaker _fac = new FactoryDrawMaker();
 
         public UnitTestsDrawMakerSwiss()
@@ -19,7 +19,7 @@ namespace deuce_unit
             // Initialize before each test
             _gm = new GameMakerTennis();
 
-            _dm = _fac.Create(new Tournament() { Type = 5 , Sport = 1}, _gm);
+            _dm = _fac.Create(new Tournament() { Type = 5, Sport = 1 }, _gm);
 
         }
         [TestInitialize]
@@ -108,7 +108,7 @@ namespace deuce_unit
 
             while (currentRoundIndex < maxRounds)
             {
-                var currentRound = tournament.Draw.GetRoundAtIndex(currentRoundIndex);
+                var currentRound = tournament.Draw.GetRound(currentRoundIndex);
                 TestContext?.WriteLine($"Processing Round {currentRound.Index + 1}:");
 
                 // Validate round structure before playing
@@ -165,7 +165,7 @@ namespace deuce_unit
                     // Check if a new round was created
                     if (roundsAfter > roundsBefore)
                     {
-                        var nextRound = tournament.Draw.GetRoundAtIndex(currentRoundIndex + 1);
+                        var nextRound = tournament.Draw.GetRound(currentRoundIndex + 1);
                         if (nextRound != null && nextRound.Permutations.Any())
                         {
                             TestContext?.WriteLine($"  Next round has {nextRound.Permutations.Count()} matches ready");
@@ -207,12 +207,12 @@ namespace deuce_unit
             TestContext?.WriteLine($"Testing Swiss tournament progression with bye scenario");
 
             // Create unique random players by shuffling indices
-             int playerCount = noPlayers;
+            int playerCount = noPlayers;
             var players = RandomUtil.GetRandomPlayers(playerCount); //Get 8 unique players
-              // Create tournament using AssignTournament factory for Swiss format
+                                                                    // Create tournament using AssignTournament factory for Swiss format
             AssignTournament assignTournament = new();
 
-            
+
             Tournament tournament = assignTournament.MakeRandom(
                 tournamentType: 5, // Swiss tournament
                 label: RandomUtil.GetRandomTournamentName(),
@@ -252,15 +252,15 @@ namespace deuce_unit
 
             // First, assign a clear winner for the first round. The rest is a draw, means
             //there is a group involving an odd number of players with same score and one clear winner.
-            foreach(Permutation p in tournament.Draw.GetRoundAtIndex(0).Permutations)
+            foreach (Permutation p in tournament.Draw.GetRound(0).Permutations)
             {
-                foreach(Match m in p.Matches)
+                foreach (Match m in p.Matches)
                 {
-                    int scoreHome  = 3;
-                    int scoreAway  = 3;
+                    int scoreHome = 3;
+                    int scoreAway = 3;
 
-                    if (m.Home.First().Id == tournament.Teams.First().Id) { scoreHome = 6 ; scoreAway = 0; }
-                    else if (m.Away.First().Id == tournament.Teams.First().Id)  { scoreAway = 6 ; scoreHome = 0; }
+                    if (m.Home.First().Id == tournament.Teams.First().Id) { scoreHome = 6; scoreAway = 0; }
+                    else if (m.Away.First().Id == tournament.Teams.First().Id) { scoreAway = 6; scoreHome = 0; }
                     // Assign clear winners for first round
                     var score = new Score
                     {
@@ -274,14 +274,14 @@ namespace deuce_unit
                     };
 
                     roundScores.Add(score);
-                    allScores.Add(score);   
+                    allScores.Add(score);
                 }
             }
 
             //Progress to next round
             var fac = new FactoryDrawMaker();
             var _dm = fac.Create(tournament, _gm);
-            _dm.OnChange(tournament.Draw, 1, 0 , roundScores);
+            _dm.OnChange(tournament.Draw, 1, 0, roundScores);
             //Move to next round
             currentRoundIndex++;
             //Validate that outcome of progression round 1.
@@ -289,16 +289,16 @@ namespace deuce_unit
             //1. Expect the first standing to get a bye
             //2. Expect an adjusted group for the rest of players
 
-            var secondRound = tournament.Draw.GetRoundAtIndex(currentRoundIndex);
+            var secondRound = tournament.Draw.GetRound(currentRoundIndex);
             var winningTeam = tournament.Teams.First();
 
             //count the number of matches
             int totalMatches = secondRound.Permutations.Sum(p => p.Matches.Count());
-            Assert.AreEqual(playerCount  / 2, totalMatches, " number of matches should be players /2");
+            Assert.AreEqual(playerCount / 2, totalMatches, " number of matches should be players /2");
 
             while (currentRoundIndex < maxRounds && currentRoundIndex > 0)
             {
-                var currentRound = tournament.Draw.GetRoundAtIndex(currentRoundIndex);
+                var currentRound = tournament.Draw.GetRound(currentRoundIndex);
                 TestContext?.WriteLine($"Processing Round {currentRound.Index + 1}:");
 
                 // Validate round structure before playing
@@ -308,7 +308,7 @@ namespace deuce_unit
                 TestContext?.WriteLine($"  Round has {currentRound.Permutations.Count()} matches");
 
                 roundScores.Clear();
-       
+
                 foreach (var permutation in currentRound.Permutations)
                 {
                     foreach (var match in permutation.Matches)
@@ -354,7 +354,7 @@ namespace deuce_unit
                     // Check if a new round was created
                     if (roundsAfter > roundsBefore)
                     {
-                        var nextRound = tournament.Draw.GetRoundAtIndex(currentRoundIndex + 1);
+                        var nextRound = tournament.Draw.GetRound(currentRoundIndex + 1);
                         if (nextRound != null && nextRound.Permutations.Any())
                         {
                             TestContext?.WriteLine($"  Next round has {nextRound.Permutations.Count()} matches ready");
@@ -394,7 +394,7 @@ namespace deuce_unit
             // Verify each player participated in each played round
             for (int r = 0; r < roundsPlayed && r < tournament?.Draw?.NoRounds; r++)
             {
-                var round = tournament.Draw.GetRoundAtIndex(r);
+                var round = tournament.Draw.GetRound(r);
                 var playersInRound = new HashSet<int>();
 
                 foreach (var perm in round?.Permutations ?? Enumerable.Empty<Permutation>())
@@ -418,7 +418,7 @@ namespace deuce_unit
 
             for (int r = 0; r < currentRoundIndex; r++)
             {
-                var round = tournament.Draw?.GetRoundAtIndex(r);
+                var round = tournament.Draw?.GetRound(r);
                 foreach (var perm in round?.Permutations ?? Enumerable.Empty<Permutation>())
                 {
                     foreach (var match in perm.Matches)
@@ -433,7 +433,7 @@ namespace deuce_unit
             }
 
             // Check current round for duplicate pairings
-            var currentRound = tournament.Draw?.GetRoundAtIndex(currentRoundIndex);
+            var currentRound = tournament.Draw?.GetRound(currentRoundIndex);
             foreach (var perm in currentRound?.Permutations ?? Enumerable.Empty<Permutation>())
             {
                 foreach (var match in perm.Matches)
@@ -480,7 +480,7 @@ namespace deuce_unit
         [TestMethod]
         [DataRow(8)]
         [DataRow(16)]
-        public void create_swiss_tournament_with_initial_round_and_print_to_pdf(int noPlayers)
+        public async Task create_swiss_tournament_with_initial_round_and_print_to_pdf(int noPlayers)
         {
             TestContext?.WriteLine($"Testing Swiss tournament creation and PDF printing with {noPlayers} players");
 
@@ -538,8 +538,8 @@ namespace deuce_unit
 
             // Verify the initial round is set properly
             Assert.AreEqual(1, tournament.Draw.NoRounds, "Swiss tournament should start with exactly 1 round");
-            
-            var initialRound = tournament.Draw.GetRoundAtIndex(0);
+
+            var initialRound = tournament.Draw.GetRound(0);
             Assert.IsNotNull(initialRound, "Initial round should not be null");
             Assert.IsTrue(initialRound.Permutations.Count() > 0, "Initial round should have permutations (matches)");
 
@@ -585,29 +585,49 @@ namespace deuce_unit
 
             TestContext?.WriteLine($"Generated {initialScores.Count} scores for initial round");
 
-            // Print tournament to PDF
-            string filename = $"{tournament.Label}.pdf";
-            TestContext?.WriteLine($"Printing tournament to PDF: {filename}");
+            // Print tournament to 3 different PDF files
+            string baseFilename = tournament.Label;
+            string filename1 = $"{baseFilename}_Round1.pdf";
+            string filename2 = $"{baseFilename}_Round1_standings.pdf";
+            string filename3 = $"{baseFilename}_Round2.pdf";
+
+            TestContext?.WriteLine($"Printing tournament to 3 PDF files: {filename1}, {filename2}, {filename3}");
 
             try
             {
                 //Advance the round
                 scheduler.OnChange(tournament.Draw, 1, 0, initialScores);
 
-                using FileStream pdfFile = new FileStream(filename, FileMode.Create, FileAccess.Write);
-                PdfPrinter printer = new PdfPrinter(tournament.Draw, new PDFTemplateFactory());
-                printer.Print(pdfFile, tournament, tournament.Draw, 2, initialScores);
-                
-                TestContext?.WriteLine($"Successfully created PDF file: {filename}");
-                
-                // Verify the file was created
-                Assert.IsTrue(File.Exists(filename), $"PDF file '{filename}' should exist after printing");
-                
-                // Verify the file has content
-                FileInfo fileInfo = new FileInfo(filename);
-                Assert.IsTrue(fileInfo.Length > 0, "PDF file should not be empty");
-                
-                TestContext?.WriteLine($"PDF file size: {fileInfo.Length} bytes");
+                PdfPrinterSwiss printer = new PdfPrinterSwiss(tournament.Draw, new PDFTemplateFactory());
+                // File 1: Round 1 only
+                using FileStream pdfFile1 = new FileStream(filename1, FileMode.Create, FileAccess.Write);
+                await printer.PrintCurrentRound(pdfFile1, tournament,  1, initialScores);
+
+                // File 2: Round 2 only
+                using FileStream pdfFile2 = new FileStream(filename2, FileMode.Create, FileAccess.Write);
+                await printer.PrintStandings(pdfFile2, tournament, 1);
+
+                // File 3: Complete tournament (both rounds)
+                using FileStream pdfFile3 = new FileStream(filename3, FileMode.Create, FileAccess.Write);
+                await printer.PrintNextRound(pdfFile3, tournament,  2, initialScores);
+
+                TestContext?.WriteLine($"Successfully created PDF files: {filename1}, {filename2}, {filename3}");
+
+                // Verify all files were created
+                Assert.IsTrue(File.Exists(filename1), $"PDF file '{filename1}' should exist after printing");
+                Assert.IsTrue(File.Exists(filename2), $"PDF file '{filename2}' should exist after printing");
+                Assert.IsTrue(File.Exists(filename3), $"PDF file '{filename3}' should exist after printing");
+
+                // Verify the files have content
+                FileInfo fileInfo1 = new FileInfo(filename1);
+                FileInfo fileInfo2 = new FileInfo(filename2);
+                FileInfo fileInfo3 = new FileInfo(filename3);
+
+                Assert.IsTrue(fileInfo1.Length > 0, "PDF file 1 should not be empty");
+                Assert.IsTrue(fileInfo2.Length > 0, "PDF file 2 should not be empty");
+                Assert.IsTrue(fileInfo3.Length > 0, "PDF file 3 should not be empty");
+
+                TestContext?.WriteLine($"PDF file sizes - Round1: {fileInfo1.Length} bytes, Round2: {fileInfo2.Length} bytes, Complete: {fileInfo3.Length} bytes");
             }
             catch (Exception ex)
             {

@@ -119,7 +119,7 @@ public class UnitTestsBracketTournament
             // Generate scores for winners bracket matches in this round
             if (currentRound <= winnersDraw.NoRounds)
             {
-                var winnersRound = winnersDraw.GetRoundAtIndex(currentRound - 1);
+                var winnersRound = winnersDraw.GetRound(currentRound - 1);
                 foreach (Permutation permutation in winnersRound.Permutations)
                 {
                     Match match = permutation.Matches.First();
@@ -162,7 +162,7 @@ public class UnitTestsBracketTournament
             // Generate scores for losers bracket matches in this round
             if (currentRound <= losersDraw.NoRounds)
             {
-                var losersRound = losersDraw.GetRoundAtIndex(currentRound - 1);
+                var losersRound = losersDraw.GetRound(currentRound - 1);
                 foreach (Permutation permutation in losersRound.Permutations)
                 {
                     var match = permutation.Matches.First();
@@ -207,8 +207,8 @@ public class UnitTestsBracketTournament
             if (winnersScores.Count > 0 || losersScores.Count > 0)
             {
                 TestContext?.WriteLine($"Round {currentRound} completed:");
-                TestContext?.WriteLine($"  Total winners matches: {(currentRound <= winnersDraw.NoRounds ? winnersDraw.GetRoundAtIndex(currentRound - 1).Permutations.Sum(p => p.Matches.Count()) : 0)}");
-                TestContext?.WriteLine($"  Total losers matches: {(currentRound <= losersDraw.NoRounds ? losersDraw.GetRoundAtIndex(currentRound - 1).Permutations.Sum(p => p.Matches.Count()) : 0)}");
+                TestContext?.WriteLine($"  Total winners matches: {(currentRound <= winnersDraw.NoRounds ? winnersDraw.GetRound(currentRound - 1).Permutations.Sum(p => p.Matches.Count()) : 0)}");
+                TestContext?.WriteLine($"  Total losers matches: {(currentRound <= losersDraw.NoRounds ? losersDraw.GetRound(currentRound - 1).Permutations.Sum(p => p.Matches.Count()) : 0)}");
                 TestContext?.WriteLine($"  Total scores processed: {winnersScores.Count + losersScores.Count}");
                 TestContext?.WriteLine("---");
             }
@@ -219,8 +219,8 @@ public class UnitTestsBracketTournament
         Assert.IsTrue(losersDraw.NoRounds > 0, "Losers bracket should have rounds");
 
         // Count non-bye teams in final rounds to verify progression
-        var finalWinnersRound = winnersDraw.GetRoundAtIndex(winnersDraw.NoRounds - 1);
-        var finalLosersRound = losersDraw.GetRoundAtIndex(losersDraw.NoRounds - 1);
+        var finalWinnersRound = winnersDraw.GetRound(winnersDraw.NoRounds - 1);
+        var finalLosersRound = losersDraw.GetRound(losersDraw.NoRounds - 1);
 
         // Verify that the tournament structure is valid
         Assert.IsTrue(winnersDraw.NoRounds > 0, "Winners bracket should have rounds");
@@ -324,7 +324,7 @@ public class UnitTestsBracketTournament
     private void TestFirstRoundAdvancement(Tournament tournament, IDrawMaker scheduler)
     {
         var winnersDraw = tournament.Draw!;
-        var firstRound = winnersDraw.GetRoundAtIndex(0);
+        var firstRound = winnersDraw.GetRound(0);
 
         // Get the first match with real players
         var testMatch = firstRound.Permutations
@@ -370,7 +370,7 @@ public class UnitTestsBracketTournament
         int expectedPowerOf2 = (int)Math.Pow(2, Math.Ceiling(Math.Log2(originalPlayers)));
 
         // Count total teams including byes
-        int totalTeamsInWinners = winnersDraw.GetRoundAtIndex(0).Permutations
+        int totalTeamsInWinners = winnersDraw.GetRound(0).Permutations
             .SelectMany(p => p.Matches)
             .SelectMany(m => new[] { m.Home, m.Away })
             .Where(side => side.Any())

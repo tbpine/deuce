@@ -21,7 +21,7 @@ namespace deuce;
 /// This class uses the LayoutManagerGroup to arrange matches by groups,
 /// displaying each group's matches in a structured layout with proper pagination.
 /// </summary>
-public class PDFTemplateGroup : IPDFTemplate
+public class PDFTemplateGroup : PDFTemplateBase
 {
     private float _page_top_margin = 10f;
     private float _page_bottom_margin = 10f;
@@ -33,7 +33,7 @@ public class PDFTemplateGroup : IPDFTemplate
     private float _table_padding_left = 5f;
     private float _table_padding_right = 5f;
 
-    public ILayoutManager LayoutManager { get; private set; }
+    public override ILayoutManager LayoutManager { get; protected set; }
 
     public PDFTemplateGroup()
     {
@@ -58,7 +58,7 @@ public class PDFTemplateGroup : IPDFTemplate
     /// <param name="roundNo">The round number to generate the PDF for. (not used in group format)</param>
     /// <param name="scores">Optional list of scores for the matches.</param>
     /// <exception cref="ArgumentException">Thrown when tournament or groups are null/empty.</exception>
-    public void Generate(Document doc, PdfDocument pdfdoc, Tournament tournament, int roundNo,
+    public override void Generate(Document doc, PdfDocument pdfdoc, Tournament tournament, int roundNo,
         List<Score>? scores = null)
     {
         // Validate input

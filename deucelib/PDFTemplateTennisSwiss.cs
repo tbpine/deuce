@@ -15,9 +15,9 @@ namespace deuce;
 /// for Swiss System tennis tournaments.
 /// Swiss format pairs teams with similar scores in each round.
 /// </summary>
-public class PDFTemplateTennisSwiss : IPDFTemplate
+public class PDFTemplateTennisSwiss : PDFTemplateBase
 {
-    public ILayoutManager LayoutManager { get; private set; }
+    public override ILayoutManager LayoutManager { get; protected set; }
 
     /// <summary>
     /// Constructor for Swiss format PDF template
@@ -34,7 +34,9 @@ public class PDFTemplateTennisSwiss : IPDFTemplate
     }
 
     /// <summary>
-    /// Prints details of matches in a Swiss round and provides space to record scores.
+    /// Generates a PDF showing matches for a specific round in a Swiss tournament.
+    /// This method only displays match pairings and score recording areas.
+    /// Standings should be generated separately using the GenerateStandings method.
     /// In Swiss format, teams are paired based on current standings/points.
     /// </summary>
     /// <param name="doc">iText document object</param>
@@ -42,114 +44,56 @@ public class PDFTemplateTennisSwiss : IPDFTemplate
     /// <param name="tournament">Tournament details</param>
     /// <param name="roundNo">The round to print</param>
     /// <param name="scores">Optionally, a list of scores to print</param>
-    public void Generate(Document doc, PdfDocument pdfdoc, Tournament tournament, int roundNo,
+    public override void Generate(Document doc, PdfDocument pdfdoc, Tournament tournament, int roundNo,
         List<Score>? scores = null)
     {
         Draw s = tournament.Draw ?? throw new ArgumentNullException(nameof(tournament.Draw), "Tournament schedule cannot be null");
 
         MakeHeader(doc, tournament, roundNo);
 
-        // Show current standings before matches (for rounds > 1)
-        if (roundNo > 1)
-        {
-            GenerateStandings(doc, pdfdoc, tournament, roundNo - 1);
-            
-            // Add spacing between standings and matches
-            doc.Add(new Paragraph("\n").SetFontSize(15));
-            
-            // Add a separator
-            var separator = new Paragraph("═".PadRight(80, '═'))
-                .SetFontSize(12)
-                .SetTextAlignment(TextAlignment.CENTER)
-                .SetMarginTop(10)
-                .SetMarginBottom(15);
-            doc.Add(separator);
-            
-            // Add matches header
-            var matchesHeader = new Paragraph($"Round {roundNo} Matches")
-                .SetFontSize(14)
-                .SetFont(PdfFontFactory.CreateFont(StandardFonts.HELVETICA_BOLD))
-                .SetTextAlignment(TextAlignment.CENTER)
-                .SetMarginBottom(15);
-            doc.Add(matchesHeader);
-        }
+        // Add matches header
+        var matchesHeader = new Paragraph($"Round {roundNo} Matches")
+            .SetFontSize(14)
+            .SetFont(PdfFontFactory.CreateFont(StandardFonts.HELVETICA_BOLD))
+            .SetTextAlignment(TextAlignment.CENTER)
+            .SetMarginBottom(15);
+        doc.Add(matchesHeader);
 
         // Get the specific round for Swiss format
         // roundNo is not zero-based but the schedule is
-        IEnumerable<Permutation> perms = s.GetRounds(roundNo-1).Permutations;
+        IEnumerable<Permutation> perms = s.GetRound(roundNo-1).Permutations;
 
         PdfFont cellFont = PdfFontFactory.CreateFont(StandardFonts.HELVETICA);
 
-        // Group matches by point brackets for better readability in Swiss format
-        var groupedPerms = GroupPermutationsByPoints(perms, tournament, roundNo, scores);
-
-        foreach (var group in groupedPerms)
+        foreach (Permutation perm in perms)
         {
-            // Add point bracket header if applicable
-            if (!string.IsNullOrEmpty(group.Key))
-            {
-                var bracketHeader = new Paragraph(group.Key)
-                    .SetFontSize(12)
-                    .SetMarginTop(10)
-                    .SetMarginBottom(5)
-                    .SetBackgroundColor(ColorConstants.LIGHT_GRAY)
-                    .SetPadding(5);
-                doc.Add(bracketHeader);
-            }
+            // Calculate how many boxes to print for scores:
+            int noScores = tournament?.Details?.Sets ?? 1;
 
-            foreach (Permutation perm in group.Value)
-            {
-                // Calculate how many boxes to print for scores:
-                int noScores = tournament?.Details?.Sets ?? 1;
+            var thome = perm.GetTeamAtIndex(0);
+            var taway = perm.GetTeamAtIndex(1);
 
-                var thome = perm.GetTeamAtIndex(0);
-                var taway = perm.GetTeamAtIndex(1);
+            // Print match pairing info
+            Paragraph pvs = new Paragraph($"{thome.Label} vs {taway.Label}")
+                .SetFontSize(11);
+                
+            // Team membership details
+            Paragraph pteam1 = new Paragraph($"{thome.Label}: {thome.GetPlayerCSV()}")
+                .SetFontSize(8)
+                .SetMarginBottom(2);
+            Paragraph pteam2 = new Paragraph($"{taway.Label}: {taway.GetPlayerCSV()}")
+                .SetFontSize(8)
+                .SetMarginBottom(10);
 
-                // Print match pairing info
-                Paragraph pvs = new Paragraph($"{thome.Label} vs {taway.Label}")
-                    .SetFontSize(11);
-                    
-                // Team membership details
-                Paragraph pteam1 = new Paragraph($"{thome.Label}: {thome.GetPlayerCSV()}")
-                    .SetFontSize(8)
-                    .SetMarginBottom(2);
-                Paragraph pteam2 = new Paragraph($"{taway.Label}: {taway.GetPlayerCSV()}")
-                    .SetFontSize(8)
-                    .SetMarginBottom(10);
+            doc.Add(pvs);
+            doc.Add(pteam1);
+            doc.Add(pteam2);
 
-                doc.Add(pvs);
-                doc.Add(pteam1);
-                doc.Add(pteam2);
-
-                // Create table for matches in this pairing
-                CreateMatchTable(doc, perm, noScores, cellFont, roundNo, scores);
-            }
+            // Create table for matches in this pairing
+            CreateMatchTable(doc, perm, noScores, cellFont, roundNo, scores);
         }
 
-        // For first round, show initial standings after matches
-        if (roundNo == 1)
-        {
-            // Add spacing
-            doc.Add(new Paragraph("\n").SetFontSize(15));
-            
-            // Add a separator
-            var separator = new Paragraph("═".PadRight(80, '═'))
-                .SetFontSize(12)
-                .SetTextAlignment(TextAlignment.CENTER)
-                .SetMarginTop(10)
-                .SetMarginBottom(15);
-            doc.Add(separator);
-            
-            // Add standings header
-            var standingsHeader = new Paragraph("Initial Tournament Standings")
-                .SetFontSize(14)
-                .SetFont(PdfFontFactory.CreateFont(StandardFonts.HELVETICA_BOLD))
-                .SetTextAlignment(TextAlignment.CENTER)
-                .SetMarginBottom(15);
-            doc.Add(standingsHeader);
-            
-            GenerateStandings(doc, pdfdoc, tournament, roundNo);
-        }
+        // Generate method should only show matches - standings are generated separately via GenerateStandings method
     }
 
     /// <summary>
@@ -206,7 +150,8 @@ public class PDFTemplateTennisSwiss : IPDFTemplate
 
             for (int i = 0; i < noScores; i++)
             {
-                var score = scores?.Find(x => x.Match == match.Id && x.Set == i + 1 && x.Round == roundNo);
+                var score = scores?.Find(x => x.Match == match.Id && x.Set == i + 1 && x.Round == roundNo-1 &&
+                x.Permutation == perm.Id);
                 var cellHomeScore = MakeScoreCell(3f);
 
                 if (score != null)
@@ -229,7 +174,8 @@ public class PDFTemplateTennisSwiss : IPDFTemplate
 
             for (int i = 0; i < noScores; i++)
             {
-                var score = scores?.Find(x => x.Match == match.Id && x.Set == i + 1 && x.Round == roundNo);
+                var score = scores?.Find(x => x.Match == match.Id && x.Set == i + 1 && x.Round == roundNo-1 &&
+                x.Permutation == perm.Id);
                 var cellAwayScore = MakeScoreCell(3f);
 
                 if (score != null)
@@ -376,7 +322,7 @@ public class PDFTemplateTennisSwiss : IPDFTemplate
     /// <param name="pdfdoc">PDF document object</param>
     /// <param name="tournament">Tournament details</param>
     /// <param name="roundNo">The round for which to show standings (1-based)</param>
-    public void GenerateStandings(Document doc, PdfDocument pdfdoc, Tournament tournament, int roundNo)
+    public override void GenerateStandings(Document doc, PdfDocument pdfdoc, Tournament tournament, int roundNo)
     {
         // Get standings for the specified round (convert to 0-based)
         var standings = tournament.GetStandingsForRound(roundNo - 1);

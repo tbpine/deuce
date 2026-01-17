@@ -11,7 +11,7 @@ namespace deuce;
 /// Handles the layout and rendering of playoff rounds, main tournament rounds, 
 /// and final matches on separate pages using iText PDF library.
 /// </summary>
-public class PDFTemplateTennisKOPlayoff : IPDFTemplate
+public class PDFTemplateTennisKOPlayoff : PDFTemplateBase
 {
     // Page margin settings in points
     private float _page_top_margin = 10f;      // Top margin for pages
@@ -28,7 +28,7 @@ public class PDFTemplateTennisKOPlayoff : IPDFTemplate
     /// <summary>
     /// Layout manager responsible for positioning tournament elements on pages
     /// </summary>
-    public ILayoutManager LayoutManager { get; private set; }
+    public override ILayoutManager LayoutManager { get; protected set; }
 
     /// <summary>
     /// Initializes a new instance of the PDFTemplateTennisKOPlayoff class.
@@ -55,7 +55,7 @@ public class PDFTemplateTennisKOPlayoff : IPDFTemplate
     /// <param name="roundNo">The round number (currently unused in this implementation)</param>
     /// <param name="scores">Optional list of scores to display in the matches</param>
     /// <exception cref="ArgumentException">Thrown when tournament.Draw is null</exception>
-    public void Generate(Document doc, PdfDocument pdfdoc, Tournament tournament, int roundNo,
+    public override void Generate(Document doc, PdfDocument pdfdoc, Tournament tournament, int roundNo,
     List<Score>? scores = null)
     {
         // Validate that the tournament has a draw

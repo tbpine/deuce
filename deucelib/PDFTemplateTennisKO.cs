@@ -16,7 +16,7 @@ using iText.Layout.Borders;
 
 namespace deuce;
 
-public class PDFTemplateTennisKO : IPDFTemplate
+public class PDFTemplateTennisKO : PDFTemplateBase
 {
     private float _page_top_margin = 10f;
     private float _page_bottom_margin = 10f;
@@ -28,7 +28,7 @@ public class PDFTemplateTennisKO : IPDFTemplate
     private float _table_padding_left = 5f;
     private float _table_padding_right = 5f;
 
-    public ILayoutManager LayoutManager { get; private set; }
+    public override ILayoutManager LayoutManager { get; protected set; }
 
     public PDFTemplateTennisKO()
     {
@@ -54,7 +54,7 @@ public class PDFTemplateTennisKO : IPDFTemplate
     /// <param name="roundNo">The round number to generate the PDF for. (not used in this implementation)
     /// <param name="scores"> Optional list of scores for the matches.
     /// <exception cref="ArgumentException"></exception>
-    public void Generate(Document doc, PdfDocument pdfdoc, Tournament tournament, int roundNo,
+    public override void Generate(Document doc, PdfDocument pdfdoc, Tournament tournament, int roundNo,
     List<Score>? scores = null)
     {
         Draw s = tournament.Draw ?? throw new ArgumentException("Schedule cannot be null for PDF generation.");

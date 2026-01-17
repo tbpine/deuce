@@ -13,4 +13,5 @@ public interface IPDFTemplate
 {
     ILayoutManager LayoutManager { get; }
     void Generate(Document doc, PdfDocument pdfdoc, Tournament tournament, int round, List<Score>? scores);
+    void GenerateStandings(Document doc, PdfDocument pdfdoc, Tournament tournament, int round);
 }

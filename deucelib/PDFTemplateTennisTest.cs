@@ -11,9 +11,9 @@ using deuce.ext;
 
 namespace deuce;
 
-public class PDFTemplateTennisTest : IPDFTemplate
+public class PDFTemplateTennisTest : PDFTemplateBase
 {
-    public ILayoutManager LayoutManager { get; private set; }
+    public override ILayoutManager LayoutManager { get; protected set; }
     public PDFTemplateTennisTest()
     {
         LayoutManager = new LayoutManagerDefault(
@@ -24,7 +24,7 @@ public class PDFTemplateTennisTest : IPDFTemplate
         );
     }
 
-    public void Generate(Document doc, PdfDocument pdfdoc,  Tournament tournament, int roundNo,
+    public override void Generate(Document doc, PdfDocument pdfdoc,  Tournament tournament, int roundNo,
     List<Score>? scores = null)
     {
         // Set the page to be landscape

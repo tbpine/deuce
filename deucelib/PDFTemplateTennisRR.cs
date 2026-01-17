@@ -13,9 +13,9 @@ namespace deuce;
 /// A class containing methods to layout elements in a PDF document
 /// for tennis matches.
 /// </summary>
-public class PDFTemplateTennisRR : IPDFTemplate
+public class PDFTemplateTennisRR : PDFTemplateBase
 {
-    public ILayoutManager LayoutManager { get; private set; }
+    public override ILayoutManager LayoutManager { get; protected set; }
 
     /// <summary>
     /// Empty constructor
@@ -40,7 +40,7 @@ public class PDFTemplateTennisRR : IPDFTemplate
     /// <param name="tournament">Tournament details</param>
     /// <param name="roundNo">The round to print</param>
     /// <param name="scores">Optionally, a list of scores to print</param>
-    public void Generate(Document doc, PdfDocument pdfdoc, Tournament tournament, int roundNo,
+    public override void Generate(Document doc, PdfDocument pdfdoc, Tournament tournament, int roundNo,
     List<Score>? scores = null)
     {
         Draw s = tournament.Draw??throw new ArgumentNullException(nameof(tournament.Draw), "Tournament schedule cannot be null");
@@ -50,7 +50,7 @@ public class PDFTemplateTennisRR : IPDFTemplate
 
         MakeHeader(doc, tournament, roundNo);
 
-        IEnumerable<Permutation> perms = s.GetRounds(roundNo).Permutations;
+        IEnumerable<Permutation> perms = s.GetRound(roundNo).Permutations;
      
         //Add header
 
