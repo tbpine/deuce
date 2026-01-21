@@ -14,6 +14,7 @@ INSERT INTO `tournament_type` VALUES (1, "Round Robin", "Round Robin","rr","");
 INSERT INTO `tournament_type` VALUES (2, "KnockOut", "KnockOut","ko","");
 INSERT INTO `tournament_type` VALUES (3 , "Brackets", "Brackets","brackets","");
 INSERT INTO `tournament_type` VALUES (4 , "Groups", "Groups","groups","");
+INSERT INTO `tournament_type` VALUES (5 , "Swiss", "Swiss","swiss","");
 
 TRUNCATE `interval`;
 INSERT INTO `interval` VALUES (0, "Unknown");

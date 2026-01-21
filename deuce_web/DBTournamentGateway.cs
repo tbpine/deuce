@@ -137,14 +137,14 @@ public class DBTournamentGateway : ITournamentGateway
         //| Create schedule.
         //------------------------------
 
-        FactorySchedulers facSchedulers = new FactorySchedulers();
-        var tournamentScheduler = facSchedulers.Create(currentTour, gameMaker);
-        var schedule = tournamentScheduler.Run(listOfTeams ?? new());
+        FactoryDrawMaker drawSchedulers = new FactoryDrawMaker();
+        var tournamentScheduler = drawSchedulers.Create(currentTour, gameMaker);
+        var draw = tournamentScheduler.Create();
 
         //Check if the schedule is correct
-        if (schedule is not null)
+        if (draw is not null)
         {
-            currentTour.Schedule = schedule;
+            currentTour.Draw = draw;
             //Schedule was created for this
             //tournament. Save to the database
             //and change it's status

@@ -160,9 +160,9 @@ public class ScoringController : MemberController
         }
 
         _model.Tournament = tournament;
-        _model.Schedule = schedule;
+        _model.Draw = schedule;
         _model.CurrentRound = currentRound;
-        _model.Tournament.Schedule = schedule;
+        _model.Tournament.Draw = schedule;
 
         //Load Page and return if the schedule is null
         if (schedule is null || tournament is null)
@@ -174,7 +174,7 @@ public class ScoringController : MemberController
 
         //Use the PdfPrinter class to generate the PDF
 
-        PdfPrinter pdfPrinter = new PdfPrinter(schedule, new TemplateFactory());
+        PdfPrinter pdfPrinter = new PdfPrinter(schedule, new PDFTemplateFactory());
         //Get the response output stream
         //Send the PDF in the response.
         this.Response.ContentType = "application/pdf";
@@ -222,8 +222,8 @@ public class ScoringController : MemberController
         //respectively.
         //Get the schedule from the database
         var schedule = await BuildScheduleFromDB();
-        _model.Tournament.Schedule = schedule;
-        _model.Schedule = schedule;
+        _model.Tournament.Draw = schedule;
+        _model.Draw = schedule;
 
         //Get scores using  ProxyScores method GetScores
         List<Score> listOfScores = await ProxyScores.GetScores(_model.Tournament.Id, _model.CurrentRound, _dbConnection);
@@ -236,7 +236,7 @@ public class ScoringController : MemberController
 
 
     //Build schedule from the database
-    private async Task<Schedule?> BuildScheduleFromDB()
+    private async Task<Draw?> BuildScheduleFromDB()
     {
 
         List<RecordSchedule> recordsSched = await _dbRepoRecordSchedule.GetList(new Filter() { TournamentId = _model.Tournament.Id });
@@ -252,8 +252,8 @@ public class ScoringController : MemberController
         List<Team> teams = teamRepo.ExtractFromRecordTeamPlayer();
         _model.Tournament.Teams = teams;
 
-        BuilderSchedule builderSchedule = new BuilderSchedule(recordsSched, players, teams, _model.Tournament, _dbConnection);
-        return builderSchedule.Create();
+        BuilderDraws builderDraw = new BuilderDraws(recordsSched, players, teams, _model.Tournament, _dbConnection);
+        return builderDraw.Create();
 
     }
 }

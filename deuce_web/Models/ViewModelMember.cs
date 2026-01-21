@@ -7,7 +7,7 @@ public class ViewModelMember
     private Account _account = new();
 
     private ISideMenuHandler _sideMenuHandler;
-    private Schedule? _schedule;
+    private Draw? _draw;
 
     private int _currentRound = 0;
     private List<Score>? _roundScores;
@@ -30,11 +30,11 @@ public class ViewModelMember
 
     public Organization Organization { get; set; } = new();
 
-    public int NoRounds { get => _schedule?.NoRounds ?? 0; }
+    public int NoRounds { get => _draw?.NoRounds ?? 0; }
     public int NoSets { get => Tournament?.Details?.Sets ?? 1; }
     public int CurrentRound { get => _currentRound; set => _currentRound = value; }
 
-    public Schedule? Schedule { get => _schedule; set => _schedule = value; }
+    public Draw? Draw { get => _draw; set => _draw = value; }
 
     public string Error { get; set; } = "";
 
@@ -55,7 +55,7 @@ public class ViewModelMember
 
     public List<Score>? RoundScores { get => _roundScores; set => _roundScores = value; }
 
-    public Round Rounds(int r) => _schedule?.GetRounds(r) ?? new Round(0);
+    public Round Rounds(int r) => _draw?.GetRound(r) ?? new Round(0);
     
       //Get the score given the round and permutation and match  //Get the score given the round and permutation and match
     public List<Score>? GetScore(int round, int permutation, int match)
