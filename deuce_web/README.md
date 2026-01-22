@@ -45,7 +45,9 @@ and represent the appropreite view. Makes navigation easier.
 - [] Review tournament wizard for KO of entry types teams or individual
 - [X] ~~Players list is readonly when the entry type is individual. Remember that indiviaula tournament are a special case of team size one.~~
 - ~~[X] Make groups of 1 for individual tournament~~
-- [] Scoring for KO tournament type
-- [] Draws for KO tournament type
-    -[] Pagenation
-- [] RR ranking
+- [X] Scoring for KO tournament type
+- [X] Draws for KO tournament type
+    -[X] Pagenation
+- [X] RR ranking
+# 22 Jan 2026
+- [] swiss format tornament. Draws , scores and prints.
