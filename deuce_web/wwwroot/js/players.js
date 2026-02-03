@@ -138,7 +138,6 @@ function teamPost(actionName) {
   form.submit();
 }
 
-
 function postFormWithValidation() {
 
 

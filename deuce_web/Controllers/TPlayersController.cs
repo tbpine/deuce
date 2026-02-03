@@ -22,7 +22,7 @@ public class TPlayersController : WizardController
 
 
     private readonly DbConnection _dbconnection;
-    
+
     public string Error { get; set; } = "";
     public List<List<SelectListItem>>? SelectMember { get; set; } = new();
 
@@ -80,7 +80,7 @@ public class TPlayersController : WizardController
         //Validate teams before saving:
         //Team must have players
         //A player cannot appear more than once.
-        
+
         ITeamValidator validator = _model.Tournament.EntryType == (int)deuce.EntryType.Individual ?
         _validatorInd : _validatorTeams;
         var isvalidTeams = validator.Check(teams, _model.Tournament);
@@ -88,7 +88,7 @@ public class TPlayersController : WizardController
         if (isvalidTeams.Result != RetCodeTeamAction.Success)
         {
             Error = isvalidTeams.Result == RetCodeTeamAction.Error ? isvalidTeams?.Message ?? "" : "";
-            _model.Teams =   _model.Tournament.EntryType == (int)deuce.EntryType.Individual ? new() : teams;
+            _model.Teams = _model.Tournament.EntryType == (int)deuce.EntryType.Individual ? new() : teams;
             await LoadPage(_model, false);
             string viewName = _model.Tournament.EntryType == (int)deuce.EntryType.Individual ? "Individual" : "Index";
             return View(viewName, _model); // Assuming you have a corresponding view named "Index"
@@ -112,7 +112,7 @@ public class TPlayersController : WizardController
         ITeamSync sync = _model.Tournament.EntryType == (int)deuce.EntryType.Individual ?
             _syncInd : _syncTeams;
 
-        sync.Run(teams, teamsInDB,_model.Tournament, _dbconnection);
+        sync.Run(teams, teamsInDB, _model.Tournament, _dbconnection);
         //Get the next navigation item
         //Get the next navigation item
         var nextNavItem = NextPage("");
@@ -136,24 +136,34 @@ public class TPlayersController : WizardController
         model.BackPage = _backPage;
         model.NavItems = new List<NavItem>(this._handlerNavItems?.NavItems ?? Enumerable.Empty<NavItem>());
 
-        //Read teams from the displayed form
-        model.Teams = _adaptorTeams.Parse(this.Request.Form, model.Tournament);
+        //Read teams from the displayed form - use appropriate adaptor based on tournament type
+        IFormReaderPlayers adaptor = _model.Tournament.EntryType == (int)deuce.EntryType.Individual ?
+            _adaptorInd : _adaptorTeams;
+        model.Teams = adaptor.Parse(this.Request.Form, model.Tournament);
 
         var formAdaptor = new FormReaderPlayersList();
         var formTeams = formAdaptor.Parse(this.Request.Form, model.Tournament);
 
-        var newTeam = formTeams.FirstOrDefault();
-        if (newTeam is not null)
+        // Add new teams (for individual tournaments, these are teams with 1 player each)
+        foreach (var newTeam in formTeams)
         {
-            newTeam.Index = model.Teams.Count;
-            //Add new team
-            model.Teams.Add(newTeam);
+            if (newTeam != null)
+            {
+                newTeam.Index = model.Teams.Count;
+                // For individual tournaments, set the team name to the player's name
+                if (_model.Tournament.EntryType == (int)deuce.EntryType.Individual && newTeam.Players.Any())
+                {
+                    var player = newTeam.Players.First();
+                    newTeam.Label = player.ToString();
+                }
+                model.Teams.Add(newTeam);
+            }
         }
 
-        //Add new team , don't need to validate and save to
-        //db yet. Return;
+        //Add new team/player, don't need to validate and save to db yet. Return;
         await LoadPage(model, false);
-        return View("Index", model);
+        string viewName = _model.Tournament.EntryType == (int)deuce.EntryType.Individual ? "Individual" : "Index";
+        return View(viewName, model);
     }
     /// <summary>
     /// Load teams from the database and mark players that are already in a team.
@@ -171,13 +181,11 @@ public class TPlayersController : WizardController
         try
         {
 
-            //Select all players registered for the tournament
-            //Get all players tournament id = 0
-
+            
+            //TODO: Filter by organization?
             Filter filterPlayer = new() { TournamentId = 0 };
             //Players registered for the tournament
-            model.Players = (await _dbRepoPlayer.GetList(filterPlayer)) ?? new();
-            //Set tournament properties for this page
+            model.Players = (await _dbRepoPlayer.GetList(filterPlayer)) ?? new();            //Set tournament properties for this page
             model.Tournament.Details.TeamSize = _sessionProxy?.TeamSize ?? 2;
             model.Tournament.EntryType = _sessionProxy?.EntryType ?? (int)deuce.EntryType.Team;
 
@@ -208,8 +216,8 @@ public class TPlayersController : WizardController
             }
 
             //Set title and selection message
-            model.Title = model.Tournament.Details.TeamSize > 1 ? "Teams" : " Players";
-            model.SelMsg = model.Tournament.Details.TeamSize > 1 ? "Select players that are in a team using checkboxes, add then press \"Add Team\". Repeat until all players are in a team" : "";
+            model.Title = model.Tournament.Details.TeamSize > 1 ? "Teams" : "Players";
+            model.SelMsg = model.Tournament.Details.TeamSize > 1 ? "Select players that are in a team using checkboxes, add then press \"Add Team\". Repeat until all players are in a team" : "Select players using checkboxes, to add them to the tournament";
 
 
         }

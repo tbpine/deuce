@@ -87,7 +87,7 @@ public class FormReaderPlayersTeams : FormReaderPlayersBase
                         Id = playerId,
                         Index = idxPlayer,
                         TeamPlayerId = playerTeamId,
-                        Tournament = null
+                        Tournament = tournament
 
                     };
 

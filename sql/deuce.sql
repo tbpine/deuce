@@ -87,7 +87,7 @@ CREATE TABLE IF NOT EXISTS `tournament` (
     `updated_datetime`	TIMESTAMP,
     `created_datetime`	TIMESTAMP,
     `status`		    INT DEFAULT(0),
-    `group_size`		INT DEFAULT
+    `group_size`		INT DEFAULT(0)
 );
 
 ALTER TABLE `tournament` AUTO_INCREMENT = 100;

@@ -73,10 +73,18 @@ public class TournamentController : MemberController
             ClubId = _model.Organization.Id // Assuming organization ID is available in session
         };
 
-
         Tournament tournament = (await _tourGateway.GetTournament(id)) ?? new();
         TournamentDetail tournamentDetail = (await _dbRepoTournamentDetail.GetList(filter)).FirstOrDefault() ?? new();
-
+        
+        // Load tournament schedule
+        var scheduleRecords = await _dbRepoRecordSchedule.GetList(filter);
+        
+        // Check if tournament has no rounds and set status to new
+        if (scheduleRecords == null || !scheduleRecords.Any())
+        {
+            tournament.Status = TournamentStatus.New;
+        }
+        
         // Validate tournament
         ResultTournamentAction resultVal = new ResultTournamentAction();
         if (_tourGateway != null && tournament != null)
