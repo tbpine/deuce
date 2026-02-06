@@ -1,9 +1,15 @@
 ---
 applyTo: '**'
 ---
+# Project general coding standards
+
+## Coding style
+- Prefer to use explicit boolean logic e.g  x.IsValid = a > 0 instead of x.IsValid = a > 0 ? true : false
+- User single line the ternary conditional operator for simple expressions.
+
 ## Tournament format
 
-- Induviduals are represented by a team with one member.
+- Individuals are represented by a team with one member.
 
 ## Add a page to the tournament wizard
 - For the MVP pattern, use a controller derived from the "WizardController" class.

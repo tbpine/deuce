@@ -80,6 +80,7 @@ public class TournamentController : MemberController
         var scheduleRecords = await _dbRepoRecordSchedule.GetList(filter);
         
         // Check if tournament has no rounds and set status to new
+        // Has to be started again to create schedule
         if (scheduleRecords == null || !scheduleRecords.Any())
         {
             tournament.Status = TournamentStatus.New;

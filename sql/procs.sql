@@ -630,8 +630,6 @@ DELETE FROM `match` where `tournament` = p_tournament;
 DELETE FROM `team_player` WHERE `tournament` = p_tournament;
 DELETE FROM `team` WHERE `tournament` = p_tournament;
 
-DELETE FROM `result` WHERE `tournament` = p_tournament;
-
 DELETE FROM `tournament` WHERE `id` = p_tournament;
  
 END//

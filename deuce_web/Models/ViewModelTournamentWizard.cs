@@ -47,6 +47,11 @@ public class ViewModelTournamentWizard
     public string? Error { get; set; }
     public List<Team> Teams { get; set; } = new();
     public List<Player> Players { get; set; } = new();
+    
+    /// <summary>
+    /// Controls whether the Next button is enabled or disabled
+    /// </summary>
+    public bool IsNextButtonEnabled { get; set; } = true;
   
     public ViewModelTournamentWizard()
     { }

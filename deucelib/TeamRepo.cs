@@ -105,10 +105,11 @@ public class TeamRepo
     /// Who's playing in a tournament
     /// </summary>
     /// <typeparam name="Team">Team</typeparam>
-    public async Task<List<Team>?> GetTournamentEntries()
+    public async Task<List<Team>> GetTournamentEntries()
     {
         //No db connnection or tournament was not specified
-        if (_dbconn is null || _tournament is null) return null;
+        //Return an empty list
+        if (_dbconn is null || _tournament is null) return new List<Team>();
 
         //Get the unnormalizes list of players fot the tournament
         DbRepoRecordTeamPlayer dbRepoRecordTeamPlayer = new(_dbconn);

@@ -53,7 +53,7 @@ builder.Services.AddScoped<DbRepoOrganization>();
 builder.Services.AddScoped<DbRepoSecurity>();
 builder.Services.AddScoped<FormReaderPlayersTeams>();
 builder.Services.AddScoped<FormReaderIndList>();
-builder.Services.AddScoped<ITournamentGateway, DBTournamentGateway>();
+builder.Services.AddScoped<ITournamentGateway, DefaultTournamentGateway>();
 builder.Services.AddScoped<TeamRepo>();
 builder.Services.AddScoped<TeamValidator>();
 builder.Services.AddScoped<TeamValidatorInd>();

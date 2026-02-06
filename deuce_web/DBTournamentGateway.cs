@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 /// <summary>
 /// Load tournament objects from the database
 /// </summary>
-public class DBTournamentGateway : ITournamentGateway
+public class DefaultTournamentGateway : ITournamentGateway
 {
 
     private readonly SessionProxy _sessionProxy;
@@ -19,7 +19,7 @@ public class DBTournamentGateway : ITournamentGateway
 
 
 
-    public DBTournamentGateway(SessionProxy sessionProxy, DbRepoTournament dbRepoTournament,
+    public DefaultTournamentGateway(SessionProxy sessionProxy, DbRepoTournament dbRepoTournament,
     DbRepoTournamentDetail dbRepoTournamentDetail, ICacheMaster cache, DbConnection dbconn,
     DbRepoTournamentStatus dbRepoTournamentStatus, DbRepoRecordTeamPlayer dbRepoRecordTeamPlayer)
     {
@@ -108,7 +108,9 @@ public class DBTournamentGateway : ITournamentGateway
     }
 
     /// <summary>
-    /// Start the current tournament
+    /// Start the current tournament. Note , the tournament was validated before,
+    /// expect a valid sport and enough players. This method will create the schedule for the tournament
+    /// and save it to the database. It will also change the tournament status to "started
     /// </summary>
     /// <returns></returns>
     public async Task<ResultTournamentAction> StartTournament(int tournamentId)
@@ -117,11 +119,15 @@ public class DBTournamentGateway : ITournamentGateway
         //Load the current tournament and it's details
         var currentTour = await GetTournament(tournamentId);
 
-        if (currentTour is null) return new(ResultStatus.Error, "Unable to tournament.");
+        if (currentTour is null) return new(ResultStatus.Error, "Unable to start tournament.");
 
         //check what sports it is
         var listOfSports = await _cache.GetList<Sport>(CacheMasterDefault.KEY_SPORTS);
         var selectedSport = listOfSports?.Find(e => e.Id == currentTour.Sport);
+        
+        //Return an error if the selected sport is not found
+        if (selectedSport is null) return new(ResultStatus.Error, "Unable to start tournament. Unknown sport.");
+
         Organization thisOrg = new() { Id = _sessionProxy?.OrganizationId ?? 1, Name = "" };
 
         //Get the class that will make games
@@ -129,10 +135,14 @@ public class DBTournamentGateway : ITournamentGateway
         FactoryGameMaker factoryGameMaker = new FactoryGameMaker();
 
         IGameMaker gameMaker = factoryGameMaker.Create(selectedSport);
+
+        //If there's no game maker for this sport, return an error
+        if (gameMaker is null) return new(ResultStatus.Error, "Unable to start tournament. Don't know how to make games for this sport.");
+
         //Get the list of teams
         TeamRepo teamRepo = new TeamRepo(currentTour, _dbconn);
-        var listOfTeams = await teamRepo.GetTournamentEntries();
-
+        //List of teams always returns a list, even if it's empty. No need to check for null.
+        currentTour.Teams = await teamRepo.GetTournamentEntries()??[];
         //------------------------------
         //| Create schedule.
         //------------------------------

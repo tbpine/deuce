@@ -54,7 +54,10 @@ public class TPlayersController : WizardController
             //Menus and the back button
             await LoadPage(_model, true);
 
-
+            // Check if organization id is greater than zero
+                _model.Error = (_sessionProxy?.OrganizationId ?? 0) <= 0 ? "Organization must be selected before proceeding with player management.":"";
+                _model.IsNextButtonEnabled = (_sessionProxy?.OrganizationId ?? 0) > 0;
+            
         }
         catch (Exception ex)
         {

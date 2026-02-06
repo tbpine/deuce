@@ -48,6 +48,11 @@ public class ViewModelMember
     /// </summary>
     public List<Tournament> Tournaments { get; set; } = new();
 
+    /// <summary>
+    /// List of team standings for the current tournament.
+    /// </summary>
+    public List<TeamStanding> TeamStandings { get; set; } = new();
+
     public ViewModelMember(ISideMenuHandler sidemenu)
     {
         _sideMenuHandler = sidemenu;

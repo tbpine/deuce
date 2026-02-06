@@ -1,0 +1,151 @@
+@model ViewModelMember
+@{
+    Layout = "_LayoutMember";
+}
+@using deuce
+@using deuce.ext
+
+<!-- Standing content -->
+<div class="col-lg-9">
+<h1 class="h2 pb-2 pb-lg-3">@Model.Title</h1>
+
+<!-- Nav pills for rounds -->
+<div class="nav overflow-x-auto mb-2">
+    <h1 class="h4 me-4 pb-2 pb-lg-3">Rounds</h1>
+    <ul class="nav nav-pills flex-nowrap gap-2 pb-2 mb-1" role="tablist" id="pills_round">
+    @for(int i = 1 ; i <=  Model.NoRounds; i++){
+        <li class="nav-item me-1" role="presentation">
+        @{ string active = (i == (Model.CurrentRound+1) ? "active" : "");
+            string action = $"Standing/ChangeRound?round={i-1}";
+        }                    
+            <button type="button" class="nav-link text-nowrap @active" id="published-tab" data-bs-toggle="pill" data-bs-target="#published" role="tab" aria-controls="published"
+            onclick="submitAction('@action')"> 
+        @i
+            </button> 
+        </li>
+    }
+    </ul>
+</div>
+
+<div class="tab-content">
+
+    <!-- Standings tab -->
+    <div class="tab-pane fade show active" id="published" role="tabpanel" aria-labelledby="published-tab">
+
+    <!-- Action buttons -->
+    <div class="nav align-items-center mb-4">
+        <div class="d-flex flex-wrap" id="published-action-buttons">
+            <a class="nav-link position-relative px-0 pe-sm-2 py-2 me-4" onclick="printToWindow(@Model.CurrentRound,false)">
+                <i class="fi-printer fs-base me-2"></i>
+                <span class="hover-effect-underline stretched-link d-none d-md-inline">Print</span>
+            </a>
+        </div>
+        <div class="d-flex flex-wrap" id="published-action-buttons">
+            <a class="nav-link position-relative px-0 pe-sm-2 py-2 me-4" asp-controller="Standing" asp-action="Reload" >
+                <i class="fi-refresh-ccw fs-base me-2"></i>
+                <span class="hover-effect-underline stretched-link d-none d-md-inline">Reload</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Standings table -->
+    <form method="post" id="mainForm">
+        <input type="hidden" name="action" id="action"/>
+        <input id="current_round" name="current_round" type="hidden" value="@Model.CurrentRound"/>
+        
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title mb-0">Tournament Standings - Round @(Model.CurrentRound + 1)</h5>
+            </div>
+            <div class="card-body">
+                @if(Model.TeamStandings != null && Model.TeamStandings.Any())
+                {
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Rank</th>
+                                    <th>Team/Player</th>
+                                    <th>Wins</th>
+                                    <th>Losses</th>
+                                    <th>Draws</th>
+                                    <th>Points</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach(var standing in Model.TeamStandings)
+                                {
+                                    <tr>
+                                        <td><strong>@standing.Position</strong></td>
+                                        <td>@standing.Team.Label</td>
+                                        <td>@standing.Wins</td>
+                                        <td>@standing.Losses</td>
+                                        <td>@standing.Draws</td>
+                                        <td>@standing.Points</td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+                else
+                {
+                    <div class="alert alert-info">
+                        <i class="fi-info-circle me-2"></i>
+                        No standings available for this tournament.
+                    </div>
+                }
+            </div>
+        </div>
+
+        @if(Model.CurrentRound > 0 && Model.TeamStandings != null && Model.TeamStandings.Any())
+        {
+            <div class="mt-4">
+                <h6>Current Standings Summary</h6>
+                <div class="row">
+                    <div class="col-md-6 col-lg-4 mb-3">
+                        <div class="card border-secondary">
+                            <div class="card-header bg-secondary text-white">
+                                <small>Round @(Model.CurrentRound + 1) - Top Teams</small>
+                            </div>
+                            <div class="card-body p-2">
+                                <small>
+                                    @foreach(var standing in Model.TeamStandings.Take(5))
+                                    {
+                                        <div class="d-flex justify-content-between">
+                                            <span>@standing.Position. @standing.Team.GetTitle()</span>
+                                            <span>@standing.Points pts</span>
+                                        </div>
+                                    }
+                                    @if(Model.TeamStandings.Count() > 5)
+                                    {
+                                        <div class="text-muted">... and @(Model.TeamStandings.Count() - 5) more</div>
+                                    }
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+
+    </form>
+    </div>
+
+</div>
+</div>
+
+
+
+<script>
+    function submitAction(action) {
+        document.getElementById('action').value = action;
+        document.getElementById('mainForm').action = action;
+        document.getElementById('mainForm').submit();
+    }
+
+    function printToWindow(round, showScores) {
+        var printUrl = '@Url.Action("Print", "Standing")?round=' + round;
+        window.open(printUrl, '_blank', 'width=800,height=600,toolbar=0,menubar=0,location=0,status=1,scrollbars=1,resizable=1');
+    }
+</script>

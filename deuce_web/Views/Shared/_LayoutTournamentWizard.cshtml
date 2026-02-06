@@ -135,7 +135,9 @@
                     Back
                 </a>
             }
-            <a class="btn btn-dark animate-slide-end ms-auto" onclick="submitForm()">
+            <a class="btn btn-dark animate-slide-end ms-auto @(!Model.IsNextButtonEnabled ? "disabled" : "")" 
+               onclick="@(Model.IsNextButtonEnabled ? "submitForm()" : "return false;")" 
+               @(!Model.IsNextButtonEnabled ? "aria-disabled=\"true\"" : "")>
                 Next
                 <i class="fi-arrow-right animate-target fs-base ms-2 me-n1"></i>
             </a>
