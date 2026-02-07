@@ -16,6 +16,7 @@
 -- drop table if exists  `sport`;
 -- drop table if exists  `settings`;
 -- drop table if exists  `member`;
+-- drop table if exists  `team_standing`;
 
 -- settings for the while application
 
@@ -259,6 +260,21 @@ CREATE TABLE IF NOT EXISTS `bracket` (
     `id` 				INT PRIMARY KEY AUTO_INCREMENT,
     `upper` 			INT,
     `tournament` 		INT,
+    `updated_datetime` 	TIMESTAMP,
+    `created_datetime` 	TIMESTAMP
+);
+
+-- Team standings for tournaments
+-- Tracks wins, losses, draws, points and position for each team
+CREATE TABLE IF NOT EXISTS `team_standing` (
+    `id` 				INT PRIMARY KEY AUTO_INCREMENT,
+    `team`				INT,
+    `tournament` 		INT,
+    `wins`				INT DEFAULT(0),
+    `losses`			INT DEFAULT(0),
+    `draws`				INT DEFAULT(0),
+    `points`			DECIMAL(10,2) DEFAULT(0.00),
+    `position`			INT DEFAULT(0),
     `updated_datetime` 	TIMESTAMP,
     `created_datetime` 	TIMESTAMP
 );

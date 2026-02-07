@@ -113,7 +113,7 @@
                                     @foreach(var standing in Model.TeamStandings.Take(5))
                                     {
                                         <div class="d-flex justify-content-between">
-                                            <span>@standing.Position. @standing.Team.GetTitle()</span>
+                                            <span>@standing.Position. @standing.Team.Label</span>
                                             <span>@standing.Points pts</span>
                                         </div>
                                     }

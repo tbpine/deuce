@@ -191,6 +191,22 @@ PREPARE stmt FROM @stat;
 EXECUTE stmt;
 DEALLOCATE PREPARE stmt;
 
+-- Check that the foreign key constraints exists for the table team_standing and the column team references table team
+SET @n = "fk_team_standing_team";
+SELECT COUNT(constraint_name) INTO @b FROM information_schema.key_column_usage WHERE table_schema = DATABASE() AND constraint_name = @n;
+SET @stat = IF(@b = 0, "ALTER TABLE `team_standing` ADD CONSTRAINT `fk_team_standing_team` FOREIGN KEY (`team`) REFERENCES `team` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;", "SELECT 1 WHERE 1 = 0;");
+PREPARE stmt FROM @stat;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
+-- Check that the foreign key constraints exists for the table team_standing and the column tournament references table tournament
+SET @n = "fk_team_standing_tournament";
+SELECT COUNT(constraint_name) INTO @b FROM information_schema.key_column_usage WHERE table_schema = DATABASE() AND constraint_name = @n;
+SET @stat = IF(@b = 0, "ALTER TABLE `team_standing` ADD CONSTRAINT `fk_team_standing_tournament` FOREIGN KEY (`tournament`) REFERENCES `tournament` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;", "SELECT 1 WHERE 1 = 0;");
+PREPARE stmt FROM @stat;
+EXECUTE stmt;
+DEALLOCATE PREPARE stmt;
+
 -- turn on foreign key checks again
 SET FOREIGN_KEY_CHECKS=1;
 

@@ -144,11 +144,19 @@ public class StandingController : MemberController
         var schedule = await BuildScheduleFromDB();
         _model.Tournament.Draw = schedule;
         _model.Draw = schedule;
-
+        //Game maker
+        FactoryGameMaker factoryGameMaker = new FactoryGameMaker();
         //Get a list of sports from the cache
-        List<Sport>? sports = await _cache.GetList<Sport>(CacheMasterDefault.KEY_SPORTS);
-        var tournamentSport = sports?.FirstOrDefault(s => s.Id == _model.Tournament.Sport);
+        var listOfSports = await _cache.GetList<Sport>(CacheMasterDefault.KEY_SPORTS);
+        var sport = listOfSports?.FirstOrDefault(s => s.Id == _model.Tournament.Sport);
 
+        var facGameMaker = new FactoryGameMaker();
+        var gameMaker = facGameMaker.Create(sport);
+        //Draw maker
+        FactoryDrawMaker factoryDraws = new FactoryDrawMaker();
+        var drawMaker = factoryDraws.Create( _model.Tournament, gameMaker);
+        //Get the standings for the current round from the tournament
+        
 
         _model.TeamStandings = _model.Tournament.GetStandingsForRound(_model.CurrentRound)??[];
 
