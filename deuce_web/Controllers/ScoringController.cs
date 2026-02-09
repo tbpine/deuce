@@ -14,6 +14,7 @@ public class ScoringController : MemberController
     private readonly DbConnection _dbConnection;
     private readonly ILogger<ScoringController> _log;
     private readonly ICacheMaster _cache;
+    private readonly DbRepoTeamStanding _dbRepoTeamStanding;
 
     private readonly IScoreKeeper _scoreKeeper;
 
@@ -30,9 +31,10 @@ public class ScoringController : MemberController
     /// <param name="dbRepoRecordTeamPlayer">DbRepo team player</param>
     /// <param name="dbConnection">DbConnection</param>
     /// <param name="dbRepoRecordSchedule">DbRepo record schedule</param>
+    /// <param name="dbRepoTeamStanding">DbRepo team standing</param>
     public ScoringController(ILogger<ScoringController> log, ISideMenuHandler handlerNavItems, IServiceProvider sp, IConfiguration config,
     ITournamentGateway tgateway, SessionProxy sessionProxy, DbRepoRecordTeamPlayer dbRepoRecordTeamPlayer, DbConnection dbConnection,
-    DbRepoRecordSchedule dbRepoRecordSchedule, ICacheMaster cache, IScoreKeeper scorekeeper) : base(handlerNavItems, sp, config, tgateway, sessionProxy)
+    DbRepoRecordSchedule dbRepoRecordSchedule, ICacheMaster cache, IScoreKeeper scorekeeper, DbRepoTeamStanding dbRepoTeamStanding) : base(handlerNavItems, sp, config, tgateway, sessionProxy)
     {
         _log = log;
         _deRepoRecordTeamPlayer = dbRepoRecordTeamPlayer;
@@ -40,6 +42,7 @@ public class ScoringController : MemberController
         _dbConnection = dbConnection;
         _cache = cache;
         _scoreKeeper = scorekeeper;
+        _dbRepoTeamStanding = dbRepoTeamStanding;
     }
 
     [HttpGet]
@@ -70,7 +73,7 @@ public class ScoringController : MemberController
         //Find the KO tournament type
         var tournamentType = tournamentTypes?.FirstOrDefault(tt => tt.Key == "ko");
         //Load "KO.cshtml" view model if the tournament type is knockout
-        string viewName = _model.Tournament.Type == (tournamentType?.Id??-1) ? "KO" : "Index";
+        string viewName = _model.Tournament.Type == (tournamentType?.Id ?? -1) ? "KO" : "Index";
 
         // Return the view with the model
         return View(viewName, _model);
@@ -122,6 +125,10 @@ public class ScoringController : MemberController
             // Use proxy to save scores for this tournament at the current round
             await _scoreKeeper.Save(_model.Tournament.Id, formScores, currentRound, _dbConnection);
 
+            //If the score changed, then progress the tournament by
+            //calling the "OnChange" method of the draw maker:
+            await ProgressTournament(currentRound, formScores);
+
             // Reload the scores for the new round
             await LoadScore();
         }
@@ -138,8 +145,8 @@ public class ScoringController : MemberController
     {
         //Get the current tournament from the gateway
 
-        var tournament  = await _tourGateway.GetCurrentTournament();
-        int tourId= _model.Tournament.Id;
+        var tournament = await _tourGateway.GetCurrentTournament();
+        int tourId = _model.Tournament.Id;
         int currentRound = _model.CurrentRound;
 
         //call the builderSchedulefromdb method to get the schedule from the database
@@ -185,10 +192,10 @@ public class ScoringController : MemberController
             await pdfPrinter.Print(this.HttpContext.Response.BodyWriter.AsStream(true), tournament, schedule, currentRound,
             formScores);
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             _log.LogError(ex.Message);
-        }   
+        }
 
         return View("Index", _model);
 
@@ -256,4 +263,69 @@ public class ScoringController : MemberController
         return builderDraw.Create();
 
     }
+
+    /// <summary>
+    /// Progresses the tournament by calling the appropriate DrawMaker's OnChange method.
+    /// This handles advancing winners, creating next rounds, and updating the tournament draw.
+    /// </summary>
+    /// <param name="currentRound">The current round that was just completed</param>
+    /// <param name="scores">The scores that were just entered</param>
+    /// <returns></returns>
+    private async Task ProgressTournament(int currentRound, List<Score> scores)
+    {
+        try
+        {
+            // No progression needed if no scores provided
+            if (scores == null || !scores.Any())
+            {
+                return;
+            }
+
+            // Ensure we have full tournament details - load from database if needed
+            if (_model.Tournament.Id == 0)
+                _model.Tournament = await _tourGateway.GetTournament(_model.Tournament.Id);
+
+            // Ensure we have tournament teams - load if not available
+            if (_model.Tournament.Teams == null)
+            {
+                TeamRepo teamRepo = new TeamRepo(_model.Tournament, _dbConnection);
+                List<Team> listOfTeams = await teamRepo.GetListAsync(_model.Tournament.Id);
+                _model.Tournament.Teams = listOfTeams;
+            }
+
+            // Ensure we have tournament draw - load from database if not available
+            if (_model.Tournament.Draw == null)
+            {
+                _model.Tournament.Draw = await BuildScheduleFromDB();
+                if (_model.Tournament.Draw == null)
+                {
+                    _log.LogWarning("Cannot progress tournament - unable to load draw from database");
+                    return;
+                }
+            }
+
+            // Create game maker (tennis is the standard)
+            FactoryGameMaker gameFactory = new FactoryGameMaker();
+            IGameMaker gameMaker = gameFactory.Create(new Sport(_model.Tournament.Sport, "Tennis", "", "", ""));
+
+            // Create the appropriate draw maker based on tournament type
+            FactoryDrawMaker drawFactory = new FactoryDrawMaker();
+            IDrawMaker drawMaker = drawFactory.Create(_model.Tournament, gameMaker);
+
+            // Progress the tournament by calling OnChange
+            // This will advance winners, create next rounds, etc. based on the tournament type
+            drawMaker.OnChange(_model.Tournament.Draw, currentRound + 1, currentRound, scores);
+
+            _log.LogInformation("Tournament progressed for tournament {TournamentId}, round {Round} with {ScoreCount} scores", 
+                              _model.Tournament.Id, currentRound, scores.Count);
+        }
+        catch (Exception ex)
+        {
+            _log.LogError(ex, "Error progressing tournament {TournamentId} for round {Round}", 
+                         _model.Tournament.Id, currentRound);
+        }
+    }
+
+
+
 }
