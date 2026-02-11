@@ -9,7 +9,7 @@ public class ViewModelMember
     private ISideMenuHandler _sideMenuHandler;
     private Draw? _draw;
 
-    private int _currentRound = 0;
+    private int _currentRoundIdx = 0;
     private List<Score>? _roundScores;
 
     public Account Account { get => _account; set => _account = value; }
@@ -32,7 +32,7 @@ public class ViewModelMember
 
     public int NoRounds { get => _draw?.NoRounds ?? 0; }
     public int NoSets { get => Tournament?.Details?.Sets ?? 1; }
-    public int CurrentRound { get => _currentRound; set => _currentRound = value; }
+    public int CurrentRoundIdx { get => _currentRoundIdx; set => _currentRoundIdx = value; }
 
     public Draw? Draw { get => _draw; set => _draw = value; }
 

@@ -53,7 +53,7 @@ class FormReaderScoring
                 int teamScore = int.TryParse(strScore, out teamScore) ? teamScore : 0;
 
                 if (int.TryParse(strId, out int id) &&
-                    int.TryParse(strRound, out int roundIdx) &&
+                    int.TryParse(strRound, out int round) &&
                     int.TryParse(strPermId, out int permId) &&
                     int.TryParse(strMatchId, out int matchId) &&
                     int.TryParse(strSetId, out int setId) &&
@@ -63,7 +63,7 @@ class FormReaderScoring
                     //Check if the score exists
 
                     var existingScore = scores.FirstOrDefault(e => id > 0 && e.Id == id);
-                    if (existingScore is null) existingScore = scores.FirstOrDefault(  e => e.Permutation == permId && e.Round == roundIdx
+                    if (existingScore is null) existingScore = scores.FirstOrDefault(  e => e.Permutation == permId && e.Round == round
                     && e.Match == matchId && e.Tournament == tournamentId && e.Set == setId);
 
         
@@ -79,7 +79,7 @@ class FormReaderScoring
                         {
                             Id = id,
                             Tournament = tournamentId,
-                            Round = roundIdx,
+                            Round = round,
                             Permutation = permId,
                             Match =matchId,
                             Home = strHomeAway == "home" ? teamScore : 0,

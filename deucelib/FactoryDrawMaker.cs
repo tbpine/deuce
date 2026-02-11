@@ -1,3 +1,5 @@
+using System.Data.Common;
+
 namespace deuce;
 
 /// <summary>
@@ -46,6 +48,28 @@ public class FactoryDrawMaker
 
         return new DrawMakerRR(t, gm);
 
+    }
+
+    /// <summary>
+    /// Create a DrawMaker with database connection support.
+    /// </summary>
+    /// <param name="dbConnection">Database connection object</param>
+    /// <param name="t">Tournament details</param>
+    /// <param name="gm">Game maker</param>
+    /// <returns>A type implementing IDrawMaker</returns>
+    public IDrawMaker Create(DbConnection dbConnection, Tournament t, IGameMaker gm)
+    {
+        // Store connection for potential future database operations
+        // For now, create draw makers with existing pattern
+        switch (t.Type)
+        {
+            case 3: { return new DrawMakerKnockOutPlayoff(t, gm); }
+            case 2: { return new DrawMakerKnockOut(t, gm); }
+            case 4: { return new DrawMakerGroups(t, gm); }
+            case 5: { return new DrawMakerSwiss(dbConnection, t, gm); }
+        }
+
+        return new DrawMakerRR(t, gm);
     }
 
 }

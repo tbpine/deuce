@@ -47,7 +47,7 @@ public class StandingController : MemberController
         _model.Tournament.Id = tournament;
         _sessionProxy.TournamentId = tournament;
         // Set the current round to 0
-        _model.CurrentRound = 0;
+        _model.CurrentRoundIdx = 0;
         _sessionProxy.CurrentRound = 0;
         try
         {
@@ -70,7 +70,7 @@ public class StandingController : MemberController
     public async Task<IActionResult> ChangeRound(int round)
     {
         //Change the round in the model
-        _model.CurrentRound = round;
+        _model.CurrentRoundIdx = round;
         //And the session proxy
         if (_sessionProxy is not null) _sessionProxy.CurrentRound = round;
         //Reload the standings for the new round
@@ -84,14 +84,14 @@ public class StandingController : MemberController
         //Get the current tournament from the gateway
         var tournament = await _tourGateway.GetCurrentTournament();
         int tourId = _model.Tournament.Id;
-        int currentRound = _model.CurrentRound;
+        int currentRound = _model.CurrentRoundIdx;
 
         //Get tournament details 
         var schedule = await BuildScheduleFromDB();
 
         _model.Tournament = tournament;
         _model.Draw = schedule;
-        _model.CurrentRound = currentRound;
+        _model.CurrentRoundIdx = currentRound;
         _model.Tournament.Draw = schedule;
 
         //Load Page and return if the schedule is null
@@ -158,7 +158,7 @@ public class StandingController : MemberController
         //Get the standings for the current round from the tournament
         
 
-        _model.TeamStandings = _model.Tournament.GetStandingsForRound(_model.CurrentRound)??[];
+        _model.TeamStandings = _model.Tournament.GetStandingsForRound(_model.CurrentRoundIdx)??[];
 
 
     }

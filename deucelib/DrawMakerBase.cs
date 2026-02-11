@@ -74,7 +74,7 @@ public class DrawMakerBase : IDrawMaker
     /// </summary>
     public int GroupSize { get { return _groupSize; } set { _groupSize = value; }}
 
-    public virtual bool HasChanged(Draw schedule, int round, int previousRound, List<Score> scores)
+    public virtual bool HasChanged(Draw? schedule, int round, int previousRound, List<Score> scores)
     {
         // If no database connection is available, compare with empty list (assume no changes)
         if (_dbConnection == null)

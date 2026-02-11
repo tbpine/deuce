@@ -52,7 +52,7 @@ public class ScoringController : MemberController
         _model.Tournament.Id = tournament;
         _sessionProxy.TournamentId = tournament;
         // Set the current round to 0
-        _model.CurrentRound = 0;
+        _model.CurrentRoundIdx = 0;
         _sessionProxy.CurrentRound = 0;
         try
         {
@@ -88,7 +88,7 @@ public class ScoringController : MemberController
 
         //Get the cuurent round from the model
 
-        int currentRound = _model.CurrentRound;
+        int currentRound = _model.CurrentRoundIdx;
         //Use FormReaderScoring to parse the form data
         FormReaderScoring formReader = new FormReaderScoring();
         //parse scores from the form
@@ -98,7 +98,7 @@ public class ScoringController : MemberController
         await _scoreKeeper.Save(_sessionProxy?.TournamentId ?? 0, formScores, currentRound, _dbConnection);
 
         //Change the round in the model
-        _model.CurrentRound = round;
+        _model.CurrentRoundIdx = round;
         //And the session proxy
         if (_sessionProxy is not null) _sessionProxy.CurrentRound = round;
         //Reload the scores for the new round
@@ -117,17 +117,33 @@ public class ScoringController : MemberController
         try
         {
             // Get the current round from the model
-            int currentRound = _model.CurrentRound;
+            int currentRoundIdx = _model.CurrentRoundIdx;
             // Use FormReaderScoring to parse the form data
             FormReaderScoring formReader = new FormReaderScoring();
             // Parse scores from the form
             var formScores = formReader.Parse(this.Request.Form, _model.Tournament.Id);
-            // Use proxy to save scores for this tournament at the current round
-            await _scoreKeeper.Save(_model.Tournament.Id, formScores, currentRound, _dbConnection);
 
-            //If the score changed, then progress the tournament by
-            //calling the "OnChange" method of the draw maker:
-            await ProgressTournament(currentRound, formScores);
+            // Ensure we have full tournament details - load from database if needed
+            _model.Tournament = await _tourGateway.GetTournament(_model.Tournament.Id);
+
+            //Get the game and draw maker for this tournament
+            var gameFactory = new FactoryGameMaker();
+            //USing DTO
+            var gameMaker = gameFactory.Create(new Sport(_model.Tournament.Sport, "", "", "", ""));
+            var drawFactory = new FactoryDrawMaker();
+            var drawMaker = drawFactory.Create(_dbConnection, _model.Tournament, gameMaker);
+
+            //if the score changed, the save the scores and progress the tournament
+            if (drawMaker.HasChanged(_model.Tournament.Draw, currentRoundIdx+1 , currentRoundIdx, formScores))
+            {
+                // Use proxy to save scores for this tournament at the current round
+                await _scoreKeeper.Save(_model.Tournament.Id, formScores, currentRoundIdx+1, _dbConnection);
+
+                //If the score changed, then progress the tournament by
+                //calling the "OnChange" method of the draw maker:
+                await ProgressTournament(_model.Tournament, currentRoundIdx+1, formScores, gameMaker, drawMaker);
+
+            }
 
             // Reload the scores for the new round
             await LoadScore();
@@ -147,7 +163,7 @@ public class ScoringController : MemberController
 
         var tournament = await _tourGateway.GetCurrentTournament();
         int tourId = _model.Tournament.Id;
-        int currentRound = _model.CurrentRound;
+        int currentRound = _model.CurrentRoundIdx;
 
         //call the builderSchedulefromdb method to get the schedule from the database
         //and build the schedule object
@@ -168,7 +184,7 @@ public class ScoringController : MemberController
 
         _model.Tournament = tournament;
         _model.Draw = schedule;
-        _model.CurrentRound = currentRound;
+        _model.CurrentRoundIdx = currentRound;
         _model.Tournament.Draw = schedule;
 
         //Load Page and return if the schedule is null
@@ -233,9 +249,9 @@ public class ScoringController : MemberController
         _model.Draw = schedule;
 
         //Get scores using  ProxyScores method GetScores
-        List<Score> listOfScores = await ProxyScores.GetScores(_model.Tournament.Id, _model.CurrentRound, _dbConnection);
+        List<Score> listOfScores = await ProxyScores.GetScores(_model.Tournament.Id, _model.CurrentRoundIdx+1, _dbConnection);
         //use LINQ t6o filter scores by round order by permutation and set
-        _model.RoundScores = listOfScores.Where(s => s.Round == _model.CurrentRound).OrderBy(s => s.Permutation).ThenBy(s => s.Match).ThenBy(s => s.Set).ToList();
+        _model.RoundScores = listOfScores.Where(s => s.Round == _model.CurrentRoundIdx+1).OrderBy(s => s.Permutation).ThenBy(s => s.Match).ThenBy(s => s.Set).ToList();
 
 
 
@@ -271,7 +287,8 @@ public class ScoringController : MemberController
     /// <param name="currentRound">The current round that was just completed</param>
     /// <param name="scores">The scores that were just entered</param>
     /// <returns></returns>
-    private async Task ProgressTournament(int currentRound, List<Score> scores)
+    private async Task ProgressTournament(Tournament tournament, int currentRound, List<Score> scores, IGameMaker gameMaker,
+    IDrawMaker drawMaker)
     {
         try
         {
@@ -281,17 +298,11 @@ public class ScoringController : MemberController
                 return;
             }
 
-            // Ensure we have full tournament details - load from database if needed
-            if (_model.Tournament.Id == 0)
-                _model.Tournament = await _tourGateway.GetTournament(_model.Tournament.Id);
 
             // Ensure we have tournament teams - load if not available
-            if (_model.Tournament.Teams == null)
-            {
-                TeamRepo teamRepo = new TeamRepo(_model.Tournament, _dbConnection);
-                List<Team> listOfTeams = await teamRepo.GetListAsync(_model.Tournament.Id);
-                _model.Tournament.Teams = listOfTeams;
-            }
+            TeamRepo teamRepo = new TeamRepo(_model.Tournament, _dbConnection);
+            List<Team> listOfTeams = await teamRepo.GetListAsync(_model.Tournament.Id);
+            _model.Tournament.Teams = listOfTeams;
 
             // Ensure we have tournament draw - load from database if not available
             if (_model.Tournament.Draw == null)
@@ -304,24 +315,16 @@ public class ScoringController : MemberController
                 }
             }
 
-            // Create game maker (tennis is the standard)
-            FactoryGameMaker gameFactory = new FactoryGameMaker();
-            IGameMaker gameMaker = gameFactory.Create(new Sport(_model.Tournament.Sport, "Tennis", "", "", ""));
-
-            // Create the appropriate draw maker based on tournament type
-            FactoryDrawMaker drawFactory = new FactoryDrawMaker();
-            IDrawMaker drawMaker = drawFactory.Create(_model.Tournament, gameMaker);
-
             // Progress the tournament by calling OnChange
             // This will advance winners, create next rounds, etc. based on the tournament type
-            drawMaker.OnChange(_model.Tournament.Draw, currentRound + 1, currentRound, scores);
+            drawMaker.OnChange(_model.Tournament.Draw, currentRound , currentRound-1, scores);
 
-            _log.LogInformation("Tournament progressed for tournament {TournamentId}, round {Round} with {ScoreCount} scores", 
+            _log.LogInformation("Tournament progressed for tournament {TournamentId}, round {Round} with {ScoreCount} scores",
                               _model.Tournament.Id, currentRound, scores.Count);
         }
         catch (Exception ex)
         {
-            _log.LogError(ex, "Error progressing tournament {TournamentId} for round {Round}", 
+            _log.LogError(ex, "Error progressing tournament {TournamentId} for round {Round}",
                          _model.Tournament.Id, currentRound);
         }
     }

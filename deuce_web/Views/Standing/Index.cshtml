@@ -15,7 +15,7 @@
     <ul class="nav nav-pills flex-nowrap gap-2 pb-2 mb-1" role="tablist" id="pills_round">
     @for(int i = 1 ; i <=  Model.NoRounds; i++){
         <li class="nav-item me-1" role="presentation">
-        @{ string active = (i == (Model.CurrentRound+1) ? "active" : "");
+        @{ string active = (i == (Model.CurrentRoundIdx+1) ? "active" : "");
             string action = $"Standing/ChangeRound?round={i-1}";
         }                    
             <button type="button" class="nav-link text-nowrap @active" id="published-tab" data-bs-toggle="pill" data-bs-target="#published" role="tab" aria-controls="published"
@@ -35,7 +35,7 @@
     <!-- Action buttons -->
     <div class="nav align-items-center mb-4">
         <div class="d-flex flex-wrap" id="published-action-buttons">
-            <a class="nav-link position-relative px-0 pe-sm-2 py-2 me-4" onclick="printToWindow(@Model.CurrentRound,false)">
+            <a class="nav-link position-relative px-0 pe-sm-2 py-2 me-4" onclick="printToWindow(@Model.CurrentRoundIdx,false)">
                 <i class="fi-printer fs-base me-2"></i>
                 <span class="hover-effect-underline stretched-link d-none d-md-inline">Print</span>
             </a>
@@ -51,11 +51,11 @@
     <!-- Standings table -->
     <form method="post" id="mainForm">
         <input type="hidden" name="action" id="action"/>
-        <input id="current_round" name="current_round" type="hidden" value="@Model.CurrentRound"/>
+        <input id="current_round" name="current_round" type="hidden" value="@Model.CurrentRoundIdx"/>
         
         <div class="card">
             <div class="card-header">
-                <h5 class="card-title mb-0">Tournament Standings - Round @(Model.CurrentRound + 1)</h5>
+                <h5 class="card-title mb-0">Tournament Standings - Round @(Model.CurrentRoundIdx + 1)</h5>
             </div>
             <div class="card-body">
                 @if(Model.TeamStandings != null && Model.TeamStandings.Any())
@@ -98,7 +98,7 @@
             </div>
         </div>
 
-        @if(Model.CurrentRound > 0 && Model.TeamStandings != null && Model.TeamStandings.Any())
+        @if(Model.CurrentRoundIdx > 0 && Model.TeamStandings != null && Model.TeamStandings.Any())
         {
             <div class="mt-4">
                 <h6>Current Standings Summary</h6>
@@ -106,7 +106,7 @@
                     <div class="col-md-6 col-lg-4 mb-3">
                         <div class="card border-secondary">
                             <div class="card-header bg-secondary text-white">
-                                <small>Round @(Model.CurrentRound + 1) - Top Teams</small>
+                                <small>Round @(Model.CurrentRoundIdx + 1) - Top Teams</small>
                             </div>
                             <div class="card-body p-2">
                                 <small>

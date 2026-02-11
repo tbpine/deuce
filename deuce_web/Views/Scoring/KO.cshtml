@@ -15,7 +15,7 @@
     <ul class="nav nav-pills flex-nowrap gap-2 pb-2 mb-1" role="tablist" id="pills_round">
     @for(int i = 1 ; i <=  Model.NoRounds; i++){
         <li class="nav-item me-1" role="presentation">
-        @{ string active = (i == (Model.CurrentRound+1) ? "active" : "");
+        @{ string active = (i == (Model.CurrentRoundIdx+1) ? "active" : "");
             string action = $"Scoring/ChangeRound?round={i-1}";
         }                    
             <button type="button" class="nav-link text-nowrap @active" id="published-tab" data-bs-toggle="pill" data-bs-target="#published" role="tab" aria-controls="published"
@@ -35,13 +35,13 @@
     <!-- Master checkbox + Action buttons -->
     <div class="nav align-items-center mb-4">
         <div class="d-flex flex-wrap" id="published-action-buttons">
-            <a class="nav-link position-relative px-0 pe-sm-2 py-2 me-4" onclick="printToWindow(@Model.CurrentRound,false)">
+            <a class="nav-link position-relative px-0 pe-sm-2 py-2 me-4" onclick="printToWindow(@Model.CurrentRoundIdx,false)">
                 <i class="fi-printer fs-base me-2"></i>
                 <span class="hover-effect-underline stretched-link d-none d-md-inline">Print</span>
             </a>
         </div>
         <div class="d-flex flex-wrap" id="published-action-buttons">
-            <a class="nav-link position-relative px-0 pe-sm-2 py-2 me-4" onclick="printToWindow(@Model.CurrentRound,true)">
+            <a class="nav-link position-relative px-0 pe-sm-2 py-2 me-4" onclick="printToWindow(@Model.CurrentRoundIdx,true)">
                 <i class="fi-printer fs-base me-2"></i>
                 <span class="hover-effect-underline stretched-link d-none d-md-inline">Print Scores</span>
             </a>
@@ -73,7 +73,7 @@
         <input id="current_round" name="current_round" type="hidden" value="0"/>
         <div class="vstack gap-4" id="publishedSelection">
             @{int rIdx = 0;}
-            @foreach(var perm in  Model.Rounds(Model.CurrentRound).Permutations)
+            @foreach(var perm in  Model.Rounds(Model.CurrentRoundIdx).Permutations)
             {
                 rIdx++;
                 <div>
@@ -89,7 +89,7 @@
                         Match match = perm.GetMatchAtIndex(j);
 
                         //Find the score for this match
-                        List<Score>? matchScores = Model.GetScore(Model.CurrentRound, perm.Id, match.Id);                    
+                        List<Score>? matchScores = Model.GetScore(Model.CurrentRoundIdx, perm.Id, match.Id);                    
                         <!-- Item -->
                         <div class="d-sm-flex align-items-center border mb-2 pb-2" >
                             <div class="d-inline-flex position-relative z-2 pt-1 pb-2 ps-2 p-sm-0 ms-2 ms-sm-0 me-sm-0 w-100"
@@ -116,12 +116,12 @@
                                             <div class="col-@setColWidth">
                                                 @if (match.IsByeMatch())
                                                 {
-                                                    <input class="form-control border-black p-1" name="home_@(setScore?.Id??0)_round_@(Model.CurrentRound)_perm_@(perm.Id)_match_@(match.Id)_set_@(i+1)" 
+                                                    <input class="form-control border-black p-1" name="home_@(setScore?.Id??0)_round_@(Model.CurrentRoundIdx)_perm_@(perm.Id)_match_@(match.Id)_set_@(i+1)" 
                                                     value="@(setScore?.Home)" disabled>
                                                 }
                                                 else
                                                 {
-                                                    <input  class="form-control border-black p-1"  name="home_@(setScore?.Id??0)_round_@(Model.CurrentRound)_perm_@(perm.Id)_match_@(match.Id)_set_@(i+1)" 
+                                                    <input  class="form-control border-black p-1"  name="home_@(setScore?.Id??0)_round_@(Model.CurrentRoundIdx)_perm_@(perm.Id)_match_@(match.Id)_set_@(i+1)" 
                                                     value="@(setScore?.Home)" >
                                                     
                                                 }
@@ -138,12 +138,12 @@
                                             <div class="col-@setColWidth">
                                                 @if (match.IsByeMatch())
                                                 {
-                                                    <input  class="form-control border-black p-1" name="away_@(setScore?.Id??0)_round_@(Model.CurrentRound)_perm_@(perm.Id)_match_@(match.Id)_set_@(i+1)" 
+                                                    <input  class="form-control border-black p-1" name="away_@(setScore?.Id??0)_round_@(Model.CurrentRoundIdx)_perm_@(perm.Id)_match_@(match.Id)_set_@(i+1)" 
                                                     value="@(setScore?.Away)" disabled>
                                                 }
                                                 else
                                                 {
-                                                    <input  class="form-control border-black p-1"  name="away_@(setScore?.Id??0)_round_@(Model.CurrentRound)_perm_@(perm.Id)_match_@(match.Id)_set_@(i+1)" 
+                                                    <input  class="form-control border-black p-1"  name="away_@(setScore?.Id??0)_round_@(Model.CurrentRoundIdx)_perm_@(perm.Id)_match_@(match.Id)_set_@(i+1)" 
                                                     value="@(setScore?.Away)" >
                                                     
                                                 }

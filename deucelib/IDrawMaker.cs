@@ -13,6 +13,6 @@ public interface IDrawMaker
     int GroupSize { get; set; }
 
     //See if the draw has changed
-    bool HasChanged(Draw schedule, int round, int previousRound, List<Score> scores);
+    bool HasChanged(Draw? schedule, int round, int previousRound, List<Score> scores);
     
 }
