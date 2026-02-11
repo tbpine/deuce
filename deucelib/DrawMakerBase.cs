@@ -1,3 +1,5 @@
+using System.Data.Common;
+
 namespace deuce;
 
 /// <summary>
@@ -25,14 +27,21 @@ public class DrawMakerBase : IDrawMaker
     /// </summary>
     protected int _groupSize = 4;
 
+    /// <summary>
+    /// Optional database connection for accessing score data.
+    /// </summary>
+    protected DbConnection? _dbConnection;
+
 
     /// <summary>
     /// Construct with dependencies.
     /// </summary>
     /// <param name="tournament">Tournament details</param>
-    public DrawMakerBase(Tournament tournament)
+    /// <param name="dbConnection">Optional database connection for score access</param>
+    public DrawMakerBase(Tournament tournament, DbConnection? dbConnection = null)
     {
         _tournament = tournament;
+        _dbConnection = dbConnection;
     }
 
     /// <summary>
@@ -64,6 +73,60 @@ public class DrawMakerBase : IDrawMaker
     /// Default value is 4.
     /// </summary>
     public int GroupSize { get { return _groupSize; } set { _groupSize = value; }}
+
+    public virtual bool HasChanged(Draw schedule, int round, int previousRound, List<Score> scores)
+    {
+        // If no database connection is available, compare with empty list (assume no changes)
+        if (_dbConnection == null)
+        {
+            return scores.Count > 0;
+        }
+
+        try
+        {
+            // Get scores from database for this tournament and round
+            var dbRepoScore = new DbRepoScore(_dbConnection);
+            var filter = new Filter
+            {
+                TournamentId = _tournament.Id,
+                Round = round
+            };
+            
+            var dbScores = dbRepoScore.GetList(filter).Result;
+            
+            // If the count is different, something has changed
+            if (dbScores.Count != scores.Count)
+            {
+                return true;
+            }
+            
+            // Compare each score to see if any have changed
+            foreach (var score in scores)
+            {
+                bool foundMatch = dbScores.Any(dbScore => 
+                    dbScore.Tournament == score.Tournament &&
+                    dbScore.Round == score.Round &&
+                    dbScore.Permutation == score.Permutation &&
+                    dbScore.Match == score.Match &&
+                    dbScore.Set == score.Set &&
+                    dbScore.Home == score.Home &&
+                    dbScore.Away == score.Away
+                );
+                
+                if (!foundMatch)
+                {
+                    return true; // Found a score that doesn't match database
+                }
+            }
+            
+            return false; // All scores match
+        }
+        catch (Exception)
+        {
+            // If there's any error accessing the database, assume changes have occurred
+            return true;
+        }
+    }
 
 
 }
