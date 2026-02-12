@@ -38,7 +38,7 @@ public class DbRepoMatch : DbRepoBase<Match>
         [ primaryKeyId, obj.Permutation?.Id ?? 0, obj.Permutation?.Round?.Index ?? 0, tourId, obj.PlayersPerSide],
         null);
         object? id = await cmd.ExecuteScalarAsync();
-        obj.Id = (int)(ulong)(id ?? 0L);
+        obj.Id = id == null || id == DBNull.Value ? 0 : Convert.ToInt32(id);
 
         //Save home players
         foreach (Player player in obj.Home)

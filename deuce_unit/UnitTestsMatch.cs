@@ -39,7 +39,7 @@ public class UnitTestsMatch
 
             for (int i = 0; i < draw.NoRounds; i++)
             {
-                Round round =  draw.GetRound(i);
+                Round round =  draw.GetRoundIndex(i);
                 foreach(Permutation p in round.Permutations)
                 {
                     foreach(Match match in p.Matches)
@@ -53,7 +53,7 @@ public class UnitTestsMatch
             //Assert
             for (int i = 0; i < draw.NoRounds; i++)
             {
-                Round round =  draw.GetRound(i);
+                Round round =  draw.GetRoundIndex(i);
                 foreach(Permutation p in round.Permutations)
                 {
                     foreach(Match match in p.Matches)

@@ -101,7 +101,7 @@ namespace deuce_unit
                 TestContext?.WriteLine($"  Draw Rounds: {group.Draw?.NoRounds}");
                 for (int r = 0; r < group.Draw?.NoRounds; r++)
                 {
-                    var round = group.Draw.GetRound(r);
+                    var round = group.Draw.GetRoundIndex(r);
                     TestContext?.WriteLine($"Round {r}: Matches={round.Permutations.Count}, Playoff Matches={round.Playoff?.Permutations.Count}");
                 }
             }
@@ -115,7 +115,7 @@ namespace deuce_unit
             //Check main draw rounds
             for (int r = 0; r < tournament.Draw.NoRounds; r++)
             {
-                var round = tournament.Draw.GetRound(r);
+                var round = tournament.Draw.GetRoundIndex(r);
                 int expectedMatches = (tournament.Groups.Count()) / (int)Math.Pow(2, r);
                 Assert.AreEqual<int>(expectedMatches, round.Permutations.Count, "Not enough matches in main draw round");
             }
@@ -264,7 +264,7 @@ namespace deuce_unit
             TestContext?.WriteLine("Validating match scoring structure...");
             var firstGroup = tournament.Groups.First();
             Assert.IsNotNull(firstGroup.Draw, "First group should have a draw");
-            var firstRound = firstGroup.Draw.GetRound(0);
+            var firstRound = firstGroup.Draw.GetRoundIndex(0);
 
             if (firstRound.Permutations.Any() && firstRound.Permutations.First().Matches.Any())
             {

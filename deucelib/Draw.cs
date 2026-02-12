@@ -19,7 +19,7 @@ public class Draw
     //------------------------------------
 
     public int NoRounds { get => _rounds.Count; }
-    public Round GetRound(int idx) => _rounds[idx];
+    public Round GetRoundIndex(int idx) => _rounds[idx];
 
     public IEnumerable<Round> Rounds => _rounds;
 

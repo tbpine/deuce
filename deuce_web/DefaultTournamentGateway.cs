@@ -3,6 +3,7 @@ using System.Data.Common;
 using System.Diagnostics;
 using System.Formats.Tar;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 /// <summary>
 /// Load tournament objects from the database
 /// </summary>
@@ -16,12 +17,15 @@ public class DefaultTournamentGateway : ITournamentGateway
     private readonly DbRepoRecordTeamPlayer _dbRepoRecordTeamPlayer;
     private readonly ICacheMaster _cache;
     private readonly DbConnection _dbconn;
+    private readonly ILogger<DefaultTournamentGateway> _log;
+    private readonly DbRepoRecordSchedule _dbRepoRecordSchedule;
 
 
 
     public DefaultTournamentGateway(SessionProxy sessionProxy, DbRepoTournament dbRepoTournament,
     DbRepoTournamentDetail dbRepoTournamentDetail, ICacheMaster cache, DbConnection dbconn,
-    DbRepoTournamentStatus dbRepoTournamentStatus, DbRepoRecordTeamPlayer dbRepoRecordTeamPlayer)
+    DbRepoTournamentStatus dbRepoTournamentStatus, DbRepoRecordTeamPlayer dbRepoRecordTeamPlayer,
+    ILogger<DefaultTournamentGateway> log, DbRepoRecordSchedule dbRepoRecordSchedule)
     {
         _sessionProxy = sessionProxy;
         _dbRepoTournament = dbRepoTournament;
@@ -30,6 +34,8 @@ public class DefaultTournamentGateway : ITournamentGateway
         _dbconn = dbconn;
         _dbRepoTournamentStatus = dbRepoTournamentStatus;
         _dbRepoRecordTeamPlayer = dbRepoRecordTeamPlayer;
+        _log = log;
+        _dbRepoRecordSchedule = dbRepoRecordSchedule;
     }
 
     /// <summary>
@@ -225,5 +231,98 @@ public class DefaultTournamentGateway : ITournamentGateway
 
         return new(ResultStatus.Ok, "");
 
+    }
+
+    /// <summary>
+    /// Build schedule from the database
+    /// </summary>
+    /// <param name="tournament">The tournament for which to build the schedule</param>
+    /// <returns>Draw object representing the schedule</returns>
+    private async Task<Draw?> BuildScheduleFromDB(Tournament tournament)
+    {
+        List<RecordSchedule> recordsSched = await _dbRepoRecordSchedule.GetList(new Filter() { TournamentId = tournament.Id });
+
+        //List of players and teams for this tournament
+        List<RecordTeamPlayer> teamplayers = await _dbRepoRecordTeamPlayer.GetList(new Filter() { TournamentId = tournament.Id });
+
+        // Extract teams (which includes players with Team property correctly set)
+        TeamRepo teamRepo = new TeamRepo(teamplayers);
+        List<Team> teams = teamRepo.ExtractFromRecordTeamPlayer();
+        tournament.Teams = teams;
+
+        // Extract players from the teams (these will have their Team property set correctly)
+        List<Player> players = teams.SelectMany(t => t.Players).ToList();
+
+        BuilderDraws builderDraw = new BuilderDraws(recordsSched, players, teams, tournament, _dbconn);
+        return builderDraw.Create();
+    }
+
+    /// <summary>
+    /// Progresses the tournament by calling the appropriate DrawMaker's OnChange method.
+    /// This handles advancing winners, creating next rounds, and updating the tournament draw.
+    /// After progressing the tournament, saves the draw to the database.
+    /// </summary>
+    /// <param name="tournament">The tournament to progress</param>
+    /// <param name="currentRound">The current round that was just completed</param>
+    /// <param name="scores">The scores that were just entered</param>
+    /// <param name="gameMaker">The game maker for this tournament's sport</param>
+    /// <param name="drawMaker">The draw maker for this tournament's format</param>
+    /// <returns>ResultTournamentAction indicating success or failure</returns>
+    public async Task<ResultTournamentAction> ProgressTournament(Tournament tournament, int currentRound, List<Score> scores, IGameMaker gameMaker, IDrawMaker drawMaker)
+    {
+        try
+        {
+            // No progression needed if no scores provided
+            if (scores == null || !scores.Any())
+            {
+                return new(ResultStatus.Warning, "No scores provided for tournament progression.");
+            }
+
+            // Ensure we have tournament teams - load if not available
+            if (tournament.Teams == null || !tournament.Teams.Any())
+            {
+                TeamRepo teamRepo = new TeamRepo(tournament, _dbconn);
+                List<Team> listOfTeams = await teamRepo.GetListAsync(tournament.Id);
+                tournament.Teams = listOfTeams;
+            }
+
+            // Ensure we have tournament draw - load from database if not available
+            if (tournament.Draw == null)
+            {
+                tournament.Draw = await BuildScheduleFromDB(tournament);
+                if (tournament.Draw == null)
+                {
+                    _log.LogWarning("Cannot progress tournament {TournamentId} - unable to load draw from database", tournament.Id);
+                    return new(ResultStatus.Error, "Unable to load tournament draw from database.");
+                }
+            }
+
+            // Progress the tournament by calling OnChange
+            // This will advance winners, create next rounds, etc. based on the tournament type
+            drawMaker.OnChange(tournament.Draw, currentRound, currentRound - 1, scores);
+
+            // Save the updated draw to the database
+            Organization thisOrg = new() { Id = _sessionProxy?.OrganizationId ?? 1, Name = "" };
+            TournamentRepo tourRepo = new(_dbconn, tournament, thisOrg);
+            bool scheduleSaved = await tourRepo.SaveSchedule();
+
+            if (scheduleSaved)
+            {
+                _log.LogInformation("Tournament progressed and saved for tournament {TournamentId}, round {Round} with {ScoreCount} scores",
+                                  tournament.Id, currentRound, scores.Count);
+                return new(ResultStatus.Ok, "Tournament progressed and draw saved successfully.");
+            }
+            else
+            {
+                _log.LogError("Failed to save tournament draw after progression for tournament {TournamentId}", tournament.Id);
+                return new(ResultStatus.Error, "Tournament progressed but failed to save draw to database.");
+            }
+        }
+        catch (Exception ex)
+        {
+            _log.LogError(ex, "Error progressing tournament {TournamentId} for round {Round}",
+                         tournament.Id, currentRound);
+            return new(ResultStatus.Error, $"Error progressing tournament: {ex.Message}");
+        }
     }
 }

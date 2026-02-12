@@ -77,15 +77,15 @@ public class DrawMakerSwiss : DrawMakerBase, IDrawMaker
     public override void OnChange(Draw schedule, int round, int previousRound, List<Score> scores)
     {
         // Record standings for the completed round
-        if (previousRound >= 1)
+        if (round > 0)
         {
-            UpdateStandingsForCompletedRound(schedule, previousRound, scores);
+            UpdateStandingsForCompletedRound(schedule, round, scores);
         }
 
         // If this is not the first round, create the next round based on current standings
-        if (round > 1 && round < CalculateNumberOfRounds(_tournament.Teams.Count()))
+        if (round > 0 && round < CalculateNumberOfRounds(_tournament.Teams.Count()))
         {
-            CreateNextRound(schedule, round, scores);
+            CreateNextRound(schedule, round+1, scores);
         }
     }
 
@@ -178,7 +178,7 @@ public class DrawMakerSwiss : DrawMakerBase, IDrawMaker
             {
                 var permutation = _gameMaker.Create(_tournament, home, away, round);
                 permutation.Id = p;
-                draw.AddPermutation(permutation, round, $"Round {round + 1}");
+                draw.AddPermutation(permutation, round, $"Round {round }");
             }
         }
     }

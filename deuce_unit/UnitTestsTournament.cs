@@ -44,7 +44,7 @@ public class UnitTestsTournament
 
             for (int i = 0; i < tour.Draw!.NoRounds; i++)
             {
-                Round round = tour.Draw.GetRound(i);
+                Round round = tour.Draw.GetRoundIndex(i);
                 foreach (Permutation p in round.Permutations)
                 {
                     foreach (Match match in p.Matches)

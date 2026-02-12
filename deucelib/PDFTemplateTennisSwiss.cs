@@ -61,7 +61,7 @@ public class PDFTemplateTennisSwiss : PDFTemplateBase
 
         // Get the specific round for Swiss format
         // roundNo is not zero-based but the schedule is
-        IEnumerable<Permutation> perms = s.GetRound(roundNo-1).Permutations;
+        IEnumerable<Permutation> perms = s.GetRoundIndex(roundNo-1).Permutations;
 
         PdfFont cellFont = PdfFontFactory.CreateFont(StandardFonts.HELVETICA);
 

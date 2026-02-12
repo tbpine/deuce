@@ -55,7 +55,7 @@ public class TournamentRepo
 
         for (int i = 0; i < _tournament.Draw!.NoRounds; i++)
         {
-            Round round = _tournament.Draw.GetRound(i);
+            Round round = _tournament.Draw.GetRoundIndex(i);
             foreach (Permutation p in round.Permutations)
             {
                 foreach (Match match in p.Matches)
@@ -81,7 +81,7 @@ public class TournamentRepo
 
         for (int i = 0; i < _tournament.Draw!.NoRounds; i++)
         {
-            Round round = _tournament.Draw.GetRound(i);
+            Round round = _tournament.Draw.GetRoundIndex(i);
             foreach (Permutation p in round.Permutations)
             {
                 foreach (Match match in p.Matches)

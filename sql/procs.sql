@@ -194,7 +194,12 @@ VALUES (p_id, p_permutation, p_round, p_tournament, NOW(), NOW(), p_players_per_
 ON DUPLICATE KEY UPDATE  `permutation` = p_permutation, `round` = p_round,`tournament` = p_tournament,`updated_datetime` = NOW(),
 `players_per_side` = p_players_per_side;
 
-SELECT LAST_INSERT_ID() 'id';
+-- Send back the id column for new inserts, else just send back the current id
+IF ISNULL(p_id) THEN
+	SELECT LAST_INSERT_ID() 'id';
+ELSE
+	SELECT p_id 'id';
+END IF;
 
 END//
 

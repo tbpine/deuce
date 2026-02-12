@@ -10,4 +10,5 @@ public interface ITournamentGateway
      Task<Tournament> GetTournament(int id);
      Task<ResultTournamentAction> StartTournament(int tournamentId);
      Task<ResultTournamentAction> ValidateCurrentTournament(Tournament tournament);
+     Task<ResultTournamentAction> ProgressTournament(Tournament tournament, int currentRound, List<Score> scores, IGameMaker gameMaker, IDrawMaker drawMaker);
 }

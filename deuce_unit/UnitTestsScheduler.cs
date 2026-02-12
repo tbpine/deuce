@@ -51,7 +51,7 @@ public class UnitTestsScheduler
 
         Assert.IsNotNull(results, "Null result");
         Assert.AreEqual<int>(results.NoRounds, noPlayers - 1, "Incorrect rounds");
-        Assert.AreEqual<int>(results?.GetRound(0)?.NoGames()??0, noPlayers / 2, "Incorrect games");
+        Assert.AreEqual<int>(results?.GetRoundIndex(0)?.NoGames()??0, noPlayers / 2, "Incorrect games");
     }
 
     [TestMethod]
@@ -101,7 +101,7 @@ public class UnitTestsScheduler
 
         Assert.IsNotNull(results, "Null result");
         Assert.AreEqual<int>(results.NoRounds, noTeams - 1, "Incorrect rounds");
-        Assert.AreEqual<int>(results.GetRound(0)?.NoGames() ?? 0, (tournament.Details.NoSingles + tournament.Details.NoDoubles) * (noTeams /2) , "Incorrect games");
+        Assert.AreEqual<int>(results.GetRoundIndex(0)?.NoGames() ?? 0, (tournament.Details.NoSingles + tournament.Details.NoDoubles) * (noTeams /2) , "Incorrect games");
         //Assert.AreEqual<int>(results.NoMatches(), (tournament.Details.NoSingles + tournament.Details.NoDoubles) * (noTeams /2) * (noTeams-1), "Incorrect games");
     }
 

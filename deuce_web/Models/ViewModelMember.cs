@@ -60,7 +60,7 @@ public class ViewModelMember
 
     public List<Score>? RoundScores { get => _roundScores; set => _roundScores = value; }
 
-    public Round Rounds(int r) => _draw?.GetRound(r) ?? new Round(0);
+    public Round Rounds(int r) => _draw?.GetRoundIndex(r) ?? new Round(0);
     
       //Get the score given the round and permutation and match  //Get the score given the round and permutation and match
     public List<Score>? GetScore(int round, int permutation, int match)

@@ -50,7 +50,7 @@ public class PDFTemplateTennisRR : PDFTemplateBase
 
         MakeHeader(doc, tournament, roundNo);
 
-        IEnumerable<Permutation> perms = s.GetRound(roundNo).Permutations;
+        IEnumerable<Permutation> perms = s.GetRoundIndex(roundNo).Permutations;
      
         //Add header
 

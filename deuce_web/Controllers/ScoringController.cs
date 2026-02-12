@@ -140,8 +140,18 @@ public class ScoringController : MemberController
                 await _scoreKeeper.Save(_model.Tournament.Id, formScores, currentRoundIdx+1, _dbConnection);
 
                 //If the score changed, then progress the tournament by
-                //calling the "OnChange" method of the draw maker:
-                await ProgressTournament(_model.Tournament, currentRoundIdx+1, formScores, gameMaker, drawMaker);
+                //calling the DefaultTournamentGateway's ProgressTournament method:
+                var progressResult = await _tourGateway.ProgressTournament(_model.Tournament, currentRoundIdx+1, formScores, gameMaker, drawMaker);
+                
+                // Log the result of tournament progression
+                if (progressResult.Status == ResultStatus.Error)
+                {
+                    _log.LogError("Failed to progress tournament: {Message}", progressResult.Message);
+                }
+                else if (progressResult.Status == ResultStatus.Warning)
+                {
+                    _log.LogWarning("Tournament progression warning: {Message}", progressResult.Message);
+                }
 
             }
 
@@ -268,67 +278,17 @@ public class ScoringController : MemberController
         var dbrepotp = new DbRepoRecordTeamPlayer(_dbConnection);
         List<RecordTeamPlayer> teamplayers = await dbrepotp.GetList(new Filter() { TournamentId = _model.Tournament.Id });
 
-        PlayerRepo playerRepo = new PlayerRepo();
+        // Extract teams (which includes players with Team property correctly set)
         TeamRepo teamRepo = new TeamRepo(teamplayers);
-
-        List<Player> players = playerRepo.ExtractFromRecordTeamPlayer(teamplayers);
         List<Team> teams = teamRepo.ExtractFromRecordTeamPlayer();
         _model.Tournament.Teams = teams;
+
+        // Extract players from the teams (these will have their Team property set correctly)
+        List<Player> players = teams.SelectMany(t => t.Players).ToList();
 
         BuilderDraws builderDraw = new BuilderDraws(recordsSched, players, teams, _model.Tournament, _dbConnection);
         return builderDraw.Create();
 
     }
-
-    /// <summary>
-    /// Progresses the tournament by calling the appropriate DrawMaker's OnChange method.
-    /// This handles advancing winners, creating next rounds, and updating the tournament draw.
-    /// </summary>
-    /// <param name="currentRound">The current round that was just completed</param>
-    /// <param name="scores">The scores that were just entered</param>
-    /// <returns></returns>
-    private async Task ProgressTournament(Tournament tournament, int currentRound, List<Score> scores, IGameMaker gameMaker,
-    IDrawMaker drawMaker)
-    {
-        try
-        {
-            // No progression needed if no scores provided
-            if (scores == null || !scores.Any())
-            {
-                return;
-            }
-
-
-            // Ensure we have tournament teams - load if not available
-            TeamRepo teamRepo = new TeamRepo(_model.Tournament, _dbConnection);
-            List<Team> listOfTeams = await teamRepo.GetListAsync(_model.Tournament.Id);
-            _model.Tournament.Teams = listOfTeams;
-
-            // Ensure we have tournament draw - load from database if not available
-            if (_model.Tournament.Draw == null)
-            {
-                _model.Tournament.Draw = await BuildScheduleFromDB();
-                if (_model.Tournament.Draw == null)
-                {
-                    _log.LogWarning("Cannot progress tournament - unable to load draw from database");
-                    return;
-                }
-            }
-
-            // Progress the tournament by calling OnChange
-            // This will advance winners, create next rounds, etc. based on the tournament type
-            drawMaker.OnChange(_model.Tournament.Draw, currentRound , currentRound-1, scores);
-
-            _log.LogInformation("Tournament progressed for tournament {TournamentId}, round {Round} with {ScoreCount} scores",
-                              _model.Tournament.Id, currentRound, scores.Count);
-        }
-        catch (Exception ex)
-        {
-            _log.LogError(ex, "Error progressing tournament {TournamentId} for round {Round}",
-                         _model.Tournament.Id, currentRound);
-        }
-    }
-
-
 
 }
