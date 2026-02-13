@@ -194,12 +194,7 @@ VALUES (p_id, p_permutation, p_round, p_tournament, NOW(), NOW(), p_players_per_
 ON DUPLICATE KEY UPDATE  `permutation` = p_permutation, `round` = p_round,`tournament` = p_tournament,`updated_datetime` = NOW(),
 `players_per_side` = p_players_per_side;
 
--- Send back the id column for new inserts, else just send back the current id
-IF ISNULL(p_id) THEN
-	SELECT LAST_INSERT_ID() 'id';
-ELSE
-	SELECT p_id 'id';
-END IF;
+SELECT LAST_INSERT_ID() 'id';
 
 END//
 
@@ -567,7 +562,11 @@ INSERT INTO `match_player`(`id`,`match`,`player_home`,`player_away`,`tournament`
 ON DUPLICATE KEY UPDATE `match` = p_match,`player_home` = p_player_home,`player_away` = p_player_away,
 `updated_datetime` = NOW(), `tournament` = p_tournament;
 
-SELECT LAST_INSERT_ID() 'id';
+if (ISNULL(p_id)) then
+	SELECT LAST_INSERT_ID() 'id';
+else
+	SELECT p_id 'id';
+end if;
 
 END//
 
@@ -634,6 +633,8 @@ DELETE FROM `match` where `tournament` = p_tournament;
 -- Remove teams and players involved in the tournament
 DELETE FROM `team_player` WHERE `tournament` = p_tournament;
 DELETE FROM `team` WHERE `tournament` = p_tournament;
+
+-- DELETE FROM `result` WHERE `tournament` = p_tournament;
 
 DELETE FROM `tournament` WHERE `id` = p_tournament;
  
@@ -983,64 +984,6 @@ BEGIN
 	ELSE
 		SELECT p_id 'id';
 	END IF;
-END//
-
-
-DROP PROCEDURE IF EXISTS `sp_get_team_standing`//
-
-CREATE PROCEDURE `sp_get_team_standing`(
-IN p_tournament INT
-)
-BEGIN
-
-	SELECT ts.`id`, ts.`team`, ts.`tournament`, ts.`wins`, ts.`losses`, ts.`draws`, ts.`points`, ts.`position`,
-		   t.`label` 'team_name', ts.`updated_datetime`, ts.`created_datetime`
-	FROM `team_standing` ts 
-	LEFT JOIN `team` t ON t.`id` = ts.`team`
-	WHERE ts.`tournament` = p_tournament OR ISNULL(p_tournament)
-	ORDER BY ts.`position`, ts.`points` DESC, ts.`wins` DESC;
-
-END//
-
-
-DROP PROCEDURE IF EXISTS `sp_set_team_standing`//
-
-CREATE PROCEDURE `sp_set_team_standing`(
-IN p_id INT,
-IN p_team INT,
-IN p_tournament INT,
-IN p_wins INT,
-IN p_losses INT,
-IN p_draws INT,
-IN p_points DECIMAL(10,2),
-IN p_position INT)
-
-BEGIN
-
-INSERT INTO `team_standing` (`id`, `team`, `tournament`, `wins`, `losses`, `draws`, `points`, `position`, `updated_datetime`, `created_datetime`)
-VALUES (p_id, p_team, p_tournament, p_wins, p_losses, p_draws, p_points, p_position, NOW(), NOW())
-ON DUPLICATE KEY UPDATE `team` = p_team, `tournament` = p_tournament, `wins` = p_wins, `losses` = p_losses, 
-`draws` = p_draws, `points` = p_points, `position` = p_position, `updated_datetime` = NOW();
-
--- Send back the id column for new inserts, else just send back the current id
-IF ISNULL(p_id) THEN
-	SELECT LAST_INSERT_ID() 'id';
-ELSE
-	SELECT p_id 'id';
-END IF;
-
-END//
-
-
-DROP PROCEDURE IF EXISTS `sp_delete_team_standing`//
-
-CREATE PROCEDURE `sp_delete_team_standing`(
-IN p_id INT
-)
-
-BEGIN
-DELETE FROM `team_standing` WHERE `id` = p_id;
-
 END//
 
 
