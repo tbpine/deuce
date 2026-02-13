@@ -6,6 +6,17 @@ using deuce.ext;
 namespace deuce;
 
 /// <summary>
+/// Internal class to represent match_player table data
+/// </summary>
+public class MatchPlayerRecord
+{
+    public int Id { get; set; }
+    public int MatchId { get; set; }
+    public int? HomePlayerId { get; set; }
+    public int? AwayPlayerId { get; set; }
+}
+
+/// <summary>
 /// /// Insert and select matches from the database.
 /// </summary>
 public class DbRepoMatch : DbRepoBase<Match>
@@ -43,76 +54,50 @@ public class DbRepoMatch : DbRepoBase<Match>
         // Synchronize match_player records if match already exists
         if (obj.Id > 0)
         {
-            // Get existing match_player records
-            var getExistingCmd = _dbconn.CreateCommand();
-            getExistingCmd.CommandText = "SELECT `id`, `player_home`, `player_away` FROM `match_player` WHERE `match` = @matchId";
-            var matchIdParam = getExistingCmd.CreateParameter();
-            matchIdParam.ParameterName = "@matchId";
-            matchIdParam.Value = obj.Id;
-            getExistingCmd.Parameters.Add(matchIdParam);
-            
-            var existingRecords = new List<(int Id, int? PlayerHome, int? PlayerAway)>();
-            using (var reader = await getExistingCmd.ExecuteReaderAsync())
+            Match match = obj as Match;
+            if (match == null)
             {
-                while (await reader.ReadAsync())
+                throw new InvalidOperationException("Object is not of type Match");
+            }
+
+            // Get existing match_player records using GetMatchPlayers
+            var existingRecords = await GetMatchPlayers(obj.Id);
+            List<Player> addHomePlayers = new List<Player>();   
+            List<Player> addAwayPlayers = new List<Player>();   
+            List<Player> delHomePlayers = new List<Player>();   
+            List<Player> delAwayPlayers = new List<Player>(); 
+
+            foreach(Player homePlayers in match.Home)
+            {
+                if (existingRecords.Find(r=>r.HomePlayerId == homePlayers.Id) == null)
                 {
-                    var playerHome = reader.IsDBNull("player_home") ? (int?)null : reader.GetInt32("player_home");
-                    var playerAway = reader.IsDBNull("player_away") ? (int?)null : reader.GetInt32("player_away");
-                    existingRecords.Add((reader.GetInt32("id"), playerHome, playerAway));
+                    addHomePlayers.Add(homePlayers);
                 }
-            }
+            } 
 
-            // Build current schedule players
-            var currentPlayers = new List<(int? PlayerHome, int? PlayerAway)>();
+            foreach(Player awayPlayers in ((Match)obj).Away)
+            {
+                if (existingRecords.Find(r=>r.AwayPlayerId == awayPlayers.Id) == null)
+                {
+                    addAwayPlayers.Add(awayPlayers);
+                }
+            } 
             
-            // Add home players (player_home set, player_away is null)
-            foreach (Player player in obj.Home)
-            {
-                int? playerId = player.Id <= 0 ? null : player.Id;
-                currentPlayers.Add((playerId, null));
-            }
-            
-            // Add away players (player_away set, player_home is null)
-            foreach (Player player in obj.Away)
-            {
-                int? playerId = player.Id <= 0 ? null : player.Id;
-                currentPlayers.Add((null, playerId));
-            }
+            //Go through existing records . If there's no home player in the match,
+            //then add it to the delete home player list.
+            existingRecords.ForEach(r=> {
+                if (r.HomePlayerId != null && !match.Home.Any(p=>p.Id == r.HomePlayerId))
+                {
+                    delHomePlayers.Add(new Player{Id = r.HomePlayerId.Value});
+                }
+                if (r.AwayPlayerId != null && !match.Away.Any(p=>p.Id == r.AwayPlayerId))
+                {
+                    delAwayPlayers.Add(new Player{Id = r.AwayPlayerId.Value});
+                }
 
-            // Find records to delete (exist in DB but not in current schedule)
-            var recordsToDelete = existingRecords.Where(existing => 
-                !currentPlayers.Any(current => 
-                    current.PlayerHome == existing.PlayerHome && 
-                    current.PlayerAway == existing.PlayerAway)).ToList();
+            });
 
-            // Find records to insert (exist in current schedule but not in DB)
-            var recordsToInsert = currentPlayers.Where(current => 
-                !existingRecords.Any(existing => 
-                    existing.PlayerHome == current.PlayerHome && 
-                    existing.PlayerAway == current.PlayerAway)).ToList();
-
-            // Delete obsolete records
-            foreach (var record in recordsToDelete)
-            {
-                var deleteCmd = _dbconn.CreateCommand();
-                deleteCmd.CommandText = "DELETE FROM `match_player` WHERE `id` = @recordId";
-                var recordIdParam = deleteCmd.CreateParameter();
-                recordIdParam.ParameterName = "@recordId";
-                recordIdParam.Value = record.Id;
-                deleteCmd.Parameters.Add(recordIdParam);
-                await deleteCmd.ExecuteNonQueryAsync();
-            }
-
-            // Insert new records
-            foreach (var record in recordsToInsert)
-            {
-                object homePlayerId = record.PlayerHome?.ToString() ?? (object)DBNull.Value;
-                object awayPlayerId = record.PlayerAway?.ToString() ?? (object)DBNull.Value;
-                
-                var cmd2 = _dbconn.CreateCommandStoreProc("sp_set_match_player", ["p_id","p_match", "p_player_home", "p_player_away", "p_tournament"],
-                [DBNull.Value, obj.Id, homePlayerId, awayPlayerId, tourId], null);
-                await cmd2.ExecuteNonQueryAsync();
-            }
+        
         }
         else
         {
@@ -137,5 +122,128 @@ public class DbRepoMatch : DbRepoBase<Match>
         }
 
         _dbconn.Close();
+    }
+
+    /// <summary>
+    /// Get list of match player records for a specific match using the sp_get_match_player stored procedure
+    /// </summary>
+    /// <param name="matchId">The ID of the match to get players for</param>
+    /// <returns>List of MatchPlayerRecord objects from the match_player table</returns>
+    public async Task<List<MatchPlayerRecord>> GetMatchPlayers(int matchId)
+    {
+        var matchPlayerRecords = new List<MatchPlayerRecord>();
+        _dbconn.Open();
+
+        try
+        {
+            var command = _dbconn.CreateCommandStoreProc("sp_get_match_player",
+                new[] { "p_match_id" },
+                new object[] { matchId });
+
+            using var reader = await command.ExecuteReaderAsync();
+            while (await reader.ReadAsync())
+            {
+                var record = new MatchPlayerRecord
+                {
+                    Id = reader.GetInt32(reader.GetOrdinal("id")),
+                    MatchId = reader.IsDBNull(reader.GetOrdinal("match")) ? 0 : reader.GetInt32(reader.GetOrdinal("match")),
+                    HomePlayerId = reader.IsDBNull(reader.GetOrdinal("player_home")) ? null : reader.GetInt32(reader.GetOrdinal("player_home")),
+                    AwayPlayerId = reader.IsDBNull(reader.GetOrdinal("player_away")) ? null : reader.GetInt32(reader.GetOrdinal("player_away"))
+                };
+
+                matchPlayerRecords.Add(record);
+            }
+        }
+        finally
+        {
+            _dbconn.Close();
+        }
+
+        return matchPlayerRecords;
+    }
+
+    /// <summary>
+    /// Add a home player to a match using the sp_set_match_player stored procedure
+    /// </summary>
+    /// <param name="matchId">The ID of the match</param>
+    /// <param name="playerId">The ID of the home player to add</param>
+    /// <param name="tournamentId">The ID of the tournament</param>
+    /// <returns>The ID of the created match_player record</returns>
+    public async Task<int> AddHomePlayer(int matchId, int playerId, int tournamentId)
+    {
+        _dbconn.Open();
+
+        try
+        {
+            var command = _dbconn.CreateCommandStoreProc("sp_set_match_player",
+                new[] { "p_id", "p_match", "p_player_home", "p_player_away", "p_tournament" },
+                new object[] { DBNull.Value, matchId, playerId, DBNull.Value, tournamentId });
+
+            var result = await command.ExecuteScalarAsync();
+            return result == null || result == DBNull.Value ? 0 : Convert.ToInt32(result);
+        }
+        finally
+        {
+            _dbconn.Close();
+        }
+    }
+
+    /// <summary>
+    /// Add an away player to a match using the sp_set_match_player stored procedure
+    /// </summary>
+    /// <param name="matchId">The ID of the match</param>
+    /// <param name="playerId">The ID of the away player to add</param>
+    /// <param name="tournamentId">The ID of the tournament</param>
+    /// <returns>The ID of the created match_player record</returns>
+    public async Task<int> AddAwayPlayer(int matchId, int playerId, int tournamentId)
+    {
+        _dbconn.Open();
+
+        try
+        {
+            var command = _dbconn.CreateCommandStoreProc("sp_set_match_player",
+                new[] { "p_id", "p_match", "p_player_home", "p_player_away", "p_tournament" },
+                new object[] { DBNull.Value, matchId, DBNull.Value, playerId, tournamentId });
+
+            var result = await command.ExecuteScalarAsync();
+            return result == null || result == DBNull.Value ? 0 : Convert.ToInt32(result);
+        }
+        finally
+        {
+            _dbconn.Close();
+        }
+    }
+
+    /// <summary>
+    /// Add multiple home players to a match using the sp_set_match_player stored procedure
+    /// </summary>
+    /// <param name="matchId">The ID of the match</param>
+    /// <param name="playerIds">The IDs of the home players to add</param>
+    /// <param name="tournamentId">The ID of the tournament</param>
+    /// <returns>List of IDs of the created match_player records</returns>
+    public async Task<List<int>> AddHomePlayers(int matchId, List<int> playerIds, int tournamentId)
+    {
+        var recordIds = new List<int>();
+        _dbconn.Open();
+
+        try
+        {
+            foreach (var playerId in playerIds)
+            {
+                var command = _dbconn.CreateCommandStoreProc("sp_set_match_player",
+                    new[] { "p_id", "p_match", "p_player_home", "p_player_away", "p_tournament" },
+                    new object[] { DBNull.Value, matchId, playerId, DBNull.Value, tournamentId });
+
+                var result = await command.ExecuteScalarAsync();
+                var recordId = result == null || result == DBNull.Value ? 0 : Convert.ToInt32(result);
+                recordIds.Add(recordId);
+            }
+        }
+        finally
+        {
+            _dbconn.Close();
+        }
+
+        return recordIds;
     }
 }
