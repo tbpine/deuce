@@ -194,7 +194,11 @@ VALUES (p_id, p_permutation, p_round, p_tournament, NOW(), NOW(), p_players_per_
 ON DUPLICATE KEY UPDATE  `permutation` = p_permutation, `round` = p_round,`tournament` = p_tournament,`updated_datetime` = NOW(),
 `players_per_side` = p_players_per_side;
 
-SELECT LAST_INSERT_ID() 'id';
+IF (ISNULL(p_id)) THEN
+	SELECT LAST_INSERT_ID() 'id';
+ELSE
+	SELECT p_id 'id';
+END IF;
 
 END//
 
@@ -579,7 +583,46 @@ BEGIN
 
 SELECT `id`, `match`, `player_home`,`player_away`, `updated_datetime`, `created_datetime`
 FROM `match_player`
+WHERE `match` = p_match
 ORDER BY `player_home`, `player_away`;
+
+END//
+
+DROP PROCEDURE IF EXISTS `sp_delete_match_player`//
+
+CREATE PROCEDURE `sp_delete_match_player`(
+    IN p_match INT,
+    IN p_player_home INT,
+    IN p_player_away INT,
+    IN p_tournament INT
+)
+BEGIN
+    DECLARE EXIT HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+        RESIGNAL;
+    END;
+
+    START TRANSACTION;
+
+    -- Delete match_player record based on parameters
+    -- If p_player_home is provided, delete home player record
+    -- If p_player_away is provided, delete away player record
+    -- Both p_player_home and p_player_away can be NULL to allow flexible deletion
+    
+    DELETE FROM match_player 
+    WHERE `match` = p_match 
+      AND tournament = p_tournament
+      AND (
+          (p_player_home IS NOT NULL AND player_home = p_player_home) OR
+          (p_player_away IS NOT NULL AND player_away = p_player_away) OR
+          (p_player_home IS NULL AND p_player_away IS NULL)
+      );
+
+    COMMIT;
+
+    -- Return the number of affected rows
+    SELECT ROW_COUNT() AS affected_rows;
 
 END//
 
