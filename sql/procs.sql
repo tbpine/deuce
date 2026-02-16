@@ -30,7 +30,11 @@ BEGIN
 INSERT INTO `account`(`id`,`player`,`organization`,`password`,`salt`,`active`,`updated_datetime`,`created_datetime`) VALUES (p_id, p_player, p_organization, p_password, p_salt, p_active, NOW(), NOW())
 ON DUPLICATE KEY UPDATE `player` = p_player,`organization` = p_organization,`password` = p_password,`salt` = p_salt,`active` = p_active,`updated_datetime` = NOW();
 
-SELECT LAST_INSERT_ID() 'id';
+IF ISNULL(p_id) THEN
+	SELECT LAST_INSERT_ID() 'id';
+ELSE
+	SELECT p_id 'id';
+END IF;
 
 END//
 
@@ -67,7 +71,11 @@ BEGIN
 INSERT INTO `address`(`id`,`street`,`suburb`,`state`,`country`,`contact`,`email`,`player`,`organization`,`tournament`,`updated_datetime`,`created_datetime`) VALUES (p_id, p_street, p_suburb, p_state, p_country, p_contact, p_email, p_player, p_organization, p_tournament, NOW(), NOW())
 ON DUPLICATE KEY UPDATE `street` = p_street,`suburb` = p_suburb,`state` = p_state,`country` = p_country,`contact` = p_contact,`email` = p_email,`player` = p_player,`organization` = p_organization,`tournament` = p_tournament,`updated_datetime` = NOW();
 
-SELECT LAST_INSERT_ID() 'id';
+IF ISNULL(p_id) THEN
+	SELECT LAST_INSERT_ID() 'id';
+ELSE
+	SELECT p_id 'id';
+END IF;
 
 END//
 
@@ -99,7 +107,11 @@ BEGIN
 INSERT INTO `organization`(`id`,`name`,`owner`,`abn`,`active`,`updated_datetime`,`created_datetime`) VALUES (p_id, p_name, p_owner, p_abn, p_active, NOW(), NOW())
 ON DUPLICATE KEY UPDATE `name` = p_name,`owner` = p_owner,`abn` = p_abn,`active` = p_active,`updated_datetime` = NOW();
 
-SELECT LAST_INSERT_ID() 'id';
+IF ISNULL(p_id) THEN
+	SELECT LAST_INSERT_ID() 'id';
+ELSE
+	SELECT p_id 'id';
+END IF;
 
 END//
 
@@ -130,7 +142,11 @@ BEGIN
 INSERT INTO `entry`(`id`,`tournament`,`player`,`active`) VALUES (p_id, p_tournament, p_player, p_active)
 ON DUPLICATE KEY UPDATE `tournament` = p_tournament,`player` = p_player,`active` = p_active;
 
-SELECT LAST_INSERT_ID() 'id';
+IF ISNULL(p_id) THEN
+	SELECT LAST_INSERT_ID() 'id';
+ELSE
+	SELECT p_id 'id';
+END IF;
 
 END//
 
@@ -158,7 +174,11 @@ BEGIN
 INSERT INTO `interval`(`id`,`label`) VALUES (p_id, p_label)
 ON DUPLICATE KEY UPDATE `label` = p_label;
 
-SELECT LAST_INSERT_ID() 'id';
+IF ISNULL(p_id) THEN
+	SELECT LAST_INSERT_ID() 'id';
+ELSE
+	SELECT p_id 'id';
+END IF;
 
 END//
 
@@ -238,7 +258,11 @@ VALUES (p_id, p_first_name, p_middle_name, p_last_name, p_tournament,  p_utr, p_
 ON DUPLICATE KEY UPDATE `utr` = p_utr, first_name = p_first_name, middle_name = p_middle_name,
 last_name = p_last_name,  `updated_datetime` = NOW(), `tournament` = p_tournament, `member` = p_member;
 
-SELECT LAST_INSERT_ID() 'id';
+IF ISNULL(p_id) THEN
+	SELECT LAST_INSERT_ID() 'id';
+ELSE
+	SELECT p_id 'id';
+END IF;
 
 END//
 
@@ -303,7 +327,11 @@ VALUES (p_id, p_tournament, p_round, p_permutation, p_match, p_home, p_away,p_se
 ON DUPLICATE KEY UPDATE `tournament` = p_tournament, `round` = p_round, `permutation` = p_permutation, `match` = p_match,  
 `home` = p_home, `away` = p_away, `set` = p_set, `notes` = p_notes, `updated_datetime` = NOW();
 
-SELECT LAST_INSERT_ID() 'id';
+IF ISNULL(p_id) THEN
+	SELECT LAST_INSERT_ID() 'id';
+ELSE
+	SELECT p_id 'id';
+END IF;
 
 END//
 
@@ -336,7 +364,11 @@ BEGIN
 INSERT INTO `permutation`(`id`,`index`,`team_home`,`team_away`,`tournament`,`updated_datetime`,`created_datetime`) VALUES (p_id, p_index, p_team_home, p_team_away, p_tournament, NOW(), NOW())
 ON DUPLICATE KEY UPDATE `index` = p_index,`team_home` = p_team_home,`team_away` = p_team_away,`tournament` = p_tournament,`updated_datetime` = NOW();
 
-SELECT LAST_INSERT_ID() 'id';
+IF ISNULL(p_id) THEN
+	SELECT LAST_INSERT_ID() 'id';
+ELSE
+	SELECT p_id 'id';
+END IF;
 
 END//
 
@@ -414,7 +446,11 @@ INSERT INTO `team_player`(`id`,`team`,`player`,`tournament`, `index`, `updated_d
 VALUES (p_id ,p_team, p_player, p_tournament, p_index, now(), now())
 ON DUPLICATE KEY UPDATE `team` = p_team,`player` = p_player, `tournament` = p_tournament, `index` = p_index, `updated_datetime` = now();
 
-SELECT LAST_INSERT_ID() 'id';
+IF ISNULL(p_id) THEN
+	SELECT LAST_INSERT_ID() 'id';
+ELSE
+	SELECT p_id 'id';
+END IF;
 
 END//
 
@@ -545,7 +581,11 @@ BEGIN
 INSERT INTO `tournament_type`(`id`,`label`) VALUES (p_id, p_label)
 ON DUPLICATE KEY UPDATE `label` = p_label;
 
-SELECT LAST_INSERT_ID() 'id';
+IF ISNULL(p_id) THEN
+	SELECT LAST_INSERT_ID() 'id';
+ELSE
+	SELECT p_id 'id';
+END IF;
 
 END//
 
@@ -817,7 +857,11 @@ BEGIN
 INSERT INTO `tournament_venue`(`id`,`tournament`,`street`,`suburb`,`state`,`post_code`,`country-code`,`updated_datetime`,`created_datetime`) VALUES (p_id, p_tournament, p_street, p_suburb, p_state, p_post_code, p_country_code, NOW(), NOW())
 ON DUPLICATE KEY UPDATE `street` = p_street,`suburb` = p_suburb,`state` = p_state,`post_code` = p_post_code,`country-code` = p_country_code,`updated_datetime` = NOW();
 
-SELECT LAST_INSERT_ID() 'id';
+IF ISNULL(p_id) THEN
+	SELECT LAST_INSERT_ID() 'id';
+ELSE
+	SELECT p_id 'id';
+END IF;
 
 END//
 
@@ -922,7 +966,11 @@ VALUES (p_id, p_first_name, p_last_name, p_middle_name, p_utr, p_country_code, N
 ON DUPLICATE KEY UPDATE`first_name` = p_first_name, `last_name` = p_last_name, 
 `middle_name` = p_middle_name, `utr` = p_utr,  `country-code` = p_country_code , `updated_datetime` = NOW();
 
-SELECT last_insert_id() 'id';
+IF ISNULL(p_id) THEN
+	SELECT LAST_INSERT_ID() 'id';
+ELSE
+	SELECT p_id 'id';
+END IF;
 
 END//
 

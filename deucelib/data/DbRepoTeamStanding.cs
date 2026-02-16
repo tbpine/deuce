@@ -138,4 +138,149 @@ public class DbRepoTeamStanding : DbRepoBase<TeamStanding>
         var filter = new Filter { TournamentId = tournamentId };
         return await GetList(filter);
     }
+
+    /// <summary>
+    /// Synchronizes a list of team standings with the database.
+    /// This method compares the source list with existing database records
+    /// and adds, updates, or removes records as necessary.
+    /// </summary>
+    /// <param name="src">The source list of team standings to synchronize.</param>
+    /// <returns>A task representing the asynchronous synchronization operation.</returns>
+    public override async Task Sync(List<TeamStanding> src)
+    {
+        if (src == null || src.Count == 0)
+            return;
+
+        _dbconn.Open();
+
+        try
+        {
+            // Get existing team standings for the same tournament(s)
+            var tournamentIds = src.Select(s => s.Tournament).Distinct();
+            var existingStandings = new List<TeamStanding>();
+
+            foreach (int tournamentId in tournamentIds)
+            {
+                var filter = new Filter { TournamentId = tournamentId };
+                var standings = await GetList(filter);
+                existingStandings.AddRange(standings);
+            }
+
+            // Use SyncMaster to compare source and destination
+            SyncMaster<TeamStanding> syncMaster = new(src, existingStandings);
+
+            // Lists to store pending changes
+            List<TeamStanding> addList = new();
+            List<TeamStanding> updateList = new();
+            List<TeamStanding> deleteList = new();
+
+            // Configure sync event handlers
+            syncMaster.Add += (s, standingToAdd) =>
+            {
+                addList.Add(standingToAdd);
+            };
+
+            syncMaster.Update += (s, e) =>
+            {
+                if (e.Source != null)
+                {
+                    // Copy the database ID from destination to source for update
+                    if (e.Dest != null)
+                        e.Source.Id = e.Dest.Id;
+                    updateList.Add(e.Source);
+                }
+            };
+
+            syncMaster.Remove += (s, standingToRemove) =>
+            {
+                deleteList.Add(standingToRemove);
+            };
+
+            // Run the synchronization analysis
+            syncMaster.Run();
+
+            // Apply database changes within a transaction
+            var localTran = _dbconn.BeginTransaction();
+
+            try
+            {
+                // Add new team standings
+                foreach (TeamStanding standing in addList)
+                {
+                    InsertTeamStanding(standing, localTran);
+                }
+
+                // Update existing team standings
+                foreach (TeamStanding standing in updateList)
+                {
+                    UpdateTeamStanding(standing, localTran);
+                }
+
+                // Delete removed team standings 
+                foreach (TeamStanding standing in deleteList)
+                {
+                    DeleteTeamStanding(standing, localTran);
+                }
+
+                localTran.Commit();
+            }
+            catch (Exception)
+            {
+                localTran.Rollback();
+                throw;
+            }
+        }
+        finally
+        {
+            _dbconn.Close();
+        }
+    }
+
+    /// <summary>
+    /// Inserts a new team standing record using a database transaction.
+    /// </summary>
+    /// <param name="standing">The team standing to insert.</param>
+    /// <param name="transaction">The database transaction to use.</param>
+    private void InsertTeamStanding(TeamStanding standing, DbTransaction transaction)
+    {
+        var command = _dbconn.CreateCommandStoreProc("sp_set_team_standing",
+            ["p_id", "p_team", "p_tournament", "p_wins", "p_losses", "p_draws", "p_points", "p_position"],
+            [DBNull.Value, standing.TeamId, standing.Tournament, standing.Wins, standing.Losses, 
+             standing.Draws, standing.Points, standing.Position],
+            transaction);
+
+        object? result = command.ExecuteScalar();
+        standing.Id = command.GetIntegerFromScaler(result);
+    }
+
+    /// <summary>
+    /// Updates an existing team standing record using a database transaction.
+    /// </summary>
+    /// <param name="standing">The team standing to update.</param>
+    /// <param name="transaction">The database transaction to use.</param>
+    private void UpdateTeamStanding(TeamStanding standing, DbTransaction transaction)
+    {
+        var command = _dbconn.CreateCommandStoreProc("sp_set_team_standing",
+            ["p_id", "p_team", "p_tournament", "p_wins", "p_losses", "p_draws", "p_points", "p_position"],
+            [standing.Id, standing.TeamId, standing.Tournament, standing.Wins, standing.Losses,
+             standing.Draws, standing.Points, standing.Position],
+            transaction);
+
+        command.ExecuteNonQuery();
+    }
+
+    /// <summary>
+    /// Deletes a team standing record using a database transaction.
+    /// </summary>
+    /// <param name="standing">The team standing to delete.</param>
+    /// <param name="transaction">The database transaction to use.</param>
+    private void DeleteTeamStanding(TeamStanding standing, DbTransaction transaction)
+    {
+        var command = _dbconn.CreateCommandStoreProc("sp_delete_team_standing",
+            ["p_id"],
+            [standing.Id],
+            transaction);
+
+        command.ExecuteNonQuery();
+    }
 }
