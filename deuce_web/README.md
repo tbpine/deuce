@@ -53,3 +53,4 @@ and represent the appropreite view. Makes navigation easier.
 - [X] ~~ swiss format tornament. Draws , scores and prints. ~~
 # 04 Feb 2026
 - [] Get a list of players for a tournament once it's created.
+- [] Standings not saving (exception occured)

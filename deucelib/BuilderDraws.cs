@@ -83,8 +83,10 @@ public class BuilderDraws
 
             }
             //A match can involve multiple players on each side.
-            //Check home side has enough players.
-            if ((state.Match.Home?.Count() ?? 0) < state.Match.PlayersPerSide)
+            //Process home and away players independently - records can come in any order
+            
+            //Check if this record has a home player and home side needs players
+            if (recordMatch.PlayerHome > 0 && (state.Match.Home?.Count() ?? 0) < state.Match.PlayersPerSide)
             {
                 Player playerHome = _players?.Find(e => e.Id == recordMatch.PlayerHome) ?? new Player();
                 state.Match.AddHome(playerHome);
@@ -102,7 +104,9 @@ public class BuilderDraws
                 }
                 team.AddPlayer(playerHome);
             }
-            else if ((state.Match.Away?.Count() ?? 0) <  state.Match.PlayersPerSide)
+            
+            //Check if this record has an away player and away side needs players
+            if (recordMatch.PlayerAway > 0 && (state.Match.Away?.Count() ?? 0) < state.Match.PlayersPerSide)
             {
                Player playerAway = _players?.Find(e => e.Id == recordMatch.PlayerAway) ?? new Player();
                 state.Match.AddAway(playerAway);

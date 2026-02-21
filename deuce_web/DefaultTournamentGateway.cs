@@ -19,13 +19,15 @@ public class DefaultTournamentGateway : ITournamentGateway
     private readonly DbConnection _dbconn;
     private readonly ILogger<DefaultTournamentGateway> _log;
     private readonly DbRepoRecordSchedule _dbRepoRecordSchedule;
+    private readonly DbRepoTeamStanding _dbRepoTeamStanding;
 
 
 
     public DefaultTournamentGateway(SessionProxy sessionProxy, DbRepoTournament dbRepoTournament,
     DbRepoTournamentDetail dbRepoTournamentDetail, ICacheMaster cache, DbConnection dbconn,
     DbRepoTournamentStatus dbRepoTournamentStatus, DbRepoRecordTeamPlayer dbRepoRecordTeamPlayer,
-    ILogger<DefaultTournamentGateway> log, DbRepoRecordSchedule dbRepoRecordSchedule)
+    ILogger<DefaultTournamentGateway> log, DbRepoRecordSchedule dbRepoRecordSchedule, 
+    DbRepoTeamStanding dbRepoTeamStanding)
     {
         _sessionProxy = sessionProxy;
         _dbRepoTournament = dbRepoTournament;
@@ -36,6 +38,7 @@ public class DefaultTournamentGateway : ITournamentGateway
         _dbRepoRecordTeamPlayer = dbRepoRecordTeamPlayer;
         _log = log;
         _dbRepoRecordSchedule = dbRepoRecordSchedule;
+        _dbRepoTeamStanding = dbRepoTeamStanding;
     }
 
     /// <summary>
@@ -308,6 +311,29 @@ public class DefaultTournamentGateway : ITournamentGateway
 
             if (scheduleSaved)
             {
+                // Save the updated standings to the database
+                var currentStandings = tournament.GetCurrentStandings();
+                if (currentStandings != null && currentStandings.Any())
+                {
+                    // Set the tournament ID for each standing record to ensure proper database linking
+                    foreach (var standing in currentStandings)
+                    {
+                        standing.Tournament = tournament.Id;
+                    }
+                    
+                    try
+                    {
+                        await _dbRepoTeamStanding.Sync(currentStandings);
+                        _log.LogInformation("Tournament progressed and standings saved for tournament {TournamentId}, round {Round} with {StandingsCount} team standings",
+                                          tournament.Id, currentRound, currentStandings.Count);
+                    }
+                    catch (Exception ex)
+                    {
+                        _log.LogError(ex, "Failed to save tournament standings after progression for tournament {TournamentId}", tournament.Id);
+                        return new(ResultStatus.Warning, "Tournament progressed and draw saved, but failed to save standings to database.");
+                    }
+                }
+                
                 _log.LogInformation("Tournament progressed and saved for tournament {TournamentId}, round {Round} with {ScoreCount} scores",
                                   tournament.Id, currentRound, scores.Count);
                 return new(ResultStatus.Ok, "Tournament progressed and draw saved successfully.");

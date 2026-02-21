@@ -70,22 +70,32 @@ public class DrawMakerSwiss : DrawMakerBase, IDrawMaker
     /// Progress to the next round of the schedule.
     /// In Swiss format, we need to pair teams based on their current standings.
     /// </summary>
-    /// <param name="schedule">The current schedule</param>
+    /// <param name="draw">The current schedule</param>
     /// <param name="round">The current round number</param>
     /// <param name="previousRound">The previous round number</param>
     /// <param name="scores">List of scores from recent matches</param>
-    public override void OnChange(Draw schedule, int round, int previousRound, List<Score> scores)
+    public override void OnChange(Draw draw, int round, int previousRound, List<Score> scores)
     {
         // Record standings for the completed round
         if (round > 0)
         {
-            UpdateStandingsForCompletedRound(schedule, round, scores);
+            UpdateStandingsForCompletedRound(draw, round, scores);
         }
 
-        // If this is not the first round, create the next round based on current standings
+        var previousRoundPerms = draw.Rounds.FirstOrDefault(r => r.Index == previousRound);
+        if (previousRoundPerms == null) return;
+
+        // Tighter check: verify every match in the previous round has the expected
+        // number of scores (one per set, using one-based set count).
+        int setsPerMatch = _tournament.Details?.Sets ?? 1;
+        bool allMatchesScored = previousRoundPerms.Permutations
+            .SelectMany(p => p.Matches)
+            .All(match => scores.Count(s => s.Match == match.Id) >= setsPerMatch);
+
+        if (!allMatchesScored) return;        // If this is not the first round, create the next round based on current standings
         if (round > 0 && round < CalculateNumberOfRounds(_tournament.Teams.Count()))
         {
-            CreateNextRound(schedule, round+1, scores);
+            CreateNextRound(draw, round + 1, scores);
         }
     }
 
@@ -137,7 +147,7 @@ public class DrawMakerSwiss : DrawMakerBase, IDrawMaker
             {
                 var permutation = _gameMaker.Create(_tournament, home, away, roundNumber);
                 permutation.Id = p;
-                draw.AddPermutation(permutation, roundNumber, $"Round {roundNumber }");
+                draw.AddPermutation(permutation, roundNumber, $"Round {roundNumber}");
             }
         }
     }
@@ -178,7 +188,7 @@ public class DrawMakerSwiss : DrawMakerBase, IDrawMaker
             {
                 var permutation = _gameMaker.Create(_tournament, home, away, round);
                 permutation.Id = p;
-                draw.AddPermutation(permutation, round, $"Round {round }");
+                draw.AddPermutation(permutation, round, $"Round {round}");
             }
         }
     }
@@ -252,7 +262,7 @@ public class DrawMakerSwiss : DrawMakerBase, IDrawMaker
                 else if (winner == null && loser == null)
                 {
                     // It's a draw - both teams get a draw
-                    var round = draw.Rounds.FirstOrDefault(r => r.Index == completedRound-1);
+                    var round = draw.Rounds.FirstOrDefault(r => r.Index == completedRound - 1);
                     var permutation = round?.Permutations.FirstOrDefault(p => p.Id == matchGroup.Key.Permutation);
                     var match = permutation?.Matches.FirstOrDefault(m => m.Id == matchGroup.Key.Match);
 
@@ -499,10 +509,10 @@ public class DrawMakerSwiss : DrawMakerBase, IDrawMaker
 
         // If we couldn't find unique pairings after max attempts, fall back to allowing rematches
         Debug.WriteLine($"  Could not find unique pairings after {maxAttempts} attempts, falling back to allowing rematches");
-        
+
         var finalPairings = new List<(Team, Team)>();
         var finalAvailableTeams = new List<Team>(teams);
-        
+
         // Final randomization
         for (int i = finalAvailableTeams.Count - 1; i > 0; i--)
         {
@@ -584,7 +594,7 @@ public class DrawMakerSwiss : DrawMakerBase, IDrawMaker
         var firstScore = matchScores.First();
 
         // Find the actual match to get the teams
-        var round = _tournament.Draw?.Rounds.FirstOrDefault(r => r.Index == firstScore.Round-1);
+        var round = _tournament.Draw?.GetRoundIndex(firstScore.Round - 1);
         var permutation = round?.Permutations.FirstOrDefault(p => p.Id == firstScore.Permutation);
         var match = permutation?.Matches.FirstOrDefault(m => m.Id == firstScore.Match);
 
@@ -642,7 +652,7 @@ public class DrawMakerSwiss : DrawMakerBase, IDrawMaker
         var firstScore = matchScores.First();
 
         // Find the actual match to get the teams
-        var round = _tournament.Draw?.Rounds.FirstOrDefault(r => r.Index == firstScore.Round-1);
+        var round = _tournament.Draw?.GetRoundIndex(firstScore.Round - 1);
         var permutation = round?.Permutations.FirstOrDefault(p => p.Id == firstScore.Permutation);
         var match = permutation?.Matches.FirstOrDefault(m => m.Id == firstScore.Match);
 
