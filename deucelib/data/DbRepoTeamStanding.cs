@@ -35,11 +35,11 @@ public class DbRepoTeamStanding : DbRepoBase<TeamStanding>
         var localTran = _dbconn.BeginTransaction();
         try
         {
-            var command = _dbconn.CreateCommandStoreProc("sp_set_team_standing", 
-                ["p_id", "p_team", "p_tournament", "p_wins", "p_losses", "p_draws", "p_points", "p_position"], 
-                [primaryKeyId, obj.TeamId, obj.Tournament, obj.Wins, obj.Losses, obj.Draws, obj.Points, obj.Position], 
+            var command = _dbconn.CreateCommandStoreProc("sp_set_team_standing",
+                ["p_id", "p_team", "p_tournament", "p_wins", "p_losses", "p_draws", "p_points", "p_position"],
+                [primaryKeyId, obj.TeamId, obj.Tournament, obj.Wins, obj.Losses, obj.Draws, obj.Points, obj.Position],
                 localTran);
-            
+
             object? result = command.ExecuteScalar();
             if (primaryKeyId == DBNull.Value)
                 obj.Id = command.GetIntegerFromScaler(result);
@@ -89,8 +89,8 @@ public class DbRepoTeamStanding : DbRepoBase<TeamStanding>
                 Team = new Team
                 {
                     Id = reader.GetInt32(reader.GetOrdinal("team")),
-                    Label = reader.IsDBNull(reader.GetOrdinal("team_name")) 
-                        ? "" 
+                    Label = reader.IsDBNull(reader.GetOrdinal("team_name"))
+                        ? ""
                         : reader.GetString(reader.GetOrdinal("team_name"))
                 }
             };
@@ -155,17 +155,9 @@ public class DbRepoTeamStanding : DbRepoBase<TeamStanding>
 
         try
         {
-            // Get existing team standings for the same tournament(s)
-            var tournamentIds = src.Select(s => s.Tournament).Distinct();
-            var existingStandings = new List<TeamStanding>();
+            var filter = new Filter { TournamentId = src.First()?.Tournament ?? 0 };
 
-            foreach (int tournamentId in tournamentIds)
-            {
-                var filter = new Filter { TournamentId = tournamentId };
-                var standings = await GetList(filter);
-                existingStandings.AddRange(standings);
-            }
-
+            List<TeamStanding> existingStandings = await GetList(filter);
             // Use SyncMaster to compare source and destination
             SyncMaster<TeamStanding> syncMaster = new(src, existingStandings);
 
@@ -245,7 +237,7 @@ public class DbRepoTeamStanding : DbRepoBase<TeamStanding>
     {
         var command = _dbconn.CreateCommandStoreProc("sp_set_team_standing",
             ["p_id", "p_team", "p_tournament", "p_wins", "p_losses", "p_draws", "p_points", "p_position"],
-            [DBNull.Value, standing.TeamId, standing.Tournament, standing.Wins, standing.Losses, 
+            [DBNull.Value, standing.TeamId, standing.Tournament, standing.Wins, standing.Losses,
              standing.Draws, standing.Points, standing.Position],
             transaction);
 
