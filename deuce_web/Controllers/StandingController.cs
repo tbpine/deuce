@@ -3,6 +3,7 @@
 
 using Microsoft.AspNetCore.Mvc;
 using deuce;
+using deuce.ext;
 using System.Data.Common;
 using System.Diagnostics;
 
@@ -14,6 +15,7 @@ public class StandingController : MemberController
     private readonly DbConnection _dbConnection;
     private readonly ILogger<StandingController> _log;
     private readonly ICacheMaster _cache;
+    private readonly DbRepoTeamStanding _dbRepoTeamStanding;
 
     /// <summary>
     /// Standing controller for displaying standings in Swiss format tournaments.
@@ -31,13 +33,14 @@ public class StandingController : MemberController
     /// <param name="cache">Cache master</param>
     public StandingController(ILogger<StandingController> log, ISideMenuHandler handlerNavItems, IServiceProvider sp, IConfiguration config,
     ITournamentGateway tgateway, SessionProxy sessionProxy, DbRepoRecordTeamPlayer dbRepoRecordTeamPlayer, DbConnection dbConnection,
-    DbRepoRecordSchedule dbRepoRecordSchedule, ICacheMaster cache) : base(handlerNavItems, sp, config, tgateway, sessionProxy)
+    DbRepoRecordSchedule dbRepoRecordSchedule, ICacheMaster cache, DbRepoTeamStanding dbRepoTeamStanding) : base(handlerNavItems, sp, config, tgateway, sessionProxy)
     {
         _log = log;
         _deRepoRecordTeamPlayer = dbRepoRecordTeamPlayer;
         _dbRepoRecordSchedule = dbRepoRecordSchedule;
         _dbConnection = dbConnection;
         _cache = cache;
+        _dbRepoTeamStanding = dbRepoTeamStanding;
     }
 
     [HttpGet]
@@ -155,10 +158,23 @@ public class StandingController : MemberController
         //Draw maker
         FactoryDrawMaker factoryDraws = new FactoryDrawMaker();
         var drawMaker = factoryDraws.Create( _model.Tournament, gameMaker);
-        //Get the standings for the current round from the tournament
-        
+        //Load standings from the database (DB stores latest standings only, no per-round history)
+        var standings = await _dbRepoTeamStanding.GetStandingsForTournament(_model.Tournament.Id);
 
-        _model.TeamStandings = _model.Tournament.GetStandingsForRound(_model.CurrentRoundIdx)??[];
+        //Enrich standings with full team objects (DB team_standing only stores team id;
+        //team labels come from the team_player records loaded above)
+        foreach (var standing in standings)
+        {
+            var team = _model.Tournament.Teams.FirstOrDefault(t => t.Id == standing.TeamId);
+            if (team != null)
+            {
+                standing.Team = team;
+                //For individual formats, team label may be empty — use player names
+                team.Label = team.GetDisplayName();
+            }
+        }
+
+        _model.TeamStandings = standings;
 
 
     }

@@ -151,13 +151,24 @@ public class DbRepoTeamStanding : DbRepoBase<TeamStanding>
         if (src == null || src.Count == 0)
             return;
 
+        // GetList manages its own connection open/close, so call it before opening for the transaction
+        var filter = new Filter { TournamentId = src.First()?.Tournament ?? 0 };
+        List<TeamStanding> existingStandings = await GetList(filter);
+
         _dbconn.Open();
 
         try
         {
-            var filter = new Filter { TournamentId = src.First()?.Tournament ?? 0 };
 
-            List<TeamStanding> existingStandings = await GetList(filter);
+            // Match source items to existing DB records by business key so SyncMaster can update in place
+            foreach (var srcStanding in src)
+            {
+                var existing = existingStandings.FirstOrDefault(e =>
+                    e.TeamId == srcStanding.TeamId && e.Tournament == srcStanding.Tournament);
+                if (existing != null)
+                    srcStanding.Id = existing.Id;
+            }
+
             // Use SyncMaster to compare source and destination
             SyncMaster<TeamStanding> syncMaster = new(src, existingStandings);
 

@@ -209,6 +209,7 @@ public class DrawMakerSwiss : DrawMakerBase, IDrawMaker
             currentStandings = _tournament.Teams.Select(team => new TeamStanding
             {
                 Team = team,
+                TeamId = team.Id,
                 Wins = 0,
                 Losses = 0,
                 Draws = 0,
@@ -227,6 +228,7 @@ public class DrawMakerSwiss : DrawMakerBase, IDrawMaker
             currentStandings = previousStandings.Select(s => new TeamStanding
             {
                 Team = s.Team,
+                TeamId = s.TeamId,
                 Wins = s.Wins,
                 Losses = s.Losses,
                 Draws = s.Draws,

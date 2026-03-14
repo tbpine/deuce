@@ -126,7 +126,10 @@ public class Tournament : ICloneable
     {
         _standings[roundNumber] = standings?.Select(s => new TeamStanding
         {
+            Id = s.Id,
             Team = s.Team,
+            TeamId = s.TeamId,
+            Tournament = s.Tournament,
             Wins = s.Wins,
             Losses = s.Losses,
             Draws = s.Draws,

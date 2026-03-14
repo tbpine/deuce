@@ -43,6 +43,20 @@ public static class TeamExt
     }
 
     /// <summary>
+    /// Returns the team's display name: the label if set, otherwise player names joined by " / ".
+    /// </summary>
+    public static string GetDisplayName(this Team team)
+    {
+        if (!string.IsNullOrWhiteSpace(team.Label))
+            return team.Label;
+
+        if (team.Players != null && team.Players.Any())
+            return string.Join(" / ", team.Players.Select(p => p.ToString()));
+
+        return string.Empty;
+    }
+
+    /// <summary>
     /// Creates a bye team with the same number of players as the tournament team size.
     /// </summary>
     /// <param name="team">Team object</param>

@@ -319,6 +319,7 @@ public class DefaultTournamentGateway : ITournamentGateway
                     foreach (var standing in currentStandings)
                     {
                         standing.Tournament = tournament.Id;
+                        standing.TeamId = standing.Team?.Id ?? 0;
                     }
                     
                     try

@@ -77,7 +77,7 @@
                                 {
                                     <tr>
                                         <td><strong>@standing.Position</strong></td>
-                                        <td>@standing.Team.Label</td>
+                                        <td>@standing.Team.GetDisplayName()</td>
                                         <td>@standing.Wins</td>
                                         <td>@standing.Losses</td>
                                         <td>@standing.Draws</td>
@@ -113,7 +113,7 @@
                                     @foreach(var standing in Model.TeamStandings.Take(5))
                                     {
                                         <div class="d-flex justify-content-between">
-                                            <span>@standing.Position. @standing.Team.Label</span>
+                                            <span>@standing.Position. @standing.Team.GetDisplayName()</span>
                                             <span>@standing.Points pts</span>
                                         </div>
                                     }
